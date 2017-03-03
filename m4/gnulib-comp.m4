@@ -1,5 +1,5 @@
 # DO NOT EDIT! GENERATED AUTOMATICALLY!
-# Copyright (C) 2002-2013 Free Software Foundation, Inc.
+# Copyright (C) 2002-2016 Free Software Foundation, Inc.
 #
 # This file is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -37,8 +37,15 @@ AC_DEFUN([M4_EARLY],
   m4_pattern_allow([^gl_ES$])dnl a valid locale name
   m4_pattern_allow([^gl_LIBOBJS$])dnl a variable
   m4_pattern_allow([^gl_LTLIBOBJS$])dnl a variable
+
+  # Pre-early section.
+  AC_REQUIRE([gl_USE_SYSTEM_EXTENSIONS])
   AC_REQUIRE([gl_PROG_AR_RANLIB])
+
   AC_REQUIRE([AM_PROG_CC_C_O])
+  # Code from module absolute-header:
+  # Code from module alignof:
+  # Code from module alignof-tests:
   # Code from module alloca-opt:
   # Code from module alloca-opt-tests:
   # Code from module announce-gen:
@@ -56,6 +63,7 @@ AC_DEFUN([M4_EARLY],
   # Code from module binary-io-tests:
   # Code from module btowc:
   # Code from module btowc-tests:
+  # Code from module builtin-expect:
   # Code from module c-ctype:
   # Code from module c-ctype-tests:
   # Code from module c-stack:
@@ -79,12 +87,16 @@ AC_DEFUN([M4_EARLY],
   # Code from module closeout:
   # Code from module config-h:
   # Code from module configmake:
+  # Code from module ctype:
+  # Code from module ctype-tests:
   # Code from module dirent:
   # Code from module dirent-c++-tests:
   # Code from module dirent-tests:
+  # Code from module dirfd:
   # Code from module dirname:
   # Code from module dirname-lgpl:
   # Code from module dirname-tests:
+  # Code from module do-release-commit-and-tag:
   # Code from module dosname:
   # Code from module double-slash-root:
   # Code from module dup:
@@ -99,7 +111,6 @@ AC_DEFUN([M4_EARLY],
   # Code from module execute:
   # Code from module exitfail:
   # Code from module extensions:
-  AC_REQUIRE([gl_USE_SYSTEM_EXTENSIONS])
   # Code from module extern-inline:
   # Code from module fatal-signal:
   # Code from module fclose:
@@ -122,6 +133,7 @@ AC_DEFUN([M4_EARLY],
   # Code from module filenamecat:
   # Code from module filenamecat-lgpl:
   # Code from module filenamecat-tests:
+  # Code from module flexmember:
   # Code from module float:
   # Code from module float-tests:
   # Code from module fopen:
@@ -164,17 +176,22 @@ AC_DEFUN([M4_EARLY],
   # Code from module getdtablesize:
   # Code from module getdtablesize-tests:
   # Code from module getopt-gnu:
+  # Code from module getopt-gnu-tests:
   # Code from module getopt-posix:
   # Code from module getopt-posix-tests:
   # Code from module getpagesize:
+  # Code from module getprogname:
+  # Code from module getprogname-tests:
   # Code from module gettext-h:
   # Code from module gettimeofday:
   # Code from module gettimeofday-tests:
   # Code from module git-version-gen:
+  # Code from module gitlog-to-changelog:
   # Code from module gnu-web-doc-update:
   # Code from module gnumakefile:
   # Code from module gnupload:
   # Code from module gpl-3.0:
+  # Code from module hard-locale:
   # Code from module havelib:
   # Code from module ignore-value:
   # Code from module ignore-value-tests:
@@ -184,6 +201,8 @@ AC_DEFUN([M4_EARLY],
   # Code from module inttypes:
   # Code from module inttypes-incomplete:
   # Code from module inttypes-tests:
+  # Code from module isblank:
+  # Code from module isblank-tests:
   # Code from module isnand-nolibm:
   # Code from module isnand-nolibm-tests:
   # Code from module isnanf-nolibm:
@@ -196,6 +215,8 @@ AC_DEFUN([M4_EARLY],
   # Code from module largefile:
   AC_REQUIRE([AC_SYS_LARGEFILE])
   # Code from module libsigsegv:
+  # Code from module limits-h:
+  # Code from module limits-h-tests:
   # Code from module link:
   # Code from module link-tests:
   # Code from module linkedhash-list:
@@ -215,8 +236,6 @@ AC_DEFUN([M4_EARLY],
   # Code from module lstat:
   # Code from module lstat-tests:
   # Code from module maintainer-makefile:
-  # Code from module malloc-gnu:
-  # Code from module malloc-gnu-tests:
   # Code from module malloc-posix:
   # Code from module malloca:
   # Code from module malloca-tests:
@@ -233,6 +252,7 @@ AC_DEFUN([M4_EARLY],
   # Code from module memchr-tests:
   # Code from module memchr2:
   # Code from module memchr2-tests:
+  # Code from module minmax:
   # Code from module mkdtemp:
   # Code from module mkstemp:
   # Code from module msvc-inval:
@@ -326,6 +346,8 @@ AC_DEFUN([M4_EARLY],
   # Code from module ssize_t:
   # Code from module stat:
   # Code from module stat-tests:
+  # Code from module stdalign:
+  # Code from module stdalign-tests:
   # Code from module stdarg:
   dnl Some compilers (e.g., AIX 5.3 cc) need to be in c99 mode
   dnl for the builtin va_copy to work.  With Autoconf 2.60 or later,
@@ -468,6 +490,7 @@ AC_DEFUN([M4_INIT],
     gl_PREREQ_BTOWC
   fi
   gl_WCHAR_MODULE_INDICATOR([btowc])
+  gl___BUILTIN_EXPECT
   gl_C_STACK
   gl_CANONICALIZE_LGPL
   if test $HAVE_CANONICALIZE_FILE_NAME = 0 || test $REPLACE_CANONICALIZE_FILE_NAME = 1; then
@@ -553,7 +576,6 @@ AC_DEFUN([M4_INIT],
   gl_FUNC_FPENDING
   if test $gl_cv_func___fpending = no; then
     AC_LIBOBJ([fpending])
-    gl_PREREQ_FPENDING
   fi
   gl_FUNC_FPURGE
   if test $HAVE_FPURGE = 0 || test $REPLACE_FPURGE = 1; then
@@ -604,7 +626,7 @@ AC_DEFUN([M4_INIT],
   fi
   gl_STDIO_MODULE_INDICATOR([ftello])
   gl_FUNC_GETDTABLESIZE
-  if test $HAVE_GETDTABLESIZE = 0; then
+  if test $HAVE_GETDTABLESIZE = 0 || test $REPLACE_GETDTABLESIZE = 1; then
     AC_LIBOBJ([getdtablesize])
     gl_PREREQ_GETDTABLESIZE
   fi
@@ -618,7 +640,6 @@ AC_DEFUN([M4_INIT],
     GNULIB_GL_M4_UNISTD_H_GETOPT=1
   fi
   AC_SUBST([GNULIB_GL_M4_UNISTD_H_GETOPT])
-  gl_MODULE_INDICATOR_FOR_TESTS([getopt-gnu])
   gl_FUNC_GETOPT_POSIX
   if test $REPLACE_GETOPT = 1; then
     AC_LIBOBJ([getopt])
@@ -628,6 +649,7 @@ AC_DEFUN([M4_INIT],
     GNULIB_GL_M4_UNISTD_H_GETOPT=1
   fi
   AC_SUBST([GNULIB_GL_M4_UNISTD_H_GETOPT])
+  gl_FUNC_GETPROGNAME
   AC_SUBST([LIBINTL])
   AC_SUBST([LTLIBINTL])
   gl_FUNC_GETTIMEOFDAY
@@ -646,6 +668,7 @@ AC_DEFUN([M4_INIT],
           m4_defn([m4_PACKAGE_VERSION])), [1], [],
         [AC_CONFIG_LINKS([$GNUmakefile:$GNUmakefile], [],
           [GNUmakefile=$GNUmakefile])])
+  gl_HARD_LOCALE
   gl_FUNC_ISNAND_NO_LIBM
   if test $gl_func_isnand_no_libm != yes; then
     AC_LIBOBJ([isnand])
@@ -664,6 +687,7 @@ AC_DEFUN([M4_INIT],
   gl_LANGINFO_H
   AC_REQUIRE([gl_LARGEFILE])
   gl_LIBSIGSEGV
+  gl_LIMITS_H
   gl_LOCALCHARSET
   LOCALCHARSET_TESTS_ENVIRONMENT="CHARSETALIASDIR=\"\$(abs_top_builddir)/$gl_source_base\""
   AC_SUBST([LOCALCHARSET_TESTS_ENVIRONMENT])
@@ -689,11 +713,7 @@ AC_DEFUN([M4_INIT],
   gl_SYS_STAT_MODULE_INDICATOR([lstat])
   AC_CONFIG_COMMANDS_PRE([m4_ifdef([AH_HEADER],
     [AC_SUBST([CONFIG_INCLUDE], m4_defn([AH_HEADER]))])])
-  gl_FUNC_MALLOC_GNU
-  if test $REPLACE_MALLOC = 1; then
-    AC_LIBOBJ([malloc])
-  fi
-  gl_MODULE_INDICATOR([malloc-gnu])
+  AC_REQUIRE([AC_PROG_SED])
   gl_FUNC_MALLOC_POSIX
   if test $REPLACE_MALLOC = 1; then
     AC_LIBOBJ([malloc])
@@ -725,6 +745,7 @@ AC_DEFUN([M4_INIT],
     gl_PREREQ_MEMCHR
   fi
   gl_STRING_MODULE_INDICATOR([memchr])
+  gl_MINMAX
   gl_FUNC_MKDTEMP
   if test $HAVE_MKDTEMP = 0; then
     AC_LIBOBJ([mkdtemp])
@@ -737,11 +758,11 @@ AC_DEFUN([M4_INIT],
     gl_PREREQ_MKSTEMP
   fi
   gl_STDLIB_MODULE_INDICATOR([mkstemp])
-  gl_MSVC_INVAL
+  AC_REQUIRE([gl_MSVC_INVAL])
   if test $HAVE_MSVC_INVALID_PARAMETER_HANDLER = 1; then
     AC_LIBOBJ([msvc-inval])
   fi
-  gl_MSVC_NOTHROW
+  AC_REQUIRE([gl_MSVC_NOTHROW])
   if test $HAVE_MSVC_INVALID_PARAMETER_HANDLER = 1; then
     AC_LIBOBJ([msvc-nothrow])
   fi
@@ -1072,7 +1093,15 @@ changequote([, ])dnl
     AC_LIBOBJ([closedir])
   fi
   gl_DIRENT_MODULE_INDICATOR([closedir])
+  gl_CTYPE_H
   gl_DIRENT_H
+  gl_FUNC_DIRFD
+  if test $ac_cv_func_dirfd = no && test $gl_cv_func_dirfd_macro = no \
+     || test $REPLACE_DIRFD = 1; then
+    AC_LIBOBJ([dirfd])
+    gl_PREREQ_DIRFD
+  fi
+  gl_DIRENT_MODULE_INDICATOR([dirfd])
   gl_FUNC_DUP
   if test $REPLACE_DUP = 1; then
     AC_LIBOBJ([dup])
@@ -1085,6 +1114,7 @@ changequote([, ])dnl
     gl_PREREQ_FDOPEN
   fi
   gl_STDIO_MODULE_INDICATOR([fdopen])
+  AC_C_FLEXIBLE_ARRAY_MEMBER
   gl_FUNC_UNGETC_WORKS
   gl_FUNC_UNGETC_WORKS
   gl_FUNC_UNGETC_WORKS
@@ -1101,6 +1131,11 @@ changequote([, ])dnl
   gl_UNISTD_MODULE_INDICATOR([getpagesize])
   gl_INTTYPES_H
   gl_INTTYPES_INCOMPLETE
+  gl_FUNC_ISBLANK
+  if test $HAVE_ISBLANK = 0; then
+    AC_LIBOBJ([isblank])
+  fi
+  gl_CTYPE_MODULE_INDICATOR([isblank])
   gl_DOUBLE_EXPONENT_LOCATION
   gl_FLOAT_EXPONENT_LOCATION
   gl_LONG_DOUBLE_EXPONENT_LOCATION
@@ -1184,6 +1219,7 @@ changequote([, ])dnl
   fi
   gl_UNISTD_MODULE_INDICATOR([sleep])
   AC_CHECK_DECLS_ONCE([alarm])
+  gl_STDALIGN_H
   AC_REQUIRE([gt_TYPE_WCHAR_T])
   AC_REQUIRE([gt_TYPE_WINT_T])
   gl_FUNC_STRDUP_POSIX
@@ -1336,8 +1372,10 @@ AC_DEFUN([M4tests_LIBSOURCES], [
 AC_DEFUN([M4_FILE_LIST], [
   build-aux/announce-gen
   build-aux/config.rpath
+  build-aux/do-release-commit-and-tag
   build-aux/gendocs.sh
   build-aux/git-version-gen
+  build-aux/gitlog-to-changelog
   build-aux/gnu-web-doc-update
   build-aux/gnupload
   build-aux/snippet/_Noreturn.h
@@ -1350,7 +1388,9 @@ AC_DEFUN([M4_FILE_LIST], [
   build-aux/vc-list-files
   doc/fdl-1.3.texi
   doc/gendocs_template
+  doc/gendocs_template_min
   doc/gpl-3.0.texi
+  lib/alignof.h
   lib/alloca.in.h
   lib/asnprintf.c
   lib/asprintf.c
@@ -1432,6 +1472,8 @@ AC_DEFUN([M4_FILE_LIST], [
   lib/getopt.in.h
   lib/getopt1.c
   lib/getopt_int.h
+  lib/getprogname.c
+  lib/getprogname.h
   lib/gettext.h
   lib/gettimeofday.c
   lib/gl_anyhash_list1.h
@@ -1456,6 +1498,8 @@ AC_DEFUN([M4_FILE_LIST], [
   lib/glthread/threadlib.c
   lib/glthread/tls.c
   lib/glthread/tls.h
+  lib/hard-locale.c
+  lib/hard-locale.h
   lib/ignore-value.h
   lib/intprops.h
   lib/isnan.c
@@ -1467,6 +1511,7 @@ AC_DEFUN([M4_FILE_LIST], [
   lib/isnanl.c
   lib/itold.c
   lib/langinfo.in.h
+  lib/limits.in.h
   lib/localcharset.c
   lib/localcharset.h
   lib/locale.in.h
@@ -1488,6 +1533,7 @@ AC_DEFUN([M4_FILE_LIST], [
   lib/memchr2.c
   lib/memchr2.h
   lib/memchr2.valgrind
+  lib/minmax.h
   lib/mkdtemp.c
   lib/mkstemp-safer.c
   lib/mkstemp.c
@@ -1633,12 +1679,14 @@ AC_DEFUN([M4_FILE_LIST], [
   lib/xvasprintf.c
   lib/xvasprintf.h
   m4/00gnulib.m4
+  m4/absolute-header.m4
   m4/alloca.m4
   m4/ansi-c++.m4
   m4/asm-underscore.m4
   m4/assert.m4
   m4/autobuild.m4
   m4/btowc.m4
+  m4/builtin-expect.m4
   m4/c-stack.m4
   m4/canonicalize.m4
   m4/close-stream.m4
@@ -1649,7 +1697,9 @@ AC_DEFUN([M4_FILE_LIST], [
   m4/codeset.m4
   m4/config-h.m4
   m4/configmake.m4
+  m4/ctype.m4
   m4/dirent_h.m4
+  m4/dirfd.m4
   m4/dirname.m4
   m4/double-slash-root.m4
   m4/dup.m4
@@ -1672,6 +1722,7 @@ AC_DEFUN([M4_FILE_LIST], [
   m4/fdopen.m4
   m4/fflush.m4
   m4/filenamecat.m4
+  m4/flexmember.m4
   m4/float_h.m4
   m4/fopen.m4
   m4/fpending.m4
@@ -1690,15 +1741,18 @@ AC_DEFUN([M4_FILE_LIST], [
   m4/getdtablesize.m4
   m4/getopt.m4
   m4/getpagesize.m4
+  m4/getprogname.m4
   m4/gettimeofday.m4
   m4/glibc21.m4
   m4/gnulib-common.m4
+  m4/hard-locale.m4
   m4/include_next.m4
   m4/intlmacosx.m4
   m4/intmax_t.m4
   m4/inttypes-pri.m4
   m4/inttypes.m4
   m4/inttypes_h.m4
+  m4/isblank.m4
   m4/isnand.m4
   m4/isnanf.m4
   m4/isnanl.m4
@@ -1711,6 +1765,7 @@ AC_DEFUN([M4_FILE_LIST], [
   m4/lib-link.m4
   m4/lib-prefix.m4
   m4/libsigsegv.m4
+  m4/limits-h.m4
   m4/link.m4
   m4/localcharset.m4
   m4/locale-fr.m4
@@ -1733,6 +1788,7 @@ AC_DEFUN([M4_FILE_LIST], [
   m4/mbstate_t.m4
   m4/mbtowc.m4
   m4/memchr.m4
+  m4/minmax.m4
   m4/mkdtemp.m4
   m4/mkstemp.m4
   m4/mmap-anon.m4
@@ -1742,6 +1798,7 @@ AC_DEFUN([M4_FILE_LIST], [
   m4/multiarch.m4
   m4/nl_langinfo.m4
   m4/nocrash.m4
+  m4/obstack.m4
   m4/off_t.m4
   m4/open.m4
   m4/opendir.m4
@@ -1777,6 +1834,7 @@ AC_DEFUN([M4_FILE_LIST], [
   m4/spawn_h.m4
   m4/ssize_t.m4
   m4/stat.m4
+  m4/stdalign.m4
   m4/stdarg.m4
   m4/stdbool.m4
   m4/stddef_h.m4
@@ -1836,6 +1894,7 @@ AC_DEFUN([M4_FILE_LIST], [
   tests/randomd.c
   tests/randoml.c
   tests/signature.h
+  tests/test-alignof.c
   tests/test-alloca-opt.c
   tests/test-array_list.c
   tests/test-array_oset.c
@@ -1858,6 +1917,7 @@ AC_DEFUN([M4_FILE_LIST], [
   tests/test-close.c
   tests/test-closein.c
   tests/test-closein.sh
+  tests/test-ctype.c
   tests/test-dirent-c++.cc
   tests/test-dirent.c
   tests/test-dirname.c
@@ -1915,14 +1975,18 @@ AC_DEFUN([M4_FILE_LIST], [
   tests/test-fwrite.c
   tests/test-getcwd-lgpl.c
   tests/test-getdtablesize.c
-  tests/test-getopt.c
+  tests/test-getopt-gnu.c
+  tests/test-getopt-main.h
+  tests/test-getopt-posix.c
   tests/test-getopt.h
   tests/test-getopt_long.h
+  tests/test-getprogname.c
   tests/test-gettimeofday.c
   tests/test-ignore-value.c
   tests/test-init.sh
   tests/test-intprops.c
   tests/test-inttypes.c
+  tests/test-isblank.c
   tests/test-isnand-nolibm.c
   tests/test-isnand.h
   tests/test-isnanf-nolibm.c
@@ -1931,6 +1995,7 @@ AC_DEFUN([M4_FILE_LIST], [
   tests/test-isnanl.h
   tests/test-langinfo-c++.cc
   tests/test-langinfo.c
+  tests/test-limits-h.c
   tests/test-link.c
   tests/test-link.h
   tests/test-linkedhash_list.c
@@ -1943,7 +2008,6 @@ AC_DEFUN([M4_FILE_LIST], [
   tests/test-lseek.sh
   tests/test-lstat.c
   tests/test-lstat.h
-  tests/test-malloc-gnu.c
   tests/test-malloca.c
   tests/test-math-c++.cc
   tests/test-math-c++2.cc
@@ -1959,6 +2023,7 @@ AC_DEFUN([M4_FILE_LIST], [
   tests/test-mbrtowc2.sh
   tests/test-mbrtowc3.sh
   tests/test-mbrtowc4.sh
+  tests/test-mbrtowc5.sh
   tests/test-mbsinit.c
   tests/test-mbsinit.sh
   tests/test-memchr.c
@@ -2012,6 +2077,7 @@ AC_DEFUN([M4_FILE_LIST], [
   tests/test-spawn.c
   tests/test-stat.c
   tests/test-stat.h
+  tests/test-stdalign.c
   tests/test-stdbool.c
   tests/test-stddef.c
   tests/test-stdint.c
@@ -2075,11 +2141,14 @@ AC_DEFUN([M4_FILE_LIST], [
   tests/test-xvasprintf.c
   tests/zerosize-ptr.h
   tests=lib/closedir.c
+  tests=lib/ctype.in.h
   tests=lib/dirent-private.h
   tests=lib/dirent.in.h
+  tests=lib/dirfd.c
   tests=lib/dup.c
   tests=lib/fdopen.c
   tests=lib/filename.h
+  tests=lib/flexmember.h
   tests=lib/getcwd-lgpl.c
   tests=lib/getpagesize.c
   tests=lib/gl_array_list.c
@@ -2087,6 +2156,7 @@ AC_DEFUN([M4_FILE_LIST], [
   tests=lib/gl_array_oset.c
   tests=lib/gl_array_oset.h
   tests=lib/inttypes.in.h
+  tests=lib/isblank.c
   tests=lib/link.c
   tests=lib/localename.c
   tests=lib/localename.h
@@ -2096,6 +2166,7 @@ AC_DEFUN([M4_FILE_LIST], [
   tests=lib/setenv.c
   tests=lib/setlocale.c
   tests=lib/sleep.c
+  tests=lib/stdalign.in.h
   tests=lib/strdup.c
   tests=lib/symlink.c
   tests=lib/unsetenv.c

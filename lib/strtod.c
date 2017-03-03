@@ -1,4 +1,4 @@
-/* Copyright (C) 1991-1992, 1997, 1999, 2003, 2006, 2008-2013 Free Software
+/* Copyright (C) 1991-1992, 1997, 1999, 2003, 2006, 2008-2016 Free Software
    Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
@@ -215,7 +215,7 @@ strtod (const char *nptr, char **endptr)
   const char *s = nptr;
   const char *end;
   char *endbuf;
-  int saved_errno;
+  int saved_errno = errno;
 
   /* Eat whitespace.  */
   while (locale_isspace (*s))
@@ -226,7 +226,6 @@ strtod (const char *nptr, char **endptr)
   if (*s == '-' || *s == '+')
     ++s;
 
-  saved_errno = errno;
   num = underlying_strtod (s, &endbuf);
   end = endbuf;
 
@@ -239,7 +238,12 @@ strtod (const char *nptr, char **endptr)
       if (*s == '0' && c_tolower (s[1]) == 'x')
         {
           if (! c_isxdigit (s[2 + (s[2] == '.')]))
-            end = s + 1;
+            {
+              end = s + 1;
+
+              /* strtod() on z/OS returns ERANGE for "0x".  */
+              errno = saved_errno;
+            }
           else if (end <= s + 2)
             {
               num = parse_number (s + 2, 16, 2, 4, 'p', &endbuf);
@@ -321,7 +325,7 @@ strtod (const char *nptr, char **endptr)
          better to use the underlying implementation's result, since a
          nice implementation populates the bits of the NaN according
          to interpreting n-char-sequence as a hexadecimal number.  */
-      if (s != end)
+      if (s != end || num == num)
         num = NAN;
       errno = saved_errno;
     }

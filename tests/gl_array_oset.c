@@ -1,5 +1,5 @@
 /* Ordered set data type implemented by an array.
-   Copyright (C) 2006-2007, 2009-2013 Free Software Foundation, Inc.
+   Copyright (C) 2006-2007, 2009-2016 Free Software Foundation, Inc.
    Written by Bruno Haible <bruno@clisp.org>, 2006.
 
    This program is free software: you can redistribute it and/or modify
@@ -303,7 +303,7 @@ gl_array_iterator (gl_oset_t set)
   result.count = set->count;
   result.p = set->elements + 0;
   result.q = set->elements + set->count;
-#ifdef lint
+#if defined GCC_LINT || defined lint
   result.i = 0;
   result.j = 0;
 #endif

@@ -1,6 +1,6 @@
 # Configure template for GNU M4.           -*-Autoconf-*-
-# Copyright (C) 1991, 1993-1994, 2004-2013 Free Software Foundation,
-# Inc.
+# Copyright (C) 1991, 1993-1994, 2004-2014, 2016 Free Software
+# Foundation, Inc.
 #
 # This file is part of GNU M4.
 #
@@ -24,6 +24,7 @@ AC_CONFIG_AUX_DIR([build-aux])
 
 AM_INIT_AUTOMAKE([1.11.6 dist-bzip2 dist-xz color-tests parallel-tests
 silent-rules subdir-objects gnu])
+AM_SILENT_RULES([yes]) # make --enable-silent-rules the default.
 
 m4_pattern_forbid([^M4_[A-Z]])
 
@@ -50,10 +51,10 @@ AC_ARG_ENABLE([gcc-warnings],
      *)      AC_MSG_ERROR([bad value $enableval for gcc-warnings option]) ;;
    esac
    gl_gcc_warnings=$enableval],
-  [if test -d "$srcdir"/.git; then
-     gl_gcc_warnings=yes
-   else
+  [if test -f "$srcdir"/.tarball-version; then
      gl_gcc_warnings=no
+   else
+     gl_gcc_warnings=yes
    fi]
 )
 
@@ -121,9 +122,6 @@ if test "$gl_gcc_warnings" = yes; then
   if test $M4_cv_gcc_pragma_push_works = no; then
     gl_WARN_ADD([-Wno-format-nonliteral])
   fi
-
-  gl_WARN_ADD([-fdiagnostics-show-option])
-  gl_WARN_ADD([-funit-at-a-time])
 
   AC_SUBST([WARN_CFLAGS])
 
@@ -194,7 +192,7 @@ if test "$with_syscmd_shell" = no ; then
   with_syscmd_shell=/bin/sh
   if test "$cross_compiling" != yes ; then
 dnl Give mingw a default that is more likely to be available.
-    AS_IF([AS_EXECUTABLE_P([/bin/sh])], [],
+    AS_IF([AS_EXECUTABLE_P([/bin/sh$EXEEXT])], [],
       [if (cmd /c) 2>/dev/null; then with_syscmd_shell=cmd; fi])
 dnl Too bad _AS_PATH_WALK is not public.
     M4_save_IFS=$IFS; IFS=$PATH_SEPARATOR
@@ -219,6 +217,9 @@ AC_DEFINE_UNQUOTED([SYSCMD_SHELL], ["$with_syscmd_shell"],
 M4_WITH_DMALLOC
 
 AC_CONFIG_COMMANDS([stamp-h], [[test -z "$CONFIG_HEADERS" || date > stamp-h]])
+
+AS_CASE([$host], [*-*-os2*], [OS2_LDFLAGS="-Zargs-resp"])
+AC_SUBST([OS2_LDFLAGS])
 
 AC_CONFIG_FILES([Makefile
                  doc/Makefile

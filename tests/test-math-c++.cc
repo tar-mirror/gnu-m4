@@ -1,5 +1,5 @@
 /* Test of <math.h> substitute in C++ mode.
-   Copyright (C) 2010-2013 Free Software Foundation, Inc.
+   Copyright (C) 2010-2016 Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -24,7 +24,8 @@
 #include "signature.h"
 
 /* Signature check for a function that takes a real-floating argument.
-   Check that each overloaded function with the specified signature exists.  */
+   Check that each overloaded function with the specified signature
+   exists in the GNULIB_NAMESPACE namespace.  */
 #define REAL_FLOATING_CHECK(func,\
                             rettype1, parameters1,\
                             rettype2, parameters2,\
@@ -34,7 +35,7 @@
   OVERLOADED_CHECK (func, rettype3, parameters3, _3)
 #define OVERLOADED_CHECK(func, rettype, parameters, suffix) \
   static rettype (* _GL_UNUSED signature_check_ ## func ## suffix) parameters \
-    = static_cast<rettype(*)parameters>(func)
+    = static_cast<rettype(*)parameters>(GNULIB_NAMESPACE::func)
 
 
 /* Keep these checks in the same order as math.in.h!  */

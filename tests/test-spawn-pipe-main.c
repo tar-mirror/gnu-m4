@@ -1,5 +1,5 @@
 /* Test of create_pipe_bidi/wait_subprocess.
-   Copyright (C) 2009-2013 Free Software Foundation, Inc.
+   Copyright (C) 2009-2016 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -18,7 +18,6 @@
 
 #include "spawn-pipe.h"
 #include "wait-process.h"
-#include "progname.h"
 
 #include <stdbool.h>
 #include <stdio.h>
@@ -79,8 +78,6 @@ main (int argc, char *argv[])
 {
   int test;
   int fd;
-
-  set_program_name (argv[0]);
 
   if (argc != 3)
     {

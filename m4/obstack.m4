@@ -1,23 +1,35 @@
-# obstack.m4 serial 4
-dnl Copyright (C) 2002, 2003, 2004 Free Software Foundation, Inc.
+# See if we need to provide obstacks.
+
+dnl Copyright 1996-2016 Free Software Foundation, Inc.
 dnl This file is free software; the Free Software Foundation
 dnl gives unlimited permission to copy and/or distribute it,
 dnl with or without modifications, as long as this notice is preserved.
 
-AC_DEFUN([gl_OBSTACK],
-[
-  AC_FUNC_OBSTACK
-  dnl Note: AC_FUNC_OBSTACK does AC_LIBSOURCES([obstack.h, obstack.c]).
-  if test $ac_cv_func_obstack = no; then
-    gl_PREREQ_OBSTACK
-  fi
-])
+dnl This replaces Autoconf's AC_FUNC_OBSTACK.
+dnl The Autoconf version should be marked obsolete at some point.
 
-# Prerequisites of lib/obstack.c.
-AC_DEFUN([gl_PREREQ_OBSTACK],
-[
-  AC_REQUIRE([gl_AC_HEADER_INTTYPES_H])
-  AC_REQUIRE([gl_AC_HEADER_STDINT_H])
-  AC_REQUIRE([gl_AC_TYPE_UINTMAX_T])
-  :
+AC_DEFUN([AC_FUNC_OBSTACK],
+  [AC_LIBSOURCES([obstack.h, obstack.c])dnl
+   AC_CACHE_CHECK([for obstacks that work with any size object],
+     [ac_cv_func_obstack],
+     [AC_LINK_IFELSE(
+        [AC_LANG_PROGRAM(
+           [[#include "obstack.h"
+             void *obstack_chunk_alloc (size_t n) { return 0; }
+             void obstack_chunk_free (void *p) { }
+             /* Check that an internal function returns size_t, not int.  */
+             size_t _obstack_memory_used (struct obstack *);
+            ]],
+           [[struct obstack mem;
+             obstack_init (&mem);
+             obstack_free (&mem, 0);
+           ]])],
+        [ac_cv_func_obstack=yes],
+        [ac_cv_func_obstack=no])])
+   if test "$ac_cv_func_obstack" = yes; then
+     AC_DEFINE([HAVE_OBSTACK], 1,
+       [Define to 1 if the system has obstacks that work with any size object.])
+   else
+     AC_LIBOBJ([obstack])
+   fi
 ])

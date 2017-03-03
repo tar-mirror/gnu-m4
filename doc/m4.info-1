@@ -1,9 +1,10 @@
-This is m4.info, produced by makeinfo version 5.1 from m4.texi.
+This is m4.info, produced by makeinfo version 6.1 from m4.texi.
 
-This manual (22 September 2013) is for GNU M4 (version 1.4.17), a
-package containing an implementation of the m4 macro language.
+This manual (31 December 2016) is for GNU M4 (version 1.4.18), a package
+containing an implementation of the m4 macro language.
 
-   Copyright (C) 1989-1994, 2004-2013 Free Software Foundation, Inc.
+   Copyright (C) 1989-1994, 2004-2014, 2016 Free Software Foundation,
+Inc.
 
      Permission is granted to copy, distribute and/or modify this
      document under the terms of the GNU Free Documentation License,
@@ -22,10 +23,11 @@ File: m4.info,  Node: Top,  Next: Preliminaries,  Up: (dir)
 GNU M4
 ******
 
-This manual (22 September 2013) is for GNU M4 (version 1.4.17), a
-package containing an implementation of the m4 macro language.
+This manual (31 December 2016) is for GNU M4 (version 1.4.18), a package
+containing an implementation of the m4 macro language.
 
-   Copyright (C) 1989-1994, 2004-2013 Free Software Foundation, Inc.
+   Copyright (C) 1989-1994, 2004-2014, 2016 Free Software Foundation,
+Inc.
 
      Permission is granted to copy, distribute and/or modify this
      document under the terms of the GNU Free Documentation License,
@@ -43,10 +45,10 @@ generating 'configure' scripts, but not for running them.
 
    GNU 'm4' was originally written by Rene' Seindal, with subsequent
 changes by Franc,ois Pinard and other volunteers on the Internet.  All
-names and email addresses can be found in the files 'm4-1.4.17/AUTHORS'
-and 'm4-1.4.17/THANKS' from the GNU M4 distribution.
+names and email addresses can be found in the files 'm4-1.4.18/AUTHORS'
+and 'm4-1.4.18/THANKS' from the GNU M4 distribution.
 
-   This is release 1.4.17.  It is now considered stable: future releases
+   This is release 1.4.18.  It is now considered stable: future releases
 in the 1.4.x series are only meant to fix bugs, increase speed, or
 improve documentation.  However...
 
@@ -361,10 +363,8 @@ addressed some long standing bugs in the venerable 1.4 release.  Then in
 2005, Gary V. Vaughan collected together the many patches to GNU 'm4'
 1.4 that were floating around the net and released 1.4.3 and 1.4.4.  And
 in 2006, Eric Blake joined the team and prepared patches for the release
-of 1.4.5, 1.4.6, 1.4.7, and 1.4.8.  More bug fixes were incorporated in
-2007, with releases 1.4.9 and 1.4.10.  Eric continued with some
-portability fixes for 1.4.11 and 1.4.12 in 2008, 1.4.13 in 2009, 1.4.14
-and 1.4.15 in 2010, and 1.4.16 in 2011.
+of 1.4.5, with subsequent releases through intervening years, as recent
+as 1.4.18 in 2016.
 
    Meanwhile, development has continued on new features for 'm4', such
 as dynamic module loading and additional builtins.  When complete, GNU
@@ -431,16 +431,16 @@ the examples assume that your current directory is located where you
 unpacked the installation, so if you plan on following along, you may
 find it helpful to do this now:
 
-     $ cd m4-1.4.17
+     $ cd m4-1.4.18
 
    As each of the predefined macros in 'm4' is described, a prototype
 call of the macro will be shown, giving descriptive names to the
 arguments, e.g.,
 
- -- Composite: example (STRING, [COUNT = '1']
-     [ARGUMENT]This is a sample prototype.  There is not really a macro
-     named 'example', but this documents that if there were, it would be
-     a Composite macro, rather than a Builtin.  It requires at least one
+ -- Composite: example (STRING, [COUNT = '1'], [ARGUMENT]...)
+     This is a sample prototype.  There is not really a macro named
+     'example', but this documents that if there were, it would be a
+     Composite macro, rather than a Builtin.  It requires at least one
      argument, STRING.  Remember that in 'm4', there must not be a space
      between the macro name and the opening parenthesis, unless it was
      intended to call the macro without any arguments.  The brackets
@@ -1487,7 +1487,7 @@ File: m4.info,  Node: Define,  Next: Arguments,  Up: Definitions
 The normal way to define or redefine macros is to use the builtin
 'define':
 
- -- Builtin: define (NAME, [EXPANSION]
+ -- Builtin: define (NAME, [EXPANSION])
      Defines NAME to expand to EXPANSION.  If EXPANSION is not given, it
      is taken to be empty.
 
@@ -1534,7 +1534,7 @@ the name is not recognized.  It can only be referenced by the builtins
 macro names.
 
  -- Composite: array (INDEX)
- -- Composite: array_set (INDEX, [VALUE]
+ -- Composite: array_set (INDEX, [VALUE])
      Provide access to entries within an array.  'array' reads the entry
      at location INDEX, and 'array_set' assigns VALUE to location INDEX.
 
@@ -1975,7 +1975,7 @@ It is possible to redefine a macro temporarily, reverting to the
 previous definition at a later time.  This is done with the builtins
 'pushdef' and 'popdef':
 
- -- Builtin: pushdef (NAME, [EXPANSION]
+ -- Builtin: pushdef (NAME, [EXPANSION])
  -- Builtin: popdef (NAME...)
      Analogous to 'define' and 'undefine'.
 
@@ -2060,7 +2060,7 @@ File: m4.info,  Node: Indir,  Next: Builtin,  Prev: Pushdef,  Up: Definitions
 
 Any macro can be called indirectly with 'indir':
 
- -- Builtin: indir (NAME, [ARGS...]
+ -- Builtin: indir (NAME, [ARGS...])
      Results in a call to the macro NAME, which is passed the rest of
      the arguments ARGS.  If NAME is not defined, an error message is
      printed, and the expansion is void.
@@ -2125,7 +2125,7 @@ File: m4.info,  Node: Builtin,  Prev: Indir,  Up: Definitions
 
 Builtin macros can be called indirectly with 'builtin':
 
- -- Builtin: builtin (NAME, [ARGS...]
+ -- Builtin: builtin (NAME, [ARGS...])
      Results in a call to the builtin NAME, which is passed the rest of
      the arguments ARGS.  If NAME does not name a builtin, an error
      message is printed, and the expansion is void.
@@ -2235,7 +2235,7 @@ File: m4.info,  Node: Ifdef,  Next: Ifelse,  Up: Conditionals
 There are two different builtin conditionals in 'm4'.  The first is
 'ifdef':
 
- -- Builtin: ifdef (NAME, STRING-1, [STRING-2]
+ -- Builtin: ifdef (NAME, STRING-1, [STRING-2])
      If NAME is defined as a macro, 'ifdef' expands to STRING-1,
      otherwise to STRING-2.  If STRING-2 is omitted, it is taken to be
      the empty string (according to the normal rules).
@@ -2263,9 +2263,9 @@ as a way to introduce a long comment, as an if-else construct, or as a
 multibranch, depending on the number of arguments supplied:
 
  -- Builtin: ifelse (COMMENT)
- -- Builtin: ifelse (STRING-1, STRING-2, EQUAL, [NOT-EQUAL]
+ -- Builtin: ifelse (STRING-1, STRING-2, EQUAL, [NOT-EQUAL])
  -- Builtin: ifelse (STRING-1, STRING-2, EQUAL-1, STRING-3, STRING-4,
-          EQUAL-2, ..., [NOT-EQUAL]
+          EQUAL-2, ..., [NOT-EQUAL])
      Used with only one argument, the 'ifelse' simply discards it and
      produces no output.
 
@@ -2394,7 +2394,8 @@ be made with 'shift', 'ifelse' and recursion.  It also shows that
 'shift' is usually used with '$@'.  Another example of this is an
 implementation of a short-circuiting conditional operator.
 
- -- Composite: cond (TEST-1, STRING-1, EQUAL-1, [TEST-2]
+ -- Composite: cond (TEST-1, STRING-1, EQUAL-1, [TEST-2], [STRING-2],
+          [EQUAL-2], ..., [NOT-EQUAL])
      Similar to 'ifelse', where an equal comparison between the first
      two strings results in the third, otherwise the first three
      arguments are discarded and the process repeats.  The difference is
@@ -2444,14 +2445,14 @@ with 'ifelse', compared with only the relevant effects with 'cond'.
    Another common task that requires iteration is joining a list of
 arguments into a single string.
 
- -- Composite: join ([SEPARATOR]
- -- Composite: joinall ([SEPARATOR]
+ -- Composite: join ([SEPARATOR], [ARGS...])
+ -- Composite: joinall ([SEPARATOR], [ARGS...])
      Generate a single-quoted string, consisting of each ARG separated
      by SEPARATOR.  While 'joinall' always outputs a SEPARATOR between
      arguments, 'join' avoids the SEPARATOR for an empty ARG.
 
    Here are some examples of its usage, based on the implementation
-'m4-1.4.17/examples/join.m4' distributed in this package:
+'m4-1.4.18/examples/join.m4' distributed in this package:
 
      $ m4 -I examples
      include(`join.m4')
@@ -2546,7 +2547,7 @@ element, or treating multiple arguments as a single element:
      levels of quoting are added around each element.
 
    An actual implementation of these three macros is distributed as
-'m4-1.4.17/examples/quote.m4' in this package.  First, let's examine
+'m4-1.4.18/examples/quote.m4' in this package.  First, let's examine
 their usage:
 
      $ m4 -I examples
@@ -2661,7 +2662,7 @@ finished, it increments the iterator (using the predefined macro 'incr',
 *note Incr::), and recurses.
 
    Here is an actual implementation of 'forloop', distributed as
-'m4-1.4.17/examples/forloop.m4' in this package:
+'m4-1.4.18/examples/forloop.m4' in this package:
 
      $ m4 -I examples
      undivert(`forloop.m4')dnl
@@ -2701,8 +2702,8 @@ Here is an example of a loop macro that implements list iteration.
 
    As an example, this displays each word in a list inside of a
 sentence, using an implementation of 'foreach' distributed as
-'m4-1.4.17/examples/foreach.m4', and 'foreachq' in
-'m4-1.4.17/examples/foreachq.m4'.
+'m4-1.4.18/examples/foreach.m4', and 'foreachq' in
+'m4-1.4.18/examples/foreachq.m4'.
 
      $ m4 -I examples
      include(`foreach.m4')
@@ -2852,7 +2853,7 @@ stack.
      parameter.
 
    A sample implementation of these macros is distributed in the file
-'m4-1.4.17/examples/stack.m4'.
+'m4-1.4.18/examples/stack.m4'.
 
      $ m4 -I examples
      include(`stack.m4')
@@ -2915,7 +2916,7 @@ Since m4 is a macro language, it is possible to write macros that can
 build other macros.  First on the list is a way to automate the creation
 of blind macros.
 
- -- Composite: define_blind (NAME, [VALUE]
+ -- Composite: define_blind (NAME, [VALUE])
      Defines NAME as a blind macro, such that NAME will expand to VALUE
      only when given explicit arguments.  VALUE should not be the result
      of 'defn' (*note Defn::).  This macro is only recognized with
@@ -2982,7 +2983,7 @@ more obvious.  The macro 'stack_foreach' mentioned earlier is an example
 of a context that provides exactly one argument to a macro name.  But
 coupled with currying, we can invoke 'reverse' with two arguments for
 each definition of a macro stack.  This example uses the file
-'m4-1.4.17/examples/curry.m4' included in the distribution.
+'m4-1.4.18/examples/curry.m4' included in the distribution.
 
      $ m4 -I examples
      include(`curry.m4')include(`stack.m4')
@@ -3083,7 +3084,7 @@ File: m4.info,  Node: Dumpdef,  Next: Trace,  Up: Debugging
 If you want to see what a name expands into, you can use the builtin
 'dumpdef':
 
- -- Builtin: dumpdef ([NAMES...]
+ -- Builtin: dumpdef ([NAMES...])
      Accepts any number of arguments.  If called without any arguments,
      it displays the definitions of all known names, otherwise it
      displays the definitions of the NAMES given.  The output is printed
@@ -3126,8 +3127,8 @@ File: m4.info,  Node: Trace,  Next: Debug Levels,  Prev: Dumpdef,  Up: Debugging
 It is possible to trace macro calls and expansions through the builtins
 'traceon' and 'traceoff':
 
- -- Builtin: traceon ([NAMES...]
- -- Builtin: traceoff ([NAMES...]
+ -- Builtin: traceon ([NAMES...])
+ -- Builtin: traceoff ([NAMES...])
      When called without any arguments, 'traceon' and 'traceoff' will
      turn tracing on and off, respectively, for all currently defined
      macros.
@@ -3320,7 +3321,7 @@ The examples throughout this manual assume the default flags.
    There is a builtin macro 'debugmode', which allows on-the-fly control
 of the debugging output format:
 
- -- Builtin: debugmode ([FLAGS]
+ -- Builtin: debugmode ([FLAGS])
      The argument FLAGS should be a subset of the letters listed above.
      As special cases, if the argument starts with a '+', the flags are
      added to the current debug flags, and if it starts with a '-', they
@@ -3390,7 +3391,7 @@ Debug and tracing output can be redirected to files using either the
 '--debugfile' option to 'm4' (*note Invoking m4: Debugging options.), or
 with the builtin macro 'debugfile':
 
- -- Builtin: debugfile ([FILE]
+ -- Builtin: debugfile ([FILE])
      Sends all further debug and trace output to FILE, opened in append
      mode.  If FILE is the empty string, debug and trace output are
      discarded.  If 'debugfile' is called without any arguments, debug
@@ -3497,7 +3498,7 @@ File: m4.info,  Node: Changequote,  Next: Changecom,  Prev: Dnl,  Up: Input Cont
 The default quote delimiters can be changed with the builtin
 'changequote':
 
- -- Builtin: changequote ([START = '`']
+ -- Builtin: changequote ([START = '`'], [END = '''])
      This sets START as the new begin-quote delimiter and END as the new
      end-quote delimiter.  If both arguments are missing, the default
      quotes ('`' and ''') are used.  If START is void, then quoting is
@@ -3692,7 +3693,7 @@ File: m4.info,  Node: Changecom,  Next: Changeword,  Prev: Changequote,  Up: Inp
 The default comment delimiters can be changed with the builtin macro
 'changecom':
 
- -- Builtin: changecom ([START]
+ -- Builtin: changecom ([START], [END = '<NL>'])
      This sets START as the new begin-comment delimiter and END as the
      new end-comment delimiter.  If both arguments are missing, or START
      is void, then comments are disabled.  Otherwise, if END is missing
@@ -4003,7 +4004,7 @@ behavior is likely to change in a future release, to match POSIX, so you
 should not depend on this order.
 
    It is possible to emulate POSIX behavior even with older versions of
-GNU M4 by including the file 'm4-1.4.17/examples/wrapfifo.m4' from the
+GNU M4 by including the file 'm4-1.4.18/examples/wrapfifo.m4' from the
 distribution:
 
      $ m4 -I examples
@@ -4028,7 +4029,7 @@ distribution:
 
    It is likewise possible to emulate LIFO behavior without resorting to
 the GNU M4 extension of 'builtin', by including the file
-'m4-1.4.17/examples/wraplifo.m4' from the distribution.  (Unfortunately,
+'m4-1.4.18/examples/wraplifo.m4' from the distribution.  (Unfortunately,
 both examples shown here share some subtle bugs.  See if you can find
 and correct them; or *note Answers: Improved m4wrap.).
 
@@ -4134,8 +4135,8 @@ There are two builtin macros in 'm4' for including files:
 
    The rest of this section assumes that 'm4' is invoked with the '-I'
 option (*note Invoking m4: Preprocessor features.) pointing to the
-'m4-1.4.17/examples' directory shipped as part of the GNU 'm4' package.
-The file 'm4-1.4.17/examples/incl.m4' in the distribution contains the
+'m4-1.4.18/examples' directory shipped as part of the GNU 'm4' package.
+The file 'm4-1.4.18/examples/incl.m4' in the distribution contains the
 lines:
 
      $ cat examples/incl.m4
@@ -4244,7 +4245,7 @@ File: m4.info,  Node: Divert,  Next: Undivert,  Up: Diversions
 
 Output is diverted using 'divert':
 
- -- Builtin: divert ([NUMBER = '0']
+ -- Builtin: divert ([NUMBER = '0'])
      The current diversion is changed to NUMBER.  If NUMBER is left out
      or empty, it is assumed to be zero.  If NUMBER cannot be parsed,
      the diversion is unchanged.
@@ -4327,7 +4328,7 @@ File: m4.info,  Node: Undivert,  Next: Divnum,  Prev: Divert,  Up: Diversions
 
 Diverted text can be undiverted explicitly using the builtin 'undivert':
 
- -- Builtin: undivert ([DIVERSIONS...]
+ -- Builtin: undivert ([DIVERSIONS...])
      Undiverts the numeric DIVERSIONS given by the arguments, in the
      order given.  If no arguments are supplied, all diversions are
      undiverted, in numerical order.
@@ -4490,7 +4491,7 @@ No output is produced at all.
 
    Clearing selected diversions can be done with the following macro:
 
- -- Composite: cleardivert ([DIVERSIONS...]
+ -- Composite: cleardivert ([DIVERSIONS...])
      Discard the contents of each of the listed numeric DIVERSIONS.
 
      define(`cleardivert',
@@ -4578,7 +4579,7 @@ File: m4.info,  Node: Regexp,  Next: Substr,  Prev: Index macro,  Up: Text handl
 
 Searching for regular expressions is done with the builtin 'regexp':
 
- -- Builtin: regexp (STRING, REGEXP, [REPLACEMENT]
+ -- Builtin: regexp (STRING, REGEXP, [REPLACEMENT])
      Searches for REGEXP in STRING.  The syntax for regular expressions
      is the same as in GNU Emacs, which is similar to BRE, Basic Regular
      Expressions in POSIX. *Note Syntax of Regular Expressions:
@@ -4643,7 +4644,7 @@ File: m4.info,  Node: Substr,  Next: Translit,  Prev: Regexp,  Up: Text handling
 
 Substrings are extracted with 'substr':
 
- -- Builtin: substr (STRING, FROM, [LENGTH]
+ -- Builtin: substr (STRING, FROM, [LENGTH])
      Expands to the substring of STRING, which starts at index FROM, and
      extends for LENGTH characters, or to the end of STRING, if LENGTH
      is omitted.  The starting index of a string is always 0.  The
@@ -4674,7 +4675,7 @@ File: m4.info,  Node: Translit,  Next: Patsubst,  Prev: Substr,  Up: Text handli
 
 Character translation is done with 'translit':
 
- -- Builtin: translit (STRING, CHARS, [REPLACEMENT]
+ -- Builtin: translit (STRING, CHARS, [REPLACEMENT])
      Expands to STRING, with each character that occurs in CHARS
      translated into the character from REPLACEMENT with the same index.
 
@@ -4735,7 +4736,7 @@ File: m4.info,  Node: Patsubst,  Next: Format,  Prev: Translit,  Up: Text handli
 
 Global substitution in a string is done by 'patsubst':
 
- -- Builtin: patsubst (STRING, REGEXP, [REPLACEMENT]
+ -- Builtin: patsubst (STRING, REGEXP, [REPLACEMENT])
      Searches STRING for matches of REGEXP, and substitutes REPLACEMENT
      for each match.  The syntax for regular expressions is the same as
      in GNU Emacs (*note Regexp::).
@@ -4788,7 +4789,7 @@ individual words or whole sentences, by substituting calls of the macros
      upper case and the remaining characters to lower case.
 
    First, an example of their usage, using implementations distributed
-in 'm4-1.4.17/examples/capitalize.m4'.
+in 'm4-1.4.18/examples/capitalize.m4'.
 
      $ m4 -I examples
      include(`capitalize.m4')
@@ -4980,7 +4981,7 @@ File: m4.info,  Node: Eval,  Prev: Incr,  Up: Arithmetic
 
 Integer expressions are evaluated with 'eval':
 
- -- Builtin: eval (EXPRESSION, [RADIX = '10']
+ -- Builtin: eval (EXPRESSION, [RADIX = '10'], [WIDTH])
      Expands to the value of EXPRESSION.  The expansion is empty if a
      problem is encountered while parsing the arguments.  If specified,
      RADIX and WIDTH control the format of the output.
@@ -5711,7 +5712,7 @@ File: m4.info,  Node: M4exit,  Prev: Location,  Up: Miscellaneous
 If you need to exit from 'm4' before the entire input has been read, you
 can use 'm4exit':
 
- -- Builtin: m4exit ([CODE = '0']
+ -- Builtin: m4exit ([CODE = '0'])
      Causes 'm4' to exit, with exit status CODE.  If CODE is left out,
      the exit status is zero.  If CODE cannot be parsed, or is outside
      the range of 0 to 255, the exit status is one.  No further input is
@@ -5912,7 +5913,7 @@ directives are:
      the same name, and its order, along with 'F', is important.
 
 'V NUMBER <NL>'
-     Confirms the format of the file.  'm4' 1.4.17 only creates and
+     Confirms the format of the file.  'm4' 1.4.18 only creates and
      understands frozen files where NUMBER is 1.  This directive must be
      the first non-comment in the file, and may not appear more than
      once.
@@ -6309,7 +6310,7 @@ The 'forloop' macro (*note Forloop::) as presented earlier can go into
 an infinite loop if given an iterator that is not parsed as a macro
 name.  It does not do any sanity checking on its numeric bounds, and
 only permits decimal numbers for bounds.  Here is an improved version,
-shipped as 'm4-1.4.17/examples/forloop2.m4'; this version also optimizes
+shipped as 'm4-1.4.18/examples/forloop2.m4'; this version also optimizes
 overhead by calling four macros instead of six per iteration (excluding
 those in TEXT), by not dereferencing the ITERATOR in the helper
 '_forloop'.
@@ -6384,7 +6385,7 @@ to pass the current iterator value as a single argument.  Coupled with
 helper macros if the argument is needed in more than one place in the
 expansion, the output can be generated with three, rather than four,
 macros of overhead per iteration.  Notice how the file
-'m4-1.4.17/examples/forloop3.m4' rearranges the arguments of the helper
+'m4-1.4.18/examples/forloop3.m4' rearranges the arguments of the helper
 '_forloop' to take two arguments that are placed around the current
 value.  By splitting a balanced set of parantheses across multiple
 arguments, the helper macro can now be shared by 'forloop' and the new
@@ -6476,7 +6477,7 @@ fewer arguments, rather than adding additional quoted uses of 'shift'.
 By doing so, 'm4' uses less memory, invokes fewer macros, is less likely
 to run into machine limits, and most importantly, performs faster.  The
 fixed version of 'foreachq' can be found in
-'m4-1.4.17/examples/foreachq2.m4':
+'m4-1.4.18/examples/foreachq2.m4':
 
      $ m4 -I examples
      include(`foreachq2.m4')
@@ -6525,7 +6526,7 @@ operate on an unboxed list in the first place, and by using the
 fixed-length '$#' instead of an arbitrary length list as the key to end
 recursion.  The result is an overhead of six macro invocations per loop
 (excluding any macros in TEXT), instead of eight.  This alternative
-approach is available as 'm4-1.4.17/examples/foreach3.m4':
+approach is available as 'm4-1.4.18/examples/foreach3.m4':
 
      $ m4 -I examples
      include(`foreachq3.m4')
@@ -6634,7 +6635,7 @@ supported.
      =>4
 
    For yet another approach, the improved version of 'foreach',
-available in 'm4-1.4.17/examples/foreach2.m4', simply overquotes the
+available in 'm4-1.4.18/examples/foreach2.m4', simply overquotes the
 arguments to '_foreach' to begin with, using 'dquote_elt'.  Then
 '_foreach' can just use '_arg1' to remove the extra layer of quoting
 that was added up front:
@@ -6803,7 +6804,7 @@ argument in the recursive call; while the other approach would give the
 same output, it does so at the expense of increasing the argument size
 on each iteration of '_stack_reverse_sep', which results in quadratic
 instead of linear execution time.  The improved stack walking macros are
-available in 'm4-1.4.17/examples/stack_sep.m4':
+available in 'm4-1.4.18/examples/stack_sep.m4':
 
      $ m4 -I examples
      include(`stack_sep.m4')
@@ -6883,7 +6884,7 @@ in an undefined state.
 arguments to 'm4wrap', separated by a space, rather than saving just the
 first argument.  This is done with the 'join' macro documented
 previously (*note Shift::).  The improved LIFO example is shipped as
-'m4-1.4.17/examples/wraplifo2.m4', and can easily be converted to a FIFO
+'m4-1.4.18/examples/wraplifo2.m4', and can easily be converted to a FIFO
 solution by swapping the adjacent invocations of 'joinall' and 'defn'.
 
      $ m4 -I examples
@@ -7017,7 +7018,7 @@ that means the replacement text has unbalanced quotes, necessitating
 another round of 'changequote'.
 
    In the fixed version below, (also shipped as
-'m4-1.4.17/examples/capitalize2.m4'), 'capitalize' uses the alternate
+'m4-1.4.18/examples/capitalize2.m4'), 'capitalize' uses the alternate
 quotes of '<<[' and ']>>' (the longer strings are chosen so as to be
 less likely to appear in the text being converted).  The helpers
 '_to_alt' and '_from_alt' merely reduce the number of characters

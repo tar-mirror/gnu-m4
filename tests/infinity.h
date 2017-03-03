@@ -1,5 +1,5 @@
 /* Macros for infinity.
-   Copyright (C) 2011-2013 Free Software Foundation, Inc.
+   Copyright (C) 2011-2016 Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -17,8 +17,9 @@
 
 /* Infinityf () returns a 'float' +Infinity.  */
 
-/* The Microsoft MSVC 9 compiler chokes on the expression 1.0f / 0.0f.  */
-#if defined _MSC_VER
+/* The Microsoft MSVC 9 compiler chokes on the expression 1.0f / 0.0f.
+   The IBM XL C compiler on z/OS complains.  */
+#if defined _MSC_VER || (defined __MVS__ && defined __IBMC__)
 static float
 Infinityf ()
 {
@@ -32,8 +33,9 @@ Infinityf ()
 
 /* Infinityd () returns a 'double' +Infinity.  */
 
-/* The Microsoft MSVC 9 compiler chokes on the expression 1.0 / 0.0.  */
-#if defined _MSC_VER
+/* The Microsoft MSVC 9 compiler chokes on the expression 1.0 / 0.0.
+   The IBM XL C compiler on z/OS complains.  */
+#if defined _MSC_VER || (defined __MVS__ && defined __IBMC__)
 static double
 Infinityd ()
 {
@@ -47,9 +49,10 @@ Infinityd ()
 
 /* Infinityl () returns a 'long double' +Infinity.  */
 
-/* The Microsoft MSVC 9 compiler chokes on the expression 1.0L / 0.0L.  */
-#if defined _MSC_VER
-static double
+/* The Microsoft MSVC 9 compiler chokes on the expression 1.0L / 0.0L.
+   The IBM XL C compiler on z/OS complains.  */
+#if defined _MSC_VER || (defined __MVS__ && defined __IBMC__)
+static long double
 Infinityl ()
 {
   static long double zero = 0.0L;

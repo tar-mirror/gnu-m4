@@ -1,5 +1,5 @@
 /* Test the gnulib dirname module.
-   Copyright (C) 2005-2007, 2009-2013 Free Software Foundation, Inc.
+   Copyright (C) 2005-2007, 2009-2016 Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -150,7 +150,7 @@ main (void)
         {
           ok = false;
           printf ("dir_name '%s': got '%s' len %d,"
-                  " expected '%s' len %ld\n",
+                  " expected '%s' len %lu\n",
                   t->name, dir, dirlen,
                   t->dir, (unsigned long) strlen (t->dir));
         }
@@ -167,7 +167,7 @@ main (void)
         {
           ok = false;
           printf ("base_name '%s': got '%s' len %d,"
-                  " expected '%s' len %ld\n",
+                  " expected '%s' len %lu\n",
                   t->name, base, baselen,
                   t->base, (unsigned long) strlen (t->base));
         }

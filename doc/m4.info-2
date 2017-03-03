@@ -1,9 +1,10 @@
-This is m4.info, produced by makeinfo version 5.1 from m4.texi.
+This is m4.info, produced by makeinfo version 6.1 from m4.texi.
 
-This manual (22 September 2013) is for GNU M4 (version 1.4.17), a
-package containing an implementation of the m4 macro language.
+This manual (31 December 2016) is for GNU M4 (version 1.4.18), a package
+containing an implementation of the m4 macro language.
 
-   Copyright (C) 1989-1994, 2004-2013 Free Software Foundation, Inc.
+   Copyright (C) 1989-1994, 2004-2014, 2016 Free Software Foundation,
+Inc.
 
      Permission is granted to copy, distribute and/or modify this
      document under the terms of the GNU Free Documentation License,
@@ -24,7 +25,7 @@ Appendix B How to make copies of this manual
 
 This appendix covers the license for copying this manual.  Note that
 some of the longer examples in this manual are also distributed in the
-directory 'm4-1.4.17/examples/', where a more permissive license is in
+directory 'm4-1.4.18/examples/', where a more permissive license is in
 effect when copying just the examples.
 
 * Menu:
@@ -544,7 +545,7 @@ introduced the first time.
 * __program__:                           Location.            (line  11)
 * __unix__:                              Platform macros.     (line  14)
 * __windows__:                           Platform macros.     (line  16)
-* argn:                                  Shift.               (line 255)
+* argn:                                  Shift.               (line 256)
 * array:                                 Define.              (line  55)
 * array_set:                             Define.              (line  56)
 * builtin:                               Builtin.             (line   8)
@@ -566,8 +567,8 @@ introduced the first time.
 * divnum:                                Divnum.              (line   8)
 * dnl:                                   Dnl.                 (line   8)
 * downcase:                              Patsubst.            (line  53)
-* dquote:                                Shift.               (line 193)
-* dquote_elt:                            Shift.               (line 194)
+* dquote:                                Shift.               (line 194)
+* dquote_elt:                            Shift.               (line 195)
 * dumpdef:                               Dumpdef.             (line   9)
 * errprint:                              Errprint.            (line   8)
 * esyscmd:                               Esyscmd.             (line   8)
@@ -587,8 +588,8 @@ introduced the first time.
 * incr:                                  Incr.                (line   9)
 * index:                                 Index macro.         (line   8)
 * indir:                                 Indir.               (line   8)
-* join:                                  Shift.               (line 101)
-* joinall:                               Shift.               (line 102)
+* join:                                  Shift.               (line 102)
+* joinall:                               Shift.               (line 103)
 * len:                                   Len.                 (line   8)
 * m4exit:                                M4exit.              (line   9)
 * m4wrap:                                M4wrap.              (line  13)
@@ -599,7 +600,7 @@ introduced the first time.
 * patsubst:                              Patsubst.            (line   8)
 * popdef:                                Pushdef.             (line  11)
 * pushdef:                               Pushdef.             (line  10)
-* quote:                                 Shift.               (line 192)
+* quote:                                 Shift.               (line 193)
 * regexp:                                Regexp.              (line   8)
 * rename:                                Composition.         (line 120)
 * reverse:                               Shift.               (line  31)
@@ -634,10 +635,10 @@ C.2 Index for many concepts
 * arguments to macros:                   Macro Arguments.     (line   6)
 * arguments to macros <1>:               Arguments.           (line   6)
 * arguments to macros, special:          Pseudo Arguments.    (line   6)
-* arguments, joining:                    Shift.               (line  98)
+* arguments, joining:                    Shift.               (line  99)
 * arguments, more than nine:             Arguments.           (line  54)
-* arguments, more than nine <1>:         Shift.               (line 250)
-* arguments, more than nine <2>:         Improved foreach.    (line 156)
+* arguments, more than nine <1>:         Shift.               (line 251)
+* arguments, more than nine <2>:         Improved foreach.    (line 157)
 * arguments, quoted macro:               Quoting Arguments.   (line   6)
 * arguments, reversing:                  Shift.               (line  31)
 * arithmetic:                            Arithmetic.          (line   6)
@@ -672,7 +673,7 @@ C.2 Index for many concepts
 * comparing strings:                     Ifelse.              (line   6)
 * compatibility:                         Compatibility.       (line   6)
 * composing macros:                      Composition.         (line   6)
-* concatenating arguments:               Shift.               (line  98)
+* concatenating arguments:               Shift.               (line  99)
 * conditional, short-circuiting:         Shift.               (line  51)
 * conditionals:                          Ifdef.               (line   6)
 * controlling debugging output:          Debug Levels.        (line   6)
@@ -709,7 +710,7 @@ C.2 Index for many concepts
 * examples, understanding:               Manual.              (line   6)
 * executing shell commands:              Shell commands.      (line   6)
 * exit status from shell commands:       Sysval.              (line   6)
-* exiting from 'm4':                     M4exit.              (line   6)
+* exiting from m4:                       M4exit.              (line   6)
 * expansion of macros:                   Macro expansion.     (line   6)
 * expansion, deferring:                  M4wrap.              (line   6)
 * expansion, tracing macro:              Trace.               (line   6)
@@ -764,7 +765,7 @@ C.2 Index for many concepts
 * GNU M4, history of:                    History.             (line   6)
 * GPL, GNU General Public License:       GNU General Public License.
                                                               (line   6)
-* history of 'm4':                       History.             (line   6)
+* history of m4:                         History.             (line   6)
 * included files, search path for:       Search Path.         (line   6)
 * inclusion, of files:                   File Inclusion.      (line   6)
 * inclusion, of files <1>:               Undivert.            (line  13)
@@ -783,10 +784,10 @@ C.2 Index for many concepts
 * input, saving:                         M4wrap.              (line   6)
 * integer arithmetic:                    Arithmetic.          (line   6)
 * integer expression evaluation:         Eval.                (line   6)
-* invoking 'm4':                         Invoking m4.         (line   6)
+* invoking m4:                           Invoking m4.         (line   6)
 * invoking macros:                       Invocation.          (line   6)
 * iterating over lists:                  Foreach.             (line   6)
-* joining arguments:                     Shift.               (line  98)
+* joining arguments:                     Shift.               (line  99)
 * length of strings:                     Len.                 (line   6)
 * lexical structure of words:            Changeword.          (line   6)
 * License, code:                         Copying This Package.
@@ -801,7 +802,7 @@ C.2 Index for many concepts
 * loops:                                 Shift.               (line  10)
 * loops, counting:                       Forloop.             (line   6)
 * loops, list iteration:                 Foreach.             (line   6)
-* 'M4PATH':                              Search Path.         (line   9)
+* M4PATH:                                Search Path.         (line   9)
 * macro composition:                     Composition.         (line   6)
 * macro definitions, on the command line: Preprocessor features.
                                                               (line   6)
@@ -826,30 +827,30 @@ C.2 Index for many concepts
 * macros, recursive:                     Shift.               (line   6)
 * macros, special arguments to:          Pseudo Arguments.    (line   6)
 * macros, temporary redefinition of:     Pushdef.             (line   6)
-* manipulating quotes:                   Shift.               (line 189)
+* manipulating quotes:                   Shift.               (line 190)
 * messages, printing error:              Errprint.            (line   6)
 * more than nine arguments:              Arguments.           (line  54)
-* more than nine arguments <1>:          Shift.               (line 250)
-* more than nine arguments <2>:          Improved foreach.    (line 156)
+* more than nine arguments <1>:          Shift.               (line 251)
+* more than nine arguments <2>:          Improved foreach.    (line 157)
 * multibranches:                         Ifelse.              (line  69)
 * names:                                 Names.               (line   6)
 * nesting limit:                         Limits control.      (line  43)
 * nine arguments, more than:             Arguments.           (line  54)
-* nine arguments, more than <1>:         Shift.               (line 250)
-* nine arguments, more than <2>:         Improved foreach.    (line 156)
+* nine arguments, more than <1>:         Shift.               (line 251)
+* nine arguments, more than <2>:         Improved foreach.    (line 157)
 * numbers:                               Manual.              (line  57)
 * options, command line:                 Invoking m4.         (line  10)
 * output, diverting to files:            Divert.              (line   6)
 * output, formatted:                     Format.              (line   6)
 * output, literal:                       Pseudo Arguments.    (line 106)
 * output, saving debugging:              Debug Output.        (line   6)
-* overview of 'm4':                      Intro.               (line   6)
+* overview of m4:                        Intro.               (line   6)
 * pattern substitution:                  Patsubst.            (line   6)
 * platform macros:                       Platform macros.     (line   6)
 * positional parameters, more than nine: Arguments.           (line  54)
 * POSIX:                                 Extensions.          (line   6)
-* 'POSIXLY_CORRECT':                     Invoking m4.         (line  10)
-* 'POSIXLY_CORRECT' <1>:                 Incompatibilities.   (line 144)
+* POSIXLY_CORRECT:                       Invoking m4.         (line  10)
+* POSIXLY_CORRECT <1>:                   Incompatibilities.   (line 144)
 * preprocessor features:                 Preprocessor features.
                                                               (line   6)
 * printing error messages:               Errprint.            (line   6)
@@ -857,7 +858,7 @@ C.2 Index for many concepts
 * pushdef stack <1>:                     Stacks.              (line   6)
 * quadratic behavior, avoiding:          Improved foreach.    (line  38)
 * quote delimiters, changing:            Changequote.         (line   6)
-* quote manipulation:                    Shift.               (line 189)
+* quote manipulation:                    Shift.               (line 190)
 * quoted macro arguments:                Quoting Arguments.   (line   6)
 * quoted string:                         Quoted strings.      (line   6)
 * quoting rule of thumb:                 Quoting Arguments.   (line  22)
@@ -893,7 +894,7 @@ C.2 Index for many concepts
 * standard error, output to <1>:         Trace.               (line   6)
 * standard error, output to <2>:         Errprint.            (line   6)
 * status of shell commands:              Sysval.              (line   6)
-* status, setting 'm4' exit:             M4exit.              (line   6)
+* status, setting m4 exit:               M4exit.              (line   6)
 * string, quoted:                        Quoted strings.      (line   6)
 * strings, length of:                    Len.                 (line   6)
 * substitution by regular expression:    Patsubst.            (line   6)
@@ -907,7 +908,7 @@ C.2 Index for many concepts
 * syntax, changing:                      Changeword.          (line   6)
 * temporary file names:                  Mkstemp.             (line   6)
 * temporary redefinition of macros:      Pushdef.             (line   6)
-* 'TMPDIR':                              Diversions.          (line  10)
+* TMPDIR:                                Diversions.          (line  10)
 * tokens:                                Syntax.              (line   6)
 * tokens, builtin macro:                 Defn.                (line 101)
 * tokens, special:                       Other tokens.        (line   6)

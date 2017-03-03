@@ -1,5 +1,5 @@
 /* Test of ordered set data type implementation.
-   Copyright (C) 2006-2013 Free Software Foundation, Inc.
+   Copyright (C) 2006-2016 Free Software Foundation, Inc.
    Written by Bruno Haible <bruno@clisp.org>, 2006.
 
    This program is free software: you can redistribute it and/or modify
@@ -23,7 +23,6 @@
 #include <string.h>
 
 #include "gl_array_oset.h"
-#include "progname.h"
 #include "macros.h"
 
 extern void gl_avltree_oset_check_invariants (gl_oset_t set);
@@ -71,8 +70,6 @@ int
 main (int argc, char *argv[])
 {
   gl_oset_t set1, set2;
-
-  set_program_name (argv[0]);
 
   /* Allow the user to provide a non-default random seed on the command line.  */
   if (argc > 1)

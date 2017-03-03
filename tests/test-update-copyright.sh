@@ -1,6 +1,6 @@
 #!/bin/sh
 # Test suite for update-copyright.
-# Copyright (C) 2009-2013 Free Software Foundation, Inc.
+# Copyright (C) 2009-2016 Free Software Foundation, Inc.
 # This file is part of the GNUlib Library.
 #
 # This program is free software: you can redistribute it and/or modify
@@ -37,7 +37,7 @@ trap 'rm -f $TMP_BASE*' 0 1 2 3 15
 TMP=$TMP_BASE
 s=$TMP-script
 cat <<\EOF > $s
-eval '(exit $?0)' && eval 'exec perl -wS -0777 -pi "$0" ${1+"$@"}'
+eval '(exit $?0)' && eval 'exec perl -wS -0777 -pi "$0" "$@"'
   & eval 'exec perl -wS -0777 -pi "$0" $argv:q'
     if 0;
 s/a/b/

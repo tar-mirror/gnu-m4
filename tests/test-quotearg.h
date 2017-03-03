@@ -1,5 +1,5 @@
 /* Test of quotearg family of functions.
-   Copyright (C) 2008-2013 Free Software Foundation, Inc.
+   Copyright (C) 2008-2016 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -24,8 +24,9 @@ struct result_strings {
   char const *str4; /* Translation of " \t\n'\"\033?""?/\\".  */
   char const *str5; /* Translation of "a:b".  */
   char const *str6; /* Translation of "a\\b".  */
-  char const *str7a; /* Translation of LQ RQ, in ASCII charset.  */
-  char const *str7b; /* Translation of LQ RQ, in Latin1 or UTF-8 charset.  */
+  char const *str7; /* Translation of "a' b".  */
+  char const *str8a; /* Translation of LQ RQ, in ASCII charset.  */
+  char const *str8b; /* Translation of LQ RQ, in Latin1 or UTF-8 charset.  */
 };
 
 struct result_groups {
@@ -43,7 +44,7 @@ struct result_groups {
 
 static struct result_strings inputs = {
   "", "\0001\0", 3, "simple", " \t\n'\"\033?""?/\\", "a:b", "a\\b",
-  LQ RQ, NULL
+  "a' b", LQ RQ, NULL
 };
 
 static void
@@ -85,12 +86,16 @@ compare_strings (char *(func) (char const *, size_t *),
   p = func (inputs.str6, &len);
   compare (results->str6, strlen (results->str6), p, len);
 
-  len = strlen (inputs.str7a);
-  p = func (inputs.str7a, &len);
+  len = strlen (inputs.str7);
+  p = func (inputs.str7, &len);
+  compare (results->str7, strlen (results->str7), p, len);
+
+  len = strlen (inputs.str8a);
+  p = func (inputs.str8a, &len);
   if (ascii_only)
-    compare (results->str7a, strlen (results->str7a), p, len);
+    compare (results->str8a, strlen (results->str8a), p, len);
   else
-    compare (results->str7b, strlen (results->str7b), p, len);
+    compare (results->str8b, strlen (results->str8b), p, len);
 }
 
 static char *
@@ -109,15 +114,6 @@ static char *
 use_quotearg (const char *str, size_t *len)
 {
   char *p = *len == SIZE_MAX ? quotearg (str) : quotearg_mem (str, *len);
-  *len = strlen (p);
-  return p;
-}
-
-static char *
-use_quote_double_quotes (const char *str, size_t *len)
-{
-  char *p = *len == SIZE_MAX ? quotearg_char (str, '"')
-                               : quotearg_char_mem (str, *len, '"');
   *len = strlen (p);
   return p;
 }

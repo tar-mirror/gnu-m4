@@ -5,9 +5,6 @@
 @include version.texi
 @settitle GNU M4 @value{VERSION} macro processor
 @setchapternewpage odd
-@ifnothtml
-@setcontentsaftertitlepage
-@end ifnothtml
 @finalout
 
 @c @tabchar{}
@@ -23,7 +20,7 @@
 @c The ARG is an optional argument.  To be used for macro arguments in
 @c their documentation (@defmac).
 @macro ovar{varname}
-@r{[}@var{\varname\}@r{]}@c
+@r{[}@var{\varname\}@r{]}
 @end macro
 
 @c @dvar{ARG, DEFAULT}
@@ -31,7 +28,7 @@
 @c The ARG is an optional argument, defaulting to DEFAULT.  To be used
 @c for macro arguments in their documentation (@defmac).
 @macro dvar{varname, default}
-@r{[}@var{\varname\} = @samp{\default\}@r{]}@c
+@r{[}@var{\varname\} = @samp{\default\}@r{]}
 @end macro
 
 @comment %**end of header
@@ -43,8 +40,8 @@ This manual (@value{UPDATED}) is for GNU M4 (version
 @value{VERSION}), a package containing an implementation of the m4 macro
 language.
 
-Copyright @copyright{} 1989-1994, 2004-2013 Free Software Foundation,
-Inc.
+Copyright @copyright{} 1989-1994, 2004-2014, 2016 Free Software
+Foundation, Inc.
 
 @quotation
 Permission is granted to copy, distribute and/or modify this document
@@ -419,11 +416,8 @@ addressed some long standing bugs in the venerable 1.4 release.  Then in
 2005, Gary V. Vaughan collected together the many patches to
 GNU @code{m4} 1.4 that were floating around the net and
 released 1.4.3 and 1.4.4.  And in 2006, Eric Blake joined the team and
-prepared patches for the release of 1.4.5, 1.4.6, 1.4.7, and 1.4.8.
-More bug fixes were incorporated in 2007, with releases 1.4.9 and
-1.4.10.  Eric continued with some portability fixes for 1.4.11 and
-1.4.12 in 2008, 1.4.13 in 2009, 1.4.14 and 1.4.15 in 2010, and 1.4.16 in
-2011.
+prepared patches for the release of 1.4.5, with subsequent releases
+through intervening years, as recent as 1.4.18 in 2016.
 
 Meanwhile, development has continued on new features for @code{m4}, such
 as dynamic module loading and additional builtins.  When complete,
