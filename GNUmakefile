@@ -5,7 +5,7 @@
 # It is necessary if you want to build targets usually of interest
 # only to the maintainer.
 
-# Copyright (C) 2001, 2003, 2006-2010 Free Software Foundation, Inc.
+# Copyright (C) 2001, 2003, 2006-2011 Free Software Foundation, Inc.
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -57,7 +57,7 @@ _have-git-version-gen := \
   $(shell test -f $(srcdir)/$(_build-aux)/git-version-gen && echo yes)
 ifeq ($(_have-git-version-gen)0,yes$(MAKELEVEL))
   _is-dist-target ?= $(filter-out %clean, \
-    $(filter maintainer-% dist% alpha beta major,$(MAKECMDGOALS)))
+    $(filter maintainer-% dist% alpha beta stable,$(MAKECMDGOALS)))
   _is-install-target ?= $(filter-out %check, $(filter install%,$(MAKECMDGOALS)))
   ifneq (,$(_is-dist-target)$(_is-install-target))
     _curr-ver := $(shell cd $(srcdir)				\

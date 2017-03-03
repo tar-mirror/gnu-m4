@@ -1,5 +1,5 @@
 /* Create a pipe, with specific opening flags.
-   Copyright (C) 2009, 2010 Free Software Foundation, Inc.
+   Copyright (C) 2009-2011 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -29,13 +29,6 @@
 /* Native Woe32 API.  */
 
 # include <io.h>
-
-#else
-/* Unix API.  */
-
-# ifndef O_CLOEXEC
-#  define O_CLOEXEC 0
-# endif
 
 #endif
 

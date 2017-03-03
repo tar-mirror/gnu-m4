@@ -1,6 +1,6 @@
-dnl @ ../doc/m4.texinfo:8257: Origin of test
+dnl @ ../doc/m4.texinfo:8259: Origin of test
 dnl @ expected status: 0
-dnl @ extra options:  -Dlimit=2500 -Dalt=4
+dnl @ extra options:  -Dlimit=10 -Dverbose -Dalt
 dnl @ Copyright (C) 2006, 2007, 2008, 2009 Free Software
 dnl @ Foundation, Inc.
 dnl @ This file is free software; the Free Software Foundation
@@ -8,3 +8,4 @@ dnl @ gives unlimited permission to copy and/or distribute it
 dnl @ with or without modifications, as long as this notice
 dnl @ is preserved.
 include(`loop.m4')dnl
+dnl @result{} 1 2 3 4 5 6 7 8 9 10

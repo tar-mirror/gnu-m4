@@ -1,7 +1,7 @@
 /* GNU m4 -- A simple macro processor
 
-   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2000, 2004, 2006,
-   2007, 2008, 2009, 2010 Free Software Foundation, Inc.
+   Copyright (C) 1989-1994, 2000, 2004, 2006-2011 Free Software
+   Foundation, Inc.
 
    This file is part of GNU M4.
 
@@ -26,8 +26,8 @@
 
 #include "execute.h"
 #include "memchr2.h"
-#include "pipe.h"
 #include "regex.h"
+#include "spawn-pipe.h"
 #include "wait-process.h"
 
 #define ARG(i) (argc > (i) ? TOKEN_DATA_TEXT (argv[i]) : "")
@@ -284,7 +284,7 @@ free_macro_sequence (void)
 /*-----------------------------------------------------------------.
 | Define a predefined or user-defined macro, with name NAME, and   |
 | expansion TEXT.  MODE destinguishes between the "define" and the |
-| "pushdef" case.  It is also used from main ().                   |
+| "pushdef" case.  It is also used from main.                      |
 `-----------------------------------------------------------------*/
 
 void
@@ -661,7 +661,7 @@ m4_ifelse (struct obstack *obs, int argc, token_data **argv)
   result = NULL;
   while (result == NULL)
 
-    if (strcmp (ARG (0), ARG (1)) == 0)
+    if (STREQ (ARG (0), ARG (1)))
       result = ARG (2);
 
     else
@@ -889,14 +889,16 @@ m4_defn (struct obstack *obs, int argc, token_data **argv)
 {
   symbol *s;
   builtin_func *b;
-  int i;
+  unsigned int i;
 
   if (bad_argc (argv[0], argc, 2, -1))
     return;
 
-  for (i = 1; i < argc; i++)
+  assert (0 < argc && argc <= INT_MAX);
+  for (i = 1; i < (unsigned) argc; i++)
     {
-      s = lookup_symbol (ARG (i), SYMBOL_LOOKUP);
+      const char *arg = ARG((int) i);
+      s = lookup_symbol (arg, SYMBOL_LOOKUP);
       if (s == NULL)
         continue;
 
@@ -912,11 +914,11 @@ m4_defn (struct obstack *obs, int argc, token_data **argv)
           b = SYMBOL_FUNC (s);
           if (b == m4_placeholder)
             M4ERROR ((warning_status, 0, "\
-builtin `%s' requested by frozen file is not supported", ARG (i)));
+builtin `%s' requested by frozen file is not supported", arg));
           else if (argc != 2)
             M4ERROR ((warning_status, 0,
                       "Warning: cannot concatenate builtin `%s'",
-                      ARG (i)));
+                      arg));
           else
             push_macro (b);
           break;

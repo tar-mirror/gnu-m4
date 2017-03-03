@@ -1,4 +1,4 @@
-dnl @ ../doc/m4.texinfo:6323: Origin of test
+dnl @ ../doc/m4.texinfo:6274: Origin of test
 dnl @ expected status: 0
 dnl @ extra options: 
 dnl @ Copyright (C) 2006, 2007, 2008, 2009 Free Software
@@ -7,28 +7,27 @@ dnl @ This file is free software; the Free Software Foundation
 dnl @ gives unlimited permission to copy and/or distribute it
 dnl @ with or without modifications, as long as this notice
 dnl @ is preserved.
-eval(`-3 * 5')
-dnl @result{}-15
-eval(`-99 / 10')
-dnl @result{}-9
-eval(`-99 % 10')
-dnl @result{}-9
-eval(`99 % -10')
-dnl @result{}9
-eval(index(`Hello world', `llo') >= 0)
+eval(`1 == 2 > 0')
 dnl @result{}1
-eval(`0r1:0111 + 0b100 + 0r3:12')
-dnl @result{}12
-define(`square', `eval(`($1) ** 2')')
+eval(`(1 == 2) > 0')
+dnl @result{}0
+eval(`! 0 * 2')
+dnl @result{}2
+eval(`! (0 * 2)')
+dnl @result{}1
+eval(`1 | 1 ^ 1')
+dnl @result{}1
+eval(`(1 | 1) ^ 1')
+dnl @result{}0
+eval(`+ + - ~ ! ~ 0')
+dnl @result{}1
+eval(`2 || 1 / 0')
+dnl @result{}1
+eval(`0 || 1 / 0')
+dnl @error{}m4:stdin:9: divide by zero in eval: 0 || 1 / 0
 dnl @result{}
-square(`9')
-dnl @result{}81
-square(square(`5')` + 1')
-dnl @result{}676
-define(`foo', `666')
+eval(`0 && 1 % 0')
+dnl @result{}0
+eval(`2 && 1 % 0')
+dnl @error{}m4:stdin:11: modulo by zero in eval: 2 && 1 % 0
 dnl @result{}
-eval(`foo / 6')
-dnl @error{}m4:stdin:11: bad expression in eval: foo / 6
-dnl @result{}
-eval(foo / 6)
-dnl @result{}111

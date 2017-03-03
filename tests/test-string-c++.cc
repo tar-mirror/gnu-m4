@@ -1,5 +1,5 @@
 /* Test of <string.h> substitute in C++ mode.
-   Copyright (C) 2010 Free Software Foundation, Inc.
+   Copyright (C) 2010-2011 Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -124,6 +124,10 @@ SIGNATURE_CHECK (GNULIB_NAMESPACE::mbspbrk, char *,
 
 #if GNULIB_TEST_STRERROR
 SIGNATURE_CHECK (GNULIB_NAMESPACE::strerror, char *, (int));
+#endif
+
+#if GNULIB_TEST_STRERROR_R
+SIGNATURE_CHECK (GNULIB_NAMESPACE::strerror_r, int, (int, char *, size_t));
 #endif
 
 #if GNULIB_TEST_STRSIGNAL

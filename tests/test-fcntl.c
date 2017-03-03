@@ -1,5 +1,5 @@
 /* Test of fcntl(2).
-   Copyright (C) 2009, 2010 Free Software Foundation, Inc.
+   Copyright (C) 2009-2011 Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -38,11 +38,6 @@ SIGNATURE_CHECK (fcntl, int, (int, int, ...));
 
 #include "binary-io.h"
 #include "macros.h"
-
-/* Use O_CLOEXEC if available, but test works without it.  */
-#ifndef O_CLOEXEC
-# define O_CLOEXEC 0
-#endif
 
 #if !O_BINARY
 # define setmode(f,m) zero ()

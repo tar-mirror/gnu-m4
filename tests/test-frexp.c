@@ -1,5 +1,5 @@
 /* Test of splitting a double into fraction and mantissa.
-   Copyright (C) 2007-2010 Free Software Foundation, Inc.
+   Copyright (C) 2007-2011 Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -26,6 +26,7 @@ SIGNATURE_CHECK (frexp, double, (double, int *));
 #include <float.h>
 
 #include "isnand-nolibm.h"
+#include "minus-zero.h"
 #include "nan.h"
 #include "macros.h"
 
@@ -33,10 +34,6 @@ SIGNATURE_CHECK (frexp, double, (double, int *));
    This file doesn't use the exp() function.  */
 #undef exp
 #define exp exponent
-
-/* HP cc on HP-UX 10.20 has a bug with the constant expression -0.0.
-   So we use -zero instead.  */
-double zero = 0.0;
 
 static double
 my_ldexp (double x, int d)
@@ -96,7 +93,7 @@ main ()
   { /* Negative zero.  */
     int exp = -9999;
     double mantissa;
-    x = -zero;
+    x = minus_zerod;
     mantissa = frexp (x, &exp);
     ASSERT (exp == 0);
     ASSERT (mantissa == x);

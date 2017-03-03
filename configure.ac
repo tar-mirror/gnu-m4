@@ -1,6 +1,6 @@
 # Configure template for GNU M4.           -*-Autoconf-*-
-# Copyright (C) 1991, 1993, 1994, 2004, 2005, 2006, 2007, 2008, 2009,
-# 2010 Free Software Foundation, Inc.
+# Copyright (C) 1991, 1993-1994, 2004-2011 Free Software Foundation,
+# Inc.
 #
 # This file is part of GNU M4.
 #
@@ -33,6 +33,11 @@ AC_CONFIG_HEADERS([lib/config.h:lib/config.hin])
 AC_PROG_CC
 AC_DEFUN([gl_CXX_CHOICE_DEFAULT_NO])
 M4_EARLY
+
+# Maintainer note - comment this line out if you plan to rerun
+# GNULIB_POSIXCHECK testing to see if M4 should be using more modules.
+# Leave it uncommented for normal releases, for faster ./configure.
+gl_ASSERT_NO_GNULIB_POSIXCHECK
 
 # M4 is single-threaded; so we can optimize gnulib code by using this:
 gl_DISABLE_THREADS

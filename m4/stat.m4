@@ -1,6 +1,6 @@
-# serial 5
+# serial 7
 
-# Copyright (C) 2009, 2010 Free Software Foundation, Inc.
+# Copyright (C) 2009-2011 Free Software Foundation, Inc.
 #
 # This file is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
@@ -9,7 +9,6 @@
 AC_DEFUN([gl_FUNC_STAT],
 [
   AC_REQUIRE([AC_CANONICAL_HOST]) dnl for cross-compiles
-  AC_REQUIRE([gl_AC_DOS])
   AC_REQUIRE([gl_SYS_STAT_H_DEFAULTS])
   AC_CHECK_FUNCS_ONCE([lstat])
   dnl mingw is the only known platform where stat(".") and stat("./") differ
@@ -36,11 +35,15 @@ AC_DEFUN([gl_FUNC_STAT],
        AC_RUN_IFELSE(
          [AC_LANG_PROGRAM(
            [[#include <sys/stat.h>
-]], [[struct stat st;
-      if (!stat ("conftest.tmp/", &st)) return 1;
+]], [[int result = 0;
+      struct stat st;
+      if (!stat ("conftest.tmp/", &st))
+        result |= 1;
 #if HAVE_LSTAT
-      if (!stat ("conftest.lnk/", &st)) return 2;
+      if (!stat ("conftest.lnk/", &st))
+        result |= 2;
 #endif
+      return result;
            ]])],
          [gl_cv_func_stat_file_slash=yes], [gl_cv_func_stat_file_slash=no],
          [gl_cv_func_stat_file_slash="guessing no"])

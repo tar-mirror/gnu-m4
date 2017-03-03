@@ -1,4 +1,4 @@
-dnl @ ../doc/m4.texinfo:8453: Origin of test
+dnl @ ../doc/m4.texinfo:8393: Origin of test
 dnl @ expected status: 0
 dnl @ extra options: 
 dnl @ Copyright (C) 2006, 2007, 2008, 2009 Free Software
@@ -7,25 +7,10 @@ dnl @ This file is free software; the Free Software Foundation
 dnl @ gives unlimited permission to copy and/or distribute it
 dnl @ with or without modifications, as long as this notice
 dnl @ is preserved.
-define(`cleardivert',
-  `pushdef(`_n', divnum)divert(`-1')undivert($@)divert(_n)popdef(`_n')')
+include(`forloop3.m4')include(`stack_sep.m4')dnl
+forloop(`i', `1', `10000', `pushdef(`s', i)')
 dnl @result{}
-divert(`1')one
-divert
+define(`colon', `:')define(`dash', `-')
 dnl @result{}
-cleardivert
-dnl @result{}
-undivert
-dnl @result{}one
-dnl @result{}
-define(`cleardivert',
-  `pushdef(`_num', divnum)divert(`-1')ifelse(`$#', `0',
-    `undivert`'', `undivert($@)')divert(_num)popdef(`_num')')
-dnl @result{}
-divert(`2')two
-divert
-dnl @result{}
-cleardivert
-dnl @result{}
-undivert
-dnl @result{}
+len(stack_foreach_sep(`s', `dash', `', `colon'))
+dnl @result{}58893

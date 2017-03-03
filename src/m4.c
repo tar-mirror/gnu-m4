@@ -1,7 +1,6 @@
 /* GNU m4 -- A simple macro processor
 
-   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2004, 2005, 2006,
-   2007, 2008, 2009, 2010 Free Software Foundation, Inc.
+   Copyright (C) 1989-1994, 2004-2011 Free Software Foundation, Inc.
 
    This file is part of GNU M4.
 
@@ -397,7 +396,7 @@ main (int argc, char *const *argv)
   signal_message[SIGABRT] = xstrdup (strsignal (SIGABRT));
   signal_message[SIGILL] = xstrdup (strsignal (SIGILL));
   signal_message[SIGFPE] = xstrdup (strsignal (SIGFPE));
-  if (SIGBUS != SIGILL)
+  if (SIGBUS != SIGILL && SIGBUS != SIGSEGV)
     signal_message[SIGBUS] = xstrdup (strsignal (SIGBUS));
   sigemptyset (&act.sa_mask);
   /* One-shot - if we fault while handling a fault, we want to revert

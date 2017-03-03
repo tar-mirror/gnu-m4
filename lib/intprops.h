@@ -1,7 +1,6 @@
 /* intprops.h -- properties of integer types
 
-   Copyright (C) 2001, 2002, 2003, 2004, 2005, 2009, 2010 Free Software
-   Foundation, Inc.
+   Copyright (C) 2001-2005, 2009-2011 Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -50,11 +49,11 @@
         ? (t) 0 \
         : TYPE_SIGNED_MAGNITUDE (t) \
         ? ~ (t) 0 \
-        : ~ (t) 0 << (sizeof (t) * CHAR_BIT - 1)))
+        : ~ TYPE_MAXIMUM (t)))
 # define TYPE_MAXIMUM(t) \
   ((t) (! TYPE_SIGNED (t) \
         ? (t) -1 \
-        : ~ (~ (t) 0 << (sizeof (t) * CHAR_BIT - 1))))
+        : ((((t) 1 << (sizeof (t) * CHAR_BIT - 2)) - 1) * 2 + 1)))
 
 /* Return zero if T can be determined to be an unsigned type.
    Otherwise, return 1.
@@ -68,13 +67,17 @@
 #  define signed_type_or_expr__(t) 1
 # endif
 
+/* Bound on length of the string representing an unsigned integer
+   value representable in B bits.  log10 (2.0) < 146/485.  The
+   smallest value of B where this bound is not tight is 2621.  */
+# define INT_BITS_STRLEN_BOUND(b) (((b) * 146 + 484) / 485)
+
 /* Bound on length of the string representing an integer type or expression T.
-   Subtract 1 for the sign bit if T is signed; log10 (2.0) < 146/485;
-   add 1 for integer division truncation; add 1 more for a minus sign
-   if needed.  */
+   Subtract 1 for the sign bit if T is signed, and then add 1 more for
+   a minus sign if needed.  */
 # define INT_STRLEN_BOUND(t) \
-  ((sizeof (t) * CHAR_BIT - signed_type_or_expr__ (t)) * 146 / 485 \
-   + signed_type_or_expr__ (t) + 1)
+  (INT_BITS_STRLEN_BOUND (sizeof (t) * CHAR_BIT - signed_type_or_expr__ (t)) \
+   + signed_type_or_expr__ (t))
 
 /* Bound on buffer size needed to represent an integer type or expression T,
    including the terminating null.  */

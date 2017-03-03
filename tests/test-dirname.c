@@ -1,5 +1,5 @@
 /* Test the gnulib dirname module.
-   Copyright (C) 2005, 2006, 2007, 2009, 2010 Free Software Foundation, Inc.
+   Copyright (C) 2005-2007, 2009-2011 Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -54,7 +54,7 @@ static struct test tests[] = {
   {"",          ".",    "",     "",     "",     false,  false},
   {".",         ".",    ".",    ".",    ".",    false,  false},
   {"..",        ".",    "..",   "..",   "..",   false,  false},
-#if FILE_SYSTEM_BACKSLASH_IS_FILE_NAME_SEPARATOR
+#if ISSLASH ('\\')
   {"a\\",       ".",    "a\\",  "a\\",  "a",    true,   false},
   {"a\\b",      "a",    "b",    "b",    "a\\b", false,  false},
   {"\\",        "\\",   "",     "\\",   "\\",   false,  true},
@@ -75,7 +75,7 @@ static struct test tests[] = {
   {"//\\",      "/",    "\\",   "\\",   "//\\", false,  true},
 # endif
 #endif
-#if FILE_SYSTEM_ACCEPTS_DRIVE_LETTER_PREFIX
+#if ISSLASH ('\\')
 # if FILE_SYSTEM_DRIVE_PREFIX_CAN_BE_RELATIVE
   {"c:",        "c:",   "",     "c:",   "c:",   false,  false},
   {"c:/",       "c:/",  "",     "c:/",  "c:/",  false,  true},
@@ -105,7 +105,7 @@ static struct test tests[] = {
   {"a/b:c",     "a",    "b:c",  "./b:c","a/b:c",false,  false},
   {"a/b:c/",    "a",    "b:c/", "./b:c/","a/b:c",true,  false},
 # endif
-#else /* ! FILE_SYSTEM_ACCEPTS_DRIVE_LETTER_PREFIX */
+#else /* ! ISSLASH ('\\') */
   {"c:",        ".",    "c:",   "c:",   "c:",   false,  false},
   {"c:/",       ".",    "c:/",  "c:/",  "c:",   true,   false},
   {"c://",      ".",    "c://", "c:/",  "c:",   true,   false},

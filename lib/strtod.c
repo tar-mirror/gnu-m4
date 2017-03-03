@@ -1,4 +1,4 @@
-/* Copyright (C) 1991-1992, 1997, 1999, 2003, 2006, 2008-2010 Free Software
+/* Copyright (C) 1991-1992, 1997, 1999, 2003, 2006, 2008-2011 Free Software
    Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
@@ -24,6 +24,7 @@
 #include <limits.h>
 #include <math.h>
 #include <stdbool.h>
+#include <string.h>
 
 #include "c-ctype.h"
 
@@ -189,6 +190,21 @@ parse_number (const char *nptr,
 
 static double underlying_strtod (const char *, char **);
 
+/* HP cc on HP-UX 10.20 has a bug with the constant expression -0.0.
+   ICC 10.0 has a bug when optimizing the expression -zero.
+   The expression -DBL_MIN * DBL_MIN does not work when cross-compiling
+   to PowerPC on MacOS X 10.5.  */
+#if defined __hpux || defined __sgi || defined __ICC
+static double
+compute_minus_zero (void)
+{
+  return -DBL_MIN * DBL_MIN;
+}
+# define minus_zero compute_minus_zero ()
+#else
+double minus_zero = -0.0;
+#endif
+
 /* Convert NPTR to a double.  If ENDPTR is not NULL, a pointer to the
    character after the last one used in the number is put in *ENDPTR.  */
 double
@@ -202,6 +218,7 @@ strtod (const char *nptr, char **endptr)
   const char *s = nptr;
   const char *end;
   char *endbuf;
+  int saved_errno;
 
   /* Eat whitespace.  */
   while (locale_isspace (*s))
@@ -212,6 +229,7 @@ strtod (const char *nptr, char **endptr)
   if (*s == '-' || *s == '+')
     ++s;
 
+  saved_errno = errno;
   num = underlying_strtod (s, &endbuf);
   end = endbuf;
 
@@ -239,6 +257,35 @@ strtod (const char *nptr, char **endptr)
                 end = p;
             }
         }
+      else
+        {
+          /* If "1e 1" was misparsed as 10.0 instead of 1.0, re-do the
+             underlying strtod on a copy of the original string
+             truncated to avoid the bug.  */
+          const char *e = s + 1;
+          while (e < end && c_tolower (*e) != 'e')
+            e++;
+          if (e < end && ! c_isdigit (e[1 + (e[1] == '-' || e[1] == '+')]))
+            {
+              char *dup = strdup (s);
+              errno = saved_errno;
+              if (!dup)
+                {
+                  /* Not really our day, is it.  Rounding errors are
+                     better than outright failure.  */
+                  num = parse_number (s, 10, 10, 1, 'e', &endbuf);
+                }
+              else
+                {
+                  dup[e - s] = '\0';
+                  num = underlying_strtod (dup, &endbuf);
+                  saved_errno = errno;
+                  free (dup);
+                  errno = saved_errno;
+                }
+              end = e;
+            }
+        }
 
       s = end;
     }
@@ -256,6 +303,7 @@ strtod (const char *nptr, char **endptr)
           && c_tolower (s[4]) == 'y')
         s += 5;
       num = HUGE_VAL;
+      errno = saved_errno;
     }
   else if (c_tolower (*s) == 'n'
            && c_tolower (s[1]) == 'a'
@@ -278,6 +326,7 @@ strtod (const char *nptr, char **endptr)
          to interpreting n-char-sequence as a hexadecimal number.  */
       if (s != end)
         num = NAN;
+      errno = saved_errno;
     }
   else
     {
@@ -288,6 +337,10 @@ strtod (const char *nptr, char **endptr)
 
   if (endptr != NULL)
     *endptr = (char *) s;
+  /* Special case -0.0, since at least ICC miscompiles negation.  We
+     can't use copysign(), as that drags in -lm on some platforms.  */
+  if (!num && negative)
+    return minus_zero;
   return negative ? -num : num;
 }
 

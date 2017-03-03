@@ -1,7 +1,6 @@
 /* GNU m4 -- A simple macro processor
 
-   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2004, 2005, 2006,
-   2007, 2008, 2009, 2010 Free Software Foundation, Inc.
+   Copyright (C) 1989-1994, 2004-2011 Free Software Foundation, Inc.
 
    This file is part of GNU M4.
 
@@ -377,7 +376,7 @@ pop_input (void)
 }
 
 /*-------------------------------------------------------------------.
-| To switch input over to the wrapup stack, main () calls pop_wrapup |
+| To switch input over to the wrapup stack, main calls pop_wrapup    |
 | ().  Since wrapup text can install new wrapup text, pop_wrapup ()  |
 | returns false when there is no wrapup text on the stack, and true  |
 | otherwise.                                                         |

@@ -1,5 +1,5 @@
 # DO NOT EDIT! GENERATED AUTOMATICALLY!
-# Copyright (C) 2002-2010 Free Software Foundation, Inc.
+# Copyright (C) 2002-2011 Free Software Foundation, Inc.
 #
 # This file is free software, distributed under the terms of the GNU
 # General Public License.  As a special exception to the GNU General
@@ -12,7 +12,8 @@
 # This file represents the compiled summary of the specification in
 # gnulib-cache.m4. It lists the computed macro invocations that need
 # to be invoked from configure.ac.
-# In projects using CVS, this file can be treated like other built files.
+# In projects that use version control, this file can be treated like
+# other built files.
 
 
 # This macro should be invoked from ./configure.ac, in the section
@@ -51,9 +52,13 @@ AC_DEFUN([M4_EARLY],
   # Code from module c-stack-tests:
   # Code from module c-strcase:
   # Code from module c-strcase-tests:
+  # Code from module canonicalize-lgpl:
+  # Code from module canonicalize-lgpl-tests:
   # Code from module clean-temp:
   # Code from module cloexec:
   # Code from module cloexec-tests:
+  # Code from module close:
+  # Code from module close-hook:
   # Code from module close-stream:
   # Code from module closein:
   # Code from module closein-tests:
@@ -63,6 +68,7 @@ AC_DEFUN([M4_EARLY],
   # Code from module dirname:
   # Code from module dirname-lgpl:
   # Code from module dirname-tests:
+  # Code from module dosname:
   # Code from module double-slash-root:
   # Code from module dup2:
   # Code from module dup2-tests:
@@ -76,6 +82,7 @@ AC_DEFUN([M4_EARLY],
   # Code from module extensions:
   AC_REQUIRE([gl_USE_SYSTEM_EXTENSIONS])
   # Code from module fatal-signal:
+  # Code from module fclose:
   # Code from module fcntl:
   # Code from module fcntl-h:
   # Code from module fcntl-h-c++-tests:
@@ -134,6 +141,7 @@ AC_DEFUN([M4_EARLY],
   # Code from module gpl-3.0:
   # Code from module havelib:
   # Code from module ignore-value:
+  # Code from module ignore-value-tests:
   # Code from module include_next:
   # Code from module inline:
   # Code from module intprops:
@@ -147,10 +155,17 @@ AC_DEFUN([M4_EARLY],
   # Code from module langinfo-c++-tests:
   # Code from module langinfo-tests:
   # Code from module libsigsegv:
+  # Code from module link:
+  # Code from module link-tests:
   # Code from module linkedhash-list:
   # Code from module linkedhash-list-tests:
   # Code from module list:
   # Code from module localcharset:
+  # Code from module locale:
+  # Code from module locale-c++-tests:
+  # Code from module locale-tests:
+  # Code from module localename:
+  # Code from module localename-tests:
   # Code from module lock:
   # Code from module lseek:
   # Code from module lseek-tests:
@@ -170,6 +185,7 @@ AC_DEFUN([M4_EARLY],
   # Code from module mbrtowc-tests:
   # Code from module mbsinit:
   # Code from module mbsinit-tests:
+  # Code from module mbtowc:
   # Code from module memchr:
   # Code from module memchr-tests:
   # Code from module memchr2:
@@ -185,8 +201,6 @@ AC_DEFUN([M4_EARLY],
   # Code from module open-tests:
   # Code from module oset:
   # Code from module pathmax:
-  # Code from module pipe:
-  # Code from module pipe-tests:
   # Code from module pipe2:
   # Code from module pipe2-safer:
   # Code from module pipe2-tests:
@@ -214,7 +228,11 @@ AC_DEFUN([M4_EARLY],
   # Code from module quotearg-simple-tests:
   # Code from module rawmemchr:
   # Code from module rawmemchr-tests:
+  # Code from module readlink:
+  # Code from module readlink-tests:
   # Code from module regex:
+  # Code from module rename:
+  # Code from module rename-tests:
   # Code from module rmdir:
   # Code from module rmdir-tests:
   # Code from module same-inode:
@@ -222,6 +240,8 @@ AC_DEFUN([M4_EARLY],
   # Code from module sched-tests:
   # Code from module setenv:
   # Code from module setenv-tests:
+  # Code from module setlocale:
+  # Code from module setlocale-tests:
   # Code from module sigaction:
   # Code from module sigaction-tests:
   # Code from module signal:
@@ -235,6 +255,8 @@ AC_DEFUN([M4_EARLY],
   # Code from module snprintf-tests:
   # Code from module spawn:
   # Code from module spawn-c++-tests:
+  # Code from module spawn-pipe:
+  # Code from module spawn-pipe-tests:
   # Code from module spawn-tests:
   # Code from module ssize_t:
   # Code from module stat:
@@ -260,6 +282,7 @@ AC_DEFUN([M4_EARLY],
   # Code from module stdlib-tests:
   # Code from module strchrnul:
   # Code from module strchrnul-tests:
+  # Code from module strdup-posix:
   # Code from module streq:
   # Code from module strerror:
   # Code from module strerror-tests:
@@ -268,6 +291,7 @@ AC_DEFUN([M4_EARLY],
   # Code from module string-tests:
   # Code from module strndup:
   # Code from module strnlen:
+  # Code from module strnlen-tests:
   # Code from module strsignal:
   # Code from module strsignal-tests:
   # Code from module strstr:
@@ -285,6 +309,7 @@ AC_DEFUN([M4_EARLY],
   # Code from module sys_time-c++-tests:
   # Code from module sys_time-tests:
   # Code from module sys_wait:
+  # Code from module sys_wait-c++-tests:
   # Code from module sys_wait-tests:
   # Code from module tempname:
   # Code from module threadlib:
@@ -320,6 +345,7 @@ AC_DEFUN([M4_EARLY],
   # Code from module version-etc-fsf:
   # Code from module version-etc-tests:
   # Code from module wait-process:
+  # Code from module waitpid:
   # Code from module warn-on-use:
   # Code from module warnings:
   # Code from module wchar:
@@ -328,9 +354,10 @@ AC_DEFUN([M4_EARLY],
   # Code from module wcrtomb:
   # Code from module wcrtomb-tests:
   # Code from module wctob:
-  # Code from module wctype:
-  # Code from module wctype-c++-tests:
-  # Code from module wctype-tests:
+  # Code from module wctomb:
+  # Code from module wctype-h:
+  # Code from module wctype-h-c++-tests:
+  # Code from module wctype-h-tests:
   # Code from module xalloc:
   # Code from module xalloc-die:
   # Code from module xalloc-die-tests:
@@ -377,11 +404,20 @@ AC_DEFUN([M4_INIT],
   # Code from module c-ctype:
   # Code from module c-stack:
   gl_C_STACK
+  # Code from module canonicalize-lgpl:
+  gl_CANONICALIZE_LGPL
+  gl_MODULE_INDICATOR([canonicalize-lgpl])
+  gl_STDLIB_MODULE_INDICATOR([canonicalize_file_name])
+  gl_STDLIB_MODULE_INDICATOR([realpath])
   # Code from module clean-temp:
   AC_DEFINE([SIGNAL_SAFE_LIST], [1], [Define if lists must be signal-safe.])
   # Code from module cloexec:
   gl_CLOEXEC
   gl_MODULE_INDICATOR_FOR_TESTS([cloexec])
+  # Code from module close:
+  gl_FUNC_CLOSE
+  gl_UNISTD_MODULE_INDICATOR([close])
+  # Code from module close-hook:
   # Code from module close-stream:
   gl_CLOSE_STREAM
   gl_MODULE_INDICATOR([close-stream])
@@ -392,11 +428,13 @@ AC_DEFUN([M4_INIT],
   # Code from module config-h:
   gl_CONFIG_H
   # Code from module configmake:
+  gl_CONFIGMAKE_PREP
   # Code from module dirname:
   gl_DIRNAME
   gl_MODULE_INDICATOR([dirname])
   # Code from module dirname-lgpl:
   gl_DIRNAME_LGPL
+  # Code from module dosname:
   # Code from module double-slash-root:
   gl_DOUBLE_SLASH_ROOT
   # Code from module dup2:
@@ -418,6 +456,9 @@ AC_DEFUN([M4_INIT],
   # Code from module extensions:
   # Code from module fatal-signal:
   gl_FATAL_SIGNAL
+  # Code from module fclose:
+  gl_FUNC_FCLOSE
+  gl_STDIO_MODULE_INDICATOR([fclose])
   # Code from module fcntl:
   gl_FUNC_FCNTL
   gl_FCNTL_MODULE_INDICATOR([fcntl])
@@ -546,6 +587,9 @@ AC_DEFUN([M4_INIT],
   # Code from module mbsinit:
   gl_FUNC_MBSINIT
   gl_WCHAR_MODULE_INDICATOR([mbsinit])
+  # Code from module mbtowc:
+  gl_FUNC_MBTOWC
+  gl_STDLIB_MODULE_INDICATOR([mbtowc])
   # Code from module memchr:
   gl_FUNC_MEMCHR
   gl_STRING_MODULE_INDICATOR([memchr])
@@ -572,8 +616,6 @@ AC_DEFUN([M4_INIT],
   gl_LIST
   # Code from module pathmax:
   gl_PATHMAX
-  # Code from module pipe:
-  gl_PIPE
   # Code from module pipe2:
   gl_FUNC_PIPE2
   gl_UNISTD_MODULE_INDICATOR([pipe2])
@@ -666,11 +708,18 @@ AC_DEFUN([M4_INIT],
   # Code from module rawmemchr:
   gl_FUNC_RAWMEMCHR
   gl_STRING_MODULE_INDICATOR([rawmemchr])
+  # Code from module readlink:
+  gl_FUNC_READLINK
+  gl_UNISTD_MODULE_INDICATOR([readlink])
   # Code from module regex:
   gl_REGEX
+  # Code from module rename:
+  gl_FUNC_RENAME
+  gl_STDIO_MODULE_INDICATOR([rename])
   # Code from module rmdir:
   gl_FUNC_RMDIR
   gl_UNISTD_MODULE_INDICATOR([rmdir])
+  # Code from module same-inode:
   # Code from module sched:
   gl_SCHED_H
   # Code from module sigaction:
@@ -689,8 +738,11 @@ AC_DEFUN([M4_INIT],
   # Code from module snprintf:
   gl_FUNC_SNPRINTF
   gl_STDIO_MODULE_INDICATOR([snprintf])
+  gl_MODULE_INDICATOR([snprintf])
   # Code from module spawn:
   gl_SPAWN_H
+  # Code from module spawn-pipe:
+  gl_SPAWN_PIPE
   # Code from module ssize_t:
   gt_TYPE_SSIZE_T
   # Code from module stat:
@@ -786,6 +838,9 @@ AC_DEFUN([M4_INIT],
   # Code from module version-etc-fsf:
   # Code from module wait-process:
   gl_WAIT_PROCESS
+  # Code from module waitpid:
+  gl_FUNC_WAITPID
+  gl_SYS_WAIT_MODULE_INDICATOR([waitpid])
   # Code from module warn-on-use:
   # Code from module warnings:
   AC_SUBST([WARN_CFLAGS])
@@ -794,7 +849,7 @@ AC_DEFUN([M4_INIT],
   # Code from module wcrtomb:
   gl_FUNC_WCRTOMB
   gl_WCHAR_MODULE_INDICATOR([wcrtomb])
-  # Code from module wctype:
+  # Code from module wctype-h:
   gl_WCTYPE_H
   # Code from module xalloc:
   gl_XALLOC
@@ -880,11 +935,21 @@ changequote([, ])dnl
   gl_DOUBLE_EXPONENT_LOCATION
   gl_FLOAT_EXPONENT_LOCATION
   gl_LONG_DOUBLE_EXPONENT_LOCATION
+  gl_FUNC_LINK
+  gl_UNISTD_MODULE_INDICATOR([link])
+  gl_LOCALE_H
+  AC_CHECK_FUNCS_ONCE([newlocale])
+  gl_LOCALENAME
+  AC_CHECK_FUNCS_ONCE([newlocale])
   gt_LOCALE_FR
   gt_LOCALE_FR_UTF8
   gt_LOCALE_JA
   gt_LOCALE_ZH_CN
   gt_LOCALE_FR_UTF8
+  dnl Check for prerequisites for memory fence checks.
+  gl_FUNC_MMAP_ANON
+  AC_CHECK_HEADERS_ONCE([sys/mman.h])
+  AC_CHECK_FUNCS_ONCE([mprotect])
   gl_FUNC_MMAP_ANON
   AC_CHECK_HEADERS_ONCE([sys/mman.h])
   AC_CHECK_FUNCS_ONCE([mprotect])
@@ -900,13 +965,29 @@ changequote([, ])dnl
   AM_CONDITIONAL([POSIX_SPAWN_PORTED], [test $posix_spawn_ported = yes])
   gl_FUNC_PUTENV
   gl_STDLIB_MODULE_INDICATOR([putenv])
+  dnl Check for prerequisites for memory fence checks.
+  gl_FUNC_MMAP_ANON
+  AC_CHECK_HEADERS_ONCE([sys/mman.h])
+  AC_CHECK_FUNCS_ONCE([mprotect])
   gl_FUNC_SETENV
   gl_STDLIB_MODULE_INDICATOR([setenv])
+  gl_FUNC_SETLOCALE
+  gl_LOCALE_MODULE_INDICATOR([setlocale])
+  gt_LOCALE_FR
+  gt_LOCALE_FR_UTF8
+  gt_LOCALE_JA
+  gt_LOCALE_ZH_CN
   AC_REQUIRE([gl_FLOAT_EXPONENT_LOCATION])
   AC_REQUIRE([gl_DOUBLE_EXPONENT_LOCATION])
   AC_REQUIRE([gl_LONG_DOUBLE_EXPONENT_LOCATION])
   gt_TYPE_WCHAR_T
   gt_TYPE_WINT_T
+  gl_FUNC_STRDUP_POSIX
+  gl_STRING_MODULE_INDICATOR([strdup])
+  dnl Check for prerequisites for memory fence checks.
+  gl_FUNC_MMAP_ANON
+  AC_CHECK_HEADERS_ONCE([sys/mman.h])
+  AC_CHECK_FUNCS_ONCE([mprotect])
   AC_CHECK_DECLS_ONCE([alarm])
   gl_FUNC_MMAP_ANON
   AC_CHECK_HEADERS_ONCE([sys/mman.h])
@@ -925,6 +1006,8 @@ changequote([, ])dnl
   gt_LOCALE_ZH_CN
   gl_FUNC_WCTOB
   gl_WCHAR_MODULE_INDICATOR([wctob])
+  gl_FUNC_WCTOMB
+  gl_STDLIB_MODULE_INDICATOR([wctomb])
   m4_popdef([gl_MODULE_INDICATOR_CONDITION])
   m4_ifval(M4tests_LIBSOURCES_LIST, [
     m4_syscmd([test ! -d ]m4_defn([M4tests_LIBSOURCES_DIR])[ ||
@@ -1047,12 +1130,16 @@ AC_DEFUN([M4_FILE_LIST], [
   lib/c-ctype.h
   lib/c-stack.c
   lib/c-stack.h
+  lib/canonicalize-lgpl.c
   lib/clean-temp.c
   lib/clean-temp.h
   lib/cloexec.c
   lib/cloexec.h
+  lib/close-hook.c
+  lib/close-hook.h
   lib/close-stream.c
   lib/close-stream.h
+  lib/close.c
   lib/closein.c
   lib/closein.h
   lib/closeout.c
@@ -1061,6 +1148,7 @@ AC_DEFUN([M4_FILE_LIST], [
   lib/dirname-lgpl.c
   lib/dirname.c
   lib/dirname.h
+  lib/dosname.h
   lib/dup-safer-flag.c
   lib/dup-safer.c
   lib/dup2.c
@@ -1073,6 +1161,7 @@ AC_DEFUN([M4_FILE_LIST], [
   lib/exitfail.h
   lib/fatal-signal.c
   lib/fatal-signal.h
+  lib/fclose.c
   lib/fcntl.c
   lib/fcntl.in.h
   lib/fd-safer-flag.c
@@ -1147,6 +1236,8 @@ AC_DEFUN([M4_FILE_LIST], [
   lib/math.in.h
   lib/mbrtowc.c
   lib/mbsinit.c
+  lib/mbtowc-impl.h
+  lib/mbtowc.c
   lib/memchr.c
   lib/memchr.valgrind
   lib/memchr2.c
@@ -1161,8 +1252,6 @@ AC_DEFUN([M4_FILE_LIST], [
   lib/open.c
   lib/pathmax.h
   lib/pipe-safer.c
-  lib/pipe.c
-  lib/pipe.h
   lib/pipe2-safer.c
   lib/pipe2.c
   lib/printf-args.c
@@ -1179,6 +1268,7 @@ AC_DEFUN([M4_FILE_LIST], [
   lib/quotearg.h
   lib/rawmemchr.c
   lib/rawmemchr.valgrind
+  lib/readlink.c
   lib/ref-add.sin
   lib/ref-del.sin
   lib/regcomp.c
@@ -1187,7 +1277,9 @@ AC_DEFUN([M4_FILE_LIST], [
   lib/regex_internal.c
   lib/regex_internal.h
   lib/regexec.c
+  lib/rename.c
   lib/rmdir.c
+  lib/same-inode.h
   lib/sched.in.h
   lib/sig-handler.h
   lib/sigaction.c
@@ -1199,6 +1291,8 @@ AC_DEFUN([M4_FILE_LIST], [
   lib/sigprocmask.c
   lib/size_max.h
   lib/snprintf.c
+  lib/spawn-pipe.c
+  lib/spawn-pipe.h
   lib/spawn.in.h
   lib/spawn_faction_addclose.c
   lib/spawn_faction_adddup2.c
@@ -1220,7 +1314,6 @@ AC_DEFUN([M4_FILE_LIST], [
   lib/stdio--.h
   lib/stdio-impl.h
   lib/stdio-safer.h
-  lib/stdio-write.c
   lib/stdio.in.h
   lib/stdlib--.h
   lib/stdlib-safer.h
@@ -1262,6 +1355,7 @@ AC_DEFUN([M4_FILE_LIST], [
   lib/w32spawn.h
   lib/wait-process.c
   lib/wait-process.h
+  lib/waitpid.c
   lib/wchar.in.h
   lib/wcrtomb.c
   lib/wctype.in.h
@@ -1281,19 +1375,20 @@ AC_DEFUN([M4_FILE_LIST], [
   m4/00gnulib.m4
   m4/alloca.m4
   m4/ansi-c++.m4
-  m4/asm-underscore.m4
   m4/assert.m4
   m4/autobuild.m4
   m4/btowc.m4
   m4/c-stack.m4
+  m4/canonicalize.m4
   m4/cloexec.m4
   m4/close-stream.m4
+  m4/close.m4
   m4/closein.m4
   m4/closeout.m4
   m4/codeset.m4
   m4/config-h.m4
+  m4/configmake.m4
   m4/dirname.m4
-  m4/dos.m4
   m4/double-slash-root.m4
   m4/dup2.m4
   m4/eealloc.m4
@@ -1306,6 +1401,7 @@ AC_DEFUN([M4_FILE_LIST], [
   m4/exponentl.m4
   m4/extensions.m4
   m4/fatal-signal.m4
+  m4/fclose.m4
   m4/fcntl-o.m4
   m4/fcntl.m4
   m4/fcntl_h.m4
@@ -1331,23 +1427,28 @@ AC_DEFUN([M4_FILE_LIST], [
   m4/gnulib-common.m4
   m4/include_next.m4
   m4/inline.m4
+  m4/intlmacosx.m4
   m4/intmax_t.m4
   m4/inttypes_h.m4
   m4/isnand.m4
   m4/isnanf.m4
   m4/isnanl.m4
   m4/langinfo_h.m4
+  m4/lcmessage.m4
   m4/ldexp.m4
   m4/ldexpl.m4
   m4/lib-ld.m4
   m4/lib-link.m4
   m4/lib-prefix.m4
   m4/libsigsegv.m4
+  m4/link.m4
   m4/localcharset.m4
   m4/locale-fr.m4
   m4/locale-ja.m4
   m4/locale-tr.m4
   m4/locale-zh.m4
+  m4/locale_h.m4
+  m4/localename.m4
   m4/lock.m4
   m4/longlong.m4
   m4/lseek.m4
@@ -1359,6 +1460,7 @@ AC_DEFUN([M4_FILE_LIST], [
   m4/mbrtowc.m4
   m4/mbsinit.m4
   m4/mbstate_t.m4
+  m4/mbtowc.m4
   m4/memchr.m4
   m4/mkdtemp.m4
   m4/mkstemp.m4
@@ -1369,7 +1471,6 @@ AC_DEFUN([M4_FILE_LIST], [
   m4/nocrash.m4
   m4/open.m4
   m4/pathmax.m4
-  m4/pipe.m4
   m4/pipe2.m4
   m4/posix_spawn.m4
   m4/printf-frexp.m4
@@ -1378,10 +1479,13 @@ AC_DEFUN([M4_FILE_LIST], [
   m4/putenv.m4
   m4/quotearg.m4
   m4/rawmemchr.m4
+  m4/readlink.m4
   m4/regex.m4
+  m4/rename.m4
   m4/rmdir.m4
   m4/sched_h.m4
   m4/setenv.m4
+  m4/setlocale.m4
   m4/sig_atomic_t.m4
   m4/sigaction.m4
   m4/signal_h.m4
@@ -1389,6 +1493,7 @@ AC_DEFUN([M4_FILE_LIST], [
   m4/signbit.m4
   m4/size_max.m4
   m4/snprintf.m4
+  m4/spawn-pipe.m4
   m4/spawn_h.m4
   m4/ssize_t.m4
   m4/stat.m4
@@ -1402,6 +1507,7 @@ AC_DEFUN([M4_FILE_LIST], [
   m4/stdlib-safer.m4
   m4/stdlib_h.m4
   m4/strchrnul.m4
+  m4/strdup.m4
   m4/strerror.m4
   m4/string_h.m4
   m4/strndup.m4
@@ -1428,12 +1534,14 @@ AC_DEFUN([M4_FILE_LIST], [
   m4/vasprintf.m4
   m4/version-etc.m4
   m4/wait-process.m4
+  m4/waitpid.m4
   m4/warn-on-use.m4
   m4/warnings.m4
   m4/wchar_h.m4
   m4/wchar_t.m4
   m4/wcrtomb.m4
   m4/wctob.m4
+  m4/wctomb.m4
   m4/wctype_h.m4
   m4/wint_t.m4
   m4/xalloc.m4
@@ -1442,6 +1550,7 @@ AC_DEFUN([M4_FILE_LIST], [
   m4/xvasprintf.m4
   tests/init.sh
   tests/macros.h
+  tests/minus-zero.h
   tests/nan.h
   tests/signature.h
   tests/test-alloca-opt.c
@@ -1460,6 +1569,7 @@ AC_DEFUN([M4_FILE_LIST], [
   tests/test-c-strcase.sh
   tests/test-c-strcasecmp.c
   tests/test-c-strncasecmp.c
+  tests/test-canonicalize-lgpl.c
   tests/test-cloexec.c
   tests/test-closein.c
   tests/test-closein.sh
@@ -1502,6 +1612,7 @@ AC_DEFUN([M4_FILE_LIST], [
   tests/test-getopt.h
   tests/test-getopt_long.h
   tests/test-gettimeofday.c
+  tests/test-ignore-value.c
   tests/test-isnand-nolibm.c
   tests/test-isnand.h
   tests/test-isnanf-nolibm.c
@@ -1510,7 +1621,13 @@ AC_DEFUN([M4_FILE_LIST], [
   tests/test-isnanl.h
   tests/test-langinfo-c++.cc
   tests/test-langinfo.c
+  tests/test-link.c
+  tests/test-link.h
   tests/test-linkedhash_list.c
+  tests/test-locale-c++.cc
+  tests/test-locale-c++2.cc
+  tests/test-locale.c
+  tests/test-localename.c
   tests/test-lseek.c
   tests/test-lseek.sh
   tests/test-lstat.c
@@ -1520,6 +1637,12 @@ AC_DEFUN([M4_FILE_LIST], [
   tests/test-math-c++.cc
   tests/test-math-c++2.cc
   tests/test-math.c
+  tests/test-mbrtowc-w32-1.sh
+  tests/test-mbrtowc-w32-2.sh
+  tests/test-mbrtowc-w32-3.sh
+  tests/test-mbrtowc-w32-4.sh
+  tests/test-mbrtowc-w32-5.sh
+  tests/test-mbrtowc-w32.c
   tests/test-mbrtowc.c
   tests/test-mbrtowc1.sh
   tests/test-mbrtowc2.sh
@@ -1533,8 +1656,6 @@ AC_DEFUN([M4_FILE_LIST], [
   tests/test-nl_langinfo.sh
   tests/test-open.c
   tests/test-open.h
-  tests/test-pipe.c
-  tests/test-pipe.sh
   tests/test-pipe2.c
   tests/test-posix_spawn1.c
   tests/test-posix_spawn1.in.sh
@@ -1545,10 +1666,18 @@ AC_DEFUN([M4_FILE_LIST], [
   tests/test-quotearg-simple.c
   tests/test-quotearg.h
   tests/test-rawmemchr.c
+  tests/test-readlink.c
+  tests/test-readlink.h
+  tests/test-rename.c
+  tests/test-rename.h
   tests/test-rmdir.c
   tests/test-rmdir.h
   tests/test-sched.c
   tests/test-setenv.c
+  tests/test-setlocale1.c
+  tests/test-setlocale1.sh
+  tests/test-setlocale2.c
+  tests/test-setlocale2.sh
   tests/test-sigaction.c
   tests/test-signal-c++.cc
   tests/test-signal-c++2.cc
@@ -1556,6 +1685,8 @@ AC_DEFUN([M4_FILE_LIST], [
   tests/test-signbit.c
   tests/test-snprintf.c
   tests/test-spawn-c++.cc
+  tests/test-spawn-pipe.c
+  tests/test-spawn-pipe.sh
   tests/test-spawn.c
   tests/test-stat.c
   tests/test-stat.h
@@ -1573,6 +1704,7 @@ AC_DEFUN([M4_FILE_LIST], [
   tests/test-string-c++.cc
   tests/test-string-c++2.cc
   tests/test-string.c
+  tests/test-strnlen.c
   tests/test-strsignal.c
   tests/test-strstr.c
   tests/test-strtod.c
@@ -1582,7 +1714,9 @@ AC_DEFUN([M4_FILE_LIST], [
   tests/test-sys_stat.c
   tests/test-sys_time-c++.cc
   tests/test-sys_time.c
+  tests/test-sys_wait-c++.cc
   tests/test-sys_wait.c
+  tests/test-sys_wait.h
   tests/test-time-c++.cc
   tests/test-time-c++2.cc
   tests/test-time.c
@@ -1601,10 +1735,16 @@ AC_DEFUN([M4_FILE_LIST], [
   tests/test-version-etc.sh
   tests/test-wchar-c++.cc
   tests/test-wchar.c
+  tests/test-wcrtomb-w32-1.sh
+  tests/test-wcrtomb-w32-2.sh
+  tests/test-wcrtomb-w32-3.sh
+  tests/test-wcrtomb-w32-4.sh
+  tests/test-wcrtomb-w32-5.sh
+  tests/test-wcrtomb-w32.c
   tests/test-wcrtomb.c
   tests/test-wcrtomb.sh
-  tests/test-wctype-c++.cc
-  tests/test-wctype.c
+  tests/test-wctype-h-c++.cc
+  tests/test-wctype-h.c
   tests/test-xalloc-die.c
   tests/test-xalloc-die.sh
   tests/test-xvasprintf.c
@@ -1618,12 +1758,19 @@ AC_DEFUN([M4_FILE_LIST], [
   tests=lib/gl_array_list.h
   tests=lib/gl_array_oset.c
   tests=lib/gl_array_oset.h
+  tests=lib/link.c
+  tests=lib/locale.in.h
+  tests=lib/localename.c
+  tests=lib/localename.h
   tests=lib/putenv.c
-  tests=lib/same-inode.h
   tests=lib/setenv.c
+  tests=lib/setlocale.c
+  tests=lib/strdup.c
   tests=lib/symlink.c
   tests=lib/unsetenv.c
   tests=lib/wctob.c
+  tests=lib/wctomb-impl.h
+  tests=lib/wctomb.c
   top/GNUmakefile
   top/maint.mk
 ])

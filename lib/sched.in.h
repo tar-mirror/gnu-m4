@@ -1,5 +1,5 @@
 /* Replacement <sched.h> for platforms that lack it.
-   Copyright (C) 2008, 2009, 2010 Free Software Foundation, Inc.
+   Copyright (C) 2008-2011 Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@
 #if __GNUC__ >= 3
 @PRAGMA_SYSTEM_HEADER@
 #endif
+@PRAGMA_COLUMNS@
 
 /* The include_next requires a split double-inclusion guard.  */
 #if @HAVE_SCHED_H@
@@ -30,10 +31,13 @@
 
 #if !@HAVE_STRUCT_SCHED_PARAM@
 
+# if !GNULIB_defined_struct_sched_param
 struct sched_param
 {
   int sched_priority;
 };
+#  define GNULIB_defined_struct_sched_param 1
+# endif
 
 #endif
 

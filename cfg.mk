@@ -1,6 +1,5 @@
 # Customize maint.mk.                           -*- makefile -*-
-# Copyright (C) 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010 Free
-# Software Foundation, Inc.
+# Copyright (C) 2003-2011 Free Software Foundation, Inc.
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,15 +17,17 @@
 # Used in maint.mk's web-manual rule
 manual_title = GNU macro processor
 
-# Always use longhand copyrights.
+# Always use shorthand copyrights.
 update-copyright-env = \
-  UPDATE_COPYRIGHT_USE_INTERVALS=0 \
+  UPDATE_COPYRIGHT_USE_INTERVALS=1 \
   UPDATE_COPYRIGHT_MAX_LINE_LENGTH=72
 
 # Tests not to run as part of "make syntax-check".
 local-checks-to-skip =
+# We haven't yet turned on i18n
+local-checks-to-skip += sc_bindtextdomain
 # M4 intentionally uses a coding style that compiles under C++.
-local-checks-to-skip = sc_cast_of_x_alloc_return_value
+local-checks-to-skip += sc_cast_of_x_alloc_return_value
 # sc_copyright_check is currently broken for multi-line copyrights.
 local-checks-to-skip += sc_copyright_check
 
@@ -34,7 +35,7 @@ local-checks-to-skip += sc_copyright_check
 config_h_header = "m4\.h"
 
 # Hash of NEWS contents, to ensure we don't add entries to wrong section.
-old_NEWS_hash = eb4dc25baafabb69ad319dd6b981f37c
+old_NEWS_hash = cd89f6716f741756751054c484b7044b
 
 # Indent only with spaces.
 sc_prohibit_tab_based_indentation:

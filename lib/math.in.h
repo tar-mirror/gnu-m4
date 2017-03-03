@@ -1,6 +1,6 @@
 /* A GNU-like <math.h>.
 
-   Copyright (C) 2002-2003, 2007-2010 Free Software Foundation, Inc.
+   Copyright (C) 2002-2003, 2007-2011 Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@
 #if __GNUC__ >= 3
 @PRAGMA_SYSTEM_HEADER@
 #endif
+@PRAGMA_COLUMNS@
 
 /* The include_next requires a split double-inclusion guard.  */
 #@INCLUDE_NEXT_AS_FIRST_DIRECTIVE@ @NEXT_AS_FIRST_DIRECTIVE_MATH_H@
@@ -72,18 +73,21 @@ _GL_WARN_ON_USE (rpl_ ## func ## l, #func " is unportable - "       \
    it on platforms like Solaris 10, where NAN is present but defined
    as a function pointer rather than a floating point constant.  */
 #if !defined NAN || @REPLACE_NAN@
-# undef NAN
+# if !GNULIB_defined_NAN
+#  undef NAN
   /* The Compaq (ex-DEC) C 6.4 compiler chokes on the expression 0.0 / 0.0.  */
-# ifdef __DECC
+#  ifdef __DECC
 static float
 _NaN ()
 {
   static float zero = 0.0f;
   return zero / zero;
 }
-#  define NAN (_NaN())
-# else
-#  define NAN (0.0f / 0.0f)
+#   define NAN (_NaN())
+#  else
+#   define NAN (0.0f / 0.0f)
+#  endif
+#  define GNULIB_defined_NAN 1
 # endif
 #endif
 
@@ -201,6 +205,19 @@ _GL_WARN_ON_USE (ceilf, "ceilf is unportable - "
 # endif
 #endif
 
+#if @GNULIB_CEIL@
+# if @REPLACE_CEIL@
+#  if !(defined __cplusplus && defined GNULIB_NAMESPACE)
+#   define ceil rpl_ceil
+#  endif
+_GL_FUNCDECL_RPL (ceil, double, (double x));
+_GL_CXXALIAS_RPL (ceil, double, (double x));
+# else
+_GL_CXXALIAS_SYS (ceil, double, (double x));
+# endif
+_GL_CXXALIASWARN (ceil);
+#endif
+
 #if @GNULIB_CEILL@
 # if @REPLACE_CEILL@
 #  if !(defined __cplusplus && defined GNULIB_NAMESPACE)
@@ -261,7 +278,7 @@ _GL_WARN_ON_USE (expl, "expl is unportable - "
 #  endif
 _GL_FUNCDECL_RPL (floorf, float, (float x));
 _GL_CXXALIAS_RPL (floorf, float, (float x));
-#else
+# else
 #  if !@HAVE_DECL_FLOORF@
 _GL_FUNCDECL_SYS (floorf, float, (float x));
 #  endif
@@ -274,6 +291,19 @@ _GL_CXXALIASWARN (floorf);
 _GL_WARN_ON_USE (floorf, "floorf is unportable - "
                  "use gnulib module floorf for portability");
 # endif
+#endif
+
+#if @GNULIB_FLOOR@
+# if @REPLACE_FLOOR@
+#  if !(defined __cplusplus && defined GNULIB_NAMESPACE)
+#   define floor rpl_floor
+#  endif
+_GL_FUNCDECL_RPL (floor, double, (double x));
+_GL_CXXALIAS_RPL (floor, double, (double x));
+# else
+_GL_CXXALIAS_SYS (floor, double, (double x));
+# endif
+_GL_CXXALIASWARN (floor);
 #endif
 
 #if @GNULIB_FLOORL@
@@ -492,10 +522,18 @@ _GL_WARN_ON_USE (tanl, "tanl is unportable - "
 
 
 #if @GNULIB_TRUNCF@
-# if !@HAVE_DECL_TRUNCF@
+# if @REPLACE_TRUNCF@
+#  if !(defined __cplusplus && defined GNULIB_NAMESPACE)
+#   define truncf rpl_truncf
+#  endif
+_GL_FUNCDECL_RPL (truncf, float, (float x));
+_GL_CXXALIAS_RPL (truncf, float, (float x));
+# else
+#  if !@HAVE_DECL_TRUNCF@
 _GL_FUNCDECL_SYS (truncf, float, (float x));
-# endif
+#  endif
 _GL_CXXALIAS_SYS (truncf, float, (float x));
+# endif
 _GL_CXXALIASWARN (truncf);
 #elif defined GNULIB_POSIXCHECK
 # undef truncf
@@ -506,10 +544,18 @@ _GL_WARN_ON_USE (truncf, "truncf is unportable - "
 #endif
 
 #if @GNULIB_TRUNC@
-# if !@HAVE_DECL_TRUNC@
+# if @REPLACE_TRUNC@
+#  if !(defined __cplusplus && defined GNULIB_NAMESPACE)
+#   define trunc rpl_trunc
+#  endif
+_GL_FUNCDECL_RPL (trunc, double, (double x));
+_GL_CXXALIAS_RPL (trunc, double, (double x));
+# else
+#  if !@HAVE_DECL_TRUNC@
 _GL_FUNCDECL_SYS (trunc, double, (double x));
-# endif
+#  endif
 _GL_CXXALIAS_SYS (trunc, double, (double x));
+# endif
 _GL_CXXALIASWARN (trunc);
 #elif defined GNULIB_POSIXCHECK
 # undef trunc
@@ -609,7 +655,8 @@ _GL_EXTERN_C int isnanf (float x);
    This function is a gnulib extension, unlike isnan() which applied only
    to 'double' numbers earlier but now is a type-generic macro.  */
 # if @HAVE_ISNAND@
-/* The original <math.h> included above provides a declaration of isnan macro.  */
+/* The original <math.h> included above provides a declaration of isnan
+   macro.  */
 #  if __GNUC__ >= 4
     /* GCC 4.0 and newer provides three built-ins for isnan.  */
 #   undef isnand
@@ -629,7 +676,8 @@ _GL_EXTERN_C int isnand (double x);
 #if @GNULIB_ISNANL@
 /* Test for NaN for 'long double' numbers.  */
 # if @HAVE_ISNANL@
-/* The original <math.h> included above provides a declaration of isnan macro or (older) isnanl function.  */
+/* The original <math.h> included above provides a declaration of isnan
+   macro or (older) isnanl function.  */
 #  if __GNUC__ >= 4
     /* GCC 4.0 and newer provides three built-ins for isnan.  */
 #   undef isnanl
@@ -654,7 +702,7 @@ _GL_EXTERN_C int isnanl (long double x);
    that recursively expand back to isnan.  So use the gnulib
    replacements for them directly. */
 #  if @HAVE_ISNANF@ && __GNUC__ >= 4
-#   define gl_isnan_f(x) __builtin_isnan ((float)(x))
+#   define gl_isnan_f(x) __builtin_isnanf ((float)(x))
 #  else
 _GL_EXTERN_C int rpl_isnanf (float x);
 #   define gl_isnan_f(x) rpl_isnanf (x)
@@ -666,7 +714,7 @@ _GL_EXTERN_C int rpl_isnand (double x);
 #   define gl_isnan_d(x) rpl_isnand (x)
 #  endif
 #  if @HAVE_ISNANL@ && __GNUC__ >= 4
-#   define gl_isnan_l(x) __builtin_isnan ((long double)(x))
+#   define gl_isnan_l(x) __builtin_isnanl ((long double)(x))
 #  else
 _GL_EXTERN_C int rpl_isnanl (long double x);
 #   define gl_isnan_l(x) rpl_isnanl (x)
@@ -676,6 +724,16 @@ _GL_EXTERN_C int rpl_isnanl (long double x);
    (sizeof (x) == sizeof (long double) ? gl_isnan_l (x) : \
     sizeof (x) == sizeof (double) ? gl_isnan_d (x) : \
     gl_isnan_f (x))
+# elif __GNUC__ >= 4
+#  undef isnan
+#  define isnan(x) \
+   (sizeof (x) == sizeof (long double) ? __builtin_isnanl ((long double)(x)) : \
+    sizeof (x) == sizeof (double) ? __builtin_isnan ((double)(x)) : \
+    __builtin_isnanf ((float)(x)))
+# endif
+/* Ensure isnan is a macro.  */
+# ifndef isnan
+#  define isnan isnan
 # endif
 #elif defined GNULIB_POSIXCHECK
 # if defined isnan
@@ -701,11 +759,13 @@ _GL_EXTERN_C int gl_signbitf (float arg);
 _GL_EXTERN_C int gl_signbitd (double arg);
 _GL_EXTERN_C int gl_signbitl (long double arg);
 #  if __GNUC__ >= 2 && !__STRICT_ANSI__
+#   define _GL_NUM_UINT_WORDS(type) \
+      ((sizeof (type) + sizeof (unsigned int) - 1) / sizeof (unsigned int))
 #   if defined FLT_SIGNBIT_WORD && defined FLT_SIGNBIT_BIT && !defined gl_signbitf
 #    define gl_signbitf_OPTIMIZED_MACRO
 #    define gl_signbitf(arg) \
        ({ union { float _value;                                         \
-                  unsigned int _word[(sizeof (float) + sizeof (unsigned int) - 1) / sizeof (unsigned int)]; \
+                  unsigned int _word[_GL_NUM_UINT_WORDS (float)];       \
                 } _m;                                                   \
           _m._value = (arg);                                            \
           (_m._word[FLT_SIGNBIT_WORD] >> FLT_SIGNBIT_BIT) & 1;          \
@@ -714,8 +774,8 @@ _GL_EXTERN_C int gl_signbitl (long double arg);
 #   if defined DBL_SIGNBIT_WORD && defined DBL_SIGNBIT_BIT && !defined gl_signbitd
 #    define gl_signbitd_OPTIMIZED_MACRO
 #    define gl_signbitd(arg) \
-       ({ union { double _value;                                                \
-                  unsigned int _word[(sizeof (double) + sizeof (unsigned int) - 1) / sizeof (unsigned int)]; \
+       ({ union { double _value;                                        \
+                  unsigned int _word[_GL_NUM_UINT_WORDS (double)];      \
                 } _m;                                                   \
           _m._value = (arg);                                            \
           (_m._word[DBL_SIGNBIT_WORD] >> DBL_SIGNBIT_BIT) & 1;          \
@@ -725,10 +785,10 @@ _GL_EXTERN_C int gl_signbitl (long double arg);
 #    define gl_signbitl_OPTIMIZED_MACRO
 #    define gl_signbitl(arg) \
        ({ union { long double _value;                                   \
-                  unsigned int _word[(sizeof (long double) + sizeof (unsigned int) - 1) / sizeof (unsigned int)]; \
+                  unsigned int _word[_GL_NUM_UINT_WORDS (long double)]; \
                 } _m;                                                   \
           _m._value = (arg);                                            \
-          (_m._word[LDBL_SIGNBIT_WORD] >> LDBL_SIGNBIT_BIT) & 1;                \
+          (_m._word[LDBL_SIGNBIT_WORD] >> LDBL_SIGNBIT_BIT) & 1;        \
         })
 #   endif
 #  endif

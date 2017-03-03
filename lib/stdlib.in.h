@@ -1,6 +1,6 @@
 /* A GNU-like <stdlib.h>.
 
-   Copyright (C) 1995, 2001-2004, 2006-2010 Free Software Foundation, Inc.
+   Copyright (C) 1995, 2001-2004, 2006-2011 Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@
 #if __GNUC__ >= 3
 @PRAGMA_SYSTEM_HEADER@
 #endif
+@PRAGMA_COLUMNS@
 
 #if defined __need_malloc_and_calloc
 /* Special invocation convention inside glibc header files.  */
@@ -38,23 +39,33 @@
 /* NetBSD 5.0 mis-defines NULL.  */
 #include <stddef.h>
 
+/* MirBSD 10 defines WEXITSTATUS in <sys/wait.h>, not in <stdlib.h>.  */
+#if @GNULIB_SYSTEM_POSIX@ && !defined WEXITSTATUS
+# include <sys/wait.h>
+#endif
+
 /* Solaris declares getloadavg() in <sys/loadavg.h>.  */
 #if (@GNULIB_GETLOADAVG@ || defined GNULIB_POSIXCHECK) && @HAVE_SYS_LOADAVG_H@
 # include <sys/loadavg.h>
 #endif
 
+#if @GNULIB_RANDOM_R@
+
 /* OSF/1 5.1 declares 'struct random_data' in <random.h>, which is included
-   from <stdlib.h> if _REENTRANT is defined.  Include it always.  */
-#if @HAVE_RANDOM_H@
-# include <random.h>
-#endif
+   from <stdlib.h> if _REENTRANT is defined.  Include it whenever we need
+   'struct random_data'.  */
+# if @HAVE_RANDOM_H@
+#  include <random.h>
+# endif
 
-#if !@HAVE_STRUCT_RANDOM_DATA@ || (@GNULIB_RANDOM_R@ && !@HAVE_RANDOM_R@) \
-    || defined GNULIB_POSIXCHECK
-# include <stdint.h>
-#endif
+# if !@HAVE_STRUCT_RANDOM_DATA@ || !@HAVE_RANDOM_R@
+#  include <stdint.h>
+# endif
 
-#if !@HAVE_STRUCT_RANDOM_DATA@
+# if !@HAVE_STRUCT_RANDOM_DATA@
+/* Define 'struct random_data'.
+   But allow multiple gnulib generated <stdlib.h> replacements to coexist.  */
+#  if !GNULIB_defined_struct_random_data
 struct random_data
 {
   int32_t *fptr;                /* Front pointer.  */
@@ -65,6 +76,9 @@ struct random_data
   int rand_sep;                 /* Distance between front and rear.  */
   int32_t *end_ptr;             /* Pointer behind state table.  */
 };
+#   define GNULIB_defined_struct_random_data 1
+#  endif
+# endif
 #endif
 
 #if (@GNULIB_MKSTEMP@ || @GNULIB_GETSUBOPT@ || defined GNULIB_POSIXCHECK) && ! defined __GLIBC__ && !((defined _WIN32 || defined __WIN32__) && ! defined __CYGWIN__)
@@ -74,10 +88,10 @@ struct random_data
 # include <unistd.h>
 #endif
 
-#ifndef __attribute__
-# if __GNUC__ < 2 || (__GNUC__ == 2 && __GNUC_MINOR__ < 8)
-#  define __attribute__(Spec)   /* empty */
-# endif
+#if 3 <= __GNUC__ || __GNUC__ == 2 && 8 <= __GNUC_MINOR__
+# define _GL_ATTRIBUTE_NORETURN __attribute__ ((__noreturn__))
+#else
+# define _GL_ATTRIBUTE_NORETURN
 #endif
 
 /* The definitions of _GL_FUNCDECL_RPL etc. are copied here.  */
@@ -105,7 +119,7 @@ struct random_data
 /* Terminate the current process with the given return code, without running
    the 'atexit' handlers.  */
 # if !@HAVE__EXIT@
-_GL_FUNCDECL_SYS (_Exit, void, (int status) __attribute__ ((__noreturn__)));
+_GL_FUNCDECL_SYS (_Exit, void, (int status) _GL_ATTRIBUTE_NORETURN);
 # endif
 _GL_CXXALIAS_SYS (_Exit, void, (int status));
 _GL_CXXALIASWARN (_Exit);
@@ -172,7 +186,8 @@ _GL_CXXALIASWARN (canonicalize_file_name);
 #elif defined GNULIB_POSIXCHECK
 # undef canonicalize_file_name
 # if HAVE_RAW_DECL_CANONICALIZE_FILE_NAME
-_GL_WARN_ON_USE (canonicalize_file_name, "canonicalize_file_name is unportable - "
+_GL_WARN_ON_USE (canonicalize_file_name,
+                 "canonicalize_file_name is unportable - "
                  "use gnulib module canonicalize-lgpl for portability");
 # endif
 #endif
@@ -257,6 +272,21 @@ _GL_CXXALIASWARN (malloc);
 /* Assume malloc is always declared.  */
 _GL_WARN_ON_USE (malloc, "malloc is not POSIX compliant everywhere - "
                  "use gnulib module malloc-posix for portability");
+#endif
+
+/* Convert a multibyte character to a wide character.  */
+#if @GNULIB_MBTOWC@
+# if @REPLACE_MBTOWC@
+#  if !(defined __cplusplus && defined GNULIB_NAMESPACE)
+#   undef mbtowc
+#   define mbtowc rpl_mbtowc
+#  endif
+_GL_FUNCDECL_RPL (mbtowc, int, (wchar_t *pwc, const char *s, size_t n));
+_GL_CXXALIAS_RPL (mbtowc, int, (wchar_t *pwc, const char *s, size_t n));
+# else
+_GL_CXXALIAS_SYS (mbtowc, int, (wchar_t *pwc, const char *s, size_t n));
+# endif
+_GL_CXXALIASWARN (mbtowc);
 #endif
 
 #if @GNULIB_MKDTEMP@
@@ -572,7 +602,7 @@ _GL_FUNCDECL_RPL (setenv, int,
 _GL_CXXALIAS_RPL (setenv, int,
                   (const char *name, const char *value, int replace));
 # else
-#  if !@HAVE_SETENV@
+#  if !@HAVE_DECL_SETENV@
 _GL_FUNCDECL_SYS (setenv, int,
                   (const char *name, const char *value, int replace)
                   _GL_ARG_NONNULL ((1)));
@@ -580,7 +610,9 @@ _GL_FUNCDECL_SYS (setenv, int,
 _GL_CXXALIAS_SYS (setenv, int,
                   (const char *name, const char *value, int replace));
 # endif
+# if !(@REPLACE_SETENV@ && !@HAVE_DECL_SETENV@)
 _GL_CXXALIASWARN (setenv);
+# endif
 #elif defined GNULIB_POSIXCHECK
 # undef setenv
 # if HAVE_RAW_DECL_SETENV
@@ -675,7 +707,7 @@ _GL_CXXALIASWARN (unlockpt);
 #elif defined GNULIB_POSIXCHECK
 # undef unlockpt
 # if HAVE_RAW_DECL_UNLOCKPT
-_GL_WARN_ON_USE (ptsname, "unlockpt is not portable - "
+_GL_WARN_ON_USE (unlockpt, "unlockpt is not portable - "
                  "use gnulib module unlockpt for portability");
 # endif
 #endif
@@ -690,18 +722,35 @@ _GL_WARN_ON_USE (ptsname, "unlockpt is not portable - "
 _GL_FUNCDECL_RPL (unsetenv, int, (const char *name) _GL_ARG_NONNULL ((1)));
 _GL_CXXALIAS_RPL (unsetenv, int, (const char *name));
 # else
-#  if !@HAVE_UNSETENV@
+#  if !@HAVE_DECL_UNSETENV@
 _GL_FUNCDECL_SYS (unsetenv, int, (const char *name) _GL_ARG_NONNULL ((1)));
 #  endif
 _GL_CXXALIAS_SYS (unsetenv, int, (const char *name));
 # endif
+# if !(@REPLACE_UNSETENV@ && !@HAVE_DECL_UNSETENV@)
 _GL_CXXALIASWARN (unsetenv);
+# endif
 #elif defined GNULIB_POSIXCHECK
 # undef unsetenv
 # if HAVE_RAW_DECL_UNSETENV
 _GL_WARN_ON_USE (unsetenv, "unsetenv is unportable - "
                  "use gnulib module unsetenv for portability");
 # endif
+#endif
+
+/* Convert a wide character to a multibyte character.  */
+#if @GNULIB_WCTOMB@
+# if @REPLACE_WCTOMB@
+#  if !(defined __cplusplus && defined GNULIB_NAMESPACE)
+#   undef wctomb
+#   define wctomb rpl_wctomb
+#  endif
+_GL_FUNCDECL_RPL (wctomb, int, (char *s, wchar_t wc));
+_GL_CXXALIAS_RPL (wctomb, int, (char *s, wchar_t wc));
+# else
+_GL_CXXALIAS_SYS (wctomb, int, (char *s, wchar_t wc));
+# endif
+_GL_CXXALIASWARN (wctomb);
 #endif
 
 

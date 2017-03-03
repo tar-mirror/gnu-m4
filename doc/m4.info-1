@@ -1,10 +1,9 @@
 This is m4.info, produced by makeinfo version 4.13 from m4.texinfo.
 
-This manual (30 August 2010) is for GNU M4 (version 1.4.15), a package
-containing an implementation of the m4 macro language.
+This manual (28 February 2011) is for GNU M4 (version 1.4.16), a
+package containing an implementation of the m4 macro language.
 
-   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2004, 2005, 2006,
-2007, 2008, 2009, 2010 Free Software Foundation, Inc.
+   Copyright (C) 1989-1994, 2004-2011 Free Software Foundation, Inc.
 
      Permission is granted to copy, distribute and/or modify this
      document under the terms of the GNU Free Documentation License,
@@ -24,11 +23,10 @@ File: m4.info,  Node: Top,  Next: Preliminaries,  Up: (dir)
 GNU M4
 ******
 
-This manual (30 August 2010) is for GNU M4 (version 1.4.15), a package
-containing an implementation of the m4 macro language.
+This manual (28 February 2011) is for GNU M4 (version 1.4.16), a
+package containing an implementation of the m4 macro language.
 
-   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2004, 2005, 2006,
-2007, 2008, 2009, 2010 Free Software Foundation, Inc.
+   Copyright (C) 1989-1994, 2004-2011 Free Software Foundation, Inc.
 
      Permission is granted to copy, distribute and/or modify this
      document under the terms of the GNU Free Documentation License,
@@ -46,10 +44,10 @@ generating `configure' scripts, but not for running them.
 
    GNU `m4' was originally written by Rene' Seindal, with subsequent
 changes by Franc,ois Pinard and other volunteers on the Internet.  All
-names and email addresses can be found in the files `m4-1.4.15/AUTHORS'
-and `m4-1.4.15/THANKS' from the GNU M4 distribution.
+names and email addresses can be found in the files `m4-1.4.16/AUTHORS'
+and `m4-1.4.16/THANKS' from the GNU M4 distribution.
 
-   This is release 1.4.15.  It is now considered stable:  future
+   This is release 1.4.16.  It is now considered stable:  future
 releases in the 1.4.x series are only meant to fix bugs, increase speed,
 or improve documentation.  However...
 
@@ -345,7 +343,7 @@ And in 2006, Eric Blake joined the team and prepared patches for the
 release of 1.4.5, 1.4.6, 1.4.7, and 1.4.8.  More bug fixes were
 incorporated in 2007, with releases 1.4.9 and 1.4.10.  Eric continued
 with some portability fixes for 1.4.11 and 1.4.12 in 2008, 1.4.13 in
-2009, and 1.4.14 in 2010.
+2009, 1.4.14 and 1.4.15 in 2010, and 1.4.16 in 2011.
 
    Meanwhile, development has continued on new features for `m4', such
 as dynamic module loading and additional builtins.  When complete, GNU
@@ -412,7 +410,7 @@ the examples assume that your current directory is located where you
 unpacked the installation, so if you plan on following along, you may
 find it helpful to do this now:
 
-     $ cd m4-1.4.15
+     $ cd m4-1.4.16
 
    As each of the predefined macros in `m4' is described, a prototype
 call of the macro will be shown, giving descriptive names to the
@@ -2440,7 +2438,7 @@ arguments into a single string.
      arguments, `join' avoids the SEPARATOR for an empty ARG.
 
    Here are some examples of its usage, based on the implementation
-`m4-1.4.15/examples/join.m4' distributed in this package:
+`m4-1.4.16/examples/join.m4' distributed in this package:
 
      $ m4 -I examples
      include(`join.m4')
@@ -2535,7 +2533,7 @@ element, or treating multiple arguments as a single element:
      levels of quoting are added around each element.
 
    An actual implementation of these three macros is distributed as
-`m4-1.4.15/examples/quote.m4' in this package.  First, let's examine
+`m4-1.4.16/examples/quote.m4' in this package.  First, let's examine
 their usage:
 
      $ m4 -I examples
@@ -2651,7 +2649,7 @@ finished, it increments the iterator (using the predefined macro
 `incr', *note Incr::), and recurses.
 
    Here is an actual implementation of `forloop', distributed as
-`m4-1.4.15/examples/forloop.m4' in this package:
+`m4-1.4.16/examples/forloop.m4' in this package:
 
      $ m4 -I examples
      undivert(`forloop.m4')dnl
@@ -2692,8 +2690,8 @@ Here is an example of a loop macro that implements list iteration.
 
    As an example, this displays each word in a list inside of a
 sentence, using an implementation of `foreach' distributed as
-`m4-1.4.15/examples/foreach.m4', and `foreachq' in
-`m4-1.4.15/examples/foreachq.m4'.
+`m4-1.4.16/examples/foreach.m4', and `foreachq' in
+`m4-1.4.16/examples/foreachq.m4'.
 
      $ m4 -I examples
      include(`foreach.m4')
@@ -2843,7 +2841,7 @@ definition stack.
      parameter.
 
    A sample implementation of these macros is distributed in the file
-`m4-1.4.15/examples/stack.m4'.
+`m4-1.4.16/examples/stack.m4'.
 
      $ m4 -I examples
      include(`stack.m4')
@@ -2973,7 +2971,7 @@ more obvious.  The macro `stack_foreach' mentioned earlier is an example
 of a context that provides exactly one argument to a macro name.  But
 coupled with currying, we can invoke `reverse' with two arguments for
 each definition of a macro stack.  This example uses the file
-`m4-1.4.15/examples/curry.m4' included in the distribution.
+`m4-1.4.16/examples/curry.m4' included in the distribution.
 
      $ m4 -I examples
      include(`curry.m4')include(`stack.m4')
@@ -4001,7 +3999,7 @@ behavior is likely to change in a future release, to match POSIX, so
 you should not depend on this order.
 
    It is possible to emulate POSIX behavior even with older versions of
-GNU M4 by including the file `m4-1.4.15/examples/wrapfifo.m4' from the
+GNU M4 by including the file `m4-1.4.16/examples/wrapfifo.m4' from the
 distribution:
 
      $ m4 -I examples
@@ -4026,7 +4024,7 @@ distribution:
 
    It is likewise possible to emulate LIFO behavior without resorting to
 the GNU M4 extension of `builtin', by including the file
-`m4-1.4.15/examples/wraplifo.m4' from the distribution.
+`m4-1.4.16/examples/wraplifo.m4' from the distribution.
 (Unfortunately, both examples shown here share some subtle bugs.  See
 if you can find and correct them; or *note Answers: Improved m4wrap.).
 
@@ -4132,8 +4130,8 @@ There are two builtin macros in `m4' for including files:
 
    The rest of this section assumes that `m4' is invoked with the `-I'
 option (*note Invoking m4: Preprocessor features.)  pointing to the
-`m4-1.4.15/examples' directory shipped as part of the GNU `m4' package.
-The file `m4-1.4.15/examples/incl.m4' in the distribution contains the
+`m4-1.4.16/examples' directory shipped as part of the GNU `m4' package.
+The file `m4-1.4.16/examples/incl.m4' in the distribution contains the
 lines:
 
      $ cat examples/incl.m4
@@ -4789,7 +4787,7 @@ individual words or whole sentences, by substituting calls of the macros
      upper case and the remaining characters to lower case.
 
    First, an example of their usage, using implementations distributed
-in `m4-1.4.15/examples/capitalize.m4'.
+in `m4-1.4.16/examples/capitalize.m4'.
 
      $ m4 -I examples
      include(`capitalize.m4')
@@ -5928,7 +5926,7 @@ characters.  The directives are:
      the same name, and its order, along with `F', is important.
 
 `V NUMBER <NL>'
-     Confirms the format of the file.  `m4' 1.4.15 only creates and
+     Confirms the format of the file.  `m4' 1.4.16 only creates and
      understands frozen files where NUMBER is 1.  This directive must
      be the first non-comment in the file, and may not appear more than
      once.
@@ -6327,7 +6325,7 @@ The `forloop' macro (*note Forloop::) as presented earlier can go into
 an infinite loop if given an iterator that is not parsed as a macro
 name.  It does not do any sanity checking on its numeric bounds, and
 only permits decimal numbers for bounds.  Here is an improved version,
-shipped as `m4-1.4.15/examples/forloop2.m4'; this version also
+shipped as `m4-1.4.16/examples/forloop2.m4'; this version also
 optimizes overhead by calling four macros instead of six per iteration
 (excluding those in TEXT), by not dereferencing the ITERATOR in the
 helper `_forloop'.
@@ -6402,7 +6400,7 @@ to pass the current iterator value as a single argument.  Coupled with
 helper macros if the argument is needed in more than one place in the
 expansion, the output can be generated with three, rather than four,
 macros of overhead per iteration.  Notice how the file
-`m4-1.4.15/examples/forloop3.m4' rearranges the arguments of the helper
+`m4-1.4.16/examples/forloop3.m4' rearranges the arguments of the helper
 `_forloop' to take two arguments that are placed around the current
 value.  By splitting a balanced set of parantheses across multiple
 arguments, the helper macro can now be shared by `forloop' and the new
@@ -6494,7 +6492,7 @@ recursion use fewer arguments, rather than adding additional quoted
 uses of `shift'.  By doing so, `m4' uses less memory, invokes fewer
 macros, is less likely to run into machine limits, and most
 importantly, performs faster.  The fixed version of `foreachq' can be
-found in `m4-1.4.15/examples/foreachq2.m4':
+found in `m4-1.4.16/examples/foreachq2.m4':
 
      $ m4 -I examples
      include(`foreachq2.m4')
@@ -6543,7 +6541,7 @@ operate on an unboxed list in the first place, and by using the
 fixed-length `$#' instead of an arbitrary length list as the key to end
 recursion.  The result is an overhead of six macro invocations per loop
 (excluding any macros in TEXT), instead of eight.  This alternative
-approach is available as `m4-1.4.15/examples/foreach3.m4':
+approach is available as `m4-1.4.16/examples/foreach3.m4':
 
      $ m4 -I examples
      include(`foreachq3.m4')
@@ -6652,7 +6650,7 @@ supported.
      =>4
 
    For yet another approach, the improved version of `foreach',
-available in `m4-1.4.15/examples/foreach2.m4', simply overquotes the
+available in `m4-1.4.16/examples/foreach2.m4', simply overquotes the
 arguments to `_foreach' to begin with, using `dquote_elt'.  Then
 `_foreach' can just use `_arg1' to remove the extra layer of quoting
 that was added up front:
@@ -6821,7 +6819,7 @@ argument in the recursive call; while the other approach would give the
 same output, it does so at the expense of increasing the argument size
 on each iteration of `_stack_reverse_sep', which results in quadratic
 instead of linear execution time.  The improved stack walking macros
-are available in `m4-1.4.15/examples/stack_sep.m4':
+are available in `m4-1.4.16/examples/stack_sep.m4':
 
      $ m4 -I examples
      include(`stack_sep.m4')
@@ -6901,7 +6899,7 @@ in an undefined state.
 arguments to `m4wrap', separated by a space, rather than saving just
 the first argument.  This is done with the `join' macro documented
 previously (*note Shift::).  The improved LIFO example is shipped as
-`m4-1.4.15/examples/wraplifo2.m4', and can easily be converted to a
+`m4-1.4.16/examples/wraplifo2.m4', and can easily be converted to a
 FIFO solution by swapping the adjacent invocations of `joinall' and
 `defn'.
 
@@ -7037,7 +7035,7 @@ string.  In turn, that means the replacement text has unbalanced quotes,
 necessitating another round of `changequote'.
 
    In the fixed version below, (also shipped as
-`m4-1.4.15/examples/capitalize2.m4'), `capitalize' uses the alternate
+`m4-1.4.16/examples/capitalize2.m4'), `capitalize' uses the alternate
 quotes of `<<[' and `]>>' (the longer strings are chosen so as to be
 less likely to appear in the text being converted).  The helpers
 `_to_alt' and `_from_alt' merely reduce the number of characters
@@ -7851,7 +7849,7 @@ Appendix B How to make copies of this manual
 
 This appendix covers the license for copying this manual.  Note that
 some of the longer examples in this manual are also distributed in the
-directory `m4-1.4.15/examples/', where a more permissive license is in
+directory `m4-1.4.16/examples/', where a more permissive license is in
 effect when copying just the examples.
 
 * Menu:
