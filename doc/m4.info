@@ -1,11 +1,11 @@
-This is m4.info, produced by makeinfo version 4.7 from m4.texinfo.
+This is m4.info, produced by makeinfo version 4.8 from m4.texinfo.
 
 INFO-DIR-SECTION GNU programming tools
 START-INFO-DIR-ENTRY
 * m4: (m4).			A powerful macro processor.
 END-INFO-DIR-ENTRY
 
-   This file documents GNU M4 1.4.3.
+   This file documents GNU M4 1.4.4.
 
    Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2004, 2005 Free
 Software Foundation, Inc.
@@ -42,7 +42,7 @@ changes by Franc,ois Pinard and other volunteers on the Internet.  All
 names and email addresses can be found in the file `THANKS' from the
 GNU `m4' distribution.
 
-   This is release 1.4.3.  It is now to be considered stable, future
+   This is release 1.4.4.  It is now to be considered stable, future
 releases are only meant to fix bugs, increase speed, or improve
 documentation.  However...
 
@@ -152,7 +152,7 @@ Diverting and undiverting output
 Macros for text handling
 
 * Len::                         Calculating length of strings
-* Index::                       Searching for substrings
+* Index macro::                 Searching for substrings
 * Regexp::                      Searching for regular expressions
 * Substr::                      Extracting substrings
 * Translit::                    Translating characters
@@ -2077,7 +2077,7 @@ ways, extracting substrings, searching, substituting, and so on.
 * Menu:
 
 * Len::                         Calculating length of strings
-* Index::                       Searching for substrings
+* Index macro::                 Searching for substrings
 * Regexp::                      Searching for regular expressions
 * Substr::                      Extracting substrings
 * Translit::                    Translating characters
@@ -2085,7 +2085,7 @@ ways, extracting substrings, searching, substituting, and so on.
 * Format::                      Formatting strings (printf-like)
 
 
-File: m4.info,  Node: Len,  Next: Index,  Prev: Text handling,  Up: Text handling
+File: m4.info,  Node: Len,  Next: Index macro,  Prev: Text handling,  Up: Text handling
 
 10.1 Calculating length of strings
 ==================================
@@ -2104,7 +2104,7 @@ which expands to the length of STRING, as a decimal number.
    The builtin macro `len' is recognized only when given arguments.
 
 
-File: m4.info,  Node: Index,  Next: Regexp,  Prev: Len,  Up: Text handling
+File: m4.info,  Node: Index macro,  Next: Regexp,  Prev: Len,  Up: Text handling
 
 10.2 Searching for substrings
 =============================
@@ -2125,7 +2125,7 @@ not occur in STRING, `index' expands to `-1'.
    The builtin macro `index' is recognized only when given arguments.
 
 
-File: m4.info,  Node: Regexp,  Next: Substr,  Prev: Index,  Up: Text handling
+File: m4.info,  Node: Regexp,  Next: Substr,  Prev: Index macro,  Up: Text handling
 
 10.3 Searching for regular expressions
 ======================================
@@ -3094,7 +3094,7 @@ characters removed in the index.
 * ifelse:                                Ifelse.               (line  6)
 * include:                               Include.              (line  6)
 * incr:                                  Incr.                 (line  6)
-* index:                                 Index.                (line  6)
+* index:                                 Index macro.          (line  6)
 * indir:                                 Indir.                (line  6)
 * len:                                   Len.                  (line  6)
 * line:                                  Errprint.             (line 26)
@@ -3172,29 +3172,29 @@ Node: Divnum67552
 Node: Cleardiv68102
 Node: Text handling69143
 Node: Len69866
-Node: Index70271
-Node: Regexp70863
-Node: Substr71961
-Node: Translit72588
-Node: Patsubst74038
-Node: Format76138
-Node: Arithmetic77634
-Node: Incr78082
-Node: Eval78593
-Node: UNIX commands81599
-Node: Syscmd82073
-Node: Esyscmd82794
-Node: Sysval83747
-Node: Maketemp84161
-Node: Miscellaneous84911
-Node: Errprint85283
-Node: M4exit86285
-Node: Frozen files87079
-Node: Compatibility92002
-Node: Extensions92623
-Node: Incompatibilities94986
-Node: Other Incompat95435
-Node: Concept index97605
-Node: Macro index107456
+Node: Index macro70277
+Node: Regexp70875
+Node: Substr71979
+Node: Translit72606
+Node: Patsubst74056
+Node: Format76156
+Node: Arithmetic77652
+Node: Incr78100
+Node: Eval78611
+Node: UNIX commands81617
+Node: Syscmd82091
+Node: Esyscmd82812
+Node: Sysval83765
+Node: Maketemp84179
+Node: Miscellaneous84929
+Node: Errprint85301
+Node: M4exit86303
+Node: Frozen files87097
+Node: Compatibility92020
+Node: Extensions92641
+Node: Incompatibilities95004
+Node: Other Incompat95453
+Node: Concept index97623
+Node: Macro index107474
 
 End Tag Table

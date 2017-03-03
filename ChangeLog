@@ -1,13 +1,79 @@
+2005-03-31  Gary V. Vaughan  <gary@gnu.org>
+
+	Release 1.4.4:
+
+	* configure.ac (AC_INIT): Bump to 1.4.4.
+	* NEWS: Describe 1.4.4's changes.
+	* INSTALL, install-sh, doc/texinfo.tex: Updated from upstream.
+
+2005-10-17  John Gatewood Ham  <zappaman@buraphalinux.org>  (tiny change)
+
+	* src/m4.c: fix return code when non-existent files are processed
+
+2005-10-17  John Gatewood Ham  <zappaman@buraphalinux.org>  (tiny change)
+
+	* README: update email address for bug reports.
+
+2005-10-17  Gary V. Vaughan  <gary@gnu.org>
+
+	* doc/m4.info: Generated files are not kept in the repository.
+
+2005-05-01  Gary V. Vaughan  <gary@gnu.org>
+
+	The FSF are moving offices today.  Changed their contact address
+	in all files from `59 Temple Place, Suite 330, MA 02111-1307' to
+	`51 Franklin Street, Fifth Floor, MA 02110-1301'.
+
+	Also, some of the files here were never updated from the previous
+	'675 Mass Ave, Cambridge, MA 02139', so changed those to the
+	'51 Franklin Street, Fifth Floor, MA 02110-1301' address too.
+
+2005-03-31  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (bindir, infodir): Substitute from configure rather
+	than hardcode.
+	* doc/Makefile.in (infodir): Ditto.
+	* src/Makefile.in (bindir): Ditto.
+	* NEWS: Updated.
+
+2005-03-31  Gary V. Vaughan  <gary@gnu.org>
+
+	Changes needed to automate the release process for 1.4.3:
+
+	* Makefile.in (dist): Make .tar.bz2 tarball too.
+	* Makefile.maint (TSDEPS_DIST): Remove m4/libtool.m4.
+	(cvs-news): Look 1 line further down for NEWS release number.
+	(cvs-dist): We don't use automake, so make dist is fine.
+	Remove double . before suffixes.
+	(cvs-release): Don't mention manual.html.
+	(fetch): Get latest gendocs files.
+	(web-manual): Rewritten to use gendoc for multiformat manuals.
+	* doc/gendocs.sh: Don't save an old version in m4 CVS!
+	* doc/m4.texinfo (Index): HFS+ (the file system on my Mac) is case
+	preserving, but case insensitive, so generating html docs per node
+	clashes between Index.html, the node file, and index.html, the
+	top-level of the document tree...
+	(Index macro): ...so renamed to this.  Changed all references.
+
 2005-03-31  Gary V. Vaughan  <gary@gnu.org>  (tiny change)
 
-	* configure.in (VERSION): Bump to 1.4.3.
-	* News: Describe 1.4.3's changes.
+	* configure.ac (AC_INIT): Bump to 1.4.3a.
+
+2005-03-31  Gary V. Vaughan  <gary@gnu.org>  (tiny change)
+
+	Release 1.4.3:
+
+	* configure.in (AC_INIT): Bump to 1.4.3.
+	* NEWS: Describe 1.4.3's changes.
+
+2005-03-31  Gary V. Vaughan  <gary@gnu.org>
+
 	* Makefile.maint: New file with release rules, from CVS libtool.
 	* Makefile.in (DISTFILES): Add Makefile.maint.
 	* INSTALL, install-sh, doc/texinfo.tex: Updated to latest
 	canonical versions.
 
-2005-03-31  Erik Blake  <ebb9@byu.net>  (tiny change)
+2005-03-31  Eric Blake  <ebb9@byu.net>  (tiny change)
 
 	* doc/m4.texinfo (Patsubst): Re-add trailing space required by
 	checks/47.patsubst, with a redundant @comment to prevent emacs
@@ -15,7 +81,7 @@
 	* checks/get-them: Allow for trailing spaces tucked behind
 	@comment marks.
 
-2005-03-31  Erik Blake  <ebb9@byu.net>  (tiny change)
+2005-03-31  Eric Blake  <ebb9@byu.net>  (tiny change)
 
 	* doc/Makefile.in (install, uninstall): Accomodate DESTDIR.
 	* src/Makefile.in (install, uninstall): Likewise.
@@ -1704,4 +1770,4 @@ Mon Jan 22 21:08:52 1990  Rene' Seindal (seindal at diku.dk)
 
 	* Initial beta release.  Release 0.50, manual 0.05.
 
-	$Revision: 1.1.1.1.2.20 $ $Date: 2005/03/31 11:50:38 $
+	$Revision: 1.1.1.1.2.29 $ $Date: 2005/10/20 10:00:58 $
