@@ -1,11 +1,11 @@
 /* Abstract sequential list data type.
-   Copyright (C) 2006-2007 Free Software Foundation, Inc.
+   Copyright (C) 2006-2008 Free Software Foundation, Inc.
    Written by Bruno Haible <bruno@clisp.org>, 2006.
 
-   This program is free software; you can redistribute it and/or modify
+   This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2, or (at your option)
-   any later version.
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
 
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -13,8 +13,7 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software Foundation,
-   Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.  */
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #ifndef _GL_LIST_H
 #define _GL_LIST_H
@@ -63,6 +62,7 @@ extern "C" {
 
    gl_list_size                O(1)     O(1)     O(1)      O(1)         O(1)
    gl_list_node_value          O(1)     O(1)     O(1)      O(1)         O(1)
+   gl_list_node_set_value      O(1)     O(1)     O(1)      O(1)    O((log n)²)/O(1)
    gl_list_next_node           O(1)     O(1)   O(log n)    O(1)       O(log n)
    gl_list_previous_node       O(1)     O(1)   O(log n)    O(1)       O(log n)
    gl_list_get_at              O(1)     O(n)   O(log n)    O(n)       O(log n)
@@ -158,6 +158,10 @@ extern size_t gl_list_size (gl_list_t list);
 
 /* Return the element value represented by a list node.  */
 extern const void * gl_list_node_value (gl_list_t list, gl_list_node_t node);
+
+/* Replace the element value represented by a list node.  */
+extern void gl_list_node_set_value (gl_list_t list, gl_list_node_t node,
+				    const void *elt);
 
 /* Return the node immediately after the given node in the list, or NULL
    if the given node is the last (rightmost) one in the list.  */
@@ -382,6 +386,7 @@ struct gl_list_implementation
 		       size_t count, const void **contents);
   size_t (*size) (gl_list_t list);
   const void * (*node_value) (gl_list_t list, gl_list_node_t node);
+  void (*node_set_value) (gl_list_t list, gl_list_node_t node, const void *elt);
   gl_list_node_t (*next_node) (gl_list_t list, gl_list_node_t node);
   gl_list_node_t (*previous_node) (gl_list_t list, gl_list_node_t node);
   const void * (*get_at) (gl_list_t list, size_t position);
@@ -488,6 +493,14 @@ gl_list_node_value (gl_list_t list, gl_list_node_t node)
 {
   return ((const struct gl_list_impl_base *) list)->vtable
 	 ->node_value (list, node);
+}
+
+# define gl_list_node_set_value gl_list_node_set_value_inline
+static inline void
+gl_list_node_set_value (gl_list_t list, gl_list_node_t node, const void *elt)
+{
+  ((const struct gl_list_impl_base *) list)->vtable
+  ->node_set_value (list, node, elt);
 }
 
 # define gl_list_next_node gl_list_next_node_inline

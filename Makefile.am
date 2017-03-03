@@ -1,29 +1,28 @@
+## Makefile.am - template for generating Makefile via Automake
+##
+## Copyright (C) 2000, 2001, 2003, 2004, 2005, 2006, 2007, 2008 Free
+## Software Foundation, Inc.
+##
 ## This file is part of GNU M4.
 ##
-## Copyright (C) 2000, 2001, 2003, 2004, 2005, 2006, 2007 Free Software
-## Foundation, Inc.
-##
-## This program is free software; you can redistribute it and/or modify
+## GNU M4 is free software: you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation; either version 3 of the License, or
+## the Free Software Foundation, either version 3 of the License, or
 ## (at your option) any later version.
 ##
-## This program is distributed in the hope that it will be useful,
+## GNU M4 is distributed in the hope that it will be useful,
 ## but WITHOUT ANY WARRANTY; without even the implied warranty of
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ## GNU General Public License for more details.
 ##
 ## You should have received a copy of the GNU General Public License
-## along with this program; see the file COPYING.  If not, write to
-## the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-## Boston, MA 02110-1301, USA.
+## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ##
 ## Written by Gary V. Vaughan <gary@gnu.org>
 
 SUBDIRS = . examples lib src doc tests checks
-EXTRA_DIST = bootstrap c-boxes.el gendocs.sh GNUmakefile Makefile.maint \
-	m4/gnulib-cache.m4 local/doc/gpl-3.0.texi.diff \
-	local/lib/version-etc.c.diff
+EXTRA_DIST = bootstrap c-boxes.el cfg.mk maint.mk \
+	.version m4/gnulib-cache.m4
 DISTCLEANFILES = stamp-h
 ## maintainer-clean should remove as much as possible that ./bootstrap can
 ## recreate.  In the m4 directory, keep only gnulib-cache.m4.
@@ -34,3 +33,12 @@ MAINTAINERCLEANFILES = COPYING INSTALL Makefile.in aclocal.m4 \
 
 ACLOCAL_AMFLAGS = -I m4
 DISTCHECK_CONFIGURE_FLAGS = --enable-changeword
+
+BUILT_SOURCES = $(top_srcdir)/.version
+$(top_srcdir)/.version:
+	echo $(VERSION) > $@-t && mv $@-t $@
+
+# Arrange so that .tarball-version appears only in the distribution
+# tarball, and never in a checked-out repository.
+dist-hook:
+	echo $(VERSION) > $(distdir)/.tarball-version

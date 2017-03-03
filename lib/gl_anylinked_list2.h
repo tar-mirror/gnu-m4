@@ -1,11 +1,11 @@
 /* Sequential list data type implemented by a linked list.
-   Copyright (C) 2006-2007 Free Software Foundation, Inc.
+   Copyright (C) 2006-2008 Free Software Foundation, Inc.
    Written by Bruno Haible <bruno@clisp.org>, 2006.
 
-   This program is free software; you can redistribute it and/or modify
+   This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2, or (at your option)
-   any later version.
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
 
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -13,8 +13,7 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software Foundation,
-   Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.  */
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 /* Common code of gl_linked_list.c and gl_linkedhash_list.c.  */
 
@@ -125,6 +124,32 @@ static const void *
 gl_linked_node_value (gl_list_t list, gl_list_node_t node)
 {
   return node->value;
+}
+
+static void
+gl_linked_node_set_value (gl_list_t list, gl_list_node_t node, const void *elt)
+{
+#if WITH_HASHTABLE
+  if (elt != node->value)
+    {
+      size_t new_hashcode =
+	(list->base.hashcode_fn != NULL
+	 ? list->base.hashcode_fn (elt)
+	 : (size_t)(uintptr_t) elt);
+
+      if (new_hashcode != node->h.hashcode)
+	{
+	  remove_from_bucket (list, node);
+	  node->value = elt;
+	  node->h.hashcode = new_hashcode;
+	  add_to_bucket (list, node);
+	}
+      else
+	node->value = elt;
+    }
+#else
+  node->value = elt;
+#endif
 }
 
 static gl_list_node_t

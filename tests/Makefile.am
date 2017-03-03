@@ -1,6 +1,6 @@
 ## DO NOT EDIT! GENERATED AUTOMATICALLY!
 ## Process this file with automake to produce Makefile.in.
-# Copyright (C) 2004-2007 Free Software Foundation, Inc.
+# Copyright (C) 2002-2008 Free Software Foundation, Inc.
 #
 # This file is free software, distributed under the terms of the GNU
 # General Public License.  As a special exception to the GNU General
@@ -12,14 +12,14 @@
 
 AUTOMAKE_OPTIONS = 1.5 foreign
 
-ACLOCAL_AMFLAGS = -I ../m4
-
 SUBDIRS =
 TESTS =
 TESTS_ENVIRONMENT =
 noinst_PROGRAMS =
 check_PROGRAMS =
 noinst_HEADERS =
+noinst_LIBRARIES =
+check_LIBRARIES = libtests.a
 EXTRA_DIST =
 BUILT_SOURCES =
 SUFFIXES =
@@ -34,14 +34,36 @@ AM_CPPFLAGS = \
   -I.. -I$(srcdir)/.. \
   -I../lib -I$(srcdir)/../lib
 
-LDADD = ../lib/libm4.a
+LDADD = libtests.a ../lib/libm4.a libtests.a $(LIBTESTS_LIBDEPS)
+
+libtests_a_SOURCES =
+libtests_a_LIBADD = $(M4tests_LIBOBJS)
+libtests_a_DEPENDENCIES = $(M4tests_LIBOBJS)
+EXTRA_libtests_a_SOURCES =
+AM_LIBTOOLFLAGS = --preserve-dup-deps
+
+## begin gnulib module EOVERFLOW-tests
+
+TESTS += test-EOVERFLOW
+check_PROGRAMS += test-EOVERFLOW
+EXTRA_DIST += test-EOVERFLOW.c
+
+## end   gnulib module EOVERFLOW-tests
 
 ## begin gnulib module alloca-opt-tests
 
 TESTS += test-alloca-opt
 check_PROGRAMS += test-alloca-opt
 
+EXTRA_DIST += test-alloca-opt.c
+
 ## end   gnulib module alloca-opt-tests
+
+## begin gnulib module array-list
+
+libtests_a_SOURCES += gl_array_list.h gl_array_list.c
+
+## end   gnulib module array-list
 
 ## begin gnulib module array-list-tests
 
@@ -49,13 +71,23 @@ TESTS += test-array_list
 check_PROGRAMS += test-array_list
 test_array_list_LDADD = $(LDADD) @LIBINTL@
 
+EXTRA_DIST += test-array_list.c
+
 ## end   gnulib module array-list-tests
+
+## begin gnulib module array-oset
+
+libtests_a_SOURCES += gl_array_oset.h gl_array_oset.c
+
+## end   gnulib module array-oset
 
 ## begin gnulib module array-oset-tests
 
 TESTS += test-array_oset
 check_PROGRAMS += test-array_oset
 test_array_oset_LDADD = $(LDADD) @LIBINTL@
+
+EXTRA_DIST += test-array_oset.c
 
 ## end   gnulib module array-oset-tests
 
@@ -64,51 +96,101 @@ test_array_oset_LDADD = $(LDADD) @LIBINTL@
 TESTS += test-avltree_oset
 check_PROGRAMS += test-avltree_oset
 test_avltree_oset_LDADD = $(LDADD) @LIBINTL@
+EXTRA_DIST += test-avltree_oset.c
+
 ## end   gnulib module avltree-oset-tests
 
 ## begin gnulib module binary-io-tests
 
 TESTS += test-binary-io.sh
 TESTS_ENVIRONMENT += EXEEXT='@EXEEXT@'
-EXTRA_DIST += test-binary-io.sh
 check_PROGRAMS += test-binary-io
 
+EXTRA_DIST += test-binary-io.sh test-binary-io.c
+
 ## end   gnulib module binary-io-tests
+
+## begin gnulib module c-ctype-tests
+
+TESTS += test-c-ctype
+check_PROGRAMS += test-c-ctype
+
+EXTRA_DIST += test-c-ctype.c
+
+## end   gnulib module c-ctype-tests
 
 ## begin gnulib module closein-tests
 
 TESTS += test-closein.sh
 TESTS_ENVIRONMENT += EXEEXT='@EXEEXT@'
 check_PROGRAMS += test-closein
-EXTRA_DIST += test-closein.sh
 test_closein_LDADD = $(LDADD) @LIBINTL@
+EXTRA_DIST += test-closein.sh test-closein.c
+
 ## end   gnulib module closein-tests
 
 ## begin gnulib module fflush-tests
 
-TESTS += test-fflush
-check_PROGRAMS += test-fflush
+TESTS += test-fflush test-fflush2.sh
+TESTS_ENVIRONMENT += EXEEXT='@EXEEXT@' srcdir='$(srcdir)'
+check_PROGRAMS += test-fflush test-fflush2
 MOSTLYCLEANFILES += test-fflush.txt
+EXTRA_DIST += test-fflush.c test-fflush2.sh test-fflush2.c
+
 ## end   gnulib module fflush-tests
+
+## begin gnulib module fpending-tests
+
+TESTS += test-fpending.sh
+TESTS_ENVIRONMENT += EXEEXT='@EXEEXT@'
+check_PROGRAMS += test-fpending
+MOSTLYCLEANFILES += test-fpending.t
+EXTRA_DIST += test-fpending.c test-fpending.sh
+
+## end   gnulib module fpending-tests
 
 ## begin gnulib module fpurge-tests
 
 TESTS += test-fpurge
 check_PROGRAMS += test-fpurge
 MOSTLYCLEANFILES += t-fpurge.tmp
+EXTRA_DIST += test-fpurge.c
+
 ## end   gnulib module fpurge-tests
+
+## begin gnulib module freadahead-tests
+
+TESTS += test-freadahead.sh
+TESTS_ENVIRONMENT += EXEEXT='@EXEEXT@' srcdir='$(srcdir)'
+check_PROGRAMS += test-freadahead
+EXTRA_DIST += test-freadahead.c test-freadahead.sh
+
+## end   gnulib module freadahead-tests
 
 ## begin gnulib module freading-tests
 
 TESTS += test-freading
 check_PROGRAMS += test-freading
 MOSTLYCLEANFILES += t-freading.tmp
+EXTRA_DIST += test-freading.c
+
 ## end   gnulib module freading-tests
+
+## begin gnulib module frexp-nolibm-tests
+
+TESTS += test-frexp
+check_PROGRAMS += test-frexp
+
+EXTRA_DIST += test-frexp.c
+
+## end   gnulib module frexp-nolibm-tests
 
 ## begin gnulib module frexpl-nolibm-tests
 
 TESTS += test-frexpl
 check_PROGRAMS += test-frexpl
+
+EXTRA_DIST += test-frexpl.c
 
 ## end   gnulib module frexpl-nolibm-tests
 
@@ -117,7 +199,8 @@ check_PROGRAMS += test-frexpl
 TESTS += test-fseeko.sh
 TESTS_ENVIRONMENT += EXEEXT='@EXEEXT@' srcdir='$(srcdir)'
 check_PROGRAMS += test-fseeko
-EXTRA_DIST += test-fseeko.sh
+EXTRA_DIST += test-fseeko.c test-fseeko.sh
+
 ## end   gnulib module fseeko-tests
 
 ## begin gnulib module ftello-tests
@@ -125,7 +208,8 @@ EXTRA_DIST += test-fseeko.sh
 TESTS += test-ftello.sh
 TESTS_ENVIRONMENT += EXEEXT='@EXEEXT@' srcdir='$(srcdir)'
 check_PROGRAMS += test-ftello
-EXTRA_DIST += test-ftello.sh
+EXTRA_DIST += test-ftello.c test-ftello.sh
+
 ## end   gnulib module ftello-tests
 
 ## begin gnulib module gettimeofday-tests
@@ -133,19 +217,25 @@ EXTRA_DIST += test-ftello.sh
 TESTS += test-gettimeofday
 check_PROGRAMS += test-gettimeofday
 
+EXTRA_DIST += test-gettimeofday.c
+
 ## end   gnulib module gettimeofday-tests
 
-## begin gnulib module isnan-nolibm-tests
+## begin gnulib module isnand-nolibm-tests
 
-TESTS += test-isnan
-check_PROGRAMS += test-isnan
+TESTS += test-isnand
+check_PROGRAMS += test-isnand
 
-## end   gnulib module isnan-nolibm-tests
+EXTRA_DIST += test-isnand.c nan.h
+
+## end   gnulib module isnand-nolibm-tests
 
 ## begin gnulib module isnanf-nolibm-tests
 
 TESTS += test-isnanf
 check_PROGRAMS += test-isnanf
+
+EXTRA_DIST += test-isnanf.c nan.h
 
 ## end   gnulib module isnanf-nolibm-tests
 
@@ -153,7 +243,8 @@ check_PROGRAMS += test-isnanf
 
 TESTS += test-isnanl-nolibm
 check_PROGRAMS += test-isnanl-nolibm
-EXTRA_DIST += test-isnanl.h
+
+EXTRA_DIST += test-isnanl-nolibm.c test-isnanl.h
 
 ## end   gnulib module isnanl-nolibm-tests
 
@@ -162,6 +253,8 @@ EXTRA_DIST += test-isnanl.h
 TESTS += test-linkedhash_list
 check_PROGRAMS += test-linkedhash_list
 test_linkedhash_list_LDADD = $(LDADD) @LIBINTL@
+EXTRA_DIST += test-linkedhash_list.c
+
 ## end   gnulib module linkedhash-list-tests
 
 ## begin gnulib module lseek-tests
@@ -169,13 +262,16 @@ test_linkedhash_list_LDADD = $(LDADD) @LIBINTL@
 TESTS += test-lseek.sh
 TESTS_ENVIRONMENT += EXEEXT='@EXEEXT@' srcdir='$(srcdir)'
 check_PROGRAMS += test-lseek
-EXTRA_DIST += test-lseek.sh
+EXTRA_DIST += test-lseek.c test-lseek.sh
+
 ## end   gnulib module lseek-tests
 
 ## begin gnulib module malloca-tests
 
 TESTS += test-malloca
 check_PROGRAMS += test-malloca
+
+EXTRA_DIST += test-malloca.c
 
 ## end   gnulib module malloca-tests
 
@@ -184,12 +280,16 @@ check_PROGRAMS += test-malloca
 TESTS += test-math
 check_PROGRAMS += test-math
 
+EXTRA_DIST += test-math.c
+
 ## end   gnulib module math-tests
 
 ## begin gnulib module printf-frexp-tests
 
 TESTS += test-printf-frexp
 check_PROGRAMS += test-printf-frexp
+
+EXTRA_DIST += test-printf-frexp.c
 
 ## end   gnulib module printf-frexp-tests
 
@@ -198,12 +298,30 @@ check_PROGRAMS += test-printf-frexp
 TESTS += test-printf-frexpl
 check_PROGRAMS += test-printf-frexpl
 
+EXTRA_DIST += test-printf-frexpl.c
+
 ## end   gnulib module printf-frexpl-tests
+
+## begin gnulib module progname
+
+libtests_a_SOURCES += progname.h progname.c
+
+## end   gnulib module progname
+
+## begin gnulib module quotearg-tests
+
+TESTS += test-quotearg
+check_PROGRAMS += test-quotearg
+EXTRA_DIST += test-quotearg.c
+
+## end   gnulib module quotearg-tests
 
 ## begin gnulib module signbit-tests
 
 TESTS += test-signbit
 check_PROGRAMS += test-signbit
+
+EXTRA_DIST += test-signbit.c
 
 ## end   gnulib module signbit-tests
 
@@ -212,12 +330,16 @@ check_PROGRAMS += test-signbit
 TESTS += test-stdbool
 check_PROGRAMS += test-stdbool
 
+EXTRA_DIST += test-stdbool.c
+
 ## end   gnulib module stdbool-tests
 
 ## begin gnulib module stdint-tests
 
 TESTS += test-stdint
 check_PROGRAMS += test-stdint
+
+EXTRA_DIST += test-stdint.c
 
 ## end   gnulib module stdint-tests
 
@@ -226,6 +348,8 @@ check_PROGRAMS += test-stdint
 TESTS += test-stdio
 check_PROGRAMS += test-stdio
 
+EXTRA_DIST += test-stdio.c
+
 ## end   gnulib module stdio-tests
 
 ## begin gnulib module stdlib-tests
@@ -233,12 +357,51 @@ check_PROGRAMS += test-stdio
 TESTS += test-stdlib
 check_PROGRAMS += test-stdlib
 
+EXTRA_DIST += test-stdlib.c
+
 ## end   gnulib module stdlib-tests
+
+## begin gnulib module strerror-tests
+
+TESTS += test-strerror
+check_PROGRAMS += test-strerror
+EXTRA_DIST += test-strerror.c
+
+## end   gnulib module strerror-tests
+
+## begin gnulib module string-tests
+
+TESTS += test-string
+check_PROGRAMS += test-string
+
+EXTRA_DIST += test-string.c
+
+## end   gnulib module string-tests
+
+## begin gnulib module strstr-tests
+
+TESTS += test-strstr
+check_PROGRAMS += test-strstr
+
+EXTRA_DIST += test-strstr.c
+
+## end   gnulib module strstr-tests
+
+## begin gnulib module strtod-tests
+
+LIBS += $(POW_LIB)
+TESTS += test-strtod
+check_PROGRAMS += test-strtod
+EXTRA_DIST += test-strtod.c
+
+## end   gnulib module strtod-tests
 
 ## begin gnulib module sys_stat-tests
 
 TESTS += test-sys_stat
 check_PROGRAMS += test-sys_stat
+
+EXTRA_DIST += test-sys_stat.c
 
 ## end   gnulib module sys_stat-tests
 
@@ -247,12 +410,16 @@ check_PROGRAMS += test-sys_stat
 TESTS += test-sys_time
 check_PROGRAMS += test-sys_time
 
+EXTRA_DIST += test-sys_time.c
+
 ## end   gnulib module sys_time-tests
 
 ## begin gnulib module unistd-tests
 
 TESTS += test-unistd
 check_PROGRAMS += test-unistd
+
+EXTRA_DIST += test-unistd.c
 
 ## end   gnulib module unistd-tests
 
@@ -261,12 +428,16 @@ check_PROGRAMS += test-unistd
 TESTS += test-vasnprintf
 check_PROGRAMS += test-vasnprintf
 
+EXTRA_DIST += test-vasnprintf.c
+
 ## end   gnulib module vasnprintf-tests
 
 ## begin gnulib module vasprintf-posix-tests
 
 TESTS += test-vasprintf-posix
 check_PROGRAMS += test-vasprintf-posix
+
+EXTRA_DIST += test-vasprintf-posix.c nan.h
 
 ## end   gnulib module vasprintf-posix-tests
 
@@ -275,12 +446,22 @@ check_PROGRAMS += test-vasprintf-posix
 TESTS += test-vasprintf
 check_PROGRAMS += test-vasprintf
 
+EXTRA_DIST += test-vasprintf.c
+
 ## end   gnulib module vasprintf-tests
+
+## begin gnulib module verify
+
+libtests_a_SOURCES += verify.h
+
+## end   gnulib module verify
 
 ## begin gnulib module wchar-tests
 
 TESTS += test-wchar
 check_PROGRAMS += test-wchar
+
+EXTRA_DIST += test-wchar.c
 
 ## end   gnulib module wchar-tests
 
@@ -289,6 +470,8 @@ check_PROGRAMS += test-wchar
 TESTS += test-wctype
 check_PROGRAMS += test-wctype
 
+EXTRA_DIST += test-wctype.c
+
 ## end   gnulib module wctype-tests
 
 ## begin gnulib module xvasprintf-tests
@@ -296,6 +479,8 @@ check_PROGRAMS += test-wctype
 TESTS += test-xvasprintf
 check_PROGRAMS += test-xvasprintf
 test_xvasprintf_LDADD = $(LDADD) @LIBINTL@
+
+EXTRA_DIST += test-xvasprintf.c
 
 ## end   gnulib module xvasprintf-tests
 

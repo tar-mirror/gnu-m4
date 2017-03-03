@@ -3,20 +3,20 @@
    Copyright (C) 1989, 1990, 1991, 1992, 1993, 2004, 2006, 2007 Free
    Software Foundation, Inc.
 
-   This program is free software; you can redistribute it and/or modify
+   This file is part of GNU M4.
+
+   GNU M4 is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 3 of the License, or
+   the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful,
+   GNU M4 is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software
-   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
-   02110-1301  USA
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 /* Handling of path search of included files via the builtins "include"
@@ -101,7 +101,7 @@ add_include_directory (const char *dir)
   dir_list_end = incl;
 
 #ifdef DEBUG_INCL
-  fprintf (stderr, "add_include_directory (%s);\n", dir);
+  xfprintf (stderr, "add_include_directory (%s);\n", dir);
 #endif
 }
 
@@ -154,7 +154,7 @@ m4_path_search (const char *file, char **result)
       strcpy (name + incl->len + 1, file);
 
 #ifdef DEBUG_INCL
-      fprintf (stderr, "m4_path_search (%s) -- trying %s\n", file, name);
+      xfprintf (stderr, "m4_path_search (%s) -- trying %s\n", file, name);
 #endif
 
       fp = fopen (name, "r");
@@ -185,9 +185,9 @@ include_dump (void)
 {
   includes *incl;
 
-  fprintf (stderr, "include_dump:\n");
+  xfprintf (stderr, "include_dump:\n");
   for (incl = dir_list; incl != NULL; incl = incl->next)
-    fprintf (stderr, "\t%s\n", incl->dir);
+    xfprintf (stderr, "\t%s\n", incl->dir);
 }
 
 #endif /* DEBUG_INCL */

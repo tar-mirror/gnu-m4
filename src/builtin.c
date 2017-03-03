@@ -1,22 +1,22 @@
 /* GNU m4 -- A simple macro processor
 
-   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2000, 2004, 2006, 2007
-   Free Software Foundation, Inc.
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2000, 2004, 2006,
+   2007, 2008 Free Software Foundation, Inc.
 
-   This program is free software; you can redistribute it and/or modify
+   This file is part of GNU M4.
+
+   GNU M4 is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 3 of the License, or
+   the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful,
+   GNU M4 is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software
-   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
-   02110-1301  USA
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 /* Code for all builtin macros, initialization of symbol table, and
@@ -450,7 +450,7 @@ numeric_arg (token_data *macro, const char *arg, int *valuep)
 /* Digits for number to ascii conversions.  */
 static char const digits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
 
-static const char *
+const char *
 ntoa (int32_t value, int radix)
 {
   bool negative;
@@ -890,38 +890,43 @@ m4_defn (struct obstack *obs, int argc, token_data **argv)
 {
   symbol *s;
   builtin_func *b;
+  int i;
 
-  if (bad_argc (argv[0], argc, 2, 2))
+  if (bad_argc (argv[0], argc, 2, -1))
     return;
 
-  s = lookup_symbol (ARG (1), SYMBOL_LOOKUP);
-  if (s == NULL)
-    return;
-
-  switch (SYMBOL_TYPE (s))
+  for (i = 1; i < argc; i++)
     {
-    case TOKEN_TEXT:
-      obstack_grow (obs, lquote.string, lquote.length);
-      obstack_grow (obs, SYMBOL_TEXT (s), strlen (SYMBOL_TEXT (s)));
-      obstack_grow (obs, rquote.string, rquote.length);
-      break;
+      s = lookup_symbol (ARG (i), SYMBOL_LOOKUP);
+      if (s == NULL)
+	continue;
 
-    case TOKEN_FUNC:
-      b = SYMBOL_FUNC (s);
-      if (b == m4_placeholder)
-	M4ERROR ((warning_status, 0, "\
-builtin `%s' requested by frozen file is not supported", ARG (1)));
-      else
-	push_macro (b);
-      break;
+      switch (SYMBOL_TYPE (s))
+	{
+	case TOKEN_TEXT:
+	  obstack_grow (obs, lquote.string, lquote.length);
+	  obstack_grow (obs, SYMBOL_TEXT (s), strlen (SYMBOL_TEXT (s)));
+	  obstack_grow (obs, rquote.string, rquote.length);
+	  break;
 
-    case TOKEN_VOID:
-      break;
+	case TOKEN_FUNC:
+	  b = SYMBOL_FUNC (s);
+	  if (b == m4_placeholder)
+	    M4ERROR ((warning_status, 0, "\
+builtin `%s' requested by frozen file is not supported", ARG (i)));
+	  else if (argc != 2)
+	    M4ERROR ((warning_status, 0,
+		      "Warning: cannot concatenate builtin `%s'",
+		      ARG (i)));
+	  else
+	    push_macro (b);
+	  break;
 
-    default:
-      M4ERROR ((warning_status, 0,
-		"INTERNAL ERROR: bad symbol type in m4_defn ()"));
-      abort ();
+	default:
+	  M4ERROR ((warning_status, 0,
+		    "INTERNAL ERROR: bad symbol type in m4_defn ()"));
+	  abort ();
+	}
     }
 }
 
@@ -1339,35 +1344,42 @@ m4_sinclude (struct obstack *obs, int argc, token_data **argv)
 | Use the first argument as at template for a temporary file name.  |
 `------------------------------------------------------------------*/
 
-/* Add trailing 'X' to NAME if necessary, securely create the file,
-   and place the new file name on OBS.  */
+/* Add trailing 'X' to PATTERN of length LEN as necessary, then
+   securely create the file, and place the quoted new file name on
+   OBS.  Report errors on behalf of ME.  */
 static void
-mkstemp_helper (struct obstack *obs, const char *name)
+mkstemp_helper (struct obstack *obs, const char *me, const char *pattern,
+		size_t len)
 {
   int fd;
-  int len;
   int i;
+  char *name;
 
   /* Guarantee that there are six trailing 'X' characters, even if the
-     user forgot to supply them.  */
-  len = strlen (name);
-  obstack_grow (obs, name, len);
+     user forgot to supply them.  Output must be quoted if
+     successful.  */
+  obstack_grow (obs, lquote.string, lquote.length);
+  obstack_grow (obs, pattern, len);
   for (i = 0; len > 0 && i < 6; i++)
-    if (name[--len] != 'X')
+    if (pattern[len - i - 1] != 'X')
       break;
-  for (; i < 6; i++)
-    obstack_1grow (obs, 'X');
-  obstack_1grow (obs, '\0');
+  obstack_grow0 (obs, "XXXXXX", 6 - i);
+  name = (char *) obstack_base (obs) + lquote.length;
 
   errno = 0;
-  fd = mkstemp ((char *) obstack_base (obs));
+  fd = mkstemp (name);
   if (fd < 0)
     {
-      M4ERROR ((0, errno, "cannot create tempfile `%s'", name));
+      M4ERROR ((0, errno, "cannot create tempfile `%s'", pattern));
       obstack_free (obs, obstack_finish (obs));
     }
   else
-    close (fd);
+    {
+      close (fd);
+      /* Remove NUL, then finish quote.  */
+      obstack_blank (obs, -1);
+      obstack_grow (obs, rquote.string, rquote.length);
+    }
 }
 
 static void
@@ -1410,7 +1422,7 @@ m4_maketemp (struct obstack *obs, int argc, token_data **argv)
 	}
     }
   else
-    mkstemp_helper (obs, ARG (1));
+    mkstemp_helper (obs, ARG (0), ARG (1), strlen (ARG (1)));
 }
 
 static void
@@ -1418,7 +1430,7 @@ m4_mkstemp (struct obstack *obs, int argc, token_data **argv)
 {
   if (bad_argc (argv[0], argc, 2, 2))
     return;
-  mkstemp_helper (obs, ARG (1));
+  mkstemp_helper (obs, ARG (0), ARG (1), strlen (ARG (1)));
 }
 
 /*----------------------------------------.
@@ -1433,7 +1445,7 @@ m4_errprint (struct obstack *obs, int argc, token_data **argv)
   dump_args (obs, argc, argv, " ", false);
   obstack_1grow (obs, '\0');
   debug_flush_files ();
-  fprintf (stderr, "%s", (char *) obstack_finish (obs));
+  xfprintf (stderr, "%s", (char *) obstack_finish (obs));
   fflush (stderr);
 }
 
@@ -1898,16 +1910,16 @@ Warning: \\0 will disappear, use \\& instead in replacements"));
 	case '7': case '8': case '9':
 	  ch -= '0';
 	  if (regs->num_regs - 1 <= ch)
-	    M4ERROR ((warning_status, 0, "\
-Warning: sub-expression %d not present", ch));
+	    M4ERROR ((warning_status, 0,
+		      "Warning: sub-expression %d not present", ch));
 	  else if (regs->end[ch] > 0)
 	    obstack_grow (obs, victim + regs->start[ch],
 			  regs->end[ch] - regs->start[ch]);
 	  break;
 
 	case '\0':
-	  M4ERROR ((warning_status, 0, "\
-Warning: trailing \\ ignored in replacement"));
+	  M4ERROR ((warning_status, 0,
+		    "Warning: trailing \\ ignored in replacement"));
 	  return;
 
 	default:

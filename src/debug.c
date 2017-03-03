@@ -3,20 +3,20 @@
    Copyright (C) 1991, 1992, 1993, 1994, 2004, 2006, 2007 Free Software
    Foundation, Inc.
 
-   This program is free software; you can redistribute it and/or modify
+   This file is part of GNU M4.
+
+   GNU M4 is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 3 of the License, or
+   the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful,
+   GNU M4 is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software
-   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
-   02110-1301  USA
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include "m4.h"
@@ -231,13 +231,13 @@ debug_set_output (const char *name)
 void
 debug_message_prefix (void)
 {
-  fprintf (debug, "m4debug:");
+  xfprintf (debug, "m4debug:");
   if (current_line)
   {
     if (debug_level & DEBUG_TRACE_FILE)
-      fprintf (debug, "%s:", current_file);
+      xfprintf (debug, "%s:", current_file);
     if (debug_level & DEBUG_TRACE_LINE)
-      fprintf (debug, "%d:", current_line);
+      xfprintf (debug, "%d:", current_line);
   }
   putc (' ', debug);
 }
@@ -261,7 +261,6 @@ trace_format (const char *fmt, ...)
   char ch;
 
   int d;
-  char nbuf[32];
   const char *s;
   int slen;
   int maxlen;
@@ -297,8 +296,7 @@ trace_format (const char *fmt, ...)
 
 	case 'd':
 	  d = va_arg (args, int);
-	  sprintf (nbuf, "%d", d);
-	  s = nbuf;
+	  s = ntoa (d, 10);
 	  break;
 
 	default:

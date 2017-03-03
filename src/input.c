@@ -3,20 +3,20 @@
    Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2004, 2005, 2006, 2007
    Free Software Foundation, Inc.
 
-   This program is free software; you can redistribute it and/or modify
+   This file is part of GNU M4.
+
+   GNU M4 is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 3 of the License, or
+   the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful,
+   GNU M4 is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software
-   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
-   02110-1301  USA
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 /* Handling of different input sources, and lexical analysis.  */
@@ -845,7 +845,7 @@ next_token (token_data *td, int *line)
   if (ch == CHAR_EOF)
     {
 #ifdef DEBUG_INPUT
-      fprintf (stderr, "next_token -> EOF\n");
+      xfprintf (stderr, "next_token -> EOF\n");
 #endif
       next_char ();
       return TOKEN_EOF;
@@ -855,8 +855,8 @@ next_token (token_data *td, int *line)
       init_macro_token (td);
       next_char ();
 #ifdef DEBUG_INPUT
-      fprintf (stderr, "next_token -> MACDEF (%s)\n",
-	       find_builtin_by_addr (TOKEN_DATA_FUNC (td))->name);
+      xfprintf (stderr, "next_token -> MACDEF (%s)\n",
+		find_builtin_by_addr (TOKEN_DATA_FUNC (td))->name);
 #endif
       return TOKEN_MACDEF;
     }
@@ -988,8 +988,8 @@ next_token (token_data *td, int *line)
   TOKEN_DATA_ORIG_TEXT (td) = orig_text;
 #endif
 #ifdef DEBUG_INPUT
-  fprintf (stderr, "next_token -> %s (%s)\n",
-	   token_type_string (type), TOKEN_DATA_TEXT (td));
+  xfprintf (stderr, "next_token -> %s (%s)\n",
+	    token_type_string (type), TOKEN_DATA_TEXT (td));
 #endif
   return type;
 }
@@ -1045,7 +1045,7 @@ peek_token (void)
       }
 
 #ifdef DEBUG_INPUT
-  fprintf (stderr, "peek_token -> %s\n", token_type_string (result));
+  xfprintf (stderr, "peek_token -> %s\n", token_type_string (result));
 #endif /* DEBUG_INPUT */
   return result;
 }
@@ -1082,33 +1082,33 @@ token_type_string (token_type t)
 static void
 print_token (const char *s, token_type t, token_data *td)
 {
-  fprintf (stderr, "%s: ", s);
+  xfprintf (stderr, "%s: ", s);
   switch (t)
     {				/* TOKSW */
     case TOKEN_OPEN:
     case TOKEN_COMMA:
     case TOKEN_CLOSE:
     case TOKEN_SIMPLE:
-      fprintf (stderr, "char:");
+      xfprintf (stderr, "char:");
       break;
 
     case TOKEN_WORD:
-      fprintf (stderr, "word:");
+      xfprintf (stderr, "word:");
       break;
 
     case TOKEN_STRING:
-      fprintf (stderr, "string:");
+      xfprintf (stderr, "string:");
       break;
 
     case TOKEN_MACDEF:
-      fprintf (stderr, "macro: %p\n", TOKEN_DATA_FUNC (td));
+      xfprintf (stderr, "macro: %p\n", TOKEN_DATA_FUNC (td));
       break;
 
     case TOKEN_EOF:
-      fprintf (stderr, "eof\n");
+      xfprintf (stderr, "eof\n");
       break;
     }
-  fprintf (stderr, "\t\"%s\"\n", TOKEN_DATA_TEXT (td));
+  xfprintf (stderr, "\t\"%s\"\n", TOKEN_DATA_TEXT (td));
 }
 
 static void M4_GNUC_UNUSED

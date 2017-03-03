@@ -1,4 +1,4 @@
-dnl @ ../doc/m4.texinfo:2108: Origin of test
+dnl @ ../doc/m4.texinfo:2110: Origin of test
 dnl @ expected status: 0
 dnl @ extra options: 
 dnl @ Copyright (C) 2006, 2007 Free Software Foundation
@@ -6,10 +6,9 @@ dnl @ This file is free software; the Free Software Foundation
 dnl @ gives unlimited permission to copy and/or distribute it
 dnl @ with or without modifications, as long as this notice
 dnl @ is preserved.
-defn(`defn')
+define(`zap', defn(`undefine'))
 dnl @result{}
-define(defn(`divnum'), `cannot redefine a builtin token')
-dnl @error{}m4:stdin:2: Warning: define: invalid macro name ignored
+zap(`undefine')
 dnl @result{}
-divnum
-dnl @result{}0
+undefine(`zap')
+dnl @result{}undefine(zap)

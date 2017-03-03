@@ -1,0 +1,14 @@
+dnl @ ../doc/m4.texinfo:6239: Origin of test
+dnl @ expected status: 0
+dnl @ extra options: 
+dnl @ Copyright (C) 2006, 2007 Free Software Foundation
+dnl @ This file is free software; the Free Software Foundation
+dnl @ gives unlimited permission to copy and/or distribute it
+dnl @ with or without modifications, as long as this notice
+dnl @ is preserved.
+syscmd(`rm -f foo??????')sysval
+dnl @result{}0
+len(mkstemp(`fooXXXXX'))
+dnl @result{}9
+syscmd(`rm foo??????')sysval
+dnl @result{}0

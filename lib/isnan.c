@@ -1,19 +1,18 @@
 /* Test for NaN that does not need libm.
-   Copyright (C) 2007 Free Software Foundation, Inc.
+   Copyright (C) 2007-2008 Free Software Foundation, Inc.
 
-   This program is free software; you can redistribute it and/or modify
+   This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2, or (at your option)
-   any later version.
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
 
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
 
-   You should have received a copy of the GNU General Public License along
-   with this program; if not, write to the Free Software Foundation,
-   Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 /* Written by Bruno Haible <bruno@clisp.org>, 2007.  */
 
@@ -37,7 +36,7 @@
 # define SIZE SIZEOF_LDBL
 # define L_(literal) literal##L
 #elif ! defined USE_FLOAT
-# define FUNC rpl_isnan
+# define FUNC rpl_isnand
 # define DOUBLE double
 # define MAX_EXP DBL_MAX_EXP
 # define MIN_EXP DBL_MIN_EXP
@@ -141,7 +140,21 @@ FUNC (DOUBLE x)
   /* The configuration did not find sufficient information.  Give up about
      the signaling NaNs, handle only the quiet NaNs.  */
   if (x == x)
-    return 0;
+    {
+# if defined USE_LONG_DOUBLE && ((defined __ia64 && LDBL_MANT_DIG == 64) || (defined __x86_64__ || defined __amd64__) || (defined __i386 || defined __i386__ || defined _I386 || defined _M_IX86 || defined _X86_))
+      /* Detect any special bit patterns that pass ==; see comment above.  */
+      memory_double m1;
+      memory_double m2;
+
+      memset (&m1.value, 0, SIZE);
+      memset (&m2.value, 0, SIZE);
+      m1.value = x;
+      m2.value = x + (x ? 0.0L : -0.0L);
+      if (memcmp (&m1.value, &m2.value, SIZE) != 0)
+        return 1;
+# endif
+      return 0;
+    }
   else
     return 1;
 #endif

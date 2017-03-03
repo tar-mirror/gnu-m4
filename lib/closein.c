@@ -2,10 +2,10 @@
 
    Copyright (C) 2007 Free Software Foundation, Inc.
 
-   This program is free software; you can redistribute it and/or modify
+   This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2, or (at your option)
-   any later version.
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
 
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -13,8 +13,7 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software Foundation,
-   Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.  */
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include <config.h>
 
@@ -32,6 +31,7 @@
 #include "closeout.h"
 #include "error.h"
 #include "exitfail.h"
+#include "freadahead.h"
 #include "quotearg.h"
 
 static const char *file_name;
@@ -80,10 +80,16 @@ close_stdin (void)
 {
   bool fail = false;
 
-  /* Only attempt flush if stdin is seekable, as fflush is entitled to
-     fail on non-seekable streams.  */
-  if (fseeko (stdin, 0, SEEK_CUR) == 0 && fflush (stdin) != 0)
-    fail = true;
+  /* There is no need to flush stdin if we can determine quickly that stdin's
+     input buffer is empty; in this case we know that if stdin is seekable,
+     fseeko (stdin, 0, SEEK_CUR) == lseek (0, 0, SEEK_CUR).  */
+  if (freadahead (stdin) > 0)
+    {
+      /* Only attempt flush if stdin is seekable, as fflush is entitled to
+	 fail on non-seekable streams.  */
+      if (fseeko (stdin, 0, SEEK_CUR) == 0 && fflush (stdin) != 0)
+	fail = true;
+    }
   if (close_stream (stdin) != 0)
     fail = true;
   if (fail)

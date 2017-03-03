@@ -1,19 +1,18 @@
 /* Flushing buffers of a FILE stream.
    Copyright (C) 2007 Free Software Foundation, Inc.
 
-   This program is free software; you can redistribute it and/or modify
+   This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2, or (at your option)
-   any later version.
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
 
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
 
-   You should have received a copy of the GNU General Public License along
-   with this program; if not, write to the Free Software Foundation,
-   Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include <config.h>
 
@@ -103,6 +102,16 @@ fpurge (FILE *fp)
   else if (fp->__modeflags & (__FLAG_READONLY | __FLAG_READING))
     fp->__bufpos = fp->__bufread;
 #  endif
+  return 0;
+# elif defined __QNX__              /* QNX */
+  fp->_Rback = fp->_Back + sizeof (fp->_Back);
+  fp->_Rsave = NULL;
+  if (fp->_Mode & 0x2000 /* _MWRITE */)
+    /* fp->_Buf <= fp->_Next <= fp->_Wend */
+    fp->_Next = fp->_Buf;
+  else
+    /* fp->_Buf <= fp->_Next <= fp->_Rend */
+    fp->_Rend = fp->_Next;
   return 0;
 # else
  #error "Please port gnulib fpurge.c to your platform! Look at the definitions of fflush, setvbuf and ungetc on your system, then report this to bug-gnulib."

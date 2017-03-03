@@ -1,6 +1,359 @@
+2008-04-02  Eric Blake  <ebb9@byu.net>
+
+	Release Version 1.4.11.
+	* NEWS: Mention the release.
+
+	Prepare for release.
+	* maint.mk (alpha): Check for PREV_VERSION setting sooner, and
+	remove tag operation.
+	(version-check): Enhance this check.
+	(prev-tarball): Depend on version-check.
+	(this-vc-tag): Delete, and mention need to run tag...
+	* HACKING: ...here, prior to make maintainer-distcheck.
+	Update the instructions to match this particular release process.
+	* Makefile.am (.version, announcement): Allow for VPATH build.
+	* cfg.mk (gnulib_dir): Likewise.
+	* doc/Makefile.am ($(srcdir)/m4.1): Include release number in man
+	page.
+
+2008-04-01  Eric Blake  <ebb9@byu.net>
+
+	Speed up index builtin.
+	* m4/gnulib-cache: Import strstr module.
+	* NEWS: Mention the speedup.
+
+2008-03-29  Eric Blake  <ebb9@byu.net>
+
+	Fix testsuite on mingw, OpenBSD.
+	* src/format.c (ARG_DOUBLE): Use strtod, not atof.
+	* src/Makefile.am (m4_LDADD): Use POW_LIB when needed.
+	* doc/m4.texinfo (Format): Add hex-float support.
+	* NEWS: Document this.
+
+2008-03-27  Eric Blake  <ebb9@byu.net>
+
+	Pull other useful doc fixes from branch-1.6.
+	* doc/m4.texinfo (Arguments): Enable test of
+	--warn-macro-sequence.
+	(Defn): Test length of builtin token.
+	(Builtin, Ifelse, Changequote): Add more regression tests.
+
+2008-03-27  Eric Blake  <ebb9@byu.net>
+
+	Add test for divert bug on 2007-05-28, patched 2007-07-21.
+	* doc/m4.texinfo (Diversions): Add test.
+
+2008-03-24  Eric Blake  <ebb9@byu.net>
+
+	Pull GNUmakefile from gnulib.
+	* m4/gnulib-cache.m4: Import gnumakefile module.
+	* GNUmakefile: Remove from version control; supplied by gnulib
+	instead.
+	* configure.ac (AC_INIT): Track intra-release version with
+	git-version-gen.
+	(AC_CONFIG_LINKS): Let gnulib do this now.
+	* Makefile.am (distclean-local): Likewise.
+	(EXTRA_DIST): Likewise.  Also handle renamed files.
+	* (.version, dist-hook): Improve version handling.
+	* Makefile.cfg: Rename...
+	* cfg.mk: ...to this.
+	* Makefile.maint: Rename...
+	* maint.mk: ...to this.
+	(ME, makefile-check, m4-check): Use new macro instead of
+	hard-coded name.
+	* HACKING: Mention that maintainer rules should now work in VPATH
+	builds.
+
+2008-03-15  Eric Blake  <ebb9@byu.net>
+
+	Document join, in order to fix bug in m4wrap example.
+	* doc/m4.texinfo (Improved m4wrap): New node.
+	(Defn, Location): Enhance tests.
+	(Shift): Document the composite macro join.
+	(Incompatibilities): Move documentation of LIFO vs. FIFO...
+	(M4wrap): ...here, to match improved example.
+
+2008-03-10  Eric Blake  <ebb9@byu.net>
+
+	Allow 'make installcheck' with './configure --program-prefix'.
+	* checks/Makefile.in (program_transform_name): New macro.
+	(installcheck): Use it to transform name of m4 before testing.
+	* checks/check-them (m4): Add -m option, to allow testing m4 by a
+	different name.
+	* checks/get-them: Allow xout and xerr notation.
+
+2008-02-25  Eric Blake  <ebb9@byu.net>
+
+	Improve release process.
+	* configure.ac (AM_INIT_AUTOMAKE): Increase requirement, and add
+	dist-lzma.
+	* HACKING: Update for git release procedures.
+	* Makefile.cfg: New file.
+	* GNUmakefile: Use it.
+	* Makefile.maint (gzip_rsyncable, GZIP_ENV, GIT, VC, VC-tag)
+	(VERSION_REGEXP, this-vc-tag, my_distdir, null_AM_MAKEFLAGS)
+	(TMPDIR, gnulib-version): New macros, borrowed from coreutils.
+	(makefile-check, news-date-check, changelog-check, m4-check)
+	(vc-diff-check, maintainer-distcheck, vc-dist, my-distcheck)
+	(announcement, alpha, beta, major): New rules, borrowed from
+	coreutils.
+	(TEXI2HTML, cvs-release, update-timestamps, cvs-news, cvs-commit)
+	(cvs-dist): Delete.
+	* Makefile.am (EXTRA_DIST): Distribute new file.
+
+2008-02-19  Eric Blake  <ebb9@byu.net>
+
+	Clean up foreach example.
+	* doc/m4.texinfo (Foreach, Improved foreach): Document another
+	shortcoming in foreach.m4.
+
+2008-02-16  Eric Blake  <ebb9@byu.net>
+
+	Add regression test for multi-character quote recursion.
+	* examples/foreach2.m4: Use $0 rather than spelling out name.
+	* examples/foreachq2.m4: Likewise.
+	* examples/forloop2.m4: Likewise.
+	* examples/hanoi.m4: Likewise.
+	* examples/trace.m4: Likewise.
+	* doc/m4.texinfo (Improved forloop): Document advantage of $0.
+	(Improved foreach): Adjust dump from file.
+
+2008-02-13  Eric Blake  <ebb9@byu.net>
+
+	Fix texinfo grammar.
+	* doc/m4.texinfo (Incompatibilities): Use @. after capital.
+	(History): Use @: after abbreviations.
+	(M4exit): Use correct Latin abbreviation.
+
+2008-02-11  Eric Blake  <ebb9@byu.net>
+
+	Document behavior of __gnu__().
+	* doc/m4.texinfo (Platform macros): Enhance test.
+	(Macro expansion): New test.
+
+2008-01-31  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
+
+	* checks/Makefile.in: Use @SET_MAKE@, and use @SHELL@ rather
+	than hard-coding /bin/sh.
+	* THANKS: Update.
+	Reported by Lawson Chan.
+
+2007-12-13  Paolo Bonzini  <bonzini@gnu.org>  (tiny change)
+
+	* doc/m4.texinfo (Inhibiting Invocation): Fix quoting of a quoting
+	example.
+	* THANKS: Update.
+	Reported by Giovanni Toffetti.
+
+2007-12-07  Eric Blake  <ebb9@byu.net>
+
+	Minor security fix: Quote output of mkstemp.
+	* src/builtin.c (mkstemp_helper): Produce quoted output.
+	* doc/m4.texinfo (Mkstemp): Update the documentation and tests.
+	* NEWS: Document this change.
+
+2007-12-04  Eric Blake  <ebb9@byu.net>
+
+	Fix builds with OpenBSD make.
+	* doc/Makefile.am (HELP2MAN): New macro.
+	(man_MANS, m4.1): Fix rules for building m4.1 into srcdir.
+	* README: Update copyright.
+	* HACKING: Mention help2man and makeinfo dependencies.
+
+2007-11-22  Eric Blake  <ebb9@byu.net>
+
+	Security fix: avoid arbitrary code execution with 'm4 -F'.
+	* src/freeze.c (produce_frozen_state): Never pass raw file name as
+	printf format.
+	* NEWS: Document this fix.
+
+2007-11-07  Eric Blake  <ebb9@byu.net>
+
+	* doc/m4.texinfo (Pseudo Arguments): Test more corner cases.
+
+2007-11-05  Eric Blake  <ebb9@byu.net>
+
+	Use build-aux directory.
+	* configure.ac (PACKAGE, VERSION): Delete, since Automake does
+	this now.
+	(AC_CONFIG_AUX_DIR): Add, with auxiliary files in build-aux
+	instead of the top level.
+	(AC_INIT_AUTOMAKE): Increase requirement, and add dist-lzma.
+	* Makefile.am (EXTRA_DIST): Gnulib now manages gendocs.sh.
+	* bootstrap: Adjust accordingly.
+	* m4/gnulib-cache.m4: Add --aux-dir option.
+	* doc/Makefile.am (m4.1): Rewrite rule to use build-aux/missing.
+
+2007-10-31  Eric Blake  <ebb9@byu.net>
+
+	Test more corner cases.
+	* doc/m4.texinfo (Changecom, Pseudo Arguments): Beef up tests.
+	(Improved foreach): Document alternate foreachq style.
+
+2007-10-28  Eric Blake  <ebb9@byu.net>
+
+	More test coverage for autoconf usage patterns.
+	* doc/m4.texinfo (Inhibiting Invocation, Pseudo Arguments)
+	(Builtin): Add new undocumented tests.
+	(Shift): Document cond macro, and add new test.
+
+2007-10-27  Eric Blake  <ebb9@byu.net>
+
+	Document one use of changequote(`(',`)').
+	* doc/m4.texinfo (Changequote): Add new test, based on recent
+	autoconf addition of m4_expand.
+
+2007-10-22  Eric Blake  <ebb9@byu.net>
+
+	Never let printf failures go undetected.
+	* m4/gnulib-cache.m4: Import announce-gen, git-version-gen,
+	intprops, strtod, and xprintf modules.  Remove deprecated free
+	module.  Replace vasprintf-posix and xvasprintf with
+	xvasprintf-posix.
+	* src/m4.h: Include xprintf.h.
+	* src/builtin.c (ntoa): Export.
+	(m4_errprint): Adjust all *printf callers.
+	* src/debug.c (debug_message_prefix, trace_format): Likewise.
+	* src/freeze.c (produce_frozen_state): Likewise.
+	* src/input.c [DEBUG_INPUT]: Likewise.
+	* src/m4.c (usage): Likewise.
+	* src/m4.h (DEBUG_PRINT1, DEBUG_PRINT3, DEBUG_MESSAGE)
+	(DEBUG_MESSAGE1, DEBUG_MESSAGE2): Likewise.
+	* src/output.c (shipout_text, freeze_diversione): Likewise.
+	* src/path.c [DEBUG_INCL]: Likewise.
+	* src/stackovf.c (process_sigsegv) [DEBUG_STKOVF]: Likewise.
+	* src/symtab.c [DEBUG_SYM]: Likewise.
+
+2007-10-17  Eric Blake  <ebb9@byu.net>
+
+	Fix 'm4 -F file -t undefined'.
+	* src/freeze.c (produce_frozen_state): Avoid core dump.
+	* doc/m4.texinfo (Using frozen files): Test for the bug.
+	* NEWS: Mention the fix.
+
+2007-10-09  Eric Blake  <ebb9@byu.net>
+
+	Avoid regexp regression.
+	* doc/m4.texinfo (Regexp, Patsubst): Test \ expansion.
+
+2007-10-02  Eric Blake  <ebb9@byu.net>
+
+	Add more examples and tests.
+	* doc/m4.texinfo (Patsubst): Use the examples directory.  Also
+	document shortfall.
+	(Improved capitalize): New node.
+	(Index macro, Regexp): Test more code paths.
+	* examples/capitalize.m4: Update to match manual.
+	* examples/capitalize2.m4: New file.
+	* examples/foreachq3.m4: Likewise.
+	* examples/join.m4: Likewise.
+	* examples/loop.m4: Likewise.
+	* examples/wraplifo.m4: Likewise.
+	* examples/wraplifo2.m4: Likewise.
+	* examples/Makefile.am (EXTRA_DIST): Distribute new files.
+
+2007-09-24  Eric Blake  <ebb9@byu.net>
+
+	Create .gitignore alongside .cvsignore.
+	* bootstrap (LC_ALL): Set up front.
+	(version control) Borrow idea from head, to avoid churn in
+	m4/.*ignore files modified by gnulib-tool.
+
+2007-09-13  Eric Blake  <ebb9@byu.net>
+
+	* AUTHORS: Fix typo.
+
+2007-09-07  Eric Blake  <ebb9@byu.net>
+
+	* AUTHORS: Simplify, to match libtool and autoconf layout.
+	* THANKS: Sync with head.
+
+2007-08-10  Eric Blake  <ebb9@byu.net>
+
+	* doc/m4.texinfo (Compatibility): Sync with head.
+
+2007-08-10  Konrad Schwarz  <konrad.schwarz@siemens.com>  (tiny change)
+	and Eric Blake  <ebb9@byu.net>
+
+	* doc/m4.texinfo (Defn): Update wording.
+
+2007-08-09  Eric Blake  <ebb9@byu.net>
+
+	POSIX requires defn(`a',`b') to concatenate definitions.
+	* src/builtin.c (m4_defn): Allow multiple arguments, but warn if
+	trying to mix a builtin with anything else.
+	* doc/m4.texinfo (Defn): Document a use for this POSIX
+	requirement.
+	(Incompatibilities): Update to match current status.
+	* NEWS: Document this change.
+	* THANKS: Update.
+	Reported by Konrad Schwarz.
+
+2007-08-04  Eric Blake  <ebb9@byu.net>
+
+	Normalize all GPL license notices.
+	* GNUmakefile: Update license wording.
+	* Makefile.am: Likewise.
+	* Makefile.maint: Likewise.
+	* bootstrap: Likewise.
+	* commit: Likewise.
+	* configure.ac: Likewise.
+	* checks/Makefile.in: Likewise.
+	* doc/Makefile.am: Likewise.
+	* examples/Makefile.am: Likewise.
+	* src/Makefile.am: Likewise.
+	* src/builtin.c: Likewise.
+	* src/debug.c: Likewise.
+	* src/eval.c: Likewise.
+	* src/format.c: Likewise.
+	* src/freeze.c: Likewise.
+	* src/input.c: Likewise.
+	* src/m4.c: Likewise.
+	* src/m4.h: Likewise.
+	* src/macro.c: Likewise.
+	* src/output.c: Likewise.
+	* src/path.c: Likewise.
+	* src/stackovf.c: Likewise.
+	* src/symtab.c: Likewise.
+
+2007-07-21  Eric Blake  <ebb9@byu.net>
+
+	Fix regression on NetBSD from 2007-05-28.
+	* src/output.c (m4_tmpopen): Explicitly reset append-mode stream
+	position to byte 0.
+	* NEWS: Document this fix.
+	* THANKS: Update.
+	Reported by Thomas Klausner.
+
+2007-07-20  Eric Blake  <ebb9@byu.net>
+
+	Fix 'make distcheck' issues.
+	* Makefile.am (EXTRA_DIST): No need to distribute
+	gpl-3.0.texi.diff anymore.
+	* m4/gnulib-cache.m4: Update to latest gnulib.
+
+2007-07-14  Eric Blake  <ebb9@byu.net>
+
+	Reflect upstream license .texi changes.
+	* doc/m4.texinfo (Copying): Rename node...
+	(GNU General Public License): ...to this.
+	(GNU Free Documentation License): Adjust node location.
+	* local/doc/gpl-3.0.texi.diff: Remove file.
+
+2007-07-10  Eric Blake  <ebb9@byu.net>
+
+	Start 1.4.10a.
+	* configure.ac (AC_INIT): Bump version number.
+	* NEWS: Start changes since 1.4.10.
+	* doc/m4.texinfo (History): Mention 1.4.11.
+	(Copying This Package, Copying This Manual): Add index entries.
+	* local/lib/version-etc.c.diff: Delete, now that gnulib has been
+	updated.
+	* Makefile.am (EXTRA_DIST): Remove dead file.
+
 2007-07-09  Eric Blake  <ebb9@byu.net>
 
-	Release 1.4.10:
+	Release Version 1.4.10.
 	* doc/Makefile.am (m4_TEXINFOS): Distribute gpl-3.0.texi.
 	* Makefile.am (EXTRA_DIST): Distribute gnulib diffs.
 	* configure.ac (AC_INIT): Bump version number.
@@ -78,7 +431,7 @@
 	* configure.ac (AC_INIT): Bump version number.
 	* NEWS: Start changes since 1.4.9b, and fix typo.
 
-	Beta Release 1.4.9b:
+	Beta Release Version 1.4.9b.
 	* configure.ac (AC_INIT): Bump version number.
 	* NEWS: Describe changes since 1.4.9.
 
@@ -3772,14 +4125,12 @@ Mon Jan 22 21:08:52 1990  Rene' Seindal (seindal at diku.dk)
 
 	-----
 
-	$Revision: 1.1.1.1.2.278 $ $Date: 2007/07/10 03:50:13 $
-
 	Local Variables:
 	coding: utf-8
 	End:
 
 	Copyright (C) 1990, 1991, 1992, 1993, 1994, 2000, 2001, 2003,
-	2005, 2006, 2007 Free Software Foundation, Inc.
+	2005, 2006, 2007, 2008 Free Software Foundation, Inc.
 
 	Copying and distribution of this file, with or without
 	modification, are permitted provided the copyright notice

@@ -1,5 +1,5 @@
 # DO NOT EDIT! GENERATED AUTOMATICALLY!
-# Copyright (C) 2004-2007 Free Software Foundation, Inc.
+# Copyright (C) 2002-2008 Free Software Foundation, Inc.
 #
 # This file is free software, distributed under the terms of the GNU
 # General Public License.  As a special exception to the GNU General
@@ -25,7 +25,6 @@ AC_DEFUN([M4_EARLY],
   m4_pattern_allow([^gl_LIBOBJS$])dnl a variable
   m4_pattern_allow([^gl_LTLIBOBJS$])dnl a variable
   AC_REQUIRE([AC_PROG_RANLIB])
-  AC_REQUIRE([AC_GNU_SOURCE])
   AC_REQUIRE([gl_USE_SYSTEM_EXTENSIONS])
   AC_REQUIRE([AC_FUNC_FSEEKO])
   AC_REQUIRE([gl_FP_IEEE])
@@ -42,14 +41,15 @@ AC_DEFUN([M4_EARLY],
 # "Check for header files, types and library functions".
 AC_DEFUN([M4_INIT],
 [
-  m4_pushdef([AC_LIBOBJ], m4_defn([M4_LIBOBJ]))
-  m4_pushdef([AC_REPLACE_FUNCS], m4_defn([M4_REPLACE_FUNCS]))
-  m4_pushdef([AC_LIBSOURCES], m4_defn([M4_LIBSOURCES]))
   AM_CONDITIONAL([GL_COND_LIBTOOL], [false])
   gl_cond_libtool=false
   gl_libdeps=
   gl_ltlibdeps=
+  m4_pushdef([AC_LIBOBJ], m4_defn([M4_LIBOBJ]))
+  m4_pushdef([AC_REPLACE_FUNCS], m4_defn([M4_REPLACE_FUNCS]))
+  m4_pushdef([AC_LIBSOURCES], m4_defn([M4_LIBSOURCES]))
   gl_source_base='lib'
+  gl_EOVERFLOW
   gl_FUNC_ALLOCA
   gl_ASSERT
   AC_DEFINE([SIGNAL_SAFE_LIST], [1], [Define if lists must be signal-safe.])
@@ -60,6 +60,9 @@ AC_DEFUN([M4_INIT],
   gl_CLOSEOUT
   gl_CONFIG_H
   gl_ERROR
+  m4_ifdef([AM_XGETTEXT_OPTION],
+    [AM_XGETTEXT_OPTION([--flag=error:3:c-format])
+     AM_XGETTEXT_OPTION([--flag=error_at_line:5:c-format])])
   gl_EXITFAIL
   gl_FATAL_SIGNAL
   gl_FUNC_FFLUSH
@@ -70,7 +73,8 @@ AC_DEFUN([M4_INIT],
   gl_FUNC_FPENDING
   gl_FUNC_FPURGE
   gl_FUNC_FREADING
-  gl_FUNC_FREE
+  gl_FUNC_FREXP_NO_LIBM
+  gl_MATH_MODULE_INDICATOR([frexp])
   gl_FUNC_FREXPL_NO_LIBM
   gl_MATH_MODULE_INDICATOR([frexpl])
   gl_FUNC_FSEEKO
@@ -81,20 +85,34 @@ AC_DEFUN([M4_INIT],
   AC_SUBST([LIBINTL])
   AC_SUBST([LTLIBINTL])
   gl_FUNC_GETTIMEOFDAY
+  # Autoconf 2.61a.99 and earlier don't support linking a file only
+  # in VPATH builds.  But since GNUmakefile is for maintainer use
+  # only, it does not matter if we skip the link with older autoconf.
+  # Automake 1.10.1 and earlier try to remove GNUmakefile in non-VPATH
+  # builds, so use a shell variable to bypass this.
+  GNUmakefile=GNUmakefile
+  m4_if(m4_version_compare([2.61a.100],
+  	m4_defn([m4_PACKAGE_VERSION])), [1], [],
+        [AC_CONFIG_LINKS([$GNUmakefile:$GNUmakefile], [],
+  	[GNUmakefile=$GNUmakefile])])
   gl_INLINE
-  gl_FUNC_ISNAN_NO_LIBM
-  gl_DOUBLE_EXPONENT_LOCATION
+  gl_FUNC_ISNAND_NO_LIBM
   gl_FUNC_ISNANF_NO_LIBM
-  gl_FLOAT_EXPONENT_LOCATION
   gl_FUNC_ISNANL_NO_LIBM
-  gl_LONG_DOUBLE_EXPONENT_LOCATION
   gl_LIST
   gl_LOCALCHARSET
+  LOCALCHARSET_TESTS_ENVIRONMENT="CHARSETALIASDIR=\"\$(top_builddir)/$gl_source_base\""
+  AC_SUBST([LOCALCHARSET_TESTS_ENVIRONMENT])
   gl_FUNC_LSEEK
   gl_UNISTD_MODULE_INDICATOR([lseek])
   AC_FUNC_MALLOC
+  AC_DEFINE([GNULIB_MALLOC_GNU], 1, [Define to indicate the 'malloc' module.])
+  gl_FUNC_MALLOC_POSIX
+  gl_STDLIB_MODULE_INDICATOR([malloc-posix])
   gl_MALLOCA
   gl_MATH_H
+  gl_FUNC_MEMCHR
+  gl_FUNC_MEMCMP
   gt_FUNC_MKDTEMP
   gl_STDLIB_MODULE_INDICATOR([mkdtemp])
   gl_FUNC_MKSTEMP
@@ -111,9 +129,6 @@ AC_DEFUN([M4_INIT],
   gl_SIGNAL_H
   gl_SIGNBIT
   gl_MATH_MODULE_INDICATOR([signbit])
-  AC_REQUIRE([gl_FLOAT_EXPONENT_LOCATION])
-  AC_REQUIRE([gl_DOUBLE_EXPONENT_LOCATION])
-  AC_REQUIRE([gl_LONG_DOUBLE_EXPONENT_LOCATION])
   gl_SIGNALBLOCKING
   gl_SIGNAL_MODULE_INDICATOR([sigprocmask])
   gl_SIZE_MAX
@@ -121,11 +136,16 @@ AC_DEFUN([M4_INIT],
   gl_STDARG_H
   AM_STDBOOL_H
   gl_STDINT_H
-  gt_TYPE_WCHAR_T
-  gt_TYPE_WINT_T
   gl_STDIO_H
   gl_STDLIB_H
   gl_STDLIB_SAFER
+  gl_FUNC_STRERROR
+  gl_STRING_MODULE_INDICATOR([strerror])
+  gl_HEADER_STRING_H
+  gl_FUNC_STRSTR
+  gl_STRING_MODULE_INDICATOR([strstr])
+  gl_FUNC_STRTOD
+  gl_STDLIB_MODULE_INDICATOR([strtod])
   gl_FUNC_STRTOL
   gl_HEADER_SYS_STAT_H
   AC_PROG_MKDIR_P
@@ -139,16 +159,25 @@ AC_DEFUN([M4_INIT],
   gl_FUNC_VASNPRINTF
   gl_FUNC_VASPRINTF
   gl_STDIO_MODULE_INDICATOR([vasprintf])
+  m4_ifdef([AM_XGETTEXT_OPTION],
+    [AM_XGETTEXT_OPTION([--flag=asprintf:2:c-format])
+     AM_XGETTEXT_OPTION([--flag=vasprintf:2:c-format])])
   gl_FUNC_VASPRINTF_POSIX
+  m4_ifdef([AM_XGETTEXT_OPTION],
+    [AM_XGETTEXT_OPTION([--flag=verror:3:c-format])
+     AM_XGETTEXT_OPTION([--flag=verror_at_line:5:c-format])])
   gl_WCHAR_H
   gl_WCTYPE_H
   gl_XALLOC
+  m4_ifdef([AM_XGETTEXT_OPTION],
+    [AM_XGETTEXT_OPTION([--flag=xprintf:1:c-format])
+     AM_XGETTEXT_OPTION([--flag=xvprintf:1:c-format])
+     AM_XGETTEXT_OPTION([--flag=xfprintf:2:c-format])
+     AM_XGETTEXT_OPTION([--flag=xvfprintf:2:c-format])])
   gl_XSIZE
   gl_XVASPRINTF
-  LIBM4_LIBDEPS="$gl_libdeps"
-  AC_SUBST([LIBM4_LIBDEPS])
-  LIBM4_LTLIBDEPS="$gl_ltlibdeps"
-  AC_SUBST([LIBM4_LTLIBDEPS])
+  m4_ifdef([AM_XGETTEXT_OPTION],
+    [AM_XGETTEXT_OPTION([--flag=xasprintf:1:c-format])])
   m4_popdef([AC_LIBSOURCES])
   m4_popdef([AC_REPLACE_FUNCS])
   m4_popdef([AC_LIBOBJ])
@@ -166,39 +195,134 @@ AC_DEFUN([M4_INIT],
     AC_SUBST([M4_LIBOBJS], [$M4_libobjs])
     AC_SUBST([M4_LTLIBOBJS], [$M4_ltlibobjs])
   ])
+  gltests_libdeps=
+  gltests_ltlibdeps=
+  m4_pushdef([AC_LIBOBJ], m4_defn([M4tests_LIBOBJ]))
+  m4_pushdef([AC_REPLACE_FUNCS], m4_defn([M4tests_REPLACE_FUNCS]))
+  m4_pushdef([AC_LIBSOURCES], m4_defn([M4tests_LIBSOURCES]))
+  gl_source_base='tests'
+  gl_DOUBLE_EXPONENT_LOCATION
+  gl_FLOAT_EXPONENT_LOCATION
+  gl_LONG_DOUBLE_EXPONENT_LOCATION
+  AC_REQUIRE([gl_FLOAT_EXPONENT_LOCATION])
+  AC_REQUIRE([gl_DOUBLE_EXPONENT_LOCATION])
+  AC_REQUIRE([gl_LONG_DOUBLE_EXPONENT_LOCATION])
+  gt_TYPE_WCHAR_T
+  gt_TYPE_WINT_T
+  AC_CHECK_DECLS_ONCE([alarm])
+  m4_popdef([AC_LIBSOURCES])
+  m4_popdef([AC_REPLACE_FUNCS])
+  m4_popdef([AC_LIBOBJ])
+  AC_CONFIG_COMMANDS_PRE([
+    M4tests_libobjs=
+    M4tests_ltlibobjs=
+    if test -n "$M4tests_LIBOBJS"; then
+      # Remove the extension.
+      sed_drop_objext='s/\.o$//;s/\.obj$//'
+      for i in `for i in $M4tests_LIBOBJS; do echo "$i"; done | sed "$sed_drop_objext" | sort | uniq`; do
+        M4tests_libobjs="$M4tests_libobjs $i.$ac_objext"
+        M4tests_ltlibobjs="$M4tests_ltlibobjs $i.lo"
+      done
+    fi
+    AC_SUBST([M4tests_LIBOBJS], [$M4tests_libobjs])
+    AC_SUBST([M4tests_LTLIBOBJS], [$M4tests_ltlibobjs])
+  ])
+  LIBM4_LIBDEPS="$gl_libdeps"
+  AC_SUBST([LIBM4_LIBDEPS])
+  LIBM4_LTLIBDEPS="$gl_ltlibdeps"
+  AC_SUBST([LIBM4_LTLIBDEPS])
+  LIBTESTS_LIBDEPS="$gltests_libdeps"
+  AC_SUBST([LIBTESTS_LIBDEPS])
 ])
 
 # Like AC_LIBOBJ, except that the module name goes
 # into M4_LIBOBJS instead of into LIBOBJS.
-AC_DEFUN([M4_LIBOBJ],
-  [M4_LIBOBJS="$M4_LIBOBJS $1.$ac_objext"])
+AC_DEFUN([M4_LIBOBJ], [
+  AS_LITERAL_IF([$1], [M4_LIBSOURCES([$1.c])])dnl
+  M4_LIBOBJS="$M4_LIBOBJS $1.$ac_objext"
+])
+
+# m4_foreach_w is provided by autoconf-2.59c and later.
+# This definition is to accommodate developers using versions
+# of autoconf older than that.
+m4_ifndef([m4_foreach_w],
+  [m4_define([m4_foreach_w],
+    [m4_foreach([$1], m4_split(m4_normalize([$2]), [ ]), [$3])])])
 
 # Like AC_REPLACE_FUNCS, except that the module name goes
 # into M4_LIBOBJS instead of into LIBOBJS.
-AC_DEFUN([M4_REPLACE_FUNCS],
-  [AC_CHECK_FUNCS([$1], , [M4_LIBOBJ($ac_func)])])
+AC_DEFUN([M4_REPLACE_FUNCS], [
+  m4_foreach_w([gl_NAME], [$1], [AC_LIBSOURCES(gl_NAME[.c])])dnl
+  AC_CHECK_FUNCS([$1], , [M4_LIBOBJ($ac_func)])
+])
 
-# Like AC_LIBSOURCES, except that it does nothing.
-# We rely on EXTRA_lib..._SOURCES instead.
-AC_DEFUN([M4_LIBSOURCES],
-  [])
+# Like AC_LIBSOURCES, except the directory where the source file is
+# expected is derived from the gnulib-tool parametrization,
+# and alloca is special cased (for the alloca-opt module).
+# We could also entirely rely on EXTRA_lib..._SOURCES.
+AC_DEFUN([M4_LIBSOURCES], [
+  m4_foreach([_gl_NAME], [$1], [
+    m4_if(_gl_NAME, [alloca.c], [], [
+      m4_syscmd([test -r lib/]_gl_NAME[ || test ! -d lib])dnl
+      m4_if(m4_sysval, [0], [],
+        [AC_FATAL([missing lib/]_gl_NAME)])
+    ])
+  ])
+])
+
+# Like AC_LIBOBJ, except that the module name goes
+# into M4tests_LIBOBJS instead of into LIBOBJS.
+AC_DEFUN([M4tests_LIBOBJ], [
+  AS_LITERAL_IF([$1], [M4tests_LIBSOURCES([$1.c])])dnl
+  M4tests_LIBOBJS="$M4tests_LIBOBJS $1.$ac_objext"
+])
+
+# m4_foreach_w is provided by autoconf-2.59c and later.
+# This definition is to accommodate developers using versions
+# of autoconf older than that.
+m4_ifndef([m4_foreach_w],
+  [m4_define([m4_foreach_w],
+    [m4_foreach([$1], m4_split(m4_normalize([$2]), [ ]), [$3])])])
+
+# Like AC_REPLACE_FUNCS, except that the module name goes
+# into M4tests_LIBOBJS instead of into LIBOBJS.
+AC_DEFUN([M4tests_REPLACE_FUNCS], [
+  m4_foreach_w([gl_NAME], [$1], [AC_LIBSOURCES(gl_NAME[.c])])dnl
+  AC_CHECK_FUNCS([$1], , [M4tests_LIBOBJ($ac_func)])
+])
+
+# Like AC_LIBSOURCES, except the directory where the source file is
+# expected is derived from the gnulib-tool parametrization,
+# and alloca is special cased (for the alloca-opt module).
+# We could also entirely rely on EXTRA_lib..._SOURCES.
+AC_DEFUN([M4tests_LIBSOURCES], [
+  m4_foreach([_gl_NAME], [$1], [
+    m4_if(_gl_NAME, [alloca.c], [], [
+      m4_syscmd([test -r tests/]_gl_NAME[ || test ! -d tests])dnl
+      m4_if(m4_sysval, [0], [],
+        [AC_FATAL([missing tests/]_gl_NAME)])
+    ])
+  ])
+])
 
 # This macro records the list of files which have been installed by
 # gnulib-tool and may be removed by future gnulib-tool invocations.
 AC_DEFUN([M4_FILE_LIST], [
+  build-aux/announce-gen
   build-aux/gendocs.sh
+  build-aux/git-version-gen
   build-aux/gnupload
   build-aux/link-warning.h
   doc/fdl.texi
   doc/gendocs_template
   doc/gpl-3.0.texi
-  lib/__fpending.c
-  lib/__fpending.h
   lib/alloca.c
-  lib/alloca_.h
+  lib/alloca.in.h
   lib/asnprintf.c
   lib/asprintf.c
   lib/binary-io.h
+  lib/c-ctype.c
+  lib/c-ctype.h
   lib/clean-temp.c
   lib/clean-temp.h
   lib/cloexec.c
@@ -220,21 +344,24 @@ AC_DEFUN([M4_FILE_LIST], [
   lib/fd-safer.c
   lib/fflush.c
   lib/float+.h
-  lib/float_.h
+  lib/float.in.h
   lib/fopen-safer.c
+  lib/fpending.c
+  lib/fpending.h
   lib/fpucw.h
   lib/fpurge.c
   lib/fpurge.h
+  lib/freadahead.c
+  lib/freadahead.h
   lib/freading.c
   lib/freading.h
-  lib/free.c
   lib/frexp.c
   lib/frexpl.c
   lib/fseeko.c
   lib/ftello.c
   lib/getopt.c
+  lib/getopt.in.h
   lib/getopt1.c
-  lib/getopt_.h
   lib/getopt_int.h
   lib/gettext.h
   lib/gettimeofday.c
@@ -243,10 +370,6 @@ AC_DEFUN([M4_FILE_LIST], [
   lib/gl_anylinked_list1.h
   lib/gl_anylinked_list2.h
   lib/gl_anytree_oset.h
-  lib/gl_array_list.c
-  lib/gl_array_list.h
-  lib/gl_array_oset.c
-  lib/gl_array_oset.h
   lib/gl_avltree_oset.c
   lib/gl_avltree_oset.h
   lib/gl_linkedhash_list.c
@@ -257,7 +380,8 @@ AC_DEFUN([M4_FILE_LIST], [
   lib/gl_oset.h
   lib/intprops.h
   lib/isnan.c
-  lib/isnan.h
+  lib/isnand.c
+  lib/isnand.h
   lib/isnanf.c
   lib/isnanf.h
   lib/isnanl-nolibm.h
@@ -269,7 +393,9 @@ AC_DEFUN([M4_FILE_LIST], [
   lib/malloca.c
   lib/malloca.h
   lib/malloca.valgrind
-  lib/math_.h
+  lib/math.in.h
+  lib/memchr.c
+  lib/memcmp.c
   lib/mkdtemp.c
   lib/mkstemp-safer.c
   lib/mkstemp.c
@@ -285,8 +411,6 @@ AC_DEFUN([M4_FILE_LIST], [
   lib/printf-frexpl.h
   lib/printf-parse.c
   lib/printf-parse.h
-  lib/progname.c
-  lib/progname.h
   lib/quotearg.c
   lib/quotearg.h
   lib/ref-add.sin
@@ -297,52 +421,58 @@ AC_DEFUN([M4_FILE_LIST], [
   lib/regex_internal.c
   lib/regex_internal.h
   lib/regexec.c
-  lib/signal_.h
+  lib/signal.in.h
   lib/signbitd.c
   lib/signbitf.c
   lib/signbitl.c
   lib/sigprocmask.c
   lib/size_max.h
-  lib/stdbool_.h
-  lib/stdint_.h
+  lib/stdarg.in.h
+  lib/stdbool.in.h
+  lib/stdint.in.h
   lib/stdio--.h
   lib/stdio-safer.h
-  lib/stdio_.h
+  lib/stdio.in.h
   lib/stdlib--.h
   lib/stdlib-safer.h
-  lib/stdlib_.h
+  lib/stdlib.in.h
+  lib/str-two-way.h
+  lib/strerror.c
+  lib/string.in.h
+  lib/strstr.c
+  lib/strtod.c
   lib/strtol.c
-  lib/sys_stat_.h
-  lib/sys_time_.h
+  lib/sys_stat.in.h
+  lib/sys_time.in.h
   lib/tempname.c
   lib/tempname.h
   lib/tmpdir.c
   lib/tmpdir.h
   lib/unistd--.h
   lib/unistd-safer.h
-  lib/unistd_.h
+  lib/unistd.in.h
   lib/unlocked-io.h
   lib/vasnprintf.c
   lib/vasnprintf.h
   lib/vasprintf.c
-  lib/verify.h
   lib/verror.c
   lib/verror.h
   lib/version-etc-fsf.c
   lib/version-etc.c
   lib/version-etc.h
-  lib/wchar_.h
-  lib/wctype_.h
+  lib/wchar.in.h
+  lib/wctype.in.h
   lib/xalloc-die.c
   lib/xalloc.h
   lib/xasprintf.c
   lib/xmalloc.c
   lib/xmalloca.c
   lib/xmalloca.h
+  lib/xprintf.c
+  lib/xprintf.h
   lib/xsize.h
   lib/xvasprintf.c
   lib/xvasprintf.h
-  m4/absolute-header.m4
   m4/alloca.m4
   m4/assert.m4
   m4/cloexec.m4
@@ -363,7 +493,6 @@ AC_DEFUN([M4_FILE_LIST], [
   m4/fpieee.m4
   m4/fpurge.m4
   m4/freading.m4
-  m4/free.m4
   m4/frexp.m4
   m4/frexpl.m4
   m4/fseeko.m4
@@ -377,19 +506,23 @@ AC_DEFUN([M4_FILE_LIST], [
   m4/inline.m4
   m4/intmax_t.m4
   m4/inttypes_h.m4
-  m4/isnan.m4
+  m4/isnand.m4
   m4/isnanf.m4
   m4/isnanl.m4
   m4/ldexpl.m4
   m4/localcharset.m4
   m4/longlong.m4
   m4/lseek.m4
+  m4/malloc.m4
   m4/malloca.m4
   m4/math_h.m4
   m4/mbrtowc.m4
   m4/mbstate_t.m4
+  m4/memchr.m4
+  m4/memcmp.m4
   m4/mkdtemp.m4
   m4/mkstemp.m4
+  m4/nocrash.m4
   m4/pathmax.m4
   m4/printf-frexp.m4
   m4/printf-frexpl.m4
@@ -410,12 +543,15 @@ AC_DEFUN([M4_FILE_LIST], [
   m4/stdio_h.m4
   m4/stdlib-safer.m4
   m4/stdlib_h.m4
+  m4/strerror.m4
+  m4/string_h.m4
+  m4/strstr.m4
+  m4/strtod.m4
   m4/strtol.m4
   m4/sys_stat_h.m4
   m4/sys_time_h.m4
   m4/tempname.m4
   m4/tmpdir.m4
-  m4/ulonglong.m4
   m4/unistd-safer.m4
   m4/unistd_h.m4
   m4/unlocked-io.m4
@@ -429,24 +565,34 @@ AC_DEFUN([M4_FILE_LIST], [
   m4/xalloc.m4
   m4/xsize.m4
   m4/xvasprintf.m4
+  tests/nan.h
+  tests/test-EOVERFLOW.c
   tests/test-alloca-opt.c
   tests/test-array_list.c
   tests/test-array_oset.c
   tests/test-avltree_oset.c
   tests/test-binary-io.c
   tests/test-binary-io.sh
+  tests/test-c-ctype.c
   tests/test-closein.c
   tests/test-closein.sh
   tests/test-fflush.c
+  tests/test-fflush2.c
+  tests/test-fflush2.sh
+  tests/test-fpending.c
+  tests/test-fpending.sh
   tests/test-fpurge.c
+  tests/test-freadahead.c
+  tests/test-freadahead.sh
   tests/test-freading.c
+  tests/test-frexp.c
   tests/test-frexpl.c
   tests/test-fseeko.c
   tests/test-fseeko.sh
   tests/test-ftello.c
   tests/test-ftello.sh
   tests/test-gettimeofday.c
-  tests/test-isnan.c
+  tests/test-isnand.c
   tests/test-isnanf.c
   tests/test-isnanl-nolibm.c
   tests/test-isnanl.h
@@ -457,11 +603,16 @@ AC_DEFUN([M4_FILE_LIST], [
   tests/test-math.c
   tests/test-printf-frexp.c
   tests/test-printf-frexpl.c
+  tests/test-quotearg.c
   tests/test-signbit.c
   tests/test-stdbool.c
   tests/test-stdint.c
   tests/test-stdio.c
   tests/test-stdlib.c
+  tests/test-strerror.c
+  tests/test-string.c
+  tests/test-strstr.c
+  tests/test-strtod.c
   tests/test-sys_stat.c
   tests/test-sys_time.c
   tests/test-unistd.c
@@ -471,4 +622,12 @@ AC_DEFUN([M4_FILE_LIST], [
   tests/test-wchar.c
   tests/test-wctype.c
   tests/test-xvasprintf.c
+  tests=lib/gl_array_list.c
+  tests=lib/gl_array_list.h
+  tests=lib/gl_array_oset.c
+  tests=lib/gl_array_oset.h
+  tests=lib/progname.c
+  tests=lib/progname.h
+  tests=lib/verify.h
+  top/GNUmakefile
 ])

@@ -1,19 +1,18 @@
 /* Split a double into fraction and mantissa.
-   Copyright (C) 2007 Free Software Foundation, Inc.
+   Copyright (C) 2007-2008 Free Software Foundation, Inc.
 
-   This program is free software; you can redistribute it and/or modify
+   This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2, or (at your option)
-   any later version.
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
 
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
 
-   You should have received a copy of the GNU General Public License along
-   with this program; if not, write to the Free Software Foundation,
-   Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 /* Written by Paolo Bonzini <bonzini@gnu.org>, 2003, and
    Bruno Haible <bruno@clisp.org>, 2007.  */
@@ -28,7 +27,7 @@
 # include "isnanl-nolibm.h"
 # include "fpucw.h"
 #else
-# include "isnan.h"
+# include "isnand.h"
 #endif
 
 /* This file assumes FLT_RADIX = 2.  If FLT_RADIX is a power of 2 greater
@@ -46,7 +45,7 @@
 #else
 # define FUNC frexp
 # define DOUBLE double
-# define ISNAN isnan
+# define ISNAN isnand
 # define DECL_ROUNDING
 # define BEGIN_ROUNDING()
 # define END_ROUNDING()
@@ -54,7 +53,7 @@
 #endif
 
 DOUBLE
-FUNC (DOUBLE x, int *exp)
+FUNC (DOUBLE x, int *expptr)
 {
   int sign;
   int exponent;
@@ -63,7 +62,7 @@ FUNC (DOUBLE x, int *exp)
   /* Test for NaN, infinity, and zero.  */
   if (ISNAN (x) || x + x == x)
     {
-      *exp = 0;
+      *expptr = 0;
       return x;
     }
 
@@ -162,6 +161,6 @@ FUNC (DOUBLE x, int *exp)
 
   END_ROUNDING ();
 
-  *exp = exponent;
+  *expptr = exponent;
   return x;
 }

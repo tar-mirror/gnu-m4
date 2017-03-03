@@ -3,20 +3,20 @@
    Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2004, 2005, 2006,
    2007 Free Software Foundation, Inc.
 
-   This program is free software; you can redistribute it and/or modify
+   This file is part of GNU M4.
+
+   GNU M4 is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 3 of the License, or
+   the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful,
+   GNU M4 is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software
-   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
-   02110-1301  USA
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include "m4.h"
@@ -252,6 +252,11 @@ m4_tmpopen (int divnum)
   else if (set_cloexec_flag (fileno (file), true) != 0)
     M4ERROR ((warning_status, errno,
 	      "Warning: cannot protect diversion across forks"));
+  /* POSIX states that it is undefined whether an append stream starts
+     at offset 0 or at the end.  We want the beginning.  */
+  else if (fseeko (file, 0, SEEK_SET) != 0)
+    M4ERROR ((EXIT_FAILURE, errno,
+	      "cannot seek to beginning of diversion"));
   return file;
 }
 
@@ -463,7 +468,6 @@ void
 shipout_text (struct obstack *obs, const char *text, int length, int line)
 {
   static bool start_of_output_line = true;
-  char linebuf[20];
   const char *cursor;
 
   /* If output goes to an obstack, merely add TEXT to it.  */
@@ -514,7 +518,7 @@ shipout_text (struct obstack *obs, const char *text, int length, int line)
 	  start_of_output_line = false;
 	  output_current_line++;
 #ifdef DEBUG_OUTPUT
-	  fprintf (stderr, "DEBUG: line %d, cur %d, cur out %d\n",
+	  xfprintf (stderr, "DEBUG: line %d, cur %d, cur out %d\n",
 		   line, current_line, output_current_line);
 #endif
 
@@ -524,8 +528,13 @@ shipout_text (struct obstack *obs, const char *text, int length, int line)
 
 	  if (output_current_line != line)
 	    {
-	      sprintf (linebuf, "#line %d", line);
-	      for (cursor = linebuf; *cursor; cursor++)
+	      OUTPUT_CHARACTER ('#');
+	      OUTPUT_CHARACTER ('l');
+	      OUTPUT_CHARACTER ('i');
+	      OUTPUT_CHARACTER ('n');
+	      OUTPUT_CHARACTER ('e');
+	      OUTPUT_CHARACTER (' ');
+	      for (cursor = ntoa (line, 10); *cursor; cursor++)
 		OUTPUT_CHARACTER (*cursor);
 	      if (output_current_line < 1 && current_file[0] != '\0')
 		{
@@ -548,7 +557,7 @@ shipout_text (struct obstack *obs, const char *text, int length, int line)
 	      start_of_output_line = false;
 	      output_current_line++;
 #ifdef DEBUG_OUTPUT
-	      fprintf (stderr, "DEBUG: line %d, cur %d, cur out %d\n",
+	      xfprintf (stderr, "DEBUG: line %d, cur %d, cur out %d\n",
 		       line, current_line, output_current_line);
 #endif
 	    }
@@ -802,7 +811,7 @@ freeze_diversions (FILE *file)
       if (diversion->size || diversion->used)
 	{
 	  if (diversion->size)
-	    fprintf (file, "D%d,%d\n", diversion->divnum, diversion->used);
+	    xfprintf (file, "D%d,%d\n", diversion->divnum, diversion->used);
 	  else
 	    {
 	      struct stat file_stat;
@@ -812,8 +821,8 @@ freeze_diversions (FILE *file)
 	      if (file_stat.st_size < 0
 		  || file_stat.st_size != (unsigned long int) file_stat.st_size)
 		M4ERROR ((EXIT_FAILURE, 0, "diversion too large"));
-	      fprintf (file, "D%d,%lu\n", diversion->divnum,
-		       (unsigned long int) file_stat.st_size);
+	      xfprintf (file, "D%d,%lu\n", diversion->divnum,
+			(unsigned long int) file_stat.st_size);
 	    }
 
 	  insert_diversion_helper (diversion);
@@ -827,5 +836,5 @@ freeze_diversions (FILE *file)
   /* Save the active diversion number, if not already.  */
 
   if (saved_number != last_inserted)
-    fprintf (file, "D%d,0\n\n", saved_number);
+    xfprintf (file, "D%d,0\n\n", saved_number);
 }

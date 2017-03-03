@@ -1,10 +1,10 @@
 /* Test of signbit() substitute.
-   Copyright (C) 2007 Free Software Foundation, Inc.
+   Copyright (C) 2007, 2008 Free Software Foundation, Inc.
 
-   This program is free software; you can redistribute it and/or modify
+   This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2, or (at your option)
-   any later version.
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
 
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,8 +12,7 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software Foundation,
-   Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.  */
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 /* Written by Bruno Haible <bruno@clisp.org>, 2007.  */
 
@@ -50,6 +49,12 @@ test_signbitf ()
   ASSERT (signbit (-2.718f));
   ASSERT (signbit (-2.718e30f));
   ASSERT (signbit (-2.718e-30f));
+  /* Zeros.  */
+  ASSERT (!signbit (0.0f));
+  if (1.0f / -zerof < 0)
+    ASSERT (signbit (-0.0f));
+  else
+    ASSERT (!signbit (-0.0f));
   /* Infinite values.  */
   ASSERT (!signbit (1.0f / 0.0f));
   ASSERT (signbit (-1.0f / 0.0f));
@@ -89,6 +94,12 @@ test_signbitd ()
   ASSERT (signbit (-2.718));
   ASSERT (signbit (-2.718e30));
   ASSERT (signbit (-2.718e-30));
+  /* Zeros.  */
+  ASSERT (!signbit (0.0));
+  if (1.0 / -zerod < 0)
+    ASSERT (signbit (-0.0));
+  else
+    ASSERT (!signbit (-0.0));
   /* Infinite values.  */
   ASSERT (!signbit (1.0 / 0.0));
   ASSERT (signbit (-1.0 / 0.0));
@@ -126,6 +137,12 @@ test_signbitl ()
   ASSERT (signbit (-2.718L));
   ASSERT (signbit (-2.718e30L));
   ASSERT (signbit (-2.718e-30L));
+  /* Zeros.  */
+  ASSERT (!signbit (0.0L));
+  if (1.0L / -zerol < 0)
+    ASSERT (signbit (-0.0L));
+  else
+    ASSERT (!signbit (-0.0L));
   /* Infinite values.  */
   ASSERT (!signbit (1.0L / 0.0L));
   ASSERT (signbit (-1.0L / 0.0L));

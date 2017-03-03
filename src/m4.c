@@ -3,20 +3,20 @@
    Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2004, 2005, 2006, 2007
    Free Software Foundation, Inc.
 
-   This program is free software; you can redistribute it and/or modify
+   This file is part of GNU M4.
+
+   GNU M4 is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 3 of the License, or
+   the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful,
+   GNU M4 is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software
-   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
-   02110-1301  USA
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include "m4.h"
@@ -137,10 +137,10 @@ static void
 usage (int status)
 {
   if (status != EXIT_SUCCESS)
-    fprintf (stderr, "Try `%s --help' for more information.\n", program_name);
+    xfprintf (stderr, "Try `%s --help' for more information.\n", program_name);
   else
     {
-      printf ("Usage: %s [OPTION]... [FILE]...\n", program_name);
+      xprintf ("Usage: %s [OPTION]... [FILE]...\n", program_name);
       fputs ("\
 Process macros in FILEs.  If no FILE or if FILE is `-', standard input\n\
 is read.\n\
@@ -154,7 +154,7 @@ Operation modes:\n\
       --help                   display this help and exit\n\
       --version                output version information and exit\n\
 ", stdout);
-      printf ("\
+      xprintf ("\
   -E, --fatal-warnings         once: warnings become errors, twice: stop\n\
                                execution at first error\n\
   -i, --interactive            unbuffer output, ignore interrupts\n\
@@ -223,7 +223,7 @@ of directories included after any specified by `-I'.\n\
 Exit status is 0 for success, 1 for failure, 63 for frozen file version\n\
 mismatch, or whatever value was passed to the m4exit macro.\n\
 ", stdout);
-      printf ("\nReport bugs to <%s>.\n", PACKAGE_BUGREPORT);
+      xprintf ("\nReport bugs to <%s>.\n", PACKAGE_BUGREPORT);
     }
   exit (status);
 }

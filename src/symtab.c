@@ -3,20 +3,20 @@
    Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2003, 2006, 2007 Free
    Software Foundation, Inc.
 
-   This program is free software; you can redistribute it and/or modify
+   This file is part of GNU M4.
+
+   GNU M4 is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 3 of the License, or
+   the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful,
+   GNU M4 is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software
-   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
-   02110-1301  USA
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 /* This file handles all the low level work around the symbol table.  The
@@ -56,10 +56,10 @@ show_profile (void)
   int i;
   for (i = 0; i < 5; i++)
     {
-      fprintf(stderr, "m4: lookup mode %d called %d times, %d compares, "
-	      "%d misses, %lld bytes\n",
-	      i, profiles[i].entry, profiles[i].comparisons,
-	      profiles[i].misses, profiles[i].bytes);
+      xfprintf(stderr, "m4: lookup mode %d called %d times, %d compares, "
+	       "%d misses, %lld bytes\n",
+	       i, profiles[i].entry, profiles[i].comparisons,
+	       profiles[i].misses, profiles[i].bytes);
     }
 }
 
@@ -371,7 +371,7 @@ symtab_debug (void)
       s = lookup_symbol (text, SYMBOL_LOOKUP);
 
       if (s == NULL)
-	printf ("Name `%s' is unknown\n", text);
+	xprintf ("Name `%s' is unknown\n", text);
 
       if (delete)
 	(void) lookup_symbol (text, SYMBOL_DELETE);
@@ -387,17 +387,17 @@ symtab_print_list (int i)
   symbol *sym;
   size_t h;
 
-  printf ("Symbol dump #%d:\n", i);
+  xprintf ("Symbol dump #%d:\n", i);
   for (h = 0; h < hash_table_size; h++)
     for (sym = symtab[h]; sym != NULL; sym = sym->next)
-      printf ("\tname %s, bucket %lu, addr %p, next %p, "
-	      "flags%s%s%s, pending %d\n",
-	      SYMBOL_NAME (sym),
-	      (unsigned long int) h, sym, SYMBOL_NEXT (sym),
-	      SYMBOL_TRACED (sym) ? " traced" : "",
-	      SYMBOL_SHADOWED (sym) ? " shadowed" : "",
-	      SYMBOL_DELETED (sym) ? " deleted" : "",
-	      SYMBOL_PENDING_EXPANSIONS (sym));
+      xprintf ("\tname %s, bucket %lu, addr %p, next %p, "
+	       "flags%s%s%s, pending %d\n",
+	       SYMBOL_NAME (sym),
+	       (unsigned long int) h, sym, SYMBOL_NEXT (sym),
+	       SYMBOL_TRACED (sym) ? " traced" : "",
+	       SYMBOL_SHADOWED (sym) ? " shadowed" : "",
+	       SYMBOL_DELETED (sym) ? " deleted" : "",
+	       SYMBOL_PENDING_EXPANSIONS (sym));
 }
 
 #endif /* DEBUG_SYM */

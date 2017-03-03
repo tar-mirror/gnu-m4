@@ -1,10 +1,10 @@
 /* Test of isnanf() substitute.
-   Copyright (C) 2007 Free Software Foundation, Inc.
+   Copyright (C) 2007-2008 Free Software Foundation, Inc.
 
-   This program is free software; you can redistribute it and/or modify
+   This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2, or (at your option)
-   any later version.
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
 
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,8 +12,7 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software Foundation,
-   Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.  */
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 /* Written by Bruno Haible <bruno@clisp.org>, 2007.  */
 
@@ -24,6 +23,8 @@
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
+
+#include "nan.h"
 
 #define ASSERT(expr) \
   do									     \
@@ -36,18 +37,6 @@
     }									     \
   while (0)
 
-/* The Compaq (ex-DEC) C 6.4 compiler chokes on the expression 0.0 / 0.0.  */
-#ifdef __DECC
-static float
-NaN ()
-{
-  static float zero = 0.0f;
-  return zero / zero;
-}
-#else
-# define NaN() (0.0f / 0.0f)
-#endif
-
 int
 main ()
 {
@@ -58,11 +47,13 @@ main ()
   ASSERT (!isnanf (-2.718f));
   ASSERT (!isnanf (-2.718e30f));
   ASSERT (!isnanf (-2.718e-30f));
+  ASSERT (!isnanf (0.0f));
+  ASSERT (!isnanf (-0.0f));
   /* Infinite values.  */
   ASSERT (!isnanf (1.0f / 0.0f));
   ASSERT (!isnanf (-1.0f / 0.0f));
   /* Quiet NaN.  */
-  ASSERT (isnanf (NaN ()));
+  ASSERT (isnanf (NaNf ()));
 #if defined FLT_EXPBIT0_WORD && defined FLT_EXPBIT0_BIT
   /* Signalling NaN.  */
   {
@@ -70,7 +61,7 @@ main ()
       ((sizeof (float) + sizeof (unsigned int) - 1) / sizeof (unsigned int))
     typedef union { float value; unsigned int word[NWORDS]; } memory_float;
     memory_float m;
-    m.value = NaN ();
+    m.value = NaNf ();
 # if FLT_EXPBIT0_BIT > 0
     m.word[FLT_EXPBIT0_WORD] ^= (unsigned int) 1 << (FLT_EXPBIT0_BIT - 1);
 # else
