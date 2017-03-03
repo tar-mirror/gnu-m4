@@ -100,13 +100,21 @@ add_include_directory (const char *dir)
 #endif
 }
 
+/* Search for FILE, first in `.', then according to -I options.  If
+   successful, return the open file, and if RESULT is not NULL, set
+   *RESULT to a malloc'd string that represents the file found with
+   respect to the current working directory.  */
+
 FILE *
-path_search (const char *file)
+path_search (const char *file, const char **result)
 {
   FILE *fp;
   includes *incl;
   char *name;			/* buffer for constructed name */
   int e;
+
+  if (result)
+    *result = NULL;
 
   /* Reject empty file.  */
   if (!*file)
@@ -118,7 +126,14 @@ path_search (const char *file)
   /* Look in current working directory first.  */
   fp = fopen (file, "r");
   if (fp != NULL)
-    return fp;
+    {
+      if (set_cloexec_flag (fileno (fp), true) != 0)
+	M4ERROR ((warning_status, errno,
+		  "Warning: cannot protect input file across forks"));
+      if (result)
+	*result = xstrdup (file);
+      return fp;
+    }
 
   /* If file not found, and filename absolute, fail.  */
   if (*file == '/' || no_gnu_extensions)
@@ -142,10 +157,18 @@ path_search (const char *file)
 	{
 	  if (debug_level & DEBUG_TRACE_PATH)
 	    DEBUG_MESSAGE2 ("path search for `%s' found `%s'", file, name);
-	  break;
+	  if (set_cloexec_flag (fileno (fp), true) != 0)
+	    M4ERROR ((warning_status, errno,
+		      "Warning: cannot protect input file across forks"));
+	  if (result)
+	    *result = name;
+	  else
+	    free (name);
+	  errno = e;
+	  return fp;
 	}
     }
-  xfree (name);
+  free (name);
   errno = e;
   return fp;
 }

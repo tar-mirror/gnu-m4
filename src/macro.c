@@ -24,8 +24,8 @@
 
 #include "m4.h"
 
-static void expand_macro _((symbol *));
-static void expand_token _((struct obstack *, token_type, token_data *));
+static void expand_macro (symbol *);
+static void expand_token (struct obstack *, token_type, token_data *);
 
 /* Current recursion level in expand_macro ().  */
 int expansion_level = 0;
@@ -66,6 +66,9 @@ expand_token (struct obstack *obs, token_type t, token_data *td)
     case TOKEN_MACDEF:
       break;
 
+    case TOKEN_OPEN:
+    case TOKEN_COMMA:
+    case TOKEN_CLOSE:
     case TOKEN_SIMPLE:
     case TOKEN_STRING:
       shipout_text (obs, TOKEN_DATA_TEXT (td), strlen (TOKEN_DATA_TEXT (td)));
@@ -76,7 +79,7 @@ expand_token (struct obstack *obs, token_type t, token_data *td)
       if (sym == NULL || SYMBOL_TYPE (sym) == TOKEN_VOID
 	  || (SYMBOL_TYPE (sym) == TOKEN_FUNC
 	      && SYMBOL_BLIND_NO_ARGS (sym)
-	      && peek_input () != '('))
+	      && peek_token () != TOKEN_OPEN))
 	{
 #ifdef ENABLE_CHANGEWORD
 	  shipout_text (obs, TOKEN_DATA_ORIG_TEXT (td),
@@ -115,6 +118,8 @@ expand_argument (struct obstack *obs, token_data *argp)
   token_data td;
   char *text;
   int paren_level;
+  const char *file = current_file;
+  int line = current_line;
 
   TOKEN_DATA_TYPE (argp) = TOKEN_VOID;
 
@@ -132,11 +137,10 @@ expand_argument (struct obstack *obs, token_data *argp)
 
       switch (t)
 	{			/* TOKSW */
-	case TOKEN_SIMPLE:
-	  text = TOKEN_DATA_TEXT (&td);
-	  if ((*text == ',' || *text == ')') && paren_level == 0)
+	case TOKEN_COMMA:
+	case TOKEN_CLOSE:
+	  if (paren_level == 0)
 	    {
-
 	      /* The argument MUST be finished, whether we want it or not.  */
 	      obstack_1grow (obs, '\0');
 	      text = obstack_finish (obs);
@@ -146,8 +150,12 @@ expand_argument (struct obstack *obs, token_data *argp)
 		  TOKEN_DATA_TYPE (argp) = TOKEN_TEXT;
 		  TOKEN_DATA_TEXT (argp) = text;
 		}
-	      return (boolean) (*TOKEN_DATA_TEXT (&td) == ',');
+	      return (boolean) (t == TOKEN_COMMA);
 	    }
+	  /* fallthru */
+	case TOKEN_OPEN:
+	case TOKEN_SIMPLE:
+	  text = TOKEN_DATA_TEXT (&td);
 
 	  if (*text == '(')
 	    paren_level++;
@@ -157,8 +165,10 @@ expand_argument (struct obstack *obs, token_data *argp)
 	  break;
 
 	case TOKEN_EOF:
-	  M4ERROR ((EXIT_FAILURE, 0,
-		    "ERROR: end of file in argument list"));
+	  /* current_file changed to "" if we see TOKEN_EOF, use the
+	     previous value we stored earlier.  */
+	  M4ERROR_AT_LINE ((EXIT_FAILURE, 0, file, line,
+			    "ERROR: end of file in argument list"));
 	  break;
 
 	case TOKEN_WORD:
@@ -194,7 +204,6 @@ static void
 collect_arguments (symbol *sym, struct obstack *argptr,
 		   struct obstack *arguments)
 {
-  int ch;			/* lookahead for ( */
   token_data td;
   token_data *tdp;
   boolean more_args;
@@ -205,8 +214,7 @@ collect_arguments (symbol *sym, struct obstack *argptr,
   tdp = (token_data *) obstack_copy (arguments, &td, sizeof (td));
   obstack_grow (argptr, &tdp, sizeof (tdp));
 
-  ch = peek_input ();
-  if (ch == '(')
+  if (peek_token () == TOKEN_OPEN)
     {
       next_token (&td);		/* gobble parenthesis */
       do

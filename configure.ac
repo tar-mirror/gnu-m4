@@ -18,7 +18,7 @@
 # 02110-1301  USA
 
 AC_PREREQ([2.60])
-AC_INIT([GNU M4], [1.4.5], [bug-m4@gnu.org])
+AC_INIT([GNU M4], [1.4.6], [bug-m4@gnu.org])
 AM_INIT_AUTOMAKE([1.9.6 dist-bzip2 gnu])
 PACKAGE=$PACKAGE_TARNAME; AC_SUBST([PACKAGE])
 VERSION=$PACKAGE_VERSION; AC_SUBST([VERSION])
@@ -48,7 +48,7 @@ AC_CHECK_MEMBERS([struct sigaction.sa_sigaction], [], [],
 AC_TYPE_SIGNAL
 AC_TYPE_SIZE_T
 
-AC_CHECK_FUNCS_ONCE([sigaction sigaltstack sigstack sigvec strerror tmpfile])
+AC_CHECK_FUNCS_ONCE([sigaction sigaltstack sigstack sigvec strerror])
 
 M4_INIT
 

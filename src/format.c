@@ -200,6 +200,9 @@ format (struct obstack *obs, int argc, token_data **argv)
 	case 'e':
 	case 'E':
 	case 'f':
+	case 'F':
+	case 'g':
+	case 'G':
 	  datatype = DOUBLE;
 	  break;
 
@@ -277,6 +280,9 @@ format (struct obstack *obs, int argc, token_data **argv)
 	  else
 	    str = xasprintf (fstart, ARG_STR(argc, argv));
 	  break;
+
+	default:
+	  abort();
 	}
 
       *fmt = c;

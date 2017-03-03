@@ -1,11 +1,14 @@
-dnl @ ../doc/m4.texinfo:1814: Origin of test
-ifelse(`foo', `bar', `true')
+dnl @ ../doc/m4.texinfo:1828: Origin of test
+dnl @ Copyright (C) 2006 Free Software Foundation
+dnl @ This file is free software; the Free Software Foundation
+dnl @ gives unlimited permission to copy and/or distribute it
+dnl @ with or without modifications, as long as this notice
+dnl @ is preserved.
+define(`foo', `ifelse(`$#', `0', ``$0'', `arguments:$#')')
 dnl @result{}
-ifelse(`foo', `foo', `true')
-dnl @result{}true
-define(`foo', `bar')
-dnl @result{}
-ifelse(foo, `bar', `true', `false')
-dnl @result{}true
-ifelse(foo, `foo', `true', `false')
-dnl @result{}false
+foo
+dnl @result{}foo
+foo()
+dnl @result{}arguments:1
+foo(`a', `b', `c')
+dnl @result{}arguments:3

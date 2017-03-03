@@ -19,6 +19,8 @@
 # any checks for libraries, header files, types and library functions.
 AC_DEFUN([M4_EARLY],
 [
+  m4_pattern_forbid([^gl_[A-Z]])dnl the gnulib macro namespace
+  m4_pattern_allow([^gl_ES$])dnl a valid locale name
   AC_REQUIRE([AC_PROG_RANLIB])
   AC_REQUIRE([AC_GNU_SOURCE])
   AC_REQUIRE([gl_USE_SYSTEM_EXTENSIONS])
@@ -30,27 +32,37 @@ AC_DEFUN([M4_INIT],
 [
   AM_CONDITIONAL([GL_COND_LIBTOOL], [false])
   gl_FUNC_ALLOCA
+  gl_CLOEXEC
+  gl_CLOSE_STREAM
   gl_ERROR
   gl_EXITFAIL
   dnl gl_USE_SYSTEM_EXTENSIONS must be added quite early to configure.ac.
+  gl_FOPEN_SAFER
+  gl_FUNC_FPENDING
+  gl_FUNC_FREE
   gl_GETOPT
   AC_FUNC_MALLOC
   gl_MBCHAR
   gl_MBITER
   gl_FUNC_MEMCHR
   gl_FUNC_MKSTEMP
-  gl_OBSTACK
+  AC_FUNC_OBSTACK
+  dnl Note: AC_FUNC_OBSTACK does AC_LIBSOURCES([obstack.h, obstack.c]).
   gl_REGEX
-  gl_C_RESTRICT
   gl_SIZE_MAX
   gt_TYPE_SSIZE_T
   gl_STAT_MACROS
   gl_STDARG_H
   AM_STDBOOL_H
+  gl_STDINT_H
+  gl_STDLIB_SAFER
   gl_STRCASE
   gl_FUNC_STRTOL
   gl_HEADER_SYS_STAT_H
+  gl_TMPFILE_SAFER
   gl_HEADER_UNISTD
+  gl_UNISTD_SAFER
+  gl_FUNC_GLIBC_UNLOCKED_IO
   gl_FUNC_VASNPRINTF
   gl_FUNC_VASPRINTF
   gl_FUNC_WCWIDTH
@@ -63,18 +75,29 @@ AC_DEFUN([M4_INIT],
 # gnulib-tool and may be removed by future gnulib-tool invocations.
 AC_DEFUN([M4_FILE_LIST], [
   build-aux/gendocs.sh
+  build-aux/gnupload
   doc/fdl.texi
   doc/gendocs_template
+  lib/__fpending.c
+  lib/__fpending.h
   lib/alloca.c
   lib/alloca_.h
   lib/asnprintf.c
   lib/asprintf.c
   lib/binary-io.h
+  lib/cloexec.c
+  lib/cloexec.h
+  lib/close-stream.c
+  lib/close-stream.h
+  lib/dup-safer.c
   lib/error.c
   lib/error.h
   lib/exit.h
   lib/exitfail.c
   lib/exitfail.h
+  lib/fd-safer.c
+  lib/fopen-safer.c
+  lib/free.c
   lib/getopt.c
   lib/getopt1.c
   lib/getopt_.h
@@ -85,9 +108,11 @@ AC_DEFUN([M4_FILE_LIST], [
   lib/mbchar.h
   lib/mbuiter.h
   lib/memchr.c
+  lib/mkstemp-safer.c
   lib/mkstemp.c
   lib/obstack.c
   lib/obstack.h
+  lib/pipe-safer.c
   lib/printf-args.c
   lib/printf-args.h
   lib/printf-parse.c
@@ -102,6 +127,11 @@ AC_DEFUN([M4_FILE_LIST], [
   lib/stat-macros.h
   lib/stat_.h
   lib/stdbool_.h
+  lib/stdint_.h
+  lib/stdio--.h
+  lib/stdio-safer.h
+  lib/stdlib--.h
+  lib/stdlib-safer.h
   lib/strcase.h
   lib/strcasecmp.c
   lib/strncasecmp.c
@@ -109,10 +139,16 @@ AC_DEFUN([M4_FILE_LIST], [
   lib/strnlen1.h
   lib/strtol.c
   lib/tempname.c
+  lib/tmpfile-safer.c
+  lib/unistd--.h
+  lib/unistd-safer.h
+  lib/unlocked-io.h
   lib/vasnprintf.c
   lib/vasnprintf.h
   lib/vasprintf.c
   lib/vasprintf.h
+  lib/verror.c
+  lib/verror.h
   lib/wcwidth.h
   lib/xalloc-die.c
   lib/xalloc.h
@@ -123,11 +159,15 @@ AC_DEFUN([M4_FILE_LIST], [
   lib/xvasprintf.h
   m4/absolute-header.m4
   m4/alloca.m4
+  m4/cloexec.m4
+  m4/close-stream.m4
   m4/codeset.m4
   m4/eoverflow.m4
   m4/error.m4
   m4/exitfail.m4
   m4/extensions.m4
+  m4/fpending.m4
+  m4/free.m4
   m4/getopt.m4
   m4/intmax_t.m4
   m4/inttypes_h.m4
@@ -138,23 +178,23 @@ AC_DEFUN([M4_FILE_LIST], [
   m4/mbrtowc.m4
   m4/memchr.m4
   m4/mkstemp.m4
-  m4/obstack.m4
   m4/regex.m4
-  m4/restrict.m4
   m4/signed.m4
   m4/size_max.m4
   m4/ssize_t.m4
   m4/stat-macros.m4
   m4/stdarg.m4
   m4/stdbool.m4
+  m4/stdint.m4
   m4/stdint_h.m4
+  m4/stdio-safer.m4
+  m4/stdlib-safer.m4
   m4/strcase.m4
-  m4/strerror_r.m4
   m4/strtol.m4
   m4/sys_stat_h.m4
-  m4/uintmax_t.m4
-  m4/ulonglong.m4
+  m4/unistd-safer.m4
   m4/unistd_h.m4
+  m4/unlocked-io.m4
   m4/vasnprintf.m4
   m4/vasprintf.m4
   m4/wchar_t.m4

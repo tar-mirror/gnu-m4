@@ -2,6 +2,44 @@ GNU M4 NEWS - User visible changes.
 Copyright (C) 1992, 1993, 1994, 2004, 2005, 2006 Free Software
 Foundation, Inc.
 
+Version 1.4.6 - 25 August 2006, by Eric Blake  (CVS version 1.4.5a)
+
+* Fix buffer overruns in regexp and patsubst macros when handed a trailing
+  backslash in the replacement text, or when handling \n substitutions
+  beyond the number of \(\) groups.
+* Fix memory leak in regexp, patsubst, and changeword macros.
+* The format macro now understands %F, %g, and %G.
+* When loading frozen files, m4 now exits with status 63 if version
+  mismatch is detected.
+* Fix bugs that occurred when invoked with stdout or stderr closed,
+  and detect write failures to stdout or to the target of the
+  debugfile macro.  In particular, the syscmd and esyscmd macros can
+  no longer interfere with the debug stream or diversions.
+* The m4exit macro now converts values outside the range 0-255 to 1.
+* It is now an error if a command-line input file ends in the middle of a
+  comment, matching the behavior of mid-string and mid-argument
+  collection.
+* The dnl macro now warns if end of file is encountered instead of a
+  newline.
+* The error message when end of file is encountered now uses the file and
+  line where the dangling construct started, rather than `NONE:0:'.
+* The debugmode and __file__ macros, and the -s/--synclines option, now
+  show what directory a file was found in when the -I/--include option or
+  M4PATH variable had an effect.
+* The changequote and changecom macros now work with 8-bit characters, and
+  quotes and comments that begin with `(' are properly recognized
+  following a word.
+* The new macro __program__ is added, which allows the input file to issue
+  an error message that resembles messages from m4.  Warning and error
+  messages have been reformatted to comply with GNU Coding Standards.
+* The errprint, m4wrap, and shift macros are now recognized only with
+  arguments.
+* The index, substr, translit, regexp, and patsubst macros now produce
+  output when given only one argument, but still warn about a missing
+  second argument.
+* The patsubst macro now reliably finds zero-length matches at the end
+  of a string.
+
 Version 1.4.5 - 15 July 2006, by Eric Blake  (CVS version 1.4.4c)
 
 * Fix sysval on BeOS, OS/2, and other systems that store exit status
@@ -291,5 +329,6 @@ Version 0.50 - January 1990, by Rene' Seindal
 * Initial beta release.
 
 Local Variables:
+mode: outline
 fill-column: 75
 End:

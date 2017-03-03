@@ -110,8 +110,7 @@
 # define STACKOVF_DETECT 16384
 #endif
 
-/* Giving a hand to ansi2knr...  */
-typedef void (*handler_t) _((void));
+typedef void (*handler_t) (void);
 
 static const char *stackbot;
 static const char *stackend;
@@ -347,7 +346,17 @@ Error - Do not know how to set up stack-ovf trap handler...
     ss.ss_sp = xmalloc ((unsigned) ss.ss_size);
     ss.ss_flags = 0;
     if (sigaltstack (&ss, NULL) < 0)
-      error (EXIT_FAILURE, errno, "sigaltstack");
+      {
+	/* Oops - sigaltstack exists but doesn't work.  We can't
+	   install the overflow detector, but should gracefully treat
+	   it as though sigaltstack doesn't exist.  For example, this
+	   happens when compiled with Linux 2.1 headers but run
+	   against Linux 2.0 kernel.  */
+	free (ss.ss_sp);
+	if (errno == ENOSYS)
+	  return;
+	error (EXIT_FAILURE, errno, "sigaltstack");
+      }
   }
 
 #elif HAVE_SIGSTACK
@@ -359,7 +368,17 @@ Error - Do not know how to set up stack-ovf trap handler...
     ss.ss_sp = stackbuf + SIGSTKSZ;
     ss.ss_onstack = 0;
     if (sigstack (&ss, NULL) < 0)
-      error (EXIT_FAILURE, errno, "sigstack");
+      {
+	/* Oops - sigstack exists but doesn't work.  We can't install
+	   the overflow detector, but should gracefully treat it as
+	   though sigstack doesn't exist.  For example, this happens
+	   when compiled with Linux 2.1 headers but run against Linux
+	   2.0 kernel.  */
+	free (stackbuf);
+	if (errno == ENOSYS)
+	  return;
+	error (EXIT_FAILURE, errno, "sigstack");
+      }
   }
 
 #else /* not HAVE_SIGSTACK */
@@ -376,7 +395,7 @@ Error - Do not know how to set up stack-ovf trap handler...
 # if HAVE_STRUCT_SIGACTION_SA_SIGACTION
   act.sa_sigaction = sigsegv_handler;
 # else /* ! HAVE_STRUCT_SIGACTION_SA_SIGACTION */
-  act.sa_handler = (RETSIGTYPE (*) _((int))) sigsegv_handler;
+  act.sa_handler = (RETSIGTYPE (*) (int)) sigsegv_handler;
 # endif /* ! HAVE_STRUCT_SIGACTION_SA_SIGACTION */
   sigemptyset (&act.sa_mask);
   act.sa_flags = (SA_ONSTACK | SA_RESETHAND | SA_SIGINFO);
@@ -385,7 +404,7 @@ Error - Do not know how to set up stack-ovf trap handler...
 
 #else /* ! HAVE_SIGACTION */
 
-  vec.sv_handler = (RETSIGTYPE (*)_ ((int))) sigsegv_handler;
+  vec.sv_handler = (RETSIGTYPE (*) (int)) sigsegv_handler;
   vec.sv_mask = 0;
   vec.sv_flags = (SV_ONSTACK | SV_RESETHAND);
   if (sigvec (SIGSEGV, &vec, NULL) < 0)

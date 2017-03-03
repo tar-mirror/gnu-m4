@@ -1,12 +1,26 @@
-dnl @ ../doc/m4.texinfo:1669: Origin of test
-builtin
-dnl @result{}builtin
-builtin()
-dnl @error{}stdin:2: m4: undefined builtin `'
+dnl @ ../doc/m4.texinfo:1683: Origin of test
+dnl @ Copyright (C) 2006 Free Software Foundation
+dnl @ This file is free software; the Free Software Foundation
+dnl @ gives unlimited permission to copy and/or distribute it
+dnl @ with or without modifications, as long as this notice
+dnl @ is preserved.
+pushdef(`define', `hidden')
 dnl @result{}
-builtin(`builtin')
-dnl @error{}stdin:3: m4: Warning: too few arguments to builtin `builtin'
+undefine(`undefine')
 dnl @result{}
-builtin(`builtin',)
-dnl @error{}stdin:4: m4: undefined builtin `'
+define(`foo', `bar')
+dnl @result{}hidden
+foo
+dnl @result{}foo
+builtin(`define', `foo', `BAR')
 dnl @result{}
+foo
+dnl @result{}BAR
+undefine(`foo')
+dnl @result{}undefine(foo)
+foo
+dnl @result{}BAR
+builtin(`undefine', `foo')
+dnl @result{}
+foo
+dnl @result{}foo

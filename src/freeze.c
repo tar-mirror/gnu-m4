@@ -148,7 +148,8 @@ INTERNAL ERROR: bad token data type in freeze_one_symbol ()"));
   /* All done.  */
 
   fputs ("# End of frozen state file\n", file);
-  fclose (file);
+  if (close_stream (file) != 0)
+    M4ERROR ((EXIT_FAILURE, errno, "unable to create frozen state"));
 }
 
 /*----------------------------------------------------------------------.
@@ -221,7 +222,7 @@ reload_frozen_state (const char *name)
     }                                                           \
   while (character == '\n')
 
-  file = path_search (name);
+  file = path_search (name, NULL);
   if (file == NULL)
     M4ERROR ((EXIT_FAILURE, errno, "cannot open %s", name));
 
@@ -234,8 +235,14 @@ reload_frozen_state (const char *name)
   GET_DIRECTIVE;
   VALIDATE ('V');
   GET_CHARACTER;
-  VALIDATE ('1');
-  GET_CHARACTER;
+  GET_NUMBER (number[0]);
+  if (number[0] > 1)
+    M4ERROR ((EXIT_MISMATCH, 0,
+              "frozen file version %d greater than max supported of 1",
+	      number[0]));
+  else if (number[0] < 1)
+    M4ERROR ((EXIT_FAILURE, 0,
+              "ill-formed frozen file, version directive expected"));
   VALIDATE ('\n');
 
   GET_DIRECTIVE;
@@ -361,7 +368,9 @@ reload_frozen_state (const char *name)
 
   free (string[0]);
   free (string[1]);
-  fclose (file);
+  errno = 0;
+  if (ferror (file) || fclose (file) != 0)
+    M4ERROR ((EXIT_FAILURE, errno, "unable to read frozen state"));
 
 #undef GET_CHARACTER
 #undef GET_DIRECTIVE

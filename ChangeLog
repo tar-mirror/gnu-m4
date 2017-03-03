@@ -1,3 +1,365 @@
+2006-08-25  Eric Blake  <ebb9@byu.net>
+
+	Release 1.4.6:
+
+	* configure.ac (AC_INIT): Bump version number.
+	* NEWS: Describe changes since 1.4.5.
+
+	* Makefile.maint (web-manual): Give up on VPATH build during
+	distribution.  But distributions are made so infrequently that
+	this is not too much of a hardship.
+	* Makefile.am (MAINTAINERCLEANFILES): Avoid error if lib/CVS/
+	exists.
+
+2006-08-24  Eric Blake  <ebb9@byu.net>
+
+	* src/builtin.c (m4_index, m4_substr, m4_translit): Similar to
+	Solaris, produce output on just one argument.
+	(m4_regexp, m4_patsubst): For consistency, do likewise.
+	(m4_patsubst): Allow zero-length match at end of string.
+	* doc/m4.texinfo (Sysval): Fix overfull hbox.
+	(Bugs, Macro Arguments): Minor fixes.
+	(Other tokens): Rearrange node order.
+	(Index macro, Substr, Translit, Regexp, Patsubst): Add tests.
+	* NEWS: Document these fixes.
+
+2006-08-22  Eric Blake  <ebb9@byu.net>
+
+	* src/input.c (pop_input): Avoid empty filename with -di option.
+	* src/debug.c (debug_message_prefix): Put space before message.
+
+	* m4/gnulib-cache.m4: We don't explicitly use alloca module.
+
+	* m4/gnulib-cache.m4: Augment with gnulib-tool --import gnupload.
+	* Makefile.maint (fetch): Simplify, now that we can use gnupload.
+
+	* checks/check-them: State why a test is skipped.
+	* doc/m4.texinfo (Changeword, Sysval, Maketemp): Likewise.
+
+	* ChangeLog: Add copyright.
+	* AUTHORS: Likewise.
+	* BACKLOG: Likewise.
+	* README: Likewise.
+	* THANKS: Likewise.
+	* TODO: Likewise.
+	* examples/COPYING: New file, add copyright for all the examples.
+	* checks/get-them: Put copyright on testsuite files.
+
+2006-08-18  Eric Blake  <ebb9@byu.net>
+
+	Don't let unrelated child processes see too many files.
+	* m4/gnulib-cache.m4: Augment with gnulib-tool --import cloexec.
+	* src/builtin.c (m4_esyscmd, m4_regexp, m4_patsubst): Fix
+	spelling in error message.
+	* src/debug.c [!__STDC__]: Assume C89, and nuke old varargs.h.
+	(debug_set_output): Close debug file on exec.
+	* src/m4.h (includes): Add cloexec.h.
+	* src/output.c (make_room_for): Close diversions on exec.
+	* src/path.c (path_search): Close include files on exec.
+	* NEWS: Document this.
+
+	Regular expressions were leaking memory.
+	* src/builtin.c (init_pattern_buffer, free_pattern_buffer): New
+	helper methods.
+	(m4_regexp, m4_patsubst): Avoid memory leak.
+	* src/input.c (init_pattern_buffer) [ENABLE_CHANGEWORD]: Make
+	static.
+	(set_word_regexp) [ENABLE_CHANGEWORD]: Avoid memory leak.  Change
+	from O(n^2) to O(n) for calculating word_start.
+	(next_token, peek_token) [ENABLE_CHANGEWORD]: Treat word_start as
+	O(1) bitmap, not O(n) search string.
+	* NEWS: Document this fix.
+
+2006-08-17  Eric Blake  <ebb9@byu.net>
+
+	* NEWS: Document previous checkin.
+
+	* src/builtin.c (substitute): Avoid core dump when accessing
+	beyond bound of regular expression.
+	Reported by Karl Nelson.
+	* doc/m4.texinfo (Regexp): Add example that causes core dump on
+	some architectures prior to this patch.
+	* THANKS: Updated.
+
+2006-08-16  Eric Blake  <ebb9@byu.net>
+
+	* doc/m4.texinfo (Invoking m4, Debug Output): Fix wording to be
+	clear that dumpdef does not always go to stderr.
+
+	* src/builtin.c (m4_errprint): Flush buffers before printing to
+	stderr.
+	* THANKS: Updated.
+
+2006-08-15  Eric Blake  <ebb9@byu.net>
+
+	* src/builtin.c (m4_m4wrap, m4_errprint, m4_shift): Make blind,
+	per debian bug 96075.
+	* doc/m4.texinfo (Loops, M4wrap, Errprint): Document this change.
+	(Changeword): Don't use shift as an example of a swallowed word.
+	(Divert): Discuss fact that divert is an English word.
+	Reported by Richard A Nelson.
+
+2006-08-14  Eric Blake  <ebb9@byu.net>
+
+	* doc/m4.texinfo (Invoking m4): Minor fixes.
+
+2006-08-12  Eric Blake  <ebb9@byu.net>
+
+	* doc/m4.texinfo (Arguments): Hint at better exch macro.
+	(Answers): Provide a better definition.
+
+2006-08-09  Eric Blake  <ebb9@byu.net>
+
+	* doc/m4.texinfo (Incompatibilities): Document that m4 does not
+	yet understand locales.
+	* NEWS: Fix wording of a few items.
+
+2006-08-08  Eric Blake  <ebb9@byu.net>
+
+	Avoid printing `NONE:0:' in error messages.
+	* src/m4.h (m4_error_at_line): New function.
+	* src/m4.c (m4_error_at_line): Implement.
+	* src/input.c (skip_line, input_init, next_token): Use "", not
+	"NONE", for no file, since NONE can be a real file name.
+	* src/macro.c (expand_argument): Likewise.
+	* src/debug.c (debug_message_prefix, trace_header): Check for
+	current file.
+	* doc/m4.texinfo (Dnl, M4wrap): Adjust accordingly.
+	(Location): Document that synclines and internal message format
+	are not impacted by redefining these macros.
+	(M4exit): Hint at bug in fatal_error.
+	(Answers): Provide workaround to match m4 output.
+
+	* m4/gnulib-cache.m4: Augment with gnulib-tool --import verror.
+	* src/m4.h (m4_error): New function.
+	(M4ERROR, M4ERROR_AT_LINE): Reimplement without hacking around
+	error module deficiencies.
+	(reference_error, suppress_line): No longer needed.
+	* src/m4.c (m4_error): Implement.
+	(main): No longer need to install error callback.
+
+2006-08-04  Eric Blake  <ebb9@byu.net>
+
+	* src/m4.h (program_name): Declare.
+	(suppress_line): New variable.
+	(M4ERROR_AT_LINE): New macro.
+	* src/m4.c (reference_error, main): Follow GNU Coding Standards
+	for error message format.
+	* src/input.c (skip_line, next_token): Use M4ERROR_AT_LINE.
+	* src/macro.c (expand_argument): Likewise.
+	* checks/check-them (examples): Adjust to new message format.
+	* src/builtin.c (m4___program__): New builtin.
+	* doc/m4.texinfo (Location): Split from Errprint into new node,
+	and document __program__.
+	(Builtin, Ifdef, Ifelse, Dumpdef, Trace, Debug Output, Dnl)
+	(Include, Regexp, Patsubst, Incr, Eval): Adjust error message
+	format.
+	(Extensions): Document __program__.
+	* NEWS: Document this change.
+
+2006-08-03  Eric Blake  <ebb9@byu.net>
+
+	Don't confuse leading `(' in comment or quote with start of
+	argument collection.
+	* src/m4.h (enum token_type): Add TOKEN_OPEN, TOKEN_COMMA,
+	TOKEN_CLOSE.
+	(peek_input): Make private to input.c.
+	(peek_token): New prototype.
+	* src/input.c (default_word_regexp): Reduce ifdefs.
+	(peek_input): Make static.
+	(next_token): Return new token types.
+	(match_input, MATCH): Add argument consume, which controls
+	whether match should be pushed back.
+	(peek_token): New function.
+	(token_type_string) [DEBUG_INPUT]: New function.
+	* src/macro.c (expand_token, expand_argument, collect_arguments):
+	Handle new token types.
+	* doc/m4.texinfo (Changequote, Changecom): Document this.
+	* NEWS: Document this.
+
+	* src/stackovf.c (setup_stackovf_trap): Free memory on failure.
+
+	* src/stackovf.c (setup_stackovf_trap): Gracefully avoid stack
+	overflow detection when sigstack exists but is not implemented.
+	Fixes debian bug 154053.
+	* THANKS: Updated.
+	Reported by David Perlin.
+
+2006-08-02  Eric Blake  <ebb9@byu.net>
+
+	* src/input.c (MATCH): Fix EOF detection on multi-byte comment
+	close.
+
+2006-08-01  Eric Blake  <ebb9@byu.net>
+
+	* src/input.c (skip_line, next_token): Remember current file in
+	case input file ends abruptly.  Addresses debian bug 175365.
+	(pop_input): Defer freeing storage that holds previous file
+	name...
+	(pop_wrapup): to here, after error message is issued.
+	* src/macro.c (expand_argument): Remember current file in case
+	input file ends abruptly.
+	* doc/m4.texinfo (Macro Arguments, Dnl, Changequote, Changecom)
+	(M4wrap): Adjust testsuite accordingly.
+	(Errprint): Document line number limitation of m4wrap.
+	* NEWS: Document this fix.
+	* THANKS: Update.
+
+2006-07-31  Eric Blake  <ebb9@byu.net>
+
+	* src/input.c (peek_input, next_char, match_input): Be eight-bit
+	clean; fixes debian bug 311378.
+	* doc/m4.texinfo (Syntax): Describe eight-bit handling.
+	(Changequote, Changecom): Add examples to test this.
+	* NEWS: Document this fix.
+	* THANKS: Update.
+	Reported by Steven Augart.
+
+	* doc/m4.texinfo: Whitespace fix.
+	* checks/get-them: Avoid exceeding 14-char file name limit.
+	* THANKS: Update.
+
+2006-07-30  Eric Blake  <ebb9@byu.net>
+
+	* src/path.c (path_search): Detect allocation failure.
+
+	Use native free when it is good enough.
+	* m4/gnulib-cache.m4: Augment with gnulib-tool --import free.
+	* src/builtin.c (define_user_macro, m4_regexp, m4_patsubst):
+	Adjust calls.
+	* src/symtab.c (free_symbol): Likewise.
+	* src/m4.c (xfree, main): Likewise.
+	* src/m4.h (obstack_chunk_free): Likewise.
+	* src/path.c (path_search): Likewise.
+	* src/input.c (pop_wrapup, set_quotes, set_comment): Likewise.
+
+	* doc/m4.texinfo (Errprint): Add example for last patch.
+	* checks/check-them: Account for VPATH in latest example.
+
+2006-07-29  Eric Blake  <ebb9@byu.net>
+
+	* src/path.c (path_search): Add result parameter, so that
+	-I can be accounted for.  Debian bug 53685.
+	* src/m4.h (path_search): Update prototype.
+	* src/m4.c (main): Adjust callers.
+	* src/freeze.c (reload_frozen_state): Likewise.
+	* src/builtin.c (include, m4_undivert): Likewise.
+	* NEWS: Document this change.
+	Reported by Nicolas Lichtmaier.
+
+2006-07-28  Eric Blake  <ebb9@byu.net>
+
+	* Makefile.am (MAINTAINERCLEANFILES): Fix typo that tripped up
+	several non-GNU makes.
+	* src/stackovf.c (setup_stackovf_trap): Missed _ from yesterday.
+	* src/m4.h: Likewise.
+	* src/input.c (push_wrapup): Avoid compiler warning with Solaris
+	/usr/ccs/bin/ucbcc.
+
+2006-07-27  Eric Blake  <ebb9@byu.net>
+
+	* doc/m4.texinfo: Use @acronym{GNU} throughout.
+	(History): Update for 1.4.6.
+
+	* src/m4.h (_): Remove K&R cruft.
+	* src/builtin.c: Likewise.
+	* src/debug.c: Likewise.
+	* src/eval.c: Likewise.
+	* src/macro.c: Likewise.
+	* src/stackovf.c: Likewise.
+
+	* doc/Makefile.am (m4.1): Improve man page.
+	* src/m4.c (usage): Improve --help output, including adding the
+	bug reporting address.
+	(main): Follow GNU Coding Standards for --version output.
+
+2006-07-26  Eric Blake  <ebb9@byu.net>
+
+	* doc/m4.texinfo: Use begin-quote, end-quote, begin-comment, and
+	end-comment consistently, to match POSIX.
+
+	* doc/m4.texinfo (Macro Arguments, Changequote, Changecom)
+	(Dnl, M4wrap, Include): Document EOF issues, and add examples.
+	(Incompatibilities): Document incompatibility of changecom
+	vs. macro names, and of EOF in include.
+	* src/input.c (next_token): Reject unterminated comments at EOF.
+	(skip_line): Warn on unterminated dnl at EOF.
+	* NEWS: Document these changes.
+
+2006-07-25  Eric Blake  <ebb9@byu.net>
+
+	* m4/gnulib-cache.m4: Update to reflect gnulib's split of
+	stdio-safer into fopen-safer and tmpfile-safer.
+	* src/m4.c: Remove redundant include.
+
+2006-07-24  Eric Blake  <ebb9@byu.net>
+
+	Fix bugs related to stream handling.
+	* m4/gnulib-cache.m4: Augment with gnulib-tool --import
+	unlocked-io stdio-safer stdlib-safer close-stream.
+	* configure.ac (AC_CHECK_FUNCS_ONCE): Assume tmpfile; it can be
+	provided by gnulib if needed.
+	* src/output.c [! HAVE_TMPFILE]: Likewise.
+	* src/m4.h (includes): Replace unistd, stdio, and stdlib with
+	their safer counterparts.
+	(retcode): New global variable.
+	* src/input.c (pop_input): Check for read failure.
+	* src/freeze.c (reload_frozen_state): Likewise.
+	(produce_frozen_state): Check for write failure.
+	* src/debug.c (debug_set_file): Likewise.
+	* src/m4.c (usage, main): Likewise.
+	(retcode): Make global.
+	* src/builtin.c (m4_m4exit): Likewise.  Ensure that the exit
+	status is non-zero except when everything succeeds.
+	* doc/m4.texinfo (M4exit): Document these changes.
+	(Incompatibilities): Remove documentation of bug now fixed.
+	* NEWS: Document these fixes.
+
+2006-07-22  Eric Blake  <ebb9@byu.net>
+
+	* src/format.c (format): Avoid compiler warning that str may be
+	used uninitialized.
+
+2006-07-21  Eric Blake  <ebb9@byu.net>
+
+	* src/m4.h [UNIX]: Add more platforms that are close enough to
+	categorize as UNIX, but which don't predefine __unix__.
+	Reported by Nelson H. F. Beebe.
+
+2006-07-20  Eric Blake  <ebb9@byu.net>
+
+	* m4/gnulib-cache.m4: gnulib-tool has changed again.  Regenerate
+	to explicitly ask for --assume-autoconf=2.60.
+
+2006-07-19  Eric Blake  <ebb9@byu.net>
+
+	* doc/m4.texinfo (Sysval): Avoid kill -1, since ksh traps SIGHUP
+	and exits normally with 129.
+	Reported by Nelson H. F. Beebe.
+	* THANKS: Update.
+
+	* src/m4.h (EXIT_MISMATCH): Define.
+	* src/freeze.c (reload_frozen_state): Detect version mismatch, by
+	exiting with status 63.
+	* src/m4.c (usage): Document this.
+	* doc/m4.texinfo (Invoking m4, Using frozen files): Likewise.
+	* NEWS: Likewise.
+
+	* doc/m4.texinfo (copying): Relax restriction on front-cover and
+	back-cover texts.
+
+2006-07-17  Eric Blake  <ebb9@byu.net>
+
+	* src/format.c (format): Support F, g, and G specifiers.
+	* doc/m4.texinfo (Format): Document this.
+	* NEWS: Document this addition.
+
+	* doc/m4.texinfo (Builtin): Delete redundant text.
+
+	* configure.ac (AC_INIT): Bump version number.
+	* src/builtin.c (substitute): Bah.  Fix buffer overrun.
+	* NEWS: Document this fix.
+
 2006-07-15  Eric Blake  <ebb9@byu.net>
 
 	Release 1.4.5:
@@ -597,7 +959,7 @@
 	(hash): Likewise.  Don't case-fold in the hash function.
 	Shift by 7, not 3, for consistency with gnulib/lib/hash.c.
 	Don't assume hash word is 32 bits.
-	NEWS: Document this change.
+	* NEWS: Document this change.
 
 2006-06-04  Eric Blake  <ebb9@byu.net>
 
@@ -2540,4 +2902,17 @@ Mon Jan 22 21:08:52 1990  Rene' Seindal (seindal at diku.dk)
 
 	* Initial beta release.  Release 0.50, manual 0.05.
 
-	$Revision: 1.1.1.1.2.118 $ $Date: 2006/07/15 22:37:11 $
+	-----
+
+	$Revision: 1.1.1.1.2.169 $ $Date: 2006/08/25 14:08:32 $
+
+	Local Variables:
+	coding: utf-8
+	End:
+
+	Copyright (C) 1990, 1991, 1992, 1993, 1994, 2000, 2001, 2003,
+	2005, 2006 Free Software Foundation, Inc.
+
+	Copying and distribution of this file, with or without
+	modification, are permitted provided the copyright notice
+	and this notice are preserved.

@@ -39,10 +39,11 @@ extern FILE *popen ();
    builtin.  */
 
 #define DECLARE(name) \
-  static void name _((struct obstack *, int, token_data **))
+  static void name (struct obstack *, int, token_data **)
 
 DECLARE (m4___file__);
 DECLARE (m4___line__);
+DECLARE (m4___program__);
 DECLARE (m4_builtin);
 DECLARE (m4_changecom);
 DECLARE (m4_changequote);
@@ -97,6 +98,7 @@ builtin_tab[] =
 
   { "__file__",		TRUE,	FALSE,	FALSE,	m4___file__ },
   { "__line__",		TRUE,	FALSE,	FALSE,	m4___line__ },
+  { "__program__",	TRUE,	FALSE,	FALSE,	m4___program__ },
   { "builtin",		TRUE,	FALSE,	TRUE,	m4_builtin },
   { "changecom",	FALSE,	FALSE,	FALSE,	m4_changecom },
   { "changequote",	FALSE,	FALSE,	FALSE,	m4_changequote },
@@ -112,7 +114,7 @@ builtin_tab[] =
   { "divnum",		FALSE,	FALSE,	FALSE,	m4_divnum },
   { "dnl",		FALSE,	FALSE,	FALSE,	m4_dnl },
   { "dumpdef",		FALSE,	FALSE,	FALSE,	m4_dumpdef },
-  { "errprint",		FALSE,	FALSE,	FALSE,	m4_errprint },
+  { "errprint",		FALSE,	FALSE,	TRUE,	m4_errprint },
   { "esyscmd",		TRUE,	FALSE,	TRUE,	m4_esyscmd },
   { "eval",		FALSE,	FALSE,	TRUE,	m4_eval },
   { "format",		TRUE,	FALSE,	TRUE,	m4_format },
@@ -124,13 +126,13 @@ builtin_tab[] =
   { "indir",		TRUE,	FALSE,	TRUE,	m4_indir },
   { "len",		FALSE,	FALSE,	TRUE,	m4_len },
   { "m4exit",		FALSE,	FALSE,	FALSE,	m4_m4exit },
-  { "m4wrap",		FALSE,	FALSE,	FALSE,	m4_m4wrap },
+  { "m4wrap",		FALSE,	FALSE,	TRUE,	m4_m4wrap },
   { "maketemp",		FALSE,	FALSE,	TRUE,	m4_maketemp },
   { "patsubst",		TRUE,	FALSE,	TRUE,	m4_patsubst },
   { "popdef",		FALSE,	FALSE,	TRUE,	m4_popdef },
   { "pushdef",		FALSE,	TRUE,	TRUE,	m4_pushdef },
   { "regexp",		TRUE,	FALSE,	TRUE,	m4_regexp },
-  { "shift",		FALSE,	FALSE,	FALSE,	m4_shift },
+  { "shift",		FALSE,	FALSE,	TRUE,	m4_shift },
   { "sinclude",		FALSE,	FALSE,	TRUE,	m4_sinclude },
   { "substr",		FALSE,	FALSE,	TRUE,	m4_substr },
   { "syscmd",		FALSE,	FALSE,	TRUE,	m4_syscmd },
@@ -230,7 +232,7 @@ define_user_macro (const char *name, const char *text, symbol_lookup mode)
 
   s = lookup_symbol (name, mode);
   if (SYMBOL_TYPE (s) == TOKEN_TEXT)
-    xfree (SYMBOL_TEXT (s));
+    free (SYMBOL_TEXT (s));
 
   SYMBOL_TYPE (s) = TOKEN_TEXT;
   SYMBOL_TEXT (s) = xstrdup (text);
@@ -481,7 +483,6 @@ define_macro (int argc, token_data **argv, symbol_lookup mode)
 		"INTERNAL ERROR: bad token data type in define_macro ()"));
       abort ();
     }
-  return;
 }
 
 static void
@@ -870,7 +871,7 @@ m4_esyscmd (struct obstack *obs, int argc, token_data **argv)
   if (pin == NULL)
     {
       M4ERROR ((warning_status, errno,
-		"cannot open pipe to command \"%s\"", ARG (1)));
+		"cannot open pipe to command `%s'", ARG (1)));
       sysval = -1;
     }
   else
@@ -1049,7 +1050,7 @@ m4_undivert (struct obstack *obs, int argc, token_data **argv)
 		    "non-numeric argument to builtin `%s'", ARG (0)));
 	else
 	  {
-	    fp = path_search (ARG (i));
+	    fp = path_search (ARG (i), NULL);
 	    if (fp != NULL)
 	      {
 		insert_file (fp);
@@ -1088,6 +1089,8 @@ m4_dnl (struct obstack *obs, int argc, token_data **argv)
 static void
 m4_shift (struct obstack *obs, int argc, token_data **argv)
 {
+  if (bad_argc (argv[0], argc, 2, -1))
+    return;
   dump_args (obs, argc - 1, argv + 1, ",", TRUE);
 }
 
@@ -1154,11 +1157,12 @@ static void
 include (int argc, token_data **argv, boolean silent)
 {
   FILE *fp;
+  const char *name;
 
   if (bad_argc (argv[0], argc, 2, 2))
     return;
 
-  fp = path_search (ARG (1));
+  fp = path_search (ARG (1), &name);
   if (fp == NULL)
     {
       if (!silent)
@@ -1167,7 +1171,8 @@ include (int argc, token_data **argv, boolean silent)
       return;
     }
 
-  push_file (fp, ARG (1));
+  push_file (fp, name);
+  free ((char *) name);
 }
 
 /*------------------------------------------------.
@@ -1190,8 +1195,8 @@ m4_sinclude (struct obstack *obs, int argc, token_data **argv)
   include (argc, argv, TRUE);
 }
 
-/* More miscellaneous builtins -- "maketemp", "errprint", "__file__" and
-   "__line__".  The last two are GNU specific.  */
+/* More miscellaneous builtins -- "maketemp", "errprint", "__file__",
+   "__line__", and "__program__".  The last three are GNU specific.  */
 
 /*------------------------------------------------------------------.
 | Use the first argument as at template for a temporary file name.  |
@@ -1221,8 +1226,11 @@ m4_maketemp (struct obstack *obs, int argc, token_data **argv)
 static void
 m4_errprint (struct obstack *obs, int argc, token_data **argv)
 {
+  if (bad_argc (argv[0], argc, 2, -1))
+    return;
   dump_args (obs, argc, argv, " ", FALSE);
   obstack_1grow (obs, '\0');
+  debug_flush_files ();
   fprintf (stderr, "%s", (char *) obstack_finish (obs));
   fflush (stderr);
 }
@@ -1244,6 +1252,16 @@ m4___line__ (struct obstack *obs, int argc, token_data **argv)
     return;
   shipout_int (obs, current_line);
 }
+
+static void
+m4___program__ (struct obstack *obs, int argc, token_data **argv)
+{
+  if (bad_argc (argv[0], argc, 1, 1))
+    return;
+  obstack_grow (obs, lquote.string, lquote.length);
+  obstack_grow (obs, program_name, strlen (program_name));
+  obstack_grow (obs, rquote.string, rquote.length);
+}
 
 /* This section contains various macros for exiting, saving input until
    EOF is seen, and tracing macro calls.  That is: "m4exit", "m4wrap",
@@ -1257,13 +1275,29 @@ m4___line__ (struct obstack *obs, int argc, token_data **argv)
 static void
 m4_m4exit (struct obstack *obs, int argc, token_data **argv)
 {
-  int exit_code = 0;
+  int exit_code = EXIT_SUCCESS;
 
-  if (bad_argc (argv[0], argc, 1, 2))
-    return;
-  if (argc >= 2  && !numeric_arg (argv[0], ARG (1), &exit_code))
-    exit_code = 0;
-
+  /* Warn on bad arguments, but still exit.  */
+  bad_argc (argv[0], argc, 1, 2);
+  if (argc >= 2 && !numeric_arg (argv[0], ARG (1), &exit_code))
+    exit_code = EXIT_FAILURE;
+  if (exit_code < 0 || exit_code > 255)
+    {
+      M4ERROR ((warning_status, 0,
+		"exit status out of range: `%d'", exit_code));
+      exit_code = EXIT_FAILURE;
+    }
+  if (close_stream (stdout) != 0)
+    {
+      M4ERROR ((warning_status, errno, "write error"));
+      if (exit_code == 0)
+	exit_code = EXIT_FAILURE;
+    }
+  /* Change debug stream back to stderr, to force flushing debug stream and
+     detect any errors it might have encountered.  */
+  debug_set_output (NULL);
+  if (exit_code == 0 && retcode != 0)
+    exit_code = retcode;
   exit (exit_code);
 }
 
@@ -1276,6 +1310,8 @@ m4_m4exit (struct obstack *obs, int argc, token_data **argv)
 static void
 m4_m4wrap (struct obstack *obs, int argc, token_data **argv)
 {
+  if (bad_argc (argv[0], argc, 2, -1))
+    return;
   if (no_gnu_extensions)
     obstack_grow (obs, ARG (1), strlen (ARG (1)));
   else
@@ -1439,7 +1475,12 @@ m4_index (struct obstack *obs, int argc, token_data **argv)
   int l1, l2, retval;
 
   if (bad_argc (argv[0], argc, 3, 3))
-    return;
+    {
+      /* builtin(`index') is blank, but index(`abc') is 0.  */
+      if (argc == 2)
+	shipout_int (obs, 0);
+      return;
+    }
 
   l1 = strlen (ARG (1));
   l2 = strlen (ARG (2));
@@ -1470,7 +1511,12 @@ m4_substr (struct obstack *obs, int argc, token_data **argv)
   int length, avail;
 
   if (bad_argc (argv[0], argc, 3, 4))
-    return;
+    {
+      /* builtin(`substr') is blank, but substr(`abc') is abc.  */
+      if (argc == 2)
+	obstack_grow (obs, ARG (1), strlen (ARG (1)));
+      return;
+    }
 
   length = avail = strlen (ARG (1));
   if (!numeric_arg (argv[0], ARG (2), &start))
@@ -1548,7 +1594,12 @@ m4_translit (struct obstack *obs, int argc, token_data **argv)
   int tolen;
 
   if (bad_argc (argv[0], argc, 3, 4))
-    return;
+    {
+      /* builtin(`translit') is blank, but translit(`abc') is abc.  */
+      if (argc == 2)
+	obstack_grow (obs, ARG (1), strlen (ARG (1)));
+      return;
+    }
 
   from = ARG (2);
   if (strchr (from, '-') != NULL)
@@ -1646,24 +1697,51 @@ Warning: \\0 will disappear, use \\& instead in replacements"));
 	case '1': case '2': case '3': case '4': case '5': case '6':
 	case '7': case '8': case '9':
 	  ch -= '0';
-	  if (regs->end[ch] > 0)
-	    obstack_grow (obs, victim + regs->start[ch],
-			  regs->end[ch] - regs->start[ch]);
-	  else
+	  if (regs->num_regs - 1 <= ch)
 	    M4ERROR ((warning_status, 0, "\
 Warning: sub-expression %d not present", ch));
+	  else if (regs->end[ch] > 0)
+	    obstack_grow (obs, victim + regs->start[ch],
+			  regs->end[ch] - regs->start[ch]);
 	  break;
 
 	case '\0':
 	  M4ERROR ((warning_status, 0, "\
 Warning: trailing \\ ignored in replacement"));
-	  break;
+	  return;
 
 	default:
 	  obstack_1grow (obs, ch);
 	  break;
 	}
     }
+}
+
+/*------------------------------------------.
+| Initialize regular expression variables.  |
+`------------------------------------------*/
+
+static void
+init_pattern_buffer (struct re_pattern_buffer *buf, struct re_registers *regs)
+{
+  buf->translate = NULL;
+  buf->fastmap = NULL;
+  buf->buffer = NULL;
+  buf->allocated = 0;
+  regs->start = NULL;
+  regs->end = NULL;
+}
+
+/*----------------------------------------.
+| Clean up regular expression variables.  |
+`----------------------------------------*/
+
+static void
+free_pattern_buffer (struct re_pattern_buffer *buf, struct re_registers *regs)
+{
+  regfree (buf);
+  free (regs->start);
+  free (regs->end);
 }
 
 /*--------------------------------------------------------------------------.
@@ -1687,36 +1765,36 @@ m4_regexp (struct obstack *obs, int argc, token_data **argv)
   int length;			/* length of first argument */
 
   if (bad_argc (argv[0], argc, 3, 4))
-    return;
+    {
+      /* builtin(`regexp') is blank, but regexp(`abc') is 0.  */
+      if (argc == 2)
+	shipout_int (obs, 0);
+      return;
+    }
 
   victim = TOKEN_DATA_TEXT (argv[1]);
   regexp = TOKEN_DATA_TEXT (argv[2]);
 
-  buf.buffer = NULL;
-  buf.allocated = 0;
-  buf.fastmap = NULL;
-  buf.translate = NULL;
+  init_pattern_buffer (&buf, &regs);
   msg = re_compile_pattern (regexp, strlen (regexp), &buf);
 
   if (msg != NULL)
     {
       M4ERROR ((warning_status, 0,
 		"bad regular expression: `%s': %s", regexp, msg));
+      free_pattern_buffer (&buf, &regs);
       return;
     }
 
   length = strlen (victim);
-  startpos = re_search (&buf, victim, length, 0, length, &regs);
-  xfree (buf.buffer);
+  /* Avoid overhead of allocating regs if we won't use it.  */
+  startpos = re_search (&buf, victim, length, 0, length,
+			argc == 3 ? NULL : &regs);
 
-  if (startpos  == -2)
-    {
-      M4ERROR ((warning_status, 0,
-		"error matching regular expression \"%s\"", regexp));
-      return;
-    }
-
-  if (argc == 3)
+  if (startpos == -2)
+    M4ERROR ((warning_status, 0,
+	       "error matching regular expression `%s'", regexp));
+  else if (argc == 3)
     shipout_int (obs, startpos);
   else if (startpos >= 0)
     {
@@ -1724,7 +1802,7 @@ m4_regexp (struct obstack *obs, int argc, token_data **argv)
       substitute (obs, victim, repl, &regs);
     }
 
-  return;
+  free_pattern_buffer (&buf, &regs);
 }
 
 /*--------------------------------------------------------------------------.
@@ -1748,22 +1826,23 @@ m4_patsubst (struct obstack *obs, int argc, token_data **argv)
   int length;			/* length of first argument */
 
   if (bad_argc (argv[0], argc, 3, 4))
-    return;
+    {
+      /* builtin(`patsubst') is blank, but patsubst(`abc') is abc.  */
+      if (argc == 2)
+	obstack_grow (obs, ARG (1), strlen (ARG (1)));
+      return;
+    }
 
   regexp = TOKEN_DATA_TEXT (argv[2]);
 
-  buf.buffer = NULL;
-  buf.allocated = 0;
-  buf.fastmap = NULL;
-  buf.translate = NULL;
+  init_pattern_buffer (&buf, &regs);
   msg = re_compile_pattern (regexp, strlen (regexp), &buf);
 
   if (msg != NULL)
     {
       M4ERROR ((warning_status, 0,
 		"bad regular expression `%s': %s", regexp, msg));
-      if (buf.buffer != NULL)
-	xfree (buf.buffer);
+      free (buf.buffer);
       return;
     }
 
@@ -1772,7 +1851,7 @@ m4_patsubst (struct obstack *obs, int argc, token_data **argv)
 
   offset = 0;
   matchpos = 0;
-  while (offset < length)
+  while (offset <= length)
     {
       matchpos = re_search (&buf, victim, length,
 			    offset, length - offset, &regs);
@@ -1785,7 +1864,7 @@ m4_patsubst (struct obstack *obs, int argc, token_data **argv)
 
 	  if (matchpos == -2)
 	    M4ERROR ((warning_status, 0,
-		      "error matching regular expression \"%s\"", regexp));
+		      "error matching regular expression `%s'", regexp));
 	  else if (offset < length)
 	    obstack_grow (obs, victim + offset, length - offset);
 	  break;
@@ -1810,8 +1889,7 @@ m4_patsubst (struct obstack *obs, int argc, token_data **argv)
     }
   obstack_1grow (obs, '\0');
 
-  xfree (buf.buffer);
-  return;
+  free_pattern_buffer (&buf, &regs);
 }
 
 /* Finally, a placeholder builtin.  This builtin is not installed by

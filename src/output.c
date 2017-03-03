@@ -34,10 +34,6 @@
 /* Size of buffer size to use while copying files.  */
 #define COPY_BUFFER_SIZE (32 * 512)
 
-#ifdef HAVE_TMPFILE
-extern FILE *tmpfile ();
-#endif
-
 /* Output functions.  Most of the complexity is for handling cpp like
    sync lines.
 
@@ -103,27 +99,6 @@ output_init (void)
   output_unused = 0;
 }
 
-#ifndef HAVE_TMPFILE
-
-/* Implement tmpfile(3) for non-USG systems.  */
-
-static FILE *
-tmpfile (void)
-{
-  char buf[32];
-  int fd;
-
-  strcpy (buf, "/tmp/m4XXXXXX");
-  fd = mkstemp (buf);
-  if (fd < 0)
-    return NULL;
-
-  unlink (buf);
-  return fdopen (fd, "w+");
-}
-
-#endif /* not HAVE_TMPFILE */
-
 /*-----------------------------------------------------------------------.
 | Reorganize in-memory diversion buffers so the current diversion can	 |
 | accomodate LENGTH more characters without further reorganization.  The |
@@ -183,6 +158,9 @@ make_room_for (int length)
       if (selected_diversion->file == NULL)
 	M4ERROR ((EXIT_FAILURE, errno,
 		  "ERROR: cannot create temporary file for diversion"));
+      if (set_cloexec_flag (fileno (selected_diversion->file), true) != 0)
+	M4ERROR ((warning_status, errno,
+		  "Warning: cannot protect diversion across forks"));
 
       if (selected_diversion->used > 0)
 	{
@@ -364,7 +342,7 @@ shipout_text (struct obstack *obs, const char *text, int length)
 		sprintf (line, "#line %d", current_line);
 		for (cursor = line; *cursor; cursor++)
 		  OUTPUT_CHARACTER (*cursor);
-		if (output_current_line < 1)
+		if (output_current_line < 1 && current_file[0] != '\0')
 		  {
 		    OUTPUT_CHARACTER (' ');
 		    OUTPUT_CHARACTER ('"');

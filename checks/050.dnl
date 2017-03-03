@@ -1,6 +1,13 @@
-dnl @ ../doc/m4.texinfo:2336: Origin of test
-dnl(`args are ignored, but side effects occur',
-define(`foo', `like this')) while this text is ignored: undefine(`foo')
-dnl @error{}stdin:2: m4: Warning: excess arguments to builtin `dnl' ignored
-See how `foo' was defined, foo?
-dnl @result{}See how foo was defined, like this?
+dnl @ ../doc/m4.texinfo:2348: Origin of test
+dnl @ Copyright (C) 2006 Free Software Foundation
+dnl @ This file is free software; the Free Software Foundation
+dnl @ gives unlimited permission to copy and/or distribute it
+dnl @ with or without modifications, as long as this notice
+dnl @ is preserved.
+define(`hi', `HI')
+dnl @result{}
+m4wrap(`m4wrap(`2 hi
+')0 hi dnl 1 hi')
+dnl @result{}
+dnl @error{}m4: Warning: end of file treated as newline
+dnl @result{}0 HI 2 HI

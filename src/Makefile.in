@@ -42,23 +42,26 @@ subdir = src
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/absolute-header.m4 \
-	$(top_srcdir)/m4/alloca.m4 $(top_srcdir)/m4/codeset.m4 \
+	$(top_srcdir)/m4/alloca.m4 $(top_srcdir)/m4/cloexec.m4 \
+	$(top_srcdir)/m4/close-stream.m4 $(top_srcdir)/m4/codeset.m4 \
 	$(top_srcdir)/m4/eoverflow.m4 $(top_srcdir)/m4/error.m4 \
 	$(top_srcdir)/m4/exitfail.m4 $(top_srcdir)/m4/extensions.m4 \
+	$(top_srcdir)/m4/fpending.m4 $(top_srcdir)/m4/free.m4 \
 	$(top_srcdir)/m4/getopt.m4 $(top_srcdir)/m4/gnulib-comp.m4 \
 	$(top_srcdir)/m4/intmax_t.m4 $(top_srcdir)/m4/inttypes_h.m4 \
 	$(top_srcdir)/m4/longdouble.m4 $(top_srcdir)/m4/longlong.m4 \
 	$(top_srcdir)/m4/mbchar.m4 $(top_srcdir)/m4/mbiter.m4 \
 	$(top_srcdir)/m4/mbrtowc.m4 $(top_srcdir)/m4/memchr.m4 \
-	$(top_srcdir)/m4/mkstemp.m4 $(top_srcdir)/m4/obstack.m4 \
-	$(top_srcdir)/m4/regex.m4 $(top_srcdir)/m4/restrict.m4 \
+	$(top_srcdir)/m4/mkstemp.m4 $(top_srcdir)/m4/regex.m4 \
 	$(top_srcdir)/m4/signed.m4 $(top_srcdir)/m4/size_max.m4 \
 	$(top_srcdir)/m4/ssize_t.m4 $(top_srcdir)/m4/stat-macros.m4 \
 	$(top_srcdir)/m4/stdarg.m4 $(top_srcdir)/m4/stdbool.m4 \
-	$(top_srcdir)/m4/stdint_h.m4 $(top_srcdir)/m4/strcase.m4 \
+	$(top_srcdir)/m4/stdint.m4 $(top_srcdir)/m4/stdint_h.m4 \
+	$(top_srcdir)/m4/stdio-safer.m4 \
+	$(top_srcdir)/m4/stdlib-safer.m4 $(top_srcdir)/m4/strcase.m4 \
 	$(top_srcdir)/m4/strtol.m4 $(top_srcdir)/m4/sys_stat_h.m4 \
-	$(top_srcdir)/m4/uintmax_t.m4 $(top_srcdir)/m4/ulonglong.m4 \
-	$(top_srcdir)/m4/unistd_h.m4 $(top_srcdir)/m4/vasnprintf.m4 \
+	$(top_srcdir)/m4/unistd-safer.m4 $(top_srcdir)/m4/unistd_h.m4 \
+	$(top_srcdir)/m4/unlocked-io.m4 $(top_srcdir)/m4/vasnprintf.m4 \
 	$(top_srcdir)/m4/vasprintf.m4 $(top_srcdir)/m4/wchar_t.m4 \
 	$(top_srcdir)/m4/wcwidth.m4 $(top_srcdir)/m4/wint_t.m4 \
 	$(top_srcdir)/m4/xalloc.m4 $(top_srcdir)/m4/xsize.m4 \
@@ -93,6 +96,7 @@ DIST_SOURCES = $(am__m4_SOURCES_DIST)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
+ABSOLUTE_STDINT_H = @ABSOLUTE_STDINT_H@
 ABSOLUTE_SYS_STAT_H = @ABSOLUTE_SYS_STAT_H@
 ACLOCAL = @ACLOCAL@
 ALLOCA = @ALLOCA@
@@ -104,6 +108,11 @@ AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
 AWK = @AWK@
+BITSIZEOF_PTRDIFF_T = @BITSIZEOF_PTRDIFF_T@
+BITSIZEOF_SIG_ATOMIC_T = @BITSIZEOF_SIG_ATOMIC_T@
+BITSIZEOF_SIZE_T = @BITSIZEOF_SIZE_T@
+BITSIZEOF_WCHAR_T = @BITSIZEOF_WCHAR_T@
+BITSIZEOF_WINT_T = @BITSIZEOF_WINT_T@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
@@ -122,6 +131,16 @@ GETOPT_H = @GETOPT_H@
 GL_COND_LIBTOOL_FALSE = @GL_COND_LIBTOOL_FALSE@
 GL_COND_LIBTOOL_TRUE = @GL_COND_LIBTOOL_TRUE@
 GREP = @GREP@
+HAVE_INTTYPES_H = @HAVE_INTTYPES_H@
+HAVE_LONG_LONG_INT = @HAVE_LONG_LONG_INT@
+HAVE_SIGNED_SIG_ATOMIC_T = @HAVE_SIGNED_SIG_ATOMIC_T@
+HAVE_SIGNED_WCHAR_T = @HAVE_SIGNED_WCHAR_T@
+HAVE_SIGNED_WINT_T = @HAVE_SIGNED_WINT_T@
+HAVE_STDINT_H = @HAVE_STDINT_H@
+HAVE_SYS_BITYPES_H = @HAVE_SYS_BITYPES_H@
+HAVE_SYS_INTTYPES_H = @HAVE_SYS_INTTYPES_H@
+HAVE_SYS_TYPES_H = @HAVE_SYS_TYPES_H@
+HAVE_WCHAR_H = @HAVE_WCHAR_H@
 HAVE__BOOL = @HAVE__BOOL@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
@@ -140,16 +159,22 @@ PACKAGE_STRING = @PACKAGE_STRING@
 PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
+PTRDIFF_T_SUFFIX = @PTRDIFF_T_SUFFIX@
 RANLIB = @RANLIB@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
+SIG_ATOMIC_T_SUFFIX = @SIG_ATOMIC_T_SUFFIX@
+SIZE_T_SUFFIX = @SIZE_T_SUFFIX@
 STACKOVF_FALSE = @STACKOVF_FALSE@
 STACKOVF_TRUE = @STACKOVF_TRUE@
 STDBOOL_H = @STDBOOL_H@
+STDINT_H = @STDINT_H@
 STRIP = @STRIP@
 SYS_STAT_H = @SYS_STAT_H@
 UNISTD_H = @UNISTD_H@
 VERSION = @VERSION@
+WCHAR_T_SUFFIX = @WCHAR_T_SUFFIX@
+WINT_T_SUFFIX = @WINT_T_SUFFIX@
 ac_ct_CC = @ac_ct_CC@
 am__fastdepCC_FALSE = @am__fastdepCC_FALSE@
 am__fastdepCC_TRUE = @am__fastdepCC_TRUE@

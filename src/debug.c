@@ -21,13 +21,8 @@
 
 #include "m4.h"
 
-#include <sys/stat.h>
-
-#ifdef __STDC__
 #include <stdarg.h>
-#else
-#include <varargs.h>
-#endif
+#include <sys/stat.h>
 
 /* File for debugging output.  */
 FILE *debug = NULL;
@@ -37,7 +32,7 @@ static struct obstack trace;
 
 extern int expansion_level;
 
-static void debug_set_file _((FILE *));
+static void debug_set_file (FILE *);
 
 /*----------------------------------.
 | Initialise the debugging module.  |
@@ -137,8 +132,12 @@ debug_set_file (FILE *fp)
 {
   struct stat stdout_stat, debug_stat;
 
-  if (debug != NULL && debug != stderr && debug != stdout)
-    fclose (debug);
+  if (debug != NULL && debug != stderr && debug != stdout
+      && close_stream (debug) != 0)
+    {
+      M4ERROR ((warning_status, errno, "error writing to debug stream"));
+      retcode = EXIT_FAILURE;
+    }
   debug = fp;
 
   if (debug != NULL && debug != stdout)
@@ -154,8 +153,12 @@ debug_set_file (FILE *fp)
 	  && stdout_stat.st_dev == debug_stat.st_dev
 	  && stdout_stat.st_ino != 0)
 	{
-	  if (debug != stderr)
-	    fclose (debug);
+	  if (debug != stderr && close_stream (debug) != 0)
+	    {
+	      M4ERROR ((warning_status, errno,
+			"error writing to debug stream"));
+	      retcode = EXIT_FAILURE;
+	    }
 	  debug = stdout;
 	}
     }
@@ -195,6 +198,9 @@ debug_set_output (const char *name)
       if (fp == NULL)
 	return FALSE;
 
+      if (set_cloexec_flag (fileno (fp), true) != 0)
+	M4ERROR ((warning_status, errno,
+		  "Warning: cannot protect debug file across forks"));
       debug_set_file (fp);
     }
   return TRUE;
@@ -207,11 +213,15 @@ debug_set_output (const char *name)
 void
 debug_message_prefix (void)
 {
-  fprintf (debug, "m4 debug: ");
-  if (debug_level & DEBUG_TRACE_FILE)
-    fprintf (debug, "%s: ", current_file);
-  if (debug_level & DEBUG_TRACE_LINE)
-    fprintf (debug, "%d: ", current_line);
+  fprintf (debug, "m4debug:");
+  if (current_line)
+  {
+    if (debug_level & DEBUG_TRACE_FILE)
+      fprintf (debug, "%s:", current_file);
+    if (debug_level & DEBUG_TRACE_LINE)
+      fprintf (debug, "%d:", current_line);
+  }
+  putc (' ', debug);
 }
 
 /* The rest of this file contains the functions for macro tracing output.
@@ -226,17 +236,9 @@ debug_message_prefix (void)
 | left quote) and %r (optional right quote).			       |
 `---------------------------------------------------------------------*/
 
-#ifdef __STDC__
 static void
 trace_format (const char *fmt, ...)
-#else
-static void
-trace_format (...)
-#endif
 {
-#ifndef __STDC__
-  const char *fmt;
-#endif
   va_list args;
   char ch;
 
@@ -246,12 +248,7 @@ trace_format (...)
   int slen;
   int maxlen;
 
-#ifdef __STDC__
   va_start (args, fmt);
-#else
-  va_start (args);
-  fmt = va_arg (args, const char *);
-#endif
 
   while (TRUE)
     {
@@ -312,10 +309,13 @@ static void
 trace_header (int id)
 {
   trace_format ("m4trace:");
-  if (debug_level & DEBUG_TRACE_FILE)
-    trace_format ("%s:", current_file);
-  if (debug_level & DEBUG_TRACE_LINE)
-    trace_format ("%d:", current_line);
+  if (current_line)
+    {
+      if (debug_level & DEBUG_TRACE_FILE)
+	trace_format ("%s:", current_file);
+      if (debug_level & DEBUG_TRACE_LINE)
+	trace_format ("%d:", current_line);
+    }
   trace_format (" -%d- ", expansion_level);
   if (debug_level & DEBUG_TRACE_CALLID)
     trace_format ("id %d: ", id);

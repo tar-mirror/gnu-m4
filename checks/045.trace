@@ -1,28 +1,18 @@
-dnl @ ../doc/m4.texinfo:2099: Origin of test
-traceoff(`foo')
+dnl @ ../doc/m4.texinfo:2130: Origin of test
+dnl @ Copyright (C) 2006 Free Software Foundation
+dnl @ This file is free software; the Free Software Foundation
+dnl @ gives unlimited permission to copy and/or distribute it
+dnl @ with or without modifications, as long as this notice
+dnl @ is preserved.
+traceon(`eval', `m4_divnum')
 dnl @result{}
-traceon(`foo')
+define(`m4_eval', defn(`eval'))
 dnl @result{}
-foo
-dnl @result{}foo
-define(`foo', `bar')
+define(`m4_divnum', defn(`divnum'))
 dnl @result{}
-foo
-dnl @error{}m4trace: -1- foo -> `bar'
-dnl @result{}bar
-undefine(`foo')
-dnl @result{}
-ifdef(`foo', `yes', `no')
-dnl @result{}no
-indir(`foo')
-dnl @error{}stdin:8: m4: undefined macro `foo'
-dnl @result{}
-define(`foo', `blah')
-dnl @result{}
-foo
-dnl @error{}m4trace: -1- foo -> `blah'
-dnl @result{}blah
-traceoff
-dnl @result{}
-foo
-dnl @result{}blah
+eval(divnum)
+dnl @error{}m4trace: -1- eval(`0') -> `0'
+dnl @result{}0
+m4_eval(m4_divnum)
+dnl @error{}m4trace: -2- m4_divnum -> `0'
+dnl @result{}0

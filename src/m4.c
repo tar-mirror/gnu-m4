@@ -24,7 +24,7 @@
 #include <getopt.h>
 #include <signal.h>
 
-static void usage _((int));
+static void usage (int);
 
 /* Operate interactively (-e).  */
 static int interactive = 0;
@@ -86,18 +86,30 @@ typedef struct macro_definition macro_definition;
 
 /* Error handling functions.  */
 
-/*-------------------------------------------------------------------------.
-| Print source and line reference on standard error, as a prefix for error |
-| messages.  Flush standard output first.				   |
-`-------------------------------------------------------------------------*/
+/*-----------------------.
+| Wrapper around error.  |
+`-----------------------*/
 
 void
-reference_error (void)
+m4_error (int status, int errnum, const char *format, ...)
 {
-  int e = errno;
-  fflush (stdout);
-  fprintf (stderr, "%s:%d: ", current_file, current_line);
-  errno = e;
+  va_list args;
+  va_start (args, format);
+  verror_at_line (status, errnum, current_line ? current_file : NULL,
+                  current_line, format, args);
+}
+
+/*-------------------------------.
+| Wrapper around error_at_line.  |
+`-------------------------------*/
+
+void
+m4_error_at_line (int status, int errnum, const char *file, int line,
+                  const char *format, ...)
+{
+  va_list args;
+  va_start (args, format);
+  verror_at_line (status, errnum, line ? file : NULL, line, format, args);
 }
 
 #ifdef USE_STACKOVF
@@ -115,23 +127,6 @@ stackovf_handler (void)
 
 #endif /* USE_STACKOV */
 
-/* Memory allocation.  */
-
-/*------------------------.
-| Failsafe free routine.  |
-`------------------------*/
-
-#ifdef WITH_DMALLOC
-# undef xfree
-#endif
-
-void
-xfree (void *p)
-{
-  if (p != NULL)
-    free (p);
-}
-
 
 /*---------------------------------------------.
 | Print a usage message and exit with STATUS.  |
@@ -146,6 +141,11 @@ usage (int status)
     {
       printf ("Usage: %s [OPTION]... [FILE]...\n", program_name);
       fputs ("\
+Process macros in FILEs.  If no FILE or if FILE is `-', standard input\n\
+is read.\n\
+", stdout);
+      fputs ("\
+\n\
 Mandatory or optional arguments to long options are mandatory or optional\n\
 for short options too.\n\
 \n\
@@ -165,10 +165,10 @@ Operation modes:\n\
       fputs ("\
 \n\
 Preprocessor features:\n\
-  -D, --define=NAME[=VALUE]    enter NAME has having VALUE, or empty\n\
-  -I, --include=DIRECTORY      append this directory to include path\n\
-  -s, --synclines              generate `#line NO \"FILE\"' lines\n\
-  -U, --undefine=NAME          delete builtin NAME\n\
+  -D, --define=NAME[=VALUE]    define NAME has having VALUE, or empty\n\
+  -I, --include=DIRECTORY      append DIRECTORY to include path\n\
+  -s, --synclines              generate `#line NUM \"FILE\"' lines\n\
+  -U, --undefine=NAME          undefine NAME\n\
 ", stdout);
       fputs ("\
 \n\
@@ -203,8 +203,8 @@ FLAGS is any of:\n\
   p   show results of path searches\n\
   q   quote values as necessary, with a or e flag\n\
   t   trace for all macro calls, not only traceon'ed\n\
-  V   shorthand for all of the other flags\n\
   x   add a unique macro call id, useful with c flag\n\
+  V   shorthand for all of the above flags\n\
 ", stdout);
       fputs ("\
 \n\
@@ -213,14 +213,14 @@ of directories included after any specified by `-I'.\n\
 ", stdout);
       fputs ("\
 \n\
-If no FILE or if FILE is `-', standard input is read.\n\
+Exit status is 0 for success, 1 for failure, 63 for frozen file version\n\
+mismatch, or whatever value was passed to the m4exit macro.\n\
 ", stdout);
-      fputs ("\
-\n\
-Exit status is 0 for success, 1 for failure, or whatever value was passed\n\
-to the m4exit macro.\n\
-", stdout);
+      printf ("\nReport bugs to <%s>.\n", PACKAGE_BUGREPORT);
     }
+
+  if (close_stream (stdout) != 0)
+    M4ERROR ((EXIT_FAILURE, errno, "write error"));
   exit (status);
 }
 
@@ -259,6 +259,10 @@ static const struct option long_options[] =
   { 0, 0, 0, 0 },
 };
 
+/* Global catchall for any errors that should affect final error status, but
+   where we try to continue execution in the meantime.  */
+int retcode;
+
 #ifdef ENABLE_CHANGEWORD
 #define OPTSTRING "B:D:EF:GH:I:L:N:PQR:S:T:U:W:d::el:o:st:"
 #else
@@ -268,7 +272,6 @@ static const struct option long_options[] =
 int
 main (int argc, char *const *argv, char *const *envp)
 {
-  int retcode = EXIT_SUCCESS;
   macro_definition *head;	/* head of deferred argument list */
   macro_definition *tail;
   macro_definition *new;
@@ -278,6 +281,7 @@ main (int argc, char *const *argv, char *const *envp)
   FILE *fp;
 
   program_name = argv[0];
+  retcode = EXIT_SUCCESS;
 
   include_init ();
   debug_init ();
@@ -290,7 +294,7 @@ main (int argc, char *const *argv, char *const *envp)
   head = tail = NULL;
 
   while (optchar = getopt_long (argc, (char **) argv, OPTSTRING,
-                                long_options, NULL),
+				long_options, NULL),
 	 optchar != EOF)
     switch (optchar)
       {
@@ -401,13 +405,16 @@ main (int argc, char *const *argv, char *const *envp)
   if (show_version)
     {
       printf ("%s\n", PACKAGE_STRING);
-      printf ("Written by Rene' Seindal.\n\
-\n\
+      fputs ("\
 Copyright (C) 2006 Free Software Foundation, Inc.\n\
 This is free software; see the source for copying conditions.  There is NO\n\
 warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\
-");
+\n\
+Written by Rene' Seindal.\n\
+", stdout);
 
+      if (close_stream (stdout) != 0)
+	M4ERROR ((EXIT_FAILURE, errno, "write error"));
       exit (EXIT_SUCCESS);
     }
 
@@ -464,7 +471,7 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\
 	}
 
       next = defines->next;
-      xfree (defines);
+      free (defines);
       defines = next;
     }
 
@@ -491,7 +498,8 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\
 	  push_file (stdin, "stdin");
 	else
 	  {
-	    fp = path_search (argv[optind]);
+	    const char *name;
+	    fp = path_search (argv[optind], &name);
 	    if (fp == NULL)
 	      {
 		error (0, errno, "%s", argv[optind]);
@@ -500,8 +508,8 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\
 		retcode = EXIT_FAILURE;
 		continue;
 	      }
-	    else
-	      push_file (fp, argv[optind]);
+	    push_file (fp, name);
+	    free ((char *) name);
 	  }
 	expand_input ();
       }
@@ -512,6 +520,10 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\
   while (pop_wrapup ())
     expand_input ();
 
+  /* Change debug stream back to stderr, to force flushing debug stream and
+     detect any errors it might have encountered.  */
+  debug_set_output (NULL);
+
   if (frozen_file_to_write)
     produce_frozen_state (frozen_file_to_write);
   else
@@ -520,5 +532,7 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\
       undivert_all ();
     }
 
+  if (close_stream (stdout) != 0)
+    M4ERROR ((EXIT_FAILURE, errno, "write error"));
   exit (retcode);
 }

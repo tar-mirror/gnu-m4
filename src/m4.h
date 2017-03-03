@@ -27,7 +27,9 @@
 
 /* Canonicalize UNIX recognition macros.  */
 #if defined unix || defined __unix || defined __unix__ \
-  || defined _POSIX_VERSION || defined _POSIX2_VERSION
+  || defined _POSIX_VERSION || defined _POSIX2_VERSION \
+  || defined __NetBSD__ || defined __OpenBSD__ \
+  || defined __APPLE__ || defined __APPLE_CC__
 # define UNIX 1
 #endif
 
@@ -41,25 +43,22 @@
 # define OS2 1
 #endif
 
-/* FIXME - we no longer need this ansi2knr hack.  */
-#define _(Args) Args
-
 #include <ctype.h>
 #include <errno.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
 
 #include "binary-io.h"
+#include "cloexec.h"
+#include "close-stream.h"
 #include "error.h"
 #include "exit.h"
 #include "obstack.h"
+#include "stdio--.h"
+#include "stdlib--.h"
+#include "unistd--.h"
+#include "verror.h"
 #include "xalloc.h"
-
-#ifdef HAVE_UNISTD_H
-# include <unistd.h>
-#endif
 
 /* If FALSE is defined, we presume TRUE is defined too.  In this case,
    merely typedef boolean as being int.  Or else, define these all.  */
@@ -73,6 +72,9 @@ typedef int boolean;
 #if ! HAVE_MKSTEMP
 int mkstemp (char *);
 #endif
+
+/* Used for version mismatch, when -R detects a frozen file it can't parse.  */
+#define EXIT_MISMATCH 63
 
 /* Various declarations.  */
 
@@ -84,13 +86,24 @@ struct string
 typedef struct string STRING;
 
 /* Memory allocation.  */
-void xfree (void *);
 #define obstack_chunk_alloc	xmalloc
-#define obstack_chunk_free	xfree
+#define obstack_chunk_free	free
 
 /* Those must come first.  */
 typedef struct token_data token_data;
 typedef void builtin_func (struct obstack *, int, token_data **);
+
+/* Take advantage of GNU C compiler source level optimization hints,
+   using portable macros.  */
+#if __GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ > 6)
+#  define M4_GNUC_ATTRIBUTE(args)	__attribute__(args)
+#else
+#  define M4_GNUC_ATTRIBUTE(args)
+#endif  /* __GNUC__ */
+
+#define M4_GNUC_UNUSED		M4_GNUC_ATTRIBUTE((__unused__))
+#define M4_GNUC_PRINTF(fmt, arg)			\
+  M4_GNUC_ATTRIBUTE((__format__ (__printf__, fmt, arg)))
 
 /* File: m4.c  --- global definitions.  */
 
@@ -109,14 +122,19 @@ extern const char *user_word_regexp;	/* -W */
 #endif
 
 /* Error handling.  */
-#define M4ERROR(Arglist) \
-  (reference_error (), error Arglist)
+extern int retcode;
+extern const char *program_name;
 
-void reference_error _((void));
+void m4_error (int, int, const char *, ...) M4_GNUC_PRINTF(3, 4);
+void m4_error_at_line (int, int, const char *, int,
+                       const char *, ...) M4_GNUC_PRINTF(5, 6);
+
+#define M4ERROR(Arglist) (m4_error Arglist)
+#define M4ERROR_AT_LINE(Arglist) (m4_error_at_line Arglist)
 
 #ifdef USE_STACKOVF
-void setup_stackovf_trap _((char *const *, char *const *,
-			    void (*handler) (void)));
+void setup_stackovf_trap (char *const *, char *const *,
+                          void (*handler) (void));
 #endif
 
 /* File: debug.c  --- debugging and tracing function.  */
@@ -203,15 +221,15 @@ extern FILE *debug;
     }								\
   while (0)
 
-void debug_init _((void));
-int debug_decode _((const char *));
-void debug_flush_files _((void));
-boolean debug_set_output _((const char *));
-void debug_message_prefix _((void));
+void debug_init (void);
+int debug_decode (const char *);
+void debug_flush_files (void);
+boolean debug_set_output (const char *);
+void debug_message_prefix (void);
 
-void trace_prepre _((const char *, int));
-void trace_pre _((const char *, int, int, token_data **));
-void trace_post _((const char *, int, int, token_data **, const char *));
+void trace_prepre (const char *, int);
+void trace_pre (const char *, int, int, token_data **);
+void trace_post (const char *, int, int, token_data **, const char *);
 
 /* File: input.c  --- lexical definitions.  */
 
@@ -219,10 +237,13 @@ void trace_post _((const char *, int, int, token_data **, const char *));
 enum token_type
 {
   TOKEN_EOF,			/* end of file */
-  TOKEN_STRING,			/* a quoted string */
+  TOKEN_STRING,			/* a quoted string or comment */
   TOKEN_WORD,			/* an identifier */
-  TOKEN_SIMPLE,			/* a single character */
-  TOKEN_MACDEF			/* a macros definition (see "defn") */
+  TOKEN_OPEN,			/* ( */
+  TOKEN_COMMA,			/* , */
+  TOKEN_CLOSE,			/* ) */
+  TOKEN_SIMPLE,			/* any other single character */
+  TOKEN_MACDEF			/* a macro's definition (see "defn") */
 };
 
 /* The data for a token, a macro argument, and a macro definition.  */
@@ -261,18 +282,18 @@ struct token_data
 typedef enum token_type token_type;
 typedef enum token_data_type token_data_type;
 
-void input_init _((void));
-int peek_input _((void));
-token_type next_token _((token_data *));
-void skip_line _((void));
+void input_init (void);
+token_type peek_token (void);
+token_type next_token (token_data *);
+void skip_line (void);
 
 /* push back input */
-void push_file _((FILE *, const char *));
-void push_macro _((builtin_func *));
-struct obstack *push_string_init _((void));
-const char *push_string_finish _((void));
-void push_wrapup _((const char *));
-boolean pop_wrapup _((void));
+void push_file (FILE *, const char *);
+void push_macro (builtin_func *);
+struct obstack *push_string_init (void);
+const char *push_string_finish (void);
+void push_wrapup (const char *);
+boolean pop_wrapup (void);
 
 /* current input file, and line */
 extern const char *current_file;
@@ -287,22 +308,22 @@ extern STRING lquote, rquote;
 #define DEF_BCOMM "#"
 #define DEF_ECOMM "\n"
 
-void set_quotes _((const char *, const char *));
-void set_comment _((const char *, const char *));
+void set_quotes (const char *, const char *);
+void set_comment (const char *, const char *);
 #ifdef ENABLE_CHANGEWORD
-void set_word_regexp _((const char *));
+void set_word_regexp (const char *);
 #endif
 
 /* File: output.c --- output functions.  */
 extern int current_diversion;
 extern int output_current_line;
 
-void output_init _((void));
-void shipout_text _((struct obstack *, const char *, int));
-void make_diversion _((int));
-void insert_diversion _((int));
-void insert_file _((FILE *));
-void freeze_diversions _((FILE *));
+void output_init (void);
+void shipout_text (struct obstack *, const char *, int);
+void make_diversion (int);
+void insert_diversion (int);
+void insert_file (FILE *);
+void freeze_diversions (FILE *);
 
 /* File symtab.c  --- symbol table definitions.  */
 
@@ -351,15 +372,15 @@ typedef void hack_symbol ();
 
 extern symbol **symtab;
 
-void free_symbol _((symbol *sym));
-void symtab_init _((void));
-symbol *lookup_symbol _((const char *, symbol_lookup));
-void hack_all_symbols _((hack_symbol *, const char *));
+void free_symbol (symbol *sym);
+void symtab_init (void);
+symbol *lookup_symbol (const char *, symbol_lookup);
+void hack_all_symbols (hack_symbol *, const char *);
 
 /* File: macro.c  --- macro expansion.  */
 
-void expand_input _((void));
-void call_macro _((symbol *, int, token_data **, struct obstack *));
+void expand_input (void);
+void call_macro (symbol *, int, token_data **, struct obstack *);
 
 /* File: builtin.c  --- builtins.  */
 
@@ -382,22 +403,22 @@ struct predefined
 typedef struct builtin builtin;
 typedef struct predefined predefined;
 
-void builtin_init _((void));
-void define_builtin _((const char *, const builtin *, symbol_lookup));
-void define_user_macro _((const char *, const char *, symbol_lookup));
-void undivert_all _((void));
-void expand_user_macro _((struct obstack *, symbol *, int, token_data **));
-void m4_placeholder _((struct obstack *, int, token_data **));
+void builtin_init (void);
+void define_builtin (const char *, const builtin *, symbol_lookup);
+void define_user_macro (const char *, const char *, symbol_lookup);
+void undivert_all (void);
+void expand_user_macro (struct obstack *, symbol *, int, token_data **);
+void m4_placeholder (struct obstack *, int, token_data **);
 
-const builtin *find_builtin_by_addr _((builtin_func *));
-const builtin *find_builtin_by_name _((const char *));
+const builtin *find_builtin_by_addr (builtin_func *);
+const builtin *find_builtin_by_name (const char *);
 
 /* File: path.c  --- path search for include files.  */
 
-void include_init _((void));
-void include_env_init _((void));
-void add_include_directory _((const char *));
-FILE *path_search _((const char *));
+void include_init (void);
+void include_env_init (void);
+void add_include_directory (const char *);
+FILE *path_search (const char *, const char **);
 
 /* File: eval.c  --- expression evaluation.  */
 
@@ -405,16 +426,16 @@ FILE *path_search _((const char *));
 typedef int eval_t;
 typedef unsigned int unsigned_eval_t;
 
-boolean evaluate _((const char *, eval_t *));
+boolean evaluate (const char *, eval_t *);
 
 /* File: format.c  --- printf like formatting.  */
 
-void format _((struct obstack *, int, token_data **));
+void format (struct obstack *, int, token_data **);
 
 /* File: freeze.c --- frozen state files.  */
 
-void produce_frozen_state _((const char *));
-void reload_frozen_state _((const char *));
+void produce_frozen_state (const char *);
+void reload_frozen_state (const char *);
 
 /* Debugging the memory allocator.  */
 
@@ -438,13 +459,3 @@ void reload_frozen_state _((const char *));
    a bit safer than casting to unsigned char, since it catches some type
    errors that the cast doesn't.  */
 static inline unsigned char to_uchar (char ch) { return ch; }
-
-/* Take advantage of GNU C compiler source level optimization hints,
-   using portable macros.  */
-#if __GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ > 4)
-#  define M4_GNUC_ATTRIBUTE(args)	__attribute__(args)
-#else
-#  define M4_GNUC_ATTRIBUTE(args)
-#endif  /* __GNUC__ */
-
-#define M4_GNUC_UNUSED		M4_GNUC_ATTRIBUTE((unused))

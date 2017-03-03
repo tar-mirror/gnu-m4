@@ -43,23 +43,26 @@ DIST_COMMON = README $(am__configure_deps) $(srcdir)/Makefile.am \
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/absolute-header.m4 \
-	$(top_srcdir)/m4/alloca.m4 $(top_srcdir)/m4/codeset.m4 \
+	$(top_srcdir)/m4/alloca.m4 $(top_srcdir)/m4/cloexec.m4 \
+	$(top_srcdir)/m4/close-stream.m4 $(top_srcdir)/m4/codeset.m4 \
 	$(top_srcdir)/m4/eoverflow.m4 $(top_srcdir)/m4/error.m4 \
 	$(top_srcdir)/m4/exitfail.m4 $(top_srcdir)/m4/extensions.m4 \
+	$(top_srcdir)/m4/fpending.m4 $(top_srcdir)/m4/free.m4 \
 	$(top_srcdir)/m4/getopt.m4 $(top_srcdir)/m4/gnulib-comp.m4 \
 	$(top_srcdir)/m4/intmax_t.m4 $(top_srcdir)/m4/inttypes_h.m4 \
 	$(top_srcdir)/m4/longdouble.m4 $(top_srcdir)/m4/longlong.m4 \
 	$(top_srcdir)/m4/mbchar.m4 $(top_srcdir)/m4/mbiter.m4 \
 	$(top_srcdir)/m4/mbrtowc.m4 $(top_srcdir)/m4/memchr.m4 \
-	$(top_srcdir)/m4/mkstemp.m4 $(top_srcdir)/m4/obstack.m4 \
-	$(top_srcdir)/m4/regex.m4 $(top_srcdir)/m4/restrict.m4 \
+	$(top_srcdir)/m4/mkstemp.m4 $(top_srcdir)/m4/regex.m4 \
 	$(top_srcdir)/m4/signed.m4 $(top_srcdir)/m4/size_max.m4 \
 	$(top_srcdir)/m4/ssize_t.m4 $(top_srcdir)/m4/stat-macros.m4 \
 	$(top_srcdir)/m4/stdarg.m4 $(top_srcdir)/m4/stdbool.m4 \
-	$(top_srcdir)/m4/stdint_h.m4 $(top_srcdir)/m4/strcase.m4 \
+	$(top_srcdir)/m4/stdint.m4 $(top_srcdir)/m4/stdint_h.m4 \
+	$(top_srcdir)/m4/stdio-safer.m4 \
+	$(top_srcdir)/m4/stdlib-safer.m4 $(top_srcdir)/m4/strcase.m4 \
 	$(top_srcdir)/m4/strtol.m4 $(top_srcdir)/m4/sys_stat_h.m4 \
-	$(top_srcdir)/m4/uintmax_t.m4 $(top_srcdir)/m4/ulonglong.m4 \
-	$(top_srcdir)/m4/unistd_h.m4 $(top_srcdir)/m4/vasnprintf.m4 \
+	$(top_srcdir)/m4/unistd-safer.m4 $(top_srcdir)/m4/unistd_h.m4 \
+	$(top_srcdir)/m4/unlocked-io.m4 $(top_srcdir)/m4/vasnprintf.m4 \
 	$(top_srcdir)/m4/vasprintf.m4 $(top_srcdir)/m4/wchar_t.m4 \
 	$(top_srcdir)/m4/wcwidth.m4 $(top_srcdir)/m4/wint_t.m4 \
 	$(top_srcdir)/m4/xalloc.m4 $(top_srcdir)/m4/xsize.m4 \
@@ -94,6 +97,7 @@ DIST_ARCHIVES = $(distdir).tar.gz $(distdir).tar.bz2
 GZIP_ENV = --best
 distuninstallcheck_listfiles = find . -type f -print
 distcleancheck_listfiles = find . -type f -print
+ABSOLUTE_STDINT_H = @ABSOLUTE_STDINT_H@
 ABSOLUTE_SYS_STAT_H = @ABSOLUTE_SYS_STAT_H@
 ACLOCAL = @ACLOCAL@
 ALLOCA = @ALLOCA@
@@ -105,6 +109,11 @@ AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
 AWK = @AWK@
+BITSIZEOF_PTRDIFF_T = @BITSIZEOF_PTRDIFF_T@
+BITSIZEOF_SIG_ATOMIC_T = @BITSIZEOF_SIG_ATOMIC_T@
+BITSIZEOF_SIZE_T = @BITSIZEOF_SIZE_T@
+BITSIZEOF_WCHAR_T = @BITSIZEOF_WCHAR_T@
+BITSIZEOF_WINT_T = @BITSIZEOF_WINT_T@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
@@ -123,6 +132,16 @@ GETOPT_H = @GETOPT_H@
 GL_COND_LIBTOOL_FALSE = @GL_COND_LIBTOOL_FALSE@
 GL_COND_LIBTOOL_TRUE = @GL_COND_LIBTOOL_TRUE@
 GREP = @GREP@
+HAVE_INTTYPES_H = @HAVE_INTTYPES_H@
+HAVE_LONG_LONG_INT = @HAVE_LONG_LONG_INT@
+HAVE_SIGNED_SIG_ATOMIC_T = @HAVE_SIGNED_SIG_ATOMIC_T@
+HAVE_SIGNED_WCHAR_T = @HAVE_SIGNED_WCHAR_T@
+HAVE_SIGNED_WINT_T = @HAVE_SIGNED_WINT_T@
+HAVE_STDINT_H = @HAVE_STDINT_H@
+HAVE_SYS_BITYPES_H = @HAVE_SYS_BITYPES_H@
+HAVE_SYS_INTTYPES_H = @HAVE_SYS_INTTYPES_H@
+HAVE_SYS_TYPES_H = @HAVE_SYS_TYPES_H@
+HAVE_WCHAR_H = @HAVE_WCHAR_H@
 HAVE__BOOL = @HAVE__BOOL@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
@@ -141,16 +160,22 @@ PACKAGE_STRING = @PACKAGE_STRING@
 PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
+PTRDIFF_T_SUFFIX = @PTRDIFF_T_SUFFIX@
 RANLIB = @RANLIB@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
+SIG_ATOMIC_T_SUFFIX = @SIG_ATOMIC_T_SUFFIX@
+SIZE_T_SUFFIX = @SIZE_T_SUFFIX@
 STACKOVF_FALSE = @STACKOVF_FALSE@
 STACKOVF_TRUE = @STACKOVF_TRUE@
 STDBOOL_H = @STDBOOL_H@
+STDINT_H = @STDINT_H@
 STRIP = @STRIP@
 SYS_STAT_H = @SYS_STAT_H@
 UNISTD_H = @UNISTD_H@
 VERSION = @VERSION@
+WCHAR_T_SUFFIX = @WCHAR_T_SUFFIX@
+WINT_T_SUFFIX = @WINT_T_SUFFIX@
 ac_ct_CC = @ac_ct_CC@
 am__fastdepCC_FALSE = @am__fastdepCC_FALSE@
 am__fastdepCC_TRUE = @am__fastdepCC_TRUE@
@@ -200,7 +225,9 @@ EXTRA_DIST = bootstrap c-boxes.el gendocs.sh GNUmakefile Makefile.maint \
 
 DISTCLEANFILES = stamp-h
 MAINTAINERCLEANFILES = COPYING INSTALL Makefile.in aclocal.m4 \
-	config-h.in configure depcomp doc/fdl.texi gendocs.sh install-sh
+	config-h.in configure depcomp doc/fdl.texi gendocs.sh install-sh \
+	lib/[a-z]* m4/[a-fh-z]* m4/g[a-mo-z]* m4/gnulib-comp.m4 \
+	m4/gnulib-tool.m4 missing stamp-h.in
 
 ACLOCAL_AMFLAGS = -I m4
 DISTCHECK_CONFIGURE_FLAGS = --enable-changeword
@@ -633,8 +660,6 @@ uninstall-info: uninstall-info-recursive
 	pdf-am ps ps-am tags tags-recursive uninstall uninstall-am \
 	uninstall-info-am
 
-	lib/* m4/[a-fh-z]* m4/g[a-mo-z]* m4/gnulib-comp.m4 m4/gnulib-tool.m4 \
-	missing stamp-h.in
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:
