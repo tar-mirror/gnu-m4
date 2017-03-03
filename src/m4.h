@@ -1,6 +1,6 @@
 /* GNU m4 -- A simple macro processor
 
-   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2004 Free
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2004, 2005 Free
    Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
@@ -24,6 +24,14 @@
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
+#endif
+
+/* Canonicalise Windows and Cygwin recognition macros.  */
+#if defined __CYGWIN32__ && !defined __CYGWIN__
+#  define __CYGWIN__ __CYGWIN32__
+#endif
+#if defined _WIN32 && !defined WIN32
+#  define WIN32 _WIN32
 #endif
 
 #include <sys/types.h>

@@ -1,9 +1,114 @@
+2005-03-31  Gary V. Vaughan  <gary@gnu.org>  (tiny change)
+
+	* configure.in (VERSION): Bump to 1.4.3.
+	* News: Describe 1.4.3's changes.
+	* Makefile.maint: New file with release rules, from CVS libtool.
+	* Makefile.in (DISTFILES): Add Makefile.maint.
+	* INSTALL, install-sh, doc/texinfo.tex: Updated to latest
+	canonical versions.
+
+2005-03-31  Erik Blake  <ebb9@byu.net>  (tiny change)
+
+	* doc/m4.texinfo (Patsubst): Re-add trailing space required by
+	checks/47.patsubst, with a redundant @comment to prevent emacs
+	from removing it accidentally again.
+	* checks/get-them: Allow for trailing spaces tucked behind
+	@comment marks.
+
+2005-03-31  Erik Blake  <ebb9@byu.net>  (tiny change)
+
+	* doc/Makefile.in (install, uninstall): Accomodate DESTDIR.
+	* src/Makefile.in (install, uninstall): Likewise.
+
+2005-02-07  Gary V. Vaughan  <gary@gnu.org>
+
+	* lib/regex.c, lib/regex.h:  Reverted gnulib update, which broke
+	on Cygwin.
+	Reported by Eric Blake <ebb9@byu.net>
+
+2005-02-04  Gary V. Vaughan  <gary@gnu.org>
+
+	* lib/regex.c, lib/regex.h: Updated from gnulib.
+	* src/input.c (set_word_regexp):  Don't change the word_regexp
+	unless it compiles correctly.
+	* NEWS: Updated.
+	Reported by Frank Schwidom <schwidom@impernet.de>
+
+	* Makefile.in (stamp-h): Regenerate config.h properly.
+
+2005-02-03  Gary V. Vaughan  <gary@gnu.org>
+
+	* configure.ac (AC_DEFINE): Fix overquoting of description
+	argument.
+
+	* src/m4.h (__CYGWIN__, WIN32): Canonicalise Windows and Cygwin
+	recognition macros.
+	* src/freeze.c (produce_frozen_state): Use \n line-endings even
+	on Windows, so that the frozen file reader will work.
+	Reported by Josef T. Burger <bolo@bolo.com>
+
+	* src/m4.c (main): Modernise the --version output.
+
+2005-02-03  Gary V. Vaughan  <gary@gnu.org>
+
+	Modernise the configury a little to prevent spurious errors from
+	Autoconf-2.59's autoreconf:
+
+	* config.h.in: Renamed to...
+	* config-h.in: ...this to better support DOS 8.3 file systems.
+	* acconfig.h: Removed.
+	* configure.in: Renamed to...
+	* configure.ac: ...this, and AC_DEFINE used to declare config.h
+	entry comments.  Slight reorganisation and reformatting.
+	* aclocal.m4: Use third argument to AC_DEFINE to declare config.h
+	entry comments.
+	(AC_INIT): Use a modern 3 argument call.
+	* Makefile.in, checks/Makefile.in, doc/Makefile.in,
+	examples/Makefile.in, lib/Makefile.in, src/Makefile.in:
+	s/PRODUCT/PACKAGE/g.
+	* Makefile.in (DISTFILES): Removed acconfig.h, configure.in,
+	config.h.in.  Added configure.ac, config-h.in.
+	(stamp-h.in): Removed acconfig.h from dependencies.
+	(configure): Depends on configure.ac, not configure.in.
+	* doc/Makefile.in (stamp-vti): Ditto.
+	* src/freeze.c (produce_frozen_state), src/m4.c (main): Adjust for
+	difference between PRODUCT="m4" and PACKAGE="GNU M4".
+	* configure: Regenerated.
+
+2005-02-03  Noah Misch  <noah@cs.caltech.edu>
+
+	* src/output.c (mkstemp): Make non-static, and build regardless of
+	HAVE_TMPFILE; src/builtin.c also needs this replacement.
+	* NEWS: Update.
+
+2004-09-09  Vincent Lonngren  <Vincent.lonngren.759@student.lu.se>
+
+	* configure.in (AC_CHECK_HEADERS): Commit works best when you save
+	changes from your editor buffer first.
+
+	* configure.in (AC_CHECK_HEADERS):  Add signal.h, sys/signal.h.
+	* src/m4.c: And include them as appropriate.
+	* NEWS: Updated.
+
+2004-09-09  Andreas Schwab  <schwab@suse.de>
+
+	Refactoring of the string read case in next_char provides about a
+	20% speedup of M4 as typically used by autoconf:
+
+	* src/input.c (next_char_1): Renamed from next_char.
+	(next_char): New macro.
+	* NEWS: Updated.
+
+2004-08-21  Gary V. Vaughan  <gary@gnu.org>
+
+	* configure.in (VERSION): Bump to 1.4.2a.
+
 2004-08-19  Paul Eggert  <eggert@twinsun.com>
 
 	* Release 1.4.2.
 
 	* configure.in (VERSION): Bump to 1.4.2.
-	* NEWS: Describe 1.4.2's changes.
+	* News: Describe 1.4.2's changes.
 
 	* src/m4.c (reference_error): Preserve errno, since M4ERROR
 	relies on this.
@@ -1598,3 +1703,5 @@ Thu Nov 15 21:51:06 1990  Rene' Seindal (seindal at diku.dk)
 Mon Jan 22 21:08:52 1990  Rene' Seindal (seindal at diku.dk)
 
 	* Initial beta release.  Release 0.50, manual 0.05.
+
+	$Revision: 1.1.1.1.2.20 $ $Date: 2005/03/31 11:50:38 $

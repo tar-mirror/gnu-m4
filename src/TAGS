@@ -1,124 +1,126 @@
 
-m4.h,3492
-# define voidstar 32,1108
-# define voidstar 34,1139
-# define _(_38,1190
-# define _(_40,1218
-#  define bcopy(bcopy57,1607
-#  define memcpy(memcpy62,1707
-#  define strchr(strchr65,1778
-#  define strrchr(strrchr68,1843
-# define EXIT_SUCCESS 89,2215
-# define EXIT_FAILURE 92,2267
-typedef enum { FALSE 108,2639
-typedef enum { FALSE = 0, TRUE 108,2639
-typedef enum { FALSE = 0, TRUE = 1 } boolean;boolean108,2639
-typedef int boolean;boolean110,2691
-struct stringstring117,2769
-typedef struct string STRING;STRING122,2889
-#define obstack_chunk_alloc	129,3089
-#define obstack_chunk_free	130,3125
-typedef void builtin_func builtin_func136,3266
-typedef struct token_data token_data;token_data137,3296
-#define M4ERROR(M4ERROR156,3853
-#define DEBUG_TRACE_ARGS 173,4254
-#define DEBUG_TRACE_EXPANSION 175,4321
-#define DEBUG_TRACE_QUOTE 177,4403
-#define DEBUG_TRACE_ALL 179,4484
-#define DEBUG_TRACE_LINE 181,4552
-#define DEBUG_TRACE_FILE 183,4619
-#define DEBUG_TRACE_PATH 185,4691
-#define DEBUG_TRACE_CALL 187,4767
-#define DEBUG_TRACE_INPUT 189,4834
-#define DEBUG_TRACE_CALLID 191,4901
-#define DEBUG_TRACE_VERBOSE 194,4976
-#define DEBUG_TRACE_DEFAULT 196,5043
-#define DEBUG_PRINT1(DEBUG_PRINT1198,5074
-#define DEBUG_PRINT3(DEBUG_PRINT3206,5230
-#define DEBUG_MESSAGE(DEBUG_MESSAGE214,5409
-#define DEBUG_MESSAGE1(DEBUG_MESSAGE1226,5641
-#define DEBUG_MESSAGE2(DEBUG_MESSAGE2238,5885
-enum token_typetoken_type263,6582
-  TOKEN_EOF,265,6600
-  TOKEN_STRING,266,6633
-  TOKEN_WORD,267,6673
-  TOKEN_SIMPLE,268,6709
-  TOKEN_MACDEF	269,6752
-enum token_data_typetoken_data_type273,6883
-  TOKEN_VOID,275,6906
-  TOKEN_TEXT,276,6920
-  TOKEN_FUNC277,6934
-struct token_datatoken_data280,6951
-#define TOKEN_DATA_TYPE(TOKEN_DATA_TYPE303,7202
-#define TOKEN_DATA_TEXT(TOKEN_DATA_TEXT304,7244
-# define TOKEN_DATA_ORIG_TEXT(TOKEN_DATA_ORIG_TEXT306,7317
-#define TOKEN_DATA_FUNC(TOKEN_DATA_FUNC308,7386
-#define TOKEN_DATA_FUNC_TRACED(TOKEN_DATA_FUNC_TRACED309,7434
-typedef enum token_type token_type;token_type311,7492
-typedef enum token_data_type token_data_type;token_data_type312,7528
-#define DEF_LQUOTE 335,8162
-#define DEF_RQUOTE 336,8185
-#define DEF_BCOMM 337,8209
-#define DEF_ECOMM 338,8231
-enum symbol_lookupsymbol_lookup360,8851
-  SYMBOL_LOOKUP,362,8872
-  SYMBOL_INSERT,363,8889
-  SYMBOL_DELETE,364,8906
-  SYMBOL_PUSHDEF,365,8923
-  SYMBOL_POPDEF366,8941
-struct symbolsymbol370,8988
-#define SYMBOL_NEXT(SYMBOL_NEXT382,9150
-#define SYMBOL_TRACED(SYMBOL_TRACED383,9186
-#define SYMBOL_SHADOWED(SYMBOL_SHADOWED384,9225
-#define SYMBOL_MACRO_ARGS(SYMBOL_MACRO_ARGS385,9268
-#define SYMBOL_BLIND_NO_ARGS(SYMBOL_BLIND_NO_ARGS386,9315
-#define SYMBOL_NAME(SYMBOL_NAME387,9368
-#define SYMBOL_TYPE(SYMBOL_TYPE388,9404
-#define SYMBOL_TEXT(SYMBOL_TEXT389,9459
-#define SYMBOL_FUNC(SYMBOL_FUNC390,9514
-typedef enum symbol_lookup symbol_lookup;symbol_lookup392,9570
-typedef struct symbol symbol;symbol393,9612
-typedef void hack_symbol hack_symbol394,9642
-#define HASHMAX 396,9672
-struct builtinbuiltin411,10080
-struct predefinedpredefined420,10224
-typedef struct builtin builtin;builtin427,10317
-typedef struct predefined predefined;predefined428,10349
-typedef int eval_t;eval_t449,11103
-typedef unsigned int unsigned_eval_t;unsigned_eval_t450,11123
-# define DMALLOC_FUNC_CHECK466,11517
-# define DEBUG_INPUT473,11615
-# define DEBUG_MACRO474,11636
-# define DEBUG_SYM475,11657
-# define DEBUG_INCL476,11676
+m4.h,3548
+#  define __CYGWIN__ 31,1181
+#  define WIN32 34,1259
+# define voidstar 40,1330
+# define voidstar 42,1361
+# define _(_46,1412
+# define _(_48,1440
+#  define bcopy(bcopy65,1829
+#  define memcpy(memcpy70,1929
+#  define strchr(strchr73,2000
+#  define strrchr(strrchr76,2065
+# define EXIT_SUCCESS 97,2437
+# define EXIT_FAILURE 100,2489
+typedef enum { FALSE 116,2861
+typedef enum { FALSE = 0, TRUE 116,2861
+typedef enum { FALSE = 0, TRUE = 1 } boolean;boolean116,2861
+typedef int boolean;boolean118,2913
+struct stringstring125,2991
+typedef struct string STRING;STRING130,3111
+#define obstack_chunk_alloc	137,3311
+#define obstack_chunk_free	138,3347
+typedef void builtin_func builtin_func144,3488
+typedef struct token_data token_data;token_data145,3518
+#define M4ERROR(M4ERROR164,4075
+#define DEBUG_TRACE_ARGS 181,4476
+#define DEBUG_TRACE_EXPANSION 183,4543
+#define DEBUG_TRACE_QUOTE 185,4625
+#define DEBUG_TRACE_ALL 187,4706
+#define DEBUG_TRACE_LINE 189,4774
+#define DEBUG_TRACE_FILE 191,4841
+#define DEBUG_TRACE_PATH 193,4913
+#define DEBUG_TRACE_CALL 195,4989
+#define DEBUG_TRACE_INPUT 197,5056
+#define DEBUG_TRACE_CALLID 199,5123
+#define DEBUG_TRACE_VERBOSE 202,5198
+#define DEBUG_TRACE_DEFAULT 204,5265
+#define DEBUG_PRINT1(DEBUG_PRINT1206,5296
+#define DEBUG_PRINT3(DEBUG_PRINT3214,5452
+#define DEBUG_MESSAGE(DEBUG_MESSAGE222,5631
+#define DEBUG_MESSAGE1(DEBUG_MESSAGE1234,5863
+#define DEBUG_MESSAGE2(DEBUG_MESSAGE2246,6107
+enum token_typetoken_type271,6804
+  TOKEN_EOF,273,6822
+  TOKEN_STRING,274,6855
+  TOKEN_WORD,275,6895
+  TOKEN_SIMPLE,276,6931
+  TOKEN_MACDEF	277,6974
+enum token_data_typetoken_data_type281,7105
+  TOKEN_VOID,283,7128
+  TOKEN_TEXT,284,7142
+  TOKEN_FUNC285,7156
+struct token_datatoken_data288,7173
+#define TOKEN_DATA_TYPE(TOKEN_DATA_TYPE311,7424
+#define TOKEN_DATA_TEXT(TOKEN_DATA_TEXT312,7466
+# define TOKEN_DATA_ORIG_TEXT(TOKEN_DATA_ORIG_TEXT314,7539
+#define TOKEN_DATA_FUNC(TOKEN_DATA_FUNC316,7608
+#define TOKEN_DATA_FUNC_TRACED(TOKEN_DATA_FUNC_TRACED317,7656
+typedef enum token_type token_type;token_type319,7714
+typedef enum token_data_type token_data_type;token_data_type320,7750
+#define DEF_LQUOTE 343,8384
+#define DEF_RQUOTE 344,8407
+#define DEF_BCOMM 345,8431
+#define DEF_ECOMM 346,8453
+enum symbol_lookupsymbol_lookup368,9073
+  SYMBOL_LOOKUP,370,9094
+  SYMBOL_INSERT,371,9111
+  SYMBOL_DELETE,372,9128
+  SYMBOL_PUSHDEF,373,9145
+  SYMBOL_POPDEF374,9163
+struct symbolsymbol378,9210
+#define SYMBOL_NEXT(SYMBOL_NEXT390,9372
+#define SYMBOL_TRACED(SYMBOL_TRACED391,9408
+#define SYMBOL_SHADOWED(SYMBOL_SHADOWED392,9447
+#define SYMBOL_MACRO_ARGS(SYMBOL_MACRO_ARGS393,9490
+#define SYMBOL_BLIND_NO_ARGS(SYMBOL_BLIND_NO_ARGS394,9537
+#define SYMBOL_NAME(SYMBOL_NAME395,9590
+#define SYMBOL_TYPE(SYMBOL_TYPE396,9626
+#define SYMBOL_TEXT(SYMBOL_TEXT397,9681
+#define SYMBOL_FUNC(SYMBOL_FUNC398,9736
+typedef enum symbol_lookup symbol_lookup;symbol_lookup400,9792
+typedef struct symbol symbol;symbol401,9834
+typedef void hack_symbol hack_symbol402,9864
+#define HASHMAX 404,9894
+struct builtinbuiltin419,10302
+struct predefinedpredefined428,10446
+typedef struct builtin builtin;builtin435,10539
+typedef struct predefined predefined;predefined436,10571
+typedef int eval_t;eval_t457,11325
+typedef unsigned int unsigned_eval_t;unsigned_eval_t458,11345
+# define DMALLOC_FUNC_CHECK474,11739
+# define DEBUG_INPUT481,11837
+# define DEBUG_MACRO482,11858
+# define DEBUG_SYM483,11879
+# define DEBUG_INCL484,11898
 
-m4.c,846
-static int interactive 29,946
-int sync_output 32,1020
-int debug_level 35,1068
-int hash_table_size 38,1143
-int no_gnu_extensions 41,1211
-int prefix_all_builtins 44,1285
-int max_debug_argument_length 47,1372
-int suppress_warnings 50,1458
-int warning_status 53,1557
-int nesting_limit 56,1638
-const char *user_word_regexp 60,1742
-const char *frozen_file_to_read 64,1846
-const char *frozen_file_to_write 67,1942
-const char *program_name;70,2026
-static int show_help 73,2109
-static int show_version 76,2203
-struct macro_definitionmacro_definition78,2233
-typedef struct macro_definition macro_definition;macro_definition84,2346
-reference_error 94,2719
-stackovf_handler 109,3018
-xfree 124,3283
-usage 136,3500
-static const struct option long_options[216,6300
-#define OPTSTRING 248,7436
-#define OPTSTRING 250,7502
-main 254,7572
+m4.c,848
+static int interactive 35,1037
+int sync_output 38,1111
+int debug_level 41,1159
+int hash_table_size 44,1234
+int no_gnu_extensions 47,1302
+int prefix_all_builtins 50,1376
+int max_debug_argument_length 53,1463
+int suppress_warnings 56,1549
+int warning_status 59,1648
+int nesting_limit 62,1729
+const char *user_word_regexp 66,1833
+const char *frozen_file_to_read 70,1937
+const char *frozen_file_to_write 73,2033
+const char *program_name;76,2117
+static int show_help 79,2200
+static int show_version 82,2294
+struct macro_definitionmacro_definition84,2324
+typedef struct macro_definition macro_definition;macro_definition90,2437
+reference_error 100,2810
+stackovf_handler 115,3109
+xfree 130,3374
+usage 142,3591
+static const struct option long_options[222,6391
+#define OPTSTRING 254,7527
+#define OPTSTRING 256,7593
+main 260,7663
 
 builtin.c,1637
 #define ARG(ARG30,997
@@ -291,65 +293,69 @@ format 116,3191
   enum {INT, UINT, LONG, ULONG, DOUBLE,534,12188
   enum {INT, UINT, LONG, ULONG, DOUBLE, STR}534,12188
 
-freeze.c,228
-reverse_symbol_list 28,1089
-produce_frozen_state 49,1489
-issue_expect_message 156,4318
-reload_frozen_state 172,4755
-#define GET_CHARACTER 182,4922
-#define GET_NUMBER(GET_NUMBER185,4975
-#define VALIDATE(VALIDATE197,5223
+freeze.c,290
+reverse_symbol_list 28,1083
+produce_frozen_state 49,1483
+# define FROZEN_WRITE 57,1598
+# define FROZEN_WRITE 59,1631
+issue_expect_message 162,4392
+reload_frozen_state 178,4829
+#define GET_CHARACTER 188,4996
+#define GET_NUMBER(GET_NUMBER191,5049
+#define VALIDATE(VALIDATE203,5297
 
-input.c,1509
-enum input_typeinput_type57,2691
-  INPUT_FILE,59,2709
-  INPUT_STRING,60,2723
-  INPUT_MACRO61,2739
-typedef enum input_type input_type;input_type64,2757
-struct input_blockinput_block66,2794
-typedef struct input_block input_block;input_block97,3556
-const char *current_file;101,3631
-int current_line;104,3692
-static struct obstack token_stack;107,3757
-static struct obstack input_stack;110,3820
-static struct obstack wrapup_stack;113,3883
-static struct obstack *current_input;116,3944
-static char *token_bottom;119,4031
-static input_block *isp;122,4099
-static input_block *wsp;125,4164
-static input_block *next;128,4237
-static boolean start_of_input_line;131,4320
-#define CHAR_EOF	133,4357
-#define CHAR_MACRO	134,4408
-STRING rquote;137,4491
-STRING lquote;138,4506
-STRING bcomm;141,4544
-STRING ecomm;142,4558
-#define DEFAULT_WORD_REGEXP 146,4600
-static char *word_start;148,4654
-static struct re_pattern_buffer word_regexp;149,4679
-static int default_word_regexp;150,4724
-static struct re_registers regs;151,4756
-push_file 163,5215
-push_macro 200,6273
-push_string_init 226,6891
-push_string_finish 251,7795
-push_wrapup 281,8809
-pop_input 299,9461
-pop_wrapup 341,10659
-init_macro_token 359,11083
-peek_input 382,11814
-next_char 430,12972
-skip_line 485,14069
-match_input 502,14622
-#define MATCH(MATCH536,15569
-input_init 548,15918
-set_quotes 592,17003
-set_comment 604,17292
-set_word_regexp 618,17598
-next_token 672,19195
-print_token 815,22505
-lex_debug 844,23083
+input.c,1581
+enum input_typeinput_type57,2683
+  INPUT_FILE,59,2701
+  INPUT_STRING,60,2715
+  INPUT_MACRO61,2731
+typedef enum input_type input_type;input_type64,2749
+struct input_blockinput_block66,2786
+typedef struct input_block input_block;input_block97,3548
+const char *current_file;101,3623
+int current_line;104,3684
+static struct obstack token_stack;107,3749
+static struct obstack input_stack;110,3812
+static struct obstack wrapup_stack;113,3875
+static struct obstack *current_input;116,3936
+static char *token_bottom;119,4023
+static input_block *isp;122,4091
+static input_block *wsp;125,4156
+static input_block *next;128,4229
+static boolean start_of_input_line;131,4312
+#define CHAR_EOF	133,4349
+#define CHAR_MACRO	134,4400
+STRING rquote;137,4483
+STRING lquote;138,4498
+STRING bcomm;141,4536
+STRING ecomm;142,4550
+#define DEFAULT_WORD_REGEXP 146,4591
+static char *word_start;148,4645
+static struct re_pattern_buffer word_regexp;149,4670
+static int default_word_regexp;150,4715
+static struct re_registers regs;151,4747
+push_file 163,5206
+push_macro 200,6264
+push_string_init 226,6882
+push_string_finish 251,7786
+push_wrapup 281,8800
+pop_input 299,9452
+pop_wrapup 341,10650
+init_macro_token 359,11074
+peek_input 382,11805
+#define next_char(next_char431,13106
+next_char_1 437,13257
+skip_line 492,14356
+match_input 509,14909
+#define MATCH(MATCH543,15856
+input_init 555,16205
+set_quotes 599,17290
+set_comment 611,17579
+init_pattern_buffer 625,17885
+set_word_regexp 634,18030
+next_token 703,20155
+print_token 846,23465
+lex_debug 875,24043
 
 macro.c,205
 int expansion_level 28,1090
@@ -362,32 +368,32 @@ call_macro 238,7105
 expand_macro 269,8166
 
 output.c,821
-#define INITIAL_BUFFER_SIZE 27,964
-#define MAXIMUM_TOTAL_SIZE 31,1081
-#define COPY_BUFFER_SIZE 34,1177
-struct diversiondiversion51,1684
-static struct diversion *diversion_table;60,1940
-static int diversions;63,2028
-static int total_buffer_size;66,2101
-int current_diversion;70,2252
-static struct diversion *output_diversion;73,2354
-static FILE *output_file;76,2467
-static char *output_cursor;77,2523
-static int output_unused;78,2590
-int output_current_line;81,2712
-output_init 88,2829
-mkstemp 115,3402
-tmpfile 126,3602
-make_room_for 152,4387
-#define OUTPUT_CHARACTER(OUTPUT_CHARACTER255,7578
-output_character_helper 264,7838
-output_text 283,8340
-shipout_text 317,9538
-make_diversion 411,12061
-insert_file 460,13444
-insert_diversion 490,14270
-undivert_all 542,15502
-freeze_diversions 555,15824
+#define INITIAL_BUFFER_SIZE 27,970
+#define MAXIMUM_TOTAL_SIZE 31,1087
+#define COPY_BUFFER_SIZE 34,1183
+struct diversiondiversion51,1690
+static struct diversion *diversion_table;60,1946
+static int diversions;63,2034
+static int total_buffer_size;66,2107
+int current_diversion;70,2258
+static struct diversion *output_diversion;73,2360
+static FILE *output_file;76,2473
+static char *output_cursor;77,2529
+static int output_unused;78,2596
+int output_current_line;81,2718
+output_init 88,2835
+mkstemp 113,3379
+tmpfile 126,3601
+make_room_for 152,4386
+#define OUTPUT_CHARACTER(OUTPUT_CHARACTER255,7577
+output_character_helper 264,7837
+output_text 283,8339
+shipout_text 317,9537
+make_diversion 411,12060
+insert_file 460,13443
+insert_diversion 490,14269
+undivert_all 542,15501
+freeze_diversions 555,15823
 
 path.c,316
 struct includesincludes25,928
