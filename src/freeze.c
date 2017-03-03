@@ -56,9 +56,10 @@ produce_frozen_state (const char *name)
   symbol *sym;
   const builtin *bp;
 
-  if (file = fopen (name, O_BINARY ? "wb" : "w"), !file)
+  file = fopen (name, O_BINARY ? "wb" : "w");
+  if (!file)
     {
-      M4ERROR ((warning_status, errno, "%s", name));
+      M4ERROR ((EXIT_FAILURE, errno, "cannot open `%s'", name));
       return;
     }
 
@@ -186,34 +187,51 @@ reload_frozen_state (const char *name)
   int allocated[2];
   int number[2];
   const builtin *bp;
+  bool advance_line = true;
 
-#define GET_CHARACTER \
-  (character = getc (file))
-
-#define GET_NUMBER(Number) \
+#define GET_CHARACTER						\
   do								\
     {								\
-      (Number) = 0;						\
-      while (isdigit (character))				\
+      if (advance_line)						\
 	{							\
-	  (Number) = 10 * (Number) + character - '0';		\
-	  GET_CHARACTER;					\
+	  current_line++;					\
+	  advance_line = false;					\
 	}							\
+      (character = getc (file));				\
+      if (character == '\n')					\
+	advance_line = true;					\
     }								\
   while (0)
 
-#define VALIDATE(Expected) \
+#define GET_NUMBER(Number, AllowNeg)				\
+  do								\
+    {								\
+      unsigned int n = 0;					\
+      while (isdigit (character) && n <= INT_MAX / 10)		\
+	{							\
+	  n = 10 * n + character - '0';				\
+	  GET_CHARACTER;					\
+	}							\
+      if (((AllowNeg) ? INT_MIN : INT_MAX) < n			\
+	  || isdigit (character))				\
+	m4_error (EXIT_FAILURE, 0,				\
+		  _("integer overflow in frozen file"));	\
+      (Number) = n;						\
+    }								\
+  while (0)
+
+#define VALIDATE(Expected)					\
   do								\
     {								\
       if (character != (Expected))				\
-	issue_expect_message ((Expected));			\
+	issue_expect_message (Expected);			\
     }								\
   while (0)
 
   /* Skip comments (`#' at beginning of line) and blank lines, setting
      character to the next directive or to EOF.  */
 
-#define GET_DIRECTIVE \
+#define GET_DIRECTIVE						\
   do								\
     {								\
       GET_CHARACTER;						\
@@ -226,9 +244,35 @@ reload_frozen_state (const char *name)
     }								\
   while (character == '\n')
 
+#define GET_STRING(i)							\
+  do									\
+    {									\
+      void *tmp;							\
+      char *p;								\
+      if (number[(i)] + 1 > allocated[(i)])				\
+	{								\
+	  free (string[(i)]);						\
+	  allocated[(i)] = number[(i)] + 1;				\
+	  string[(i)] = xcharalloc ((size_t) allocated[(i)]);		\
+	}								\
+      if (number[(i)] > 0						\
+	  && !fread (string[(i)], (size_t) number[(i)], 1, file))	\
+	m4_error (EXIT_FAILURE, 0,					\
+		  _("premature end of frozen file"));			\
+      string[(i)][number[(i)]] = '\0';					\
+      p = string[(i)];							\
+      while ((tmp = memchr(p, '\n', number[(i)] - (p - string[(i)]))))	\
+	{								\
+	  current_line++;						\
+	  p = (char *) tmp + 1;						\
+	}								\
+    }									\
+  while (0)
+
   file = m4_path_search (name, NULL);
   if (file == NULL)
     M4ERROR ((EXIT_FAILURE, errno, "cannot open %s", name));
+  current_file = name;
 
   allocated[0] = 100;
   string[0] = xcharalloc ((size_t) allocated[0]);
@@ -239,7 +283,7 @@ reload_frozen_state (const char *name)
   GET_DIRECTIVE;
   VALIDATE ('V');
   GET_CHARACTER;
-  GET_NUMBER (number[0]);
+  GET_NUMBER (number[0], false);
   if (number[0] > 1)
     M4ERROR ((EXIT_MISMATCH, 0,
 	      "frozen file version %d greater than max supported of 1",
@@ -270,49 +314,19 @@ reload_frozen_state (const char *name)
 	  if (operation == 'D' && character == '-')
 	    {
 	      GET_CHARACTER;
-	      GET_NUMBER (number[0]);
+	      GET_NUMBER (number[0], true);
 	      number[0] = -number[0];
 	    }
 	  else
-	    GET_NUMBER (number[0]);
+	    GET_NUMBER (number[0], false);
 	  VALIDATE (',');
 	  GET_CHARACTER;
-	  GET_NUMBER (number[1]);
+	  GET_NUMBER (number[1], false);
 	  VALIDATE ('\n');
 
 	  if (operation != 'D')
-	    {
-
-	      /* Get first string contents.  */
-
-	      if (number[0] + 1 > allocated[0])
-		{
-		  free (string[0]);
-		  allocated[0] = number[0] + 1;
-		  string[0] = xcharalloc ((size_t) allocated[0]);
-		}
-
-	      if (number[0] > 0)
-		if (!fread (string[0], (size_t) number[0], 1, file))
-		  M4ERROR ((EXIT_FAILURE, 0, "premature end of frozen file"));
-
-	      string[0][number[0]] = '\0';
-	    }
-
-	  /* Get second string contents.  */
-
-	  if (number[1] + 1 > allocated[1])
-	    {
-	      free (string[1]);
-	      allocated[1] = number[1] + 1;
-	      string[1] = xcharalloc ((size_t) allocated[1]);
-	    }
-
-	  if (number[1] > 0)
-	    if (!fread (string[1], (size_t) number[1], 1, file))
-	      M4ERROR ((EXIT_FAILURE, 0, "premature end of frozen file"));
-
-	  string[1][number[1]] = '\0';
+	    GET_STRING (0);
+	  GET_STRING (1);
 	  GET_CHARACTER;
 	  VALIDATE ('\n');
 
@@ -372,12 +386,14 @@ reload_frozen_state (const char *name)
 
   free (string[0]);
   free (string[1]);
-  errno = 0;
-  if (ferror (file) || fclose (file) != 0)
-    M4ERROR ((EXIT_FAILURE, errno, "unable to read frozen state"));
+  if (close_stream (file) != 0)
+    m4_error (EXIT_FAILURE, errno, _("unable to read frozen state"));
+  current_file = NULL;
+  current_line = 0;
 
 #undef GET_CHARACTER
 #undef GET_DIRECTIVE
 #undef GET_NUMBER
 #undef VALIDATE
+#undef GET_STRING
 }

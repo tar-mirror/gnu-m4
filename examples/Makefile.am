@@ -34,6 +34,7 @@ foreach2.m4 \
 foreachq.m4 \
 foreachq2.m4 \
 foreachq3.m4 \
+foreachq4.m4 \
 forloop.m4 \
 forloop2.m4 \
 fstab.m4 \
@@ -51,7 +52,6 @@ pushpop.m4 \
 quote.m4 \
 regexp.m4 \
 reverse.m4 \
-stackovf.sh \
 sync-lines.m4 \
 sysv-args.m4 \
 trace.m4 \

@@ -20,7 +20,7 @@
 ##
 ## Written by Gary V. Vaughan <gary@gnu.org>
 
-SUBDIRS = . examples lib src doc tests checks
+SUBDIRS = . examples lib src doc checks tests
 EXTRA_DIST = bootstrap c-boxes.el cfg.mk maint.mk \
 	.version m4/gnulib-cache.m4
 DISTCLEANFILES = stamp-h
@@ -32,7 +32,9 @@ MAINTAINERCLEANFILES = COPYING INSTALL Makefile.in aclocal.m4 \
 	m4/gnulib-tool.m4 missing stamp-h.in
 
 ACLOCAL_AMFLAGS = -I m4
-DISTCHECK_CONFIGURE_FLAGS = --enable-changeword
+## Enough users install GNU M4 as gm4 that we make sure 'make installcheck'
+## will handle that, prior to making a release.
+DISTCHECK_CONFIGURE_FLAGS = --enable-changeword --program-prefix=g
 
 BUILT_SOURCES = $(top_srcdir)/.version
 $(top_srcdir)/.version:

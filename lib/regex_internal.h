@@ -1,5 +1,5 @@
 /* Extended regular expression matching and search library.
-   Copyright (C) 2002, 2003, 2004, 2005, 2006, 2007 Free Software Foundation, Inc.
+   Copyright (C) 2002, 2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Contributed by Isamu Hasegawa <isamu@yamato.ibm.com>.
 
@@ -161,9 +161,9 @@ typedef unsigned long int bitset_word_t;
    instead, deduce it directly from BITSET_WORD_MAX.  Avoid
    greater-than-32-bit integers and unconditional shifts by more than
    31 bits, as they're not portable.  */
-#if BITSET_WORD_MAX == 0xffffffff
+#if BITSET_WORD_MAX == 0xffffffffUL
 # define BITSET_WORD_BITS 32
-#elif BITSET_WORD_MAX >> 31 >> 5 == 1
+#elif BITSET_WORD_MAX >> 31 >> 4 == 1
 # define BITSET_WORD_BITS 36
 #elif BITSET_WORD_MAX >> 31 >> 16 == 1
 # define BITSET_WORD_BITS 48
@@ -421,7 +421,7 @@ struct re_dfa_t;
 typedef struct re_dfa_t re_dfa_t;
 
 #ifndef _LIBC
-# ifdef __i386__
+# if defined __i386__ && !defined __EMX__
 #  define internal_function   __attribute ((regparm (3), stdcall))
 # else
 #  define internal_function

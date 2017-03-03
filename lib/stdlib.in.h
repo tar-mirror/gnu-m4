@@ -15,6 +15,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+@PRAGMA_SYSTEM_HEADER@
+
 #if defined __need_malloc_and_calloc
 /* Special invocation convention inside glibc header files.  */
 
@@ -173,6 +175,21 @@ extern int mkstemp (char * /*template*/);
 #  define putenv rpl_putenv
 extern int putenv (char *string);
 # endif
+#endif
+
+
+#if @GNULIB_RPMATCH@
+# if !@HAVE_RPMATCH@
+/* Test a user response to a question.
+   Return 1 if it is affirmative, 0 if it is negative, or -1 if not clear.  */
+extern int rpmatch (const char *response);
+# endif
+#elif defined GNULIB_POSIXCHECK
+# undef rpmatch
+# define rpmatch(r) \
+    (GL_LINK_WARNING ("rpmatch is unportable - " \
+                      "use gnulib module rpmatch for portability"), \
+     rpmatch (r))
 #endif
 
 

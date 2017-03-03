@@ -1,14 +1,17 @@
-dnl @ ../doc/m4.texinfo:1382: Origin of test
+dnl @ ../doc/m4.texinfo:1407: Origin of test
 dnl @ expected status: 0
 dnl @ extra options: 
-dnl @ Copyright (C) 2006, 2007 Free Software Foundation
+dnl @ Copyright (C) 2006, 2007, 2008 Free Software Foundation,
+dnl @ Inc.
 dnl @ This file is free software; the Free Software Foundation
 dnl @ gives unlimited permission to copy and/or distribute it
 dnl @ with or without modifications, as long as this notice
 dnl @ is preserved.
-define(`macro', `m')
+define(`cde', `CDE')
 dnl @result{}
-macro(`m')macro
-dnl @result{}mmacro
-macro(`m')`'macro
-dnl @result{}mm
+define(`x', `substr(ab')
+dnl @result{}
+define(`y', `cde, `1', `3')')
+dnl @result{}
+x`'y
+dnl @result{}bCD

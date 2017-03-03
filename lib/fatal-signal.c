@@ -1,5 +1,5 @@
 /* Emergency actions in case of a fatal signal.
-   Copyright (C) 2003-2004, 2006-2007 Free Software Foundation, Inc.
+   Copyright (C) 2003-2004, 2006-2008 Free Software Foundation, Inc.
    Written by Bruno Haible <bruno@clisp.org>, 2003.
 
    This program is free software: you can redistribute it and/or modify
@@ -26,10 +26,10 @@
 #include <signal.h>
 #include <unistd.h>
 
+#include "sig-handler.h"
 #include "xalloc.h"
 
 #define SIZEOF(a) (sizeof(a) / sizeof(a[0]))
-
 
 /* ========================================================================= */
 
@@ -88,7 +88,6 @@ init_fatal_signals (void)
   static bool fatal_signals_initialized = false;
   if (!fatal_signals_initialized)
     {
-#if HAVE_SIGACTION
       size_t i;
 
       for (i = 0; i < num_fatal_signals; i++)
@@ -96,10 +95,9 @@ init_fatal_signals (void)
 	  struct sigaction action;
 
 	  if (sigaction (fatal_signals[i], NULL, &action) >= 0
-	      && action.sa_handler == SIG_IGN)
+	      && get_handler (&action) == SIG_IGN)
 	    fatal_signals[i] = -1;
 	}
-#endif
 
       fatal_signals_initialized = true;
     }
@@ -127,6 +125,11 @@ static sig_atomic_t volatile actions_count = 0;
 static size_t actions_allocated = SIZEOF (static_actions);
 
 
+/* The saved signal handlers.
+   Size 32 would not be sufficient: On HP-UX, SIGXCPU = 33, SIGXFSZ = 34.  */
+static struct sigaction saved_sigactions[64];
+
+
 /* Uninstall the handlers.  */
 static inline void
 uninstall_handlers ()
@@ -135,7 +138,12 @@ uninstall_handlers ()
 
   for (i = 0; i < num_fatal_signals; i++)
     if (fatal_signals[i] >= 0)
-      signal (fatal_signals[i], SIG_DFL);
+      {
+	int sig = fatal_signals[i];
+	if (saved_sigactions[sig].sa_handler == SIG_IGN)
+	  saved_sigactions[sig].sa_handler = SIG_DFL;
+	sigaction (sig, &saved_sigactions[sig], NULL);
+      }
 }
 
 
@@ -158,15 +166,12 @@ fatal_signal_handler (int sig)
     }
 
   /* Now execute the signal's default action.
-     If signal() blocks the signal being delivered for the duration of the
-     signal handler's execution, the re-raised signal is delivered when this
-     handler returns; otherwise it is delivered already during raise().  */
+     If the signal being delivered was blocked, the re-raised signal would be
+     delivered when this handler returns.  But the way we install this handler,
+     no signal is blocked, and the re-raised signal is delivered already
+     during raise().  */
   uninstall_handlers ();
-#if HAVE_RAISE
   raise (sig);
-#else
-  kill (getpid (), sig);
-#endif
 }
 
 
@@ -175,10 +180,23 @@ static inline void
 install_handlers ()
 {
   size_t i;
+  struct sigaction action;
 
+  action.sa_handler = &fatal_signal_handler;
+  /* If we get a fatal signal while executing fatal_signal_handler, enter
+     fatal_signal_handler recursively, since it is reentrant.  Hence no
+     SA_RESETHAND.  */
+  action.sa_flags = SA_NODEFER;
+  sigemptyset (&action.sa_mask);
   for (i = 0; i < num_fatal_signals; i++)
     if (fatal_signals[i] >= 0)
-      signal (fatal_signals[i], &fatal_signal_handler);
+      {
+	int sig = fatal_signals[i];
+
+	if (!(sig < sizeof (saved_sigactions) / sizeof (saved_sigactions[0])))
+	  abort ();
+	sigaction (sig, &action, &saved_sigactions[sig]);
+      }
 }
 
 

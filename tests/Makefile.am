@@ -42,14 +42,6 @@ libtests_a_DEPENDENCIES = $(M4tests_LIBOBJS)
 EXTRA_libtests_a_SOURCES =
 AM_LIBTOOLFLAGS = --preserve-dup-deps
 
-## begin gnulib module EOVERFLOW-tests
-
-TESTS += test-EOVERFLOW
-check_PROGRAMS += test-EOVERFLOW
-EXTRA_DIST += test-EOVERFLOW.c
-
-## end   gnulib module EOVERFLOW-tests
-
 ## begin gnulib module alloca-opt-tests
 
 TESTS += test-alloca-opt
@@ -119,6 +111,17 @@ EXTRA_DIST += test-c-ctype.c
 
 ## end   gnulib module c-ctype-tests
 
+## begin gnulib module c-stack-tests
+
+TESTS += test-c-stack.sh test-c-stack2.sh
+TESTS_ENVIRONMENT += EXEEXT='@EXEEXT@' LIBSIGSEGV='@LIBSIGSEGV@'
+check_PROGRAMS += test-c-stack
+test_c_stack_LDADD = $(LDADD) $(LIBCSTACK) @LIBINTL@
+MOSTLYCLEANFILES += t-c-stack.tmp t-c-stack2.tmp
+EXTRA_DIST += test-c-stack.c test-c-stack.sh test-c-stack2.sh
+
+## end   gnulib module c-stack-tests
+
 ## begin gnulib module closein-tests
 
 TESTS += test-closein.sh
@@ -129,6 +132,33 @@ EXTRA_DIST += test-closein.sh test-closein.c
 
 ## end   gnulib module closein-tests
 
+## begin gnulib module dirname-tests
+
+TESTS += test-dirname
+check_PROGRAMS += test-dirname
+test_dirname_LDADD = $(LDADD) @LIBINTL@
+EXTRA_DIST += test-dirname.c
+
+## end   gnulib module dirname-tests
+
+## begin gnulib module errno-tests
+
+TESTS += test-errno
+check_PROGRAMS += test-errno
+
+EXTRA_DIST += test-errno.c
+
+## end   gnulib module errno-tests
+
+## begin gnulib module fcntl-tests
+
+TESTS += test-fcntl
+check_PROGRAMS += test-fcntl
+
+EXTRA_DIST += test-fcntl.c
+
+## end   gnulib module fcntl-tests
+
 ## begin gnulib module fflush-tests
 
 TESTS += test-fflush test-fflush2.sh
@@ -138,6 +168,24 @@ MOSTLYCLEANFILES += test-fflush.txt
 EXTRA_DIST += test-fflush.c test-fflush2.sh test-fflush2.c
 
 ## end   gnulib module fflush-tests
+
+## begin gnulib module filenamecat-tests
+
+TESTS += test-filenamecat
+check_PROGRAMS += test-filenamecat
+test_filenamecat_LDADD = $(LDADD) @LIBINTL@
+EXTRA_DIST += test-filenamecat.c
+
+## end   gnulib module filenamecat-tests
+
+## begin gnulib module fopen-tests
+
+TESTS += test-fopen
+check_PROGRAMS += test-fopen
+
+EXTRA_DIST += test-fopen.c
+
+## end   gnulib module fopen-tests
 
 ## begin gnulib module fpending-tests
 
@@ -223,19 +271,19 @@ EXTRA_DIST += test-gettimeofday.c
 
 ## begin gnulib module isnand-nolibm-tests
 
-TESTS += test-isnand
-check_PROGRAMS += test-isnand
+TESTS += test-isnand-nolibm
+check_PROGRAMS += test-isnand-nolibm
 
-EXTRA_DIST += test-isnand.c nan.h
+EXTRA_DIST += test-isnand-nolibm.c test-isnand.h nan.h
 
 ## end   gnulib module isnand-nolibm-tests
 
 ## begin gnulib module isnanf-nolibm-tests
 
-TESTS += test-isnanf
-check_PROGRAMS += test-isnanf
+TESTS += test-isnanf-nolibm
+check_PROGRAMS += test-isnanf-nolibm
 
-EXTRA_DIST += test-isnanf.c nan.h
+EXTRA_DIST += test-isnanf-nolibm.c test-isnanf.h nan.h
 
 ## end   gnulib module isnanf-nolibm-tests
 
@@ -256,6 +304,15 @@ test_linkedhash_list_LDADD = $(LDADD) @LIBINTL@
 EXTRA_DIST += test-linkedhash_list.c
 
 ## end   gnulib module linkedhash-list-tests
+
+## begin gnulib module lock-tests
+
+TESTS += test-lock
+check_PROGRAMS += test-lock
+test_lock_LDADD = $(LDADD) @LIBMULTITHREAD@ @YIELD_LIB@
+EXTRA_DIST += test-lock.c
+
+## end   gnulib module lock-tests
 
 ## begin gnulib module lseek-tests
 
@@ -284,6 +341,31 @@ EXTRA_DIST += test-math.c
 
 ## end   gnulib module math-tests
 
+## begin gnulib module memchr-tests
+
+TESTS += test-memchr
+check_PROGRAMS += test-memchr
+EXTRA_DIST += test-memchr.c
+
+## end   gnulib module memchr-tests
+
+## begin gnulib module memcmp-tests
+
+TESTS += test-memcmp
+check_PROGRAMS += test-memcmp
+EXTRA_DIST += test-memcmp.c
+
+## end   gnulib module memcmp-tests
+
+## begin gnulib module open-tests
+
+TESTS += test-open
+check_PROGRAMS += test-open
+
+EXTRA_DIST += test-open.c
+
+## end   gnulib module open-tests
+
 ## begin gnulib module printf-frexp-tests
 
 TESTS += test-printf-frexp
@@ -302,19 +384,22 @@ EXTRA_DIST += test-printf-frexpl.c
 
 ## end   gnulib module printf-frexpl-tests
 
-## begin gnulib module progname
-
-libtests_a_SOURCES += progname.h progname.c
-
-## end   gnulib module progname
-
 ## begin gnulib module quotearg-tests
 
 TESTS += test-quotearg
 check_PROGRAMS += test-quotearg
+test_quotearg_LDADD = $(LDADD) @LIBINTL@
 EXTRA_DIST += test-quotearg.c
 
 ## end   gnulib module quotearg-tests
+
+## begin gnulib module sigaction-tests
+
+TESTS += test-sigaction
+check_PROGRAMS += test-sigaction
+EXTRA_DIST += test-sigaction.c
+
+## end   gnulib module sigaction-tests
 
 ## begin gnulib module signbit-tests
 
@@ -324,6 +409,15 @@ check_PROGRAMS += test-signbit
 EXTRA_DIST += test-signbit.c
 
 ## end   gnulib module signbit-tests
+
+## begin gnulib module snprintf-tests
+
+TESTS += test-snprintf
+check_PROGRAMS += test-snprintf
+
+EXTRA_DIST += test-snprintf.c
+
+## end   gnulib module snprintf-tests
 
 ## begin gnulib module stdbool-tests
 
@@ -361,6 +455,15 @@ EXTRA_DIST += test-stdlib.c
 
 ## end   gnulib module stdlib-tests
 
+## begin gnulib module strdup
+
+
+EXTRA_DIST += strdup.c
+
+EXTRA_libtests_a_SOURCES += strdup.c
+
+## end   gnulib module strdup
+
 ## begin gnulib module strerror-tests
 
 TESTS += test-strerror
@@ -377,6 +480,15 @@ check_PROGRAMS += test-string
 EXTRA_DIST += test-string.c
 
 ## end   gnulib module string-tests
+
+## begin gnulib module strsignal-tests
+
+TESTS += test-strsignal
+check_PROGRAMS += test-strsignal
+test_strsignal_LDADD = $(LDADD) @LIBINTL@
+EXTRA_DIST += test-strsignal.c
+
+## end   gnulib module strsignal-tests
 
 ## begin gnulib module strstr-tests
 
@@ -413,6 +525,22 @@ check_PROGRAMS += test-sys_time
 EXTRA_DIST += test-sys_time.c
 
 ## end   gnulib module sys_time-tests
+
+## begin gnulib module thread
+
+libtests_a_SOURCES += glthread/thread.h glthread/thread.c
+
+## end   gnulib module thread
+
+## begin gnulib module tls-tests
+
+TESTS += test-tls
+check_PROGRAMS += test-tls
+test_tls_LDADD = $(LDADD) @LIBMULTITHREAD@ @YIELD_LIB@
+
+EXTRA_DIST += test-tls.c
+
+## end   gnulib module tls-tests
 
 ## begin gnulib module unistd-tests
 
@@ -483,6 +611,12 @@ test_xvasprintf_LDADD = $(LDADD) @LIBINTL@
 EXTRA_DIST += test-xvasprintf.c
 
 ## end   gnulib module xvasprintf-tests
+
+## begin gnulib module yield
+
+libtests_a_SOURCES += glthread/yield.h
+
+## end   gnulib module yield
 
 # Clean up after Solaris cc.
 clean-local:

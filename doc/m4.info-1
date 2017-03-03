@@ -1,8 +1,7 @@
-This is ../../doc/m4.info, produced by makeinfo version 4.8 from
-../../doc/m4.texinfo.
+This is m4.info, produced by makeinfo version 4.8 from m4.texinfo.
 
-   This manual is for GNU M4 (version 1.4.11, 29 March 2008), a package
-containing an implementation of the m4 macro language.
+   This manual (25 September 2008) is for GNU M4 (version 1.4.12), a
+package containing an implementation of the m4 macro language.
 
    Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2004, 2005, 2006,
 2007, 2008 Free Software Foundation, Inc.
@@ -25,8 +24,8 @@ File: m4.info,  Node: Top,  Next: Preliminaries,  Up: (dir)
 GNU M4
 ******
 
-This manual is for GNU M4 (version 1.4.11, 29 March 2008), a package
-containing an implementation of the m4 macro language.
+This manual (25 September 2008) is for GNU M4 (version 1.4.12), a
+package containing an implementation of the m4 macro language.
 
    Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2004, 2005, 2006,
 2007, 2008 Free Software Foundation, Inc.
@@ -47,10 +46,10 @@ generating `configure' scripts, but not for running them.
 
    GNU `m4' was originally written by Rene' Seindal, with subsequent
 changes by Franc,ois Pinard and other volunteers on the Internet.  All
-names and email addresses can be found in the files `m4-1.4.11/AUTHORS'
-and `m4-1.4.11/THANKS' from the GNU M4 distribution.
+names and email addresses can be found in the files `m4-1.4.12/AUTHORS'
+and `m4-1.4.12/THANKS' from the GNU M4 distribution.
 
-   This is release 1.4.11.  It is now considered stable:  future
+   This is release 1.4.12.  It is now considered stable:  future
 releases in the 1.4.x series are only meant to fix bugs, increase speed,
 or improve documentation.  However...
 
@@ -295,7 +294,7 @@ File: m4.info,  Node: History,  Next: Bugs,  Prev: Intro,  Up: Preliminaries
 1.2 Historical references
 =========================
 
-`GPM' was an important ancestor of `m4'.  See C. Stratchey: "A General
+`GPM' was an important ancestor of `m4'.  See C. Strachey: "A General
 Purpose Macro generator", Computer Journal 8,3 (1965), pp. 225 ff.
 `GPM' is also succinctly described into David Gries classic "Compiler
 Construction for Digital Computers".
@@ -340,9 +339,9 @@ addressed some long standing bugs in the venerable 1.4 release.  Then in
 2005, Gary V. Vaughan collected together the many patches to GNU `m4'
 1.4 that were floating around the net and released 1.4.3 and 1.4.4.
 And in 2006, Eric Blake joined the team and prepared patches for the
-release of 1.4.5, 1.4.6, 1.4.7, and 1.4.8.  The 1.4.x series remains
-open for bug fixes, including releases 1.4.9, 1.4.10, and 1.4.11 in
-2007.
+release of 1.4.5, 1.4.6, 1.4.7, and 1.4.8.  More bug fixes were
+incorporated in 2007, with releases 1.4.9 and 1.4.10, closing the
+series with 1.4.11 and 1.4.12 in 2008.
 
    Meanwhile, development has continued on new features for `m4', such
 as dynamic module loading and additional builtins.  When complete, GNU
@@ -409,7 +408,7 @@ the examples assume that your current directory is located where you
 unpacked the installation, so if you plan on following along, you may
 find it helpful to do this now:
 
-     $ cd m4-1.4.11
+     $ cd m4-1.4.12
 
    As each of the predefined macros in `m4' is described, a prototype
 call of the macro will be shown, giving descriptive names to the
@@ -470,7 +469,7 @@ combined into a single command line argument with subsequent options,
 options with mandatory arguments may be provided either as a single
 command line argument or as two arguments, and options with optional
 arguments must be provided as a single argument.  In other words, `m4
--QPDfoo -d a -d+f' is equivalent to `m4 -Q -P -D foo -d -d+f -- ./a',
+-QPDfoo -d a -df' is equivalent to `m4 -Q -P -D foo -d -df -- ./a',
 although the latter form is considered canonical.
 
    With long options, options with mandatory arguments may be provided
@@ -658,6 +657,22 @@ compatibility, `m4' also accepts some options that control limits in
 other implementations, but which are automatically unbounded (limited
 only by your hardware and operating system constraints) in GNU `m4'.
 
+`-g'
+`--gnu'
+     Enable all the extensions in this implementation.  In this release
+     of M4, this option is always on by default; it is currently only
+     useful when overriding a prior use of `--traditional'.  However,
+     having GNU behavior as default makes it impossible to write a
+     strictly POSIX-compliant client that avoids all incompatible GNU
+     M4 extensions, since such a client would have to use the non-POSIX
+     command-line option to force full POSIX behavior.  Thus, a future
+     version of M4 will be changed to implicitly use the option
+     `--traditional' if the environment variable `POSIXLY_CORRECT' is
+     set.  Projects that intentionally use GNU extensions should
+     consider using `--gnu' to state their intentions, so that the
+     project will not mysteriously break if the user upgrades to a
+     newer M4 and has `POSIXLY_CORRECT' set in their environment.
+
 `-G'
 `--traditional'
      Suppress all the extensions made in this implementation, compared
@@ -676,16 +691,16 @@ only by your hardware and operating system constraints) in GNU `m4'.
 `--nesting-limit=NUM'
      Artificially limit the nesting of macro calls to NUM levels,
      stopping program execution if this limit is ever exceeded.  When
-     not specified, nesting is limited to 1024 levels.  A value of zero
-     means unlimited; but then heavily nested code could potentially
-     cause a stack overflow.
+     not specified, nesting defaults to unlimited on platforms that can
+     detect stack overflow, and to 1024 levels otherwise.  A value of
+     zero means unlimited; but then heavily nested code could
+     potentially cause a stack overflow.
 
-     The precise effect of this option might be more correctly
-     associated with textual nesting than dynamic recursion.  It has
-     been useful when some complex `m4' input was generated by
-     mechanical means.  Most users would never need this option.  If
-     shown to be obtrusive, this option (which is still experimental)
-     might well disappear.
+     The precise effect of this option is more correctly associated
+     with textual nesting than dynamic recursion.  It has been useful
+     when some complex `m4' input was generated by mechanical means, and
+     also in diagnosing recursive algorithms that do not scale well.
+     Most users never need to change this option from its default.
 
      This option does _not_ have the ability to break endless
      rescanning loops, since these do not necessarily consume much
@@ -1133,7 +1148,7 @@ File: m4.info,  Node: Inhibiting Invocation,  Next: Macro Arguments,  Prev: Invo
 ===============================
 
 An innovation of the `m4' language, compared to some of its
-predecessors (like Stratchey's `GPM', for example), is the ability to
+predecessors (like Strachey's `GPM', for example), is the ability to
 recognize macro calls without resorting to any special, prefixed
 invocation character.  While generally useful, this feature might
 sometimes be the source of spurious, unwanted macro calls.  So, GNU
@@ -2155,6 +2170,14 @@ expansion.
      builtin(`builtin',)
      error-->m4:stdin:4: undefined builtin `'
      =>
+     builtin(`builtin', ``'
+     ')
+     error-->m4:stdin:5: undefined builtin ``'
+     error-->'
+     =>
+     indir(`index')
+     error-->m4:stdin:7: Warning: too few arguments to builtin `index'
+     =>
 
 
 File: m4.info,  Node: Conditionals,  Next: Debugging,  Prev: Definitions,  Up: Top
@@ -2268,6 +2291,59 @@ recognized only with arguments.
      =>arguments:1
      foo(`a', `b', `c')
      =>arguments:3
+
+   Since m4 is a macro language, it is even possible to write a macro
+that makes defining blind macros easier:
+
+ -- Composite: define_blind (NAME, [VALUE])
+     Defines NAME as a blind macro, such that NAME will expand to VALUE
+     only when given explicit arguments.  VALUE should not be the
+     result of `defn' (*note Defn::).  This macro is only recognized
+     with parameters, and results in an empty string.
+
+   Defining a macro to define another macro can be a bit tricky.  We
+want to use a literal `$#' in the argument to the nested `define'.
+However, if `$' and `#' are adjacent in the definition of
+`define_blind', then it would be expanded as the number of arguments to
+`define_blind' rather than the intended number of arguments to NAME.
+The solution is to pass the difficult characters through extra
+arguments to a helper macro `_define_blind'.
+
+   As for the limitation against using `defn', there are two reasons.
+If a macro was previously defined with `define_blind', then it can
+safely be renamed to a new blind macro using plain `define'; using
+`define_blind' to rename it just adds another layer of `ifelse',
+occupying memory and slowing down execution.  And if a macro is a
+builtin, then it would result in an attempt to define a macro
+consisting of both text and a builtin token; this is not supported, and
+the builtin token is flattened to an empty string.
+
+   With that explanation, here's the definition, and some sample usage.
+Notice that `define_blind' is itself a blind macro.
+
+     $ m4 -d
+     define(`define_blind', `ifelse(`$#', `0', ``$0'',
+     `_$0(`$1', `$2', `$'`#', `$'`0')')')
+     =>
+     define(`_define_blind', `define(`$1',
+     `ifelse(`$3', `0', ``$4'', `$2')')')
+     =>
+     define_blind
+     =>define_blind
+     define_blind(`foo', `arguments were $*')
+     =>
+     foo
+     =>foo
+     foo(`bar')
+     =>arguments were bar
+     define(`blah', defn(`foo'))
+     =>
+     blah
+     =>blah
+     blah(`a', `b')
+     =>arguments were a,b
+     defn(`blah')
+     =>ifelse(`$#', `0', ``$0'', `arguments were $*')
 
    However, `ifelse' can take more than four arguments.  If given more
 than four arguments, `ifelse' works like a `case' or `switch' statement
@@ -2401,7 +2477,7 @@ arguments into a single string.
      arguments, `join' avoids the SEPARATOR for an empty ARG.
 
    Here are some examples of its usage, based on the implementation
-`m4-1.4.11/examples/join.m4' distributed in this package:
+`m4-1.4.12/examples/join.m4' distributed in this package:
 
      $ m4 -I examples
      include(`join.m4')
@@ -2496,7 +2572,7 @@ element, or treating multiple arguments as a single element:
      levels of quoting are added around each element.
 
    An actual implementation of these three macros is distributed as
-`m4-1.4.11/examples/quote.m4' in this package.  First, let's examine
+`m4-1.4.12/examples/quote.m4' in this package.  First, let's examine
 their usage:
 
      $ m4 -I examples
@@ -2612,7 +2688,7 @@ finished, it increments the iterator (using the predefined macro
 `incr', *note Incr::), and recurses.
 
    Here is an actual implementation of `forloop', distributed as
-`m4-1.4.11/examples/forloop.m4' in this package:
+`m4-1.4.12/examples/forloop.m4' in this package:
 
      $ m4 -I examples
      undivert(`forloop.m4')dnl
@@ -2653,8 +2729,8 @@ Here is an example of a loop macro that implements list iteration.
 
    As an example, this displays each word in a list inside of a
 sentence, using an implementation of `foreach' distributed as
-`m4-1.4.11/examples/foreach.m4', and `foreachq' in
-`m4-1.4.11/examples/foreachq.m4'.
+`m4-1.4.12/examples/foreach.m4', and `foreachq' in
+`m4-1.4.12/examples/foreachq.m4'.
 
      $ m4 -I examples
      include(`foreach.m4')
@@ -2917,6 +2993,8 @@ those macros are defined.
      =>
      foo
      =>foo
+     defn(`foo')
+     =>
      define(`foo', `bar')
      =>
      foo
@@ -2927,7 +3005,7 @@ those macros are defined.
      ifdef(`foo', `yes', `no')
      =>no
      indir(`foo')
-     error-->m4:stdin:8: undefined macro `foo'
+     error-->m4:stdin:9: undefined macro `foo'
      =>
      define(`foo', `blah')
      =>
@@ -2943,6 +3021,16 @@ those macros are defined.
 not transfer tracing status.
 
      $ m4 -d
+     traceon(`traceon')
+     =>
+     traceon(`traceoff')
+     error-->m4trace: -1- traceon(`traceoff')
+     =>
+     traceoff(`traceoff')
+     error-->m4trace: -1- traceoff(`traceoff')
+     =>
+     traceoff(`traceon')
+     =>
      traceon(`eval', `m4_divnum')
      =>
      define(`m4_eval', defn(`eval'))
@@ -2957,7 +3045,8 @@ not transfer tracing status.
      =>0
 
    *Note Debug Levels::, for information on controlling the details of
-the display.
+the display.  The format of the trace output is not specified by POSIX,
+and varies between implementations of `m4'.
 
 
 File: m4.info,  Node: Debug Levels,  Next: Debug Output,  Prev: Trace,  Up: Debugging
@@ -2980,7 +3069,8 @@ the output lines.
      In trace output, show the actual arguments that were collected
      before invoking the macro.  This applies to all macro calls if the
      `t' flag is used, otherwise only the macros covered by calls of
-     `traceon'.
+     `traceon'.  Arguments are subject to length truncation specified by
+     the command line option `--arglength' (or `-l').
 
 `c'
      In trace output, show several trace lines for each macro call.  A
@@ -2991,7 +3081,9 @@ the output lines.
 `e'
      In trace output, show the expansion of each macro call, if it is
      not void.  This applies to all macro calls if the `t' flag is used,
-     otherwise only the macros covered by calls of `traceon'.
+     otherwise only the macros covered by calls of `traceon'.  The
+     expansion is subject to length truncation specified by the command
+     line option `--arglength' (or `-l').
 
 `f'
      In debug and trace output, include the name of the current input
@@ -3063,6 +3155,35 @@ control of the debugging output format:
      foo
      error-->m4trace:8: -1- foo
      =>FOO
+
+   The following example demonstrates the behavior of length truncation,
+when specified on the command line.  Note that each argument and the
+final result are individually truncated.  Also, the special tokens for
+builtin functions are not truncated.
+
+     $ m4 -d -l 6
+     define(`echo', `$@')debugmode(`+t')
+     =>
+     echo(`1', `long string')
+     error-->m4trace: -1- echo(`1', `long s...') -> ``1',`l...'
+     =>1,long string
+     indir(`echo', defn(`changequote'))
+     error-->m4trace: -2- defn(`change...')
+     error-->m4trace: -1- indir(`echo', <changequote>) -> ``''
+     =>
+
+   This example shows the effects of the debug flags that are not
+related to macro tracing.
+
+     $ m4 -dip -I examples
+     error-->m4debug: input read from stdin
+     include(`foo')dnl
+     error-->m4debug: path search for `foo' found `examples/foo'
+     error-->m4debug: input read from examples/foo
+     =>bar
+     error-->m4debug: input reverted to stdin, line 1
+     ^D
+     error-->m4debug: input exhausted
 
 
 File: m4.info,  Node: Debug Output,  Prev: Debug Levels,  Up: Debugging
@@ -3364,6 +3485,10 @@ very often.
      `dangling quote
      ^D
      error-->m4:stdin:2: ERROR: end of file in string
+
+     ifelse(`dangling quote
+     ^D
+     error-->m4:stdin:1: ERROR: end of file in string
 
 
 File: m4.info,  Node: Changecom,  Next: Changeword,  Prev: Changequote,  Up: Input Control
@@ -3686,7 +3811,7 @@ behavior is likely to change in a future release, to match POSIX, so
 you should not depend on this order.
 
    It is possible to emulate POSIX behavior even with older versions of
-GNU M4 by including the file `m4-1.4.11/examples/wrapfifo.m4' from the
+GNU M4 by including the file `m4-1.4.12/examples/wrapfifo.m4' from the
 distribution:
 
      $ m4 -I examples
@@ -3711,7 +3836,7 @@ distribution:
 
    It is likewise possible to emulate LIFO behavior without resorting to
 the GNU M4 extension of `builtin', by including the file
-`m4-1.4.11/examples/wraplifo.m4' from the distribution.
+`m4-1.4.12/examples/wraplifo.m4' from the distribution.
 (Unfortunately, both examples shown here share some subtle bugs.  See
 if you can find and correct them; or *note Answers: Improved m4wrap.).
 
@@ -3796,9 +3921,10 @@ There are two builtin macros in `m4' for including files:
      The expansion of `include' and `sinclude' is therefore the
      contents of FILE.
 
-     If FILE does not exist (or cannot be read), the expansion is void,
-     and `include' will fail with an error while `sinclude' is silent.
-     The empty string counts as a file that does not exist.
+     If FILE does not exist, is a directory, or cannot otherwise be
+     read, the expansion is void, and `include' will fail with an error
+     while `sinclude' is silent.  The empty string counts as a file
+     that does not exist.
 
      The macros `include' and `sinclude' are recognized only with
      parameters.
@@ -3816,8 +3942,8 @@ There are two builtin macros in `m4' for including files:
 
    The rest of this section assumes that `m4' is invoked with the `-I'
 option (*note Invoking m4: Preprocessor features.)  pointing to the
-`m4-1.4.11/examples' directory shipped as part of the GNU `m4' package.
-The file `m4-1.4.11/examples/incl.m4' in the distribution contains the
+`m4-1.4.12/examples' directory shipped as part of the GNU `m4' package.
+The file `m4-1.4.12/examples/incl.m4' in the distribution contains the
 lines:
 
      $ cat examples/incl.m4
@@ -4467,7 +4593,7 @@ individual words or whole sentences, by substituting calls of the macros
      upper case and the remaining characters to lower case.
 
    First, an example of their usage, using implementations distributed
-in `m4-1.4.11/examples/capitalize.m4'.
+in `m4-1.4.12/examples/capitalize.m4'.
 
      $ m4 -I examples
      include(`capitalize.m4')
@@ -5327,7 +5453,7 @@ Include::):
      =>foo called at stdin:2
      include(`incl.m4')
      =>Include file start
-     =>foo called at ../examples/incl.m4:2
+     =>foo called at examples/incl.m4:2
      =>Include file end
      =>
 
@@ -5590,7 +5716,7 @@ characters.  The directives are:
      the same name, and its order, along with `F', is important.
 
 `V NUMBER <NL>'
-     Confirms the format of the file.  `m4' 1.4.11 only creates and
+     Confirms the format of the file.  `m4' 1.4.12 only creates and
      understands frozen files where NUMBER is 1.  This directive must
      be the first non-comment in the file, and may not appear more than
      once.
@@ -5747,7 +5873,7 @@ behaviors is non-portable, as a future release of GNU `m4' may change.
    * POSIX requires `m4wrap' (*note M4wrap::) to act in FIFO (first-in,
      first-out) order, but GNU `m4' currently uses LIFO order.
      Furthermore, POSIX states that only the first argument to `m4wrap'
-     is saved for later evaluation, bug GNU `m4' saves and processes
+     is saved for later evaluation, but GNU `m4' saves and processes
      all arguments, with output separated by spaces.
 
    * POSIX states that builtins that require arguments, but are called
@@ -5822,6 +5948,13 @@ behaviors is non-portable, as a future release of GNU `m4' may change.
      `traceon(`foo')' in the input, is an attribute that is preserved
      even if the macro is currently undefined.
 
+     Additionally, while POSIX requires trace output, it makes no
+     demands on the formatting of that output.  Parsing trace output is
+     not guaranteed to be reliable, even between different releases of
+     GNU M4; however, the intent is that any future changes in trace
+     output will only occur under the direction of additional
+     `debugmode' flags (*note Debug Levels::).
+
    * POSIX requires `eval' (*note Eval::) to treat all operators with
      the same precedence as C.  However, earlier versions of GNU `m4'
      followed the traditional behavior of other `m4' implementations,
@@ -5851,6 +5984,20 @@ behaviors is non-portable, as a future release of GNU `m4' may change.
      implementations also ignore all whitespace (formfeed, carriage
      return, and vertical tab).  GNU `m4' follows tradition and ignores
      all leading unquoted whitespace.
+
+   * A strictly-compliant POSIX client is not allowed to use
+     command-line arguments not specified by POSIX.  However, since
+     this version of M4 ignores `POSIXLY_CORRECT' and enables the option
+     `--gnu' by default (*note Invoking m4: Limits control.), a client
+     desiring to be strictly compliant has no way to disable GNU
+     extensions that conflict with POSIX when directly invoking the
+     compiled `m4'.  A future version of `GNU' M4 will honor the
+     environment variable `POSIXLY_CORRECT', implicitly enabling
+     `--traditional' if it is set, in order to allow a
+     strictly-compliant client.  In the meantime, a client needing
+     strict POSIX compliance can use the workaround of invoking a shell
+     script wrapper, where the wrapper then adds `--traditional' to the
+     arguments passed to the compiled `m4'.
 
 
 File: m4.info,  Node: Other Incompatibilities,  Prev: Incompatibilities,  Up: Compatibility
@@ -5967,23 +6114,24 @@ The `forloop' macro (*note Forloop::) as presented earlier can go into
 an infinite loop if given an iterator that is not parsed as a macro
 name.  It does not do any sanity checking on its numeric bounds, and
 only permits decimal numbers for bounds.  Here is an improved version,
-shipped as `m4-1.4.11/examples/forloop2.m4'; this version also
-optimizes based on the fact that the starting bound does not need to be
-passed to the helper `_forloop'.
+shipped as `m4-1.4.12/examples/forloop2.m4'; this version also
+optimizes overhead by calling four macros instead of six per iteration
+(excluding those in TEXT), by not dereferencing the ITERATOR in the
+helper `_forloop'.
 
-     $ m4 -I examples
+     $ m4 -d -I examples
      undivert(`forloop2.m4')dnl
      =>divert(`-1')
      =># forloop(var, from, to, stmt) - improved version:
      =>#   works even if VAR is not a strict macro name
      =>#   performs sanity check that FROM is larger than TO
      =>#   allows complex numerical expressions in TO and FROM
-     =>define(`forloop', `ifelse(eval(`($3) >= ($2)'), `1',
-     =>  `pushdef(`$1', eval(`$2'))_$0(`$1',
+     =>define(`forloop', `ifelse(eval(`($2) <= ($3)'), `1',
+     =>  `pushdef(`$1')_$0(`$1', eval(`$2'),
      =>    eval(`$3'), `$4')popdef(`$1')')')
      =>define(`_forloop',
-     =>  `$3`'ifelse(indir(`$1'), `$2', `',
-     =>    `define(`$1', incr(indir(`$1')))$0($@)')')
+     =>  `define(`$1', `$2')$4`'ifelse(`$2', `$3', `',
+     =>    `$0(`$1', incr(`$2'), `$3', `$4')')')
      =>divert`'dnl
      include(`forloop2.m4')
      =>
@@ -5994,7 +6142,7 @@ passed to the helper `_forloop'.
      forloop(`i', `5 + 5', `0xc', ` 0x`'eval(i, `16')')
      => 0xa 0xb 0xc
      forloop(`i', `a', `b', `non-numeric bounds')
-     error-->m4:stdin:6: bad expression in eval (bad input): (b) >= (a)
+     error-->m4:stdin:6: bad expression in eval (bad input): (a) <= (b)
      =>
 
    One other change to notice is that the improved version used `_$0'
@@ -6014,8 +6162,8 @@ this example.
        arg1(patsubst(dquote(defn(`$1')), `[`']', `\&\&')))')
      =>
      double(`forloop')double(`_forloop')defn(`forloop2')
-     =>ifelse(eval(``($3) >= ($2)''), ``1'',
-     =>  ``pushdef(``$1'', eval(``$2''))_$0(``$1'',
+     =>ifelse(eval(``($2) <= ($3)''), ``1'',
+     =>  ``pushdef(``$1'')_$0(``$1'', eval(``$2''),
      =>    eval(``$3''), ``$4'')popdef(``$1'')'')
      forloop(i, 1, 5, `ifelse(')forloop(i, 1, 5, `)')
      =>
@@ -6084,7 +6232,7 @@ recursion use fewer arguments, rather than adding additional quoted
 uses of `shift'.  By doing so, `m4' uses less memory, invokes fewer
 macros, is less likely to run into machine limits, and most
 importantly, performs faster.  The fixed version of `foreachq' can be
-found in `m4-1.4.11/examples/foreachq2.m4':
+found in `m4-1.4.12/examples/foreachq2.m4':
 
      $ m4 -I examples
      include(`foreachq2.m4')
@@ -6122,16 +6270,18 @@ immediately, the `defn(`ITERATOR')' no longer contains unexpanded
 macros.
 
    The astute m4 programmer might notice that the solution above still
-uses more memory, and thus more time, than strictly necessary.  Note
-that `$2', which contains an arbitrarily long quoted list, is expanded
-and rescanned three times per iteration of `_foreachq'.  Furthermore,
-every iteration of the algorithm effectively unboxes then reboxes the
-list, which costs a couple of macro invocations.  It is possible to
-rewrite the algorithm for a bit more speed by swapping the order of the
-arguments to `_foreachq' in order to operate on an unboxed list in the
-first place, and by using the fixed-length `$#' instead of an arbitrary
-length list as the key to end recursion.  This alternative approach is
-available as `m4-1.4.11/examples/foreach3.m4':
+uses more memory and macro invocations, and thus more time, than
+strictly necessary.  Note that `$2', which contains an arbitrarily long
+quoted list, is expanded and rescanned three times per iteration of
+`_foreachq'. Furthermore, every iteration of the algorithm effectively
+unboxes then reboxes the list, which costs a couple of macro
+invocations.  It is possible to rewrite the algorithm for a bit more
+speed by swapping the order of the arguments to `_foreachq' in order to
+operate on an unboxed list in the first place, and by using the
+fixed-length `$#' instead of an arbitrary length list as the key to end
+recursion.  The result is an overhead of six macro invocations per loop
+(excluding any macros in TEXT), instead of eight.  This alternative
+approach is available as `m4-1.4.12/examples/foreach3.m4':
 
      $ m4 -I examples
      include(`foreachq3.m4')
@@ -6140,12 +6290,11 @@ available as `m4-1.4.11/examples/foreach3.m4':
      =>divert(`-1')
      =># foreachq(x, `item_1, item_2, ..., item_n', stmt)
      =>#   quoted list, alternate improved version
-     =>define(`foreachq',
-     =>`pushdef(`$1')_$0(`$1', `$3'ifelse(`$2', `', `',
-     =>  `, $2'))popdef(`$1')')
-     =>define(`_foreachq', `ifelse(`$#', `2', `',
-     =>  `define(`$1', `$3')$2`'$0(`$1', `$2'ifelse(`$#', `3', `',
-     =>    `, shift(shift(shift($@)))'))')')
+     =>define(`foreachq', `ifelse(`$2', `', `',
+     =>  `pushdef(`$1')_$0(`$1', `$3', `', $2)popdef(`$1')')')
+     =>define(`_foreachq', `ifelse(`$#', `3', `',
+     =>  `define(`$1', `$4')$2`'$0(`$1', `$2',
+     =>    shift(shift(shift($@))))')')
      =>divert`'dnl
      traceon(`shift')debugmode(`aq')
      =>
@@ -6153,26 +6302,95 @@ available as `m4-1.4.11/examples/foreach3.m4':
      ')dnl
      =>1
      error-->m4trace: -4- shift(`x', `x
+     error-->', `', `1', `2', `3', `4')
+     error-->m4trace: -3- shift(`x
+     error-->', `', `1', `2', `3', `4')
+     error-->m4trace: -2- shift(`', `1', `2', `3', `4')
+     =>2
+     error-->m4trace: -4- shift(`x', `x
      error-->', `1', `2', `3', `4')
      error-->m4trace: -3- shift(`x
      error-->', `1', `2', `3', `4')
      error-->m4trace: -2- shift(`1', `2', `3', `4')
-     =>2
+     =>3
      error-->m4trace: -4- shift(`x', `x
      error-->', `2', `3', `4')
      error-->m4trace: -3- shift(`x
      error-->', `2', `3', `4')
      error-->m4trace: -2- shift(`2', `3', `4')
-     =>3
+     =>4
      error-->m4trace: -4- shift(`x', `x
      error-->', `3', `4')
      error-->m4trace: -3- shift(`x
      error-->', `3', `4')
      error-->m4trace: -2- shift(`3', `4')
+
+   In the current version of M4, every instance of `$@' is rescanned as
+it is encountered.  Thus, the `foreachq3.m4' alternative uses much less
+memory than `foreachq2.m4', and executes as much as 10% faster, since
+each iteration encounters fewer `$@'.  However, the implementation of
+rescanning every byte in `$@' is quadratic in the number of bytes
+scanned (for example, making the broken version in `foreachq.m4' cubic,
+rather than quadratic, in behavior).  A future release of M4 will
+improve the underlying implementation by reusing results of previous
+scans, so that both styles of `foreachq' can become linear in the
+number of bytes scanned.  Notice how the implementation injects an
+empty argument prior to expanding `$2' within `foreachq'; the helper
+macro `_foreachq' then ignores the third argument altogether, and ends
+recursion when there are three arguments left because there was nothing
+left to pass through `shift'.  Thus, each iteration only needs one
+`ifelse', rather than the two conditionals used in the version from
+`foreachq2.m4'.
+
+   So far, all of the implementations of `foreachq' presented have been
+quadratic with M4 1.4.x.  But `forloop' is linear, because each
+iteration parses a constant amount of arguments.  So, it is possible to
+design a variant that uses `forloop' to do the iteration, then uses
+`$@' only once at the end, giving a linear result even with older M4
+implementations.  This implementation relies on the GNU extension that
+`$10' expands to the tenth argument rather than the first argument
+concatenated with `0'.  The trick is to define an intermediate macro
+that repeats the text `m4_define(`$1', `$N')$2`'', with `n' set to
+successive integers corresponding to each argument.  The helper macro
+`_foreachq_' is needed in order to generate the literal sequences such
+as `$1' into the intermediate macro, rather than expanding them as the
+arguments of `_foreachq'.  With this approach, no `shift' calls are
+even needed!  Even though there are seven macros of overhead per
+iteration instead of six in `foreachq3.m4', the linear scaling is
+apparent at relatively small list sizes.  However, this approach will
+need adjustment when a future version of M4 follows POSIX by no longer
+treating `$10' as the tenth argument; the anticipation is that `${10}'
+can be used instead, although that alternative syntax is not yet
+supported.
+
+     $ m4 -I examples
+     include(`foreachq4.m4')
+     =>
+     undivert(`foreachq4.m4')dnl
+     =>include(`forloop2.m4')dnl
+     =>divert(`-1')
+     =># foreachq(x, `item_1, item_2, ..., item_n', stmt)
+     =>#   quoted list, version based on forloop
+     =>define(`foreachq',
+     =>`ifelse(`$2', `', `', `_$0(`$1', `$3', $2)')')
+     =>define(`_foreachq',
+     =>`pushdef(`$1', forloop(`$1', `3', `$#',
+     =>  `$0_(`1', `2', indir(`$1'))')`popdef(
+     =>    `$1')')indir(`$1', $@)')
+     =>define(`_foreachq_',
+     =>``define(`$$1', `$$3')$$2`''')
+     =>divert`'dnl
+     traceon(`shift')debugmode(`aq')
+     =>
+     foreachq(`x', ``1', `2', `3', `4'', `x
+     ')dnl
+     =>1
+     =>2
+     =>3
      =>4
 
    For yet another approach, the improved version of `foreach',
-available in `m4-1.4.11/examples/foreach2.m4', simply overquotes the
+available in `m4-1.4.12/examples/foreach2.m4', simply overquotes the
 arguments to `_foreach' to begin with, using `dquote_elt'.  Then
 `_foreach' can just use `_arg1' to remove the extra layer of quoting
 that was added up front:
@@ -6207,6 +6425,11 @@ that was added up front:
      =>4
      error-->m4trace: -3- shift(``4'')
 
+   It is likewise possible to write a variant of `foreach' that
+performs in linear time on M4 1.4.x; the easiest method is probably
+writing a version of `foreach' that unboxes its list, then invokes
+`_foreachq' as previously defined in `foreachq4.m4'.
+
    In summary, recursion over list elements is trickier than it
 appeared at first glance, but provides a powerful idiom within `m4'
 processing.  As a final demonstration, both list styles are now able to
@@ -6214,12 +6437,12 @@ handle several scenarios that would wreak havoc on one or both of the
 original implementations.  This points out one other difference between
 the list styles.  `foreach' evaluates unquoted list elements only once,
 in preparation for calling `_foreach', similary for `foreachq' as
-provided by `foreachq3.m4'.  But `foreachq', as provided by
-`foreachq2.m4', evaluates unquoted list elements twice while visiting
-the first list element, once in `_arg1q' and once in `_rest'.  When
-deciding which list style to use, one must take into account whether
-repeating the side effects of unquoted list elements will have any
-detrimental effects.
+provided by `foreachq3.m4' or `foreachq4.m4'.  But `foreachq', as
+provided by `foreachq2.m4', evaluates unquoted list elements twice
+while visiting the first list element, once in `_arg1q' and once in
+`_rest'.  When deciding which list style to use, one must take into
+account whether repeating the side effects of unquoted list elements
+will have any detrimental effects.
 
      $ m4 -I examples
      include(`foreach2.m4')
@@ -6330,7 +6553,7 @@ in an undefined state.
 arguments to `m4wrap', separated by a space, rather than saving just
 the first argument.  This is done with the `join' macro documented
 previously (*note Shift::).  The improved LIFO example is shipped as
-`m4-1.4.11/examples/wraplifo2.m4', and can easily be converted to a
+`m4-1.4.12/examples/wraplifo2.m4', and can easily be converted to a
 FIFO solution by swapping the adjacent invocations of `joinall' and
 `defn'.
 
@@ -6466,7 +6689,7 @@ string.  In turn, that means the replacement text has unbalanced quotes,
 necessitating another round of `changequote'.
 
    In the fixed version below, (also shipped as
-`m4-1.4.11/examples/capitalize.m4'), `capitalize' uses the alternate
+`m4-1.4.12/examples/capitalize.m4'), `capitalize' uses the alternate
 quotes of `<<[' and `]>>' (the longer strings are chosen so as to be
 less likely to appear in the text being converted).  The helpers
 `_to_alt' and `_from_alt' merely reduce the number of characters
@@ -6484,14 +6707,8 @@ are invoked with the alternate quoting scheme in effect.
      define(`Active', `Act2, Ive')dnl
      define(`ACTIVE', `ACT3, IVE')dnl
      define(`A', `OOPS')dnl
-     capitalize(active)
-     =>Act1,Ive
-     capitalize(`active')
-     =>Act2, Ive
-     capitalize(``active'')
-     =>Active
-     capitalize(```actIVE''')
-     =>`Active'
+     capitalize(active; `active'; ``active''; ```actIVE''')
+     =>Act1,Ive; Act2, Ive; Active; `Active'
      undivert(`capitalize2.m4')dnl
      =>divert(`-1')
      =># upcase(text)
@@ -7286,453 +7503,10 @@ Appendix B How to make copies of this manual
 
 This appendix covers the license for copying this manual.  Note that
 some of the longer examples in this manual are also distributed in the
-directory `m4-1.4.11/examples/', where a more permissive license is in
+directory `m4-1.4.12/examples/', where a more permissive license is in
 effect when copying just the examples.
 
 * Menu:
 
 * GNU Free Documentation License::  License for copying this manual
-
-
-File: m4.info,  Node: GNU Free Documentation License,  Up: Copying This Manual
-
-B.1 License for copying this manual
-===================================
-
-                      Version 1.2, November 2002
-
-     Copyright (C) 2000,2001,2002 Free Software Foundation, Inc.
-     51 Franklin St, Fifth Floor, Boston, MA  02110-1301, USA
-
-     Everyone is permitted to copy and distribute verbatim copies
-     of this license document, but changing it is not allowed.
-
-  0. PREAMBLE
-
-     The purpose of this License is to make a manual, textbook, or other
-     functional and useful document "free" in the sense of freedom: to
-     assure everyone the effective freedom to copy and redistribute it,
-     with or without modifying it, either commercially or
-     noncommercially.  Secondarily, this License preserves for the
-     author and publisher a way to get credit for their work, while not
-     being considered responsible for modifications made by others.
-
-     This License is a kind of "copyleft", which means that derivative
-     works of the document must themselves be free in the same sense.
-     It complements the GNU General Public License, which is a copyleft
-     license designed for free software.
-
-     We have designed this License in order to use it for manuals for
-     free software, because free software needs free documentation: a
-     free program should come with manuals providing the same freedoms
-     that the software does.  But this License is not limited to
-     software manuals; it can be used for any textual work, regardless
-     of subject matter or whether it is published as a printed book.
-     We recommend this License principally for works whose purpose is
-     instruction or reference.
-
-  1. APPLICABILITY AND DEFINITIONS
-
-     This License applies to any manual or other work, in any medium,
-     that contains a notice placed by the copyright holder saying it
-     can be distributed under the terms of this License.  Such a notice
-     grants a world-wide, royalty-free license, unlimited in duration,
-     to use that work under the conditions stated herein.  The
-     "Document", below, refers to any such manual or work.  Any member
-     of the public is a licensee, and is addressed as "you".  You
-     accept the license if you copy, modify or distribute the work in a
-     way requiring permission under copyright law.
-
-     A "Modified Version" of the Document means any work containing the
-     Document or a portion of it, either copied verbatim, or with
-     modifications and/or translated into another language.
-
-     A "Secondary Section" is a named appendix or a front-matter section
-     of the Document that deals exclusively with the relationship of the
-     publishers or authors of the Document to the Document's overall
-     subject (or to related matters) and contains nothing that could
-     fall directly within that overall subject.  (Thus, if the Document
-     is in part a textbook of mathematics, a Secondary Section may not
-     explain any mathematics.)  The relationship could be a matter of
-     historical connection with the subject or with related matters, or
-     of legal, commercial, philosophical, ethical or political position
-     regarding them.
-
-     The "Invariant Sections" are certain Secondary Sections whose
-     titles are designated, as being those of Invariant Sections, in
-     the notice that says that the Document is released under this
-     License.  If a section does not fit the above definition of
-     Secondary then it is not allowed to be designated as Invariant.
-     The Document may contain zero Invariant Sections.  If the Document
-     does not identify any Invariant Sections then there are none.
-
-     The "Cover Texts" are certain short passages of text that are
-     listed, as Front-Cover Texts or Back-Cover Texts, in the notice
-     that says that the Document is released under this License.  A
-     Front-Cover Text may be at most 5 words, and a Back-Cover Text may
-     be at most 25 words.
-
-     A "Transparent" copy of the Document means a machine-readable copy,
-     represented in a format whose specification is available to the
-     general public, that is suitable for revising the document
-     straightforwardly with generic text editors or (for images
-     composed of pixels) generic paint programs or (for drawings) some
-     widely available drawing editor, and that is suitable for input to
-     text formatters or for automatic translation to a variety of
-     formats suitable for input to text formatters.  A copy made in an
-     otherwise Transparent file format whose markup, or absence of
-     markup, has been arranged to thwart or discourage subsequent
-     modification by readers is not Transparent.  An image format is
-     not Transparent if used for any substantial amount of text.  A
-     copy that is not "Transparent" is called "Opaque".
-
-     Examples of suitable formats for Transparent copies include plain
-     ASCII without markup, Texinfo input format, LaTeX input format,
-     SGML or XML using a publicly available DTD, and
-     standard-conforming simple HTML, PostScript or PDF designed for
-     human modification.  Examples of transparent image formats include
-     PNG, XCF and JPG.  Opaque formats include proprietary formats that
-     can be read and edited only by proprietary word processors, SGML or
-     XML for which the DTD and/or processing tools are not generally
-     available, and the machine-generated HTML, PostScript or PDF
-     produced by some word processors for output purposes only.
-
-     The "Title Page" means, for a printed book, the title page itself,
-     plus such following pages as are needed to hold, legibly, the
-     material this License requires to appear in the title page.  For
-     works in formats which do not have any title page as such, "Title
-     Page" means the text near the most prominent appearance of the
-     work's title, preceding the beginning of the body of the text.
-
-     A section "Entitled XYZ" means a named subunit of the Document
-     whose title either is precisely XYZ or contains XYZ in parentheses
-     following text that translates XYZ in another language.  (Here XYZ
-     stands for a specific section name mentioned below, such as
-     "Acknowledgements", "Dedications", "Endorsements", or "History".)
-     To "Preserve the Title" of such a section when you modify the
-     Document means that it remains a section "Entitled XYZ" according
-     to this definition.
-
-     The Document may include Warranty Disclaimers next to the notice
-     which states that this License applies to the Document.  These
-     Warranty Disclaimers are considered to be included by reference in
-     this License, but only as regards disclaiming warranties: any other
-     implication that these Warranty Disclaimers may have is void and
-     has no effect on the meaning of this License.
-
-  2. VERBATIM COPYING
-
-     You may copy and distribute the Document in any medium, either
-     commercially or noncommercially, provided that this License, the
-     copyright notices, and the license notice saying this License
-     applies to the Document are reproduced in all copies, and that you
-     add no other conditions whatsoever to those of this License.  You
-     may not use technical measures to obstruct or control the reading
-     or further copying of the copies you make or distribute.  However,
-     you may accept compensation in exchange for copies.  If you
-     distribute a large enough number of copies you must also follow
-     the conditions in section 3.
-
-     You may also lend copies, under the same conditions stated above,
-     and you may publicly display copies.
-
-  3. COPYING IN QUANTITY
-
-     If you publish printed copies (or copies in media that commonly
-     have printed covers) of the Document, numbering more than 100, and
-     the Document's license notice requires Cover Texts, you must
-     enclose the copies in covers that carry, clearly and legibly, all
-     these Cover Texts: Front-Cover Texts on the front cover, and
-     Back-Cover Texts on the back cover.  Both covers must also clearly
-     and legibly identify you as the publisher of these copies.  The
-     front cover must present the full title with all words of the
-     title equally prominent and visible.  You may add other material
-     on the covers in addition.  Copying with changes limited to the
-     covers, as long as they preserve the title of the Document and
-     satisfy these conditions, can be treated as verbatim copying in
-     other respects.
-
-     If the required texts for either cover are too voluminous to fit
-     legibly, you should put the first ones listed (as many as fit
-     reasonably) on the actual cover, and continue the rest onto
-     adjacent pages.
-
-     If you publish or distribute Opaque copies of the Document
-     numbering more than 100, you must either include a
-     machine-readable Transparent copy along with each Opaque copy, or
-     state in or with each Opaque copy a computer-network location from
-     which the general network-using public has access to download
-     using public-standard network protocols a complete Transparent
-     copy of the Document, free of added material.  If you use the
-     latter option, you must take reasonably prudent steps, when you
-     begin distribution of Opaque copies in quantity, to ensure that
-     this Transparent copy will remain thus accessible at the stated
-     location until at least one year after the last time you
-     distribute an Opaque copy (directly or through your agents or
-     retailers) of that edition to the public.
-
-     It is requested, but not required, that you contact the authors of
-     the Document well before redistributing any large number of
-     copies, to give them a chance to provide you with an updated
-     version of the Document.
-
-  4. MODIFICATIONS
-
-     You may copy and distribute a Modified Version of the Document
-     under the conditions of sections 2 and 3 above, provided that you
-     release the Modified Version under precisely this License, with
-     the Modified Version filling the role of the Document, thus
-     licensing distribution and modification of the Modified Version to
-     whoever possesses a copy of it.  In addition, you must do these
-     things in the Modified Version:
-
-       A. Use in the Title Page (and on the covers, if any) a title
-          distinct from that of the Document, and from those of
-          previous versions (which should, if there were any, be listed
-          in the History section of the Document).  You may use the
-          same title as a previous version if the original publisher of
-          that version gives permission.
-
-       B. List on the Title Page, as authors, one or more persons or
-          entities responsible for authorship of the modifications in
-          the Modified Version, together with at least five of the
-          principal authors of the Document (all of its principal
-          authors, if it has fewer than five), unless they release you
-          from this requirement.
-
-       C. State on the Title page the name of the publisher of the
-          Modified Version, as the publisher.
-
-       D. Preserve all the copyright notices of the Document.
-
-       E. Add an appropriate copyright notice for your modifications
-          adjacent to the other copyright notices.
-
-       F. Include, immediately after the copyright notices, a license
-          notice giving the public permission to use the Modified
-          Version under the terms of this License, in the form shown in
-          the Addendum below.
-
-       G. Preserve in that license notice the full lists of Invariant
-          Sections and required Cover Texts given in the Document's
-          license notice.
-
-       H. Include an unaltered copy of this License.
-
-       I. Preserve the section Entitled "History", Preserve its Title,
-          and add to it an item stating at least the title, year, new
-          authors, and publisher of the Modified Version as given on
-          the Title Page.  If there is no section Entitled "History" in
-          the Document, create one stating the title, year, authors,
-          and publisher of the Document as given on its Title Page,
-          then add an item describing the Modified Version as stated in
-          the previous sentence.
-
-       J. Preserve the network location, if any, given in the Document
-          for public access to a Transparent copy of the Document, and
-          likewise the network locations given in the Document for
-          previous versions it was based on.  These may be placed in
-          the "History" section.  You may omit a network location for a
-          work that was published at least four years before the
-          Document itself, or if the original publisher of the version
-          it refers to gives permission.
-
-       K. For any section Entitled "Acknowledgements" or "Dedications",
-          Preserve the Title of the section, and preserve in the
-          section all the substance and tone of each of the contributor
-          acknowledgements and/or dedications given therein.
-
-       L. Preserve all the Invariant Sections of the Document,
-          unaltered in their text and in their titles.  Section numbers
-          or the equivalent are not considered part of the section
-          titles.
-
-       M. Delete any section Entitled "Endorsements".  Such a section
-          may not be included in the Modified Version.
-
-       N. Do not retitle any existing section to be Entitled
-          "Endorsements" or to conflict in title with any Invariant
-          Section.
-
-       O. Preserve any Warranty Disclaimers.
-
-     If the Modified Version includes new front-matter sections or
-     appendices that qualify as Secondary Sections and contain no
-     material copied from the Document, you may at your option
-     designate some or all of these sections as invariant.  To do this,
-     add their titles to the list of Invariant Sections in the Modified
-     Version's license notice.  These titles must be distinct from any
-     other section titles.
-
-     You may add a section Entitled "Endorsements", provided it contains
-     nothing but endorsements of your Modified Version by various
-     parties--for example, statements of peer review or that the text
-     has been approved by an organization as the authoritative
-     definition of a standard.
-
-     You may add a passage of up to five words as a Front-Cover Text,
-     and a passage of up to 25 words as a Back-Cover Text, to the end
-     of the list of Cover Texts in the Modified Version.  Only one
-     passage of Front-Cover Text and one of Back-Cover Text may be
-     added by (or through arrangements made by) any one entity.  If the
-     Document already includes a cover text for the same cover,
-     previously added by you or by arrangement made by the same entity
-     you are acting on behalf of, you may not add another; but you may
-     replace the old one, on explicit permission from the previous
-     publisher that added the old one.
-
-     The author(s) and publisher(s) of the Document do not by this
-     License give permission to use their names for publicity for or to
-     assert or imply endorsement of any Modified Version.
-
-  5. COMBINING DOCUMENTS
-
-     You may combine the Document with other documents released under
-     this License, under the terms defined in section 4 above for
-     modified versions, provided that you include in the combination
-     all of the Invariant Sections of all of the original documents,
-     unmodified, and list them all as Invariant Sections of your
-     combined work in its license notice, and that you preserve all
-     their Warranty Disclaimers.
-
-     The combined work need only contain one copy of this License, and
-     multiple identical Invariant Sections may be replaced with a single
-     copy.  If there are multiple Invariant Sections with the same name
-     but different contents, make the title of each such section unique
-     by adding at the end of it, in parentheses, the name of the
-     original author or publisher of that section if known, or else a
-     unique number.  Make the same adjustment to the section titles in
-     the list of Invariant Sections in the license notice of the
-     combined work.
-
-     In the combination, you must combine any sections Entitled
-     "History" in the various original documents, forming one section
-     Entitled "History"; likewise combine any sections Entitled
-     "Acknowledgements", and any sections Entitled "Dedications".  You
-     must delete all sections Entitled "Endorsements."
-
-  6. COLLECTIONS OF DOCUMENTS
-
-     You may make a collection consisting of the Document and other
-     documents released under this License, and replace the individual
-     copies of this License in the various documents with a single copy
-     that is included in the collection, provided that you follow the
-     rules of this License for verbatim copying of each of the
-     documents in all other respects.
-
-     You may extract a single document from such a collection, and
-     distribute it individually under this License, provided you insert
-     a copy of this License into the extracted document, and follow
-     this License in all other respects regarding verbatim copying of
-     that document.
-
-  7. AGGREGATION WITH INDEPENDENT WORKS
-
-     A compilation of the Document or its derivatives with other
-     separate and independent documents or works, in or on a volume of
-     a storage or distribution medium, is called an "aggregate" if the
-     copyright resulting from the compilation is not used to limit the
-     legal rights of the compilation's users beyond what the individual
-     works permit.  When the Document is included in an aggregate, this
-     License does not apply to the other works in the aggregate which
-     are not themselves derivative works of the Document.
-
-     If the Cover Text requirement of section 3 is applicable to these
-     copies of the Document, then if the Document is less than one half
-     of the entire aggregate, the Document's Cover Texts may be placed
-     on covers that bracket the Document within the aggregate, or the
-     electronic equivalent of covers if the Document is in electronic
-     form.  Otherwise they must appear on printed covers that bracket
-     the whole aggregate.
-
-  8. TRANSLATION
-
-     Translation is considered a kind of modification, so you may
-     distribute translations of the Document under the terms of section
-     4.  Replacing Invariant Sections with translations requires special
-     permission from their copyright holders, but you may include
-     translations of some or all Invariant Sections in addition to the
-     original versions of these Invariant Sections.  You may include a
-     translation of this License, and all the license notices in the
-     Document, and any Warranty Disclaimers, provided that you also
-     include the original English version of this License and the
-     original versions of those notices and disclaimers.  In case of a
-     disagreement between the translation and the original version of
-     this License or a notice or disclaimer, the original version will
-     prevail.
-
-     If a section in the Document is Entitled "Acknowledgements",
-     "Dedications", or "History", the requirement (section 4) to
-     Preserve its Title (section 1) will typically require changing the
-     actual title.
-
-  9. TERMINATION
-
-     You may not copy, modify, sublicense, or distribute the Document
-     except as expressly provided for under this License.  Any other
-     attempt to copy, modify, sublicense or distribute the Document is
-     void, and will automatically terminate your rights under this
-     License.  However, parties who have received copies, or rights,
-     from you under this License will not have their licenses
-     terminated so long as such parties remain in full compliance.
-
- 10. FUTURE REVISIONS OF THIS LICENSE
-
-     The Free Software Foundation may publish new, revised versions of
-     the GNU Free Documentation License from time to time.  Such new
-     versions will be similar in spirit to the present version, but may
-     differ in detail to address new problems or concerns.  See
-     `http://www.gnu.org/copyleft/'.
-
-     Each version of the License is given a distinguishing version
-     number.  If the Document specifies that a particular numbered
-     version of this License "or any later version" applies to it, you
-     have the option of following the terms and conditions either of
-     that specified version or of any later version that has been
-     published (not as a draft) by the Free Software Foundation.  If
-     the Document does not specify a version number of this License,
-     you may choose any version ever published (not as a draft) by the
-     Free Software Foundation.
-
-ADDENDUM: How to use this License for your documents
-====================================================
-
-To use this License in a document you have written, include a copy of
-the License in the document and put the following copyright and license
-notices just after the title page:
-
-       Copyright (C)  YEAR  YOUR NAME.
-       Permission is granted to copy, distribute and/or modify this document
-       under the terms of the GNU Free Documentation License, Version 1.2
-       or any later version published by the Free Software Foundation;
-       with no Invariant Sections, no Front-Cover Texts, and no Back-Cover
-       Texts.  A copy of the license is included in the section entitled ``GNU
-       Free Documentation License''.
-
-   If you have Invariant Sections, Front-Cover Texts and Back-Cover
-Texts, replace the "with...Texts." line with this:
-
-         with the Invariant Sections being LIST THEIR TITLES, with
-         the Front-Cover Texts being LIST, and with the Back-Cover Texts
-         being LIST.
-
-   If you have Invariant Sections without Cover Texts, or some other
-combination of the three, merge those two alternatives to suit the
-situation.
-
-   If your document contains nontrivial examples of program code, we
-recommend releasing these examples in parallel under your choice of
-free software license, such as the GNU General Public License, to
-permit their use in free software.
-
-
-File: m4.info,  Node: Indices,  Prev: Copying This Manual,  Up: Top
-
-Appendix C Indices of concepts and macros
-*****************************************
-
-* Menu:
-
-* Macro index::                 Index for all `m4' macros
-* Concept index::               Index for many concepts
 

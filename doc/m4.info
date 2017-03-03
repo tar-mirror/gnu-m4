@@ -1,8 +1,7 @@
-This is ../../doc/m4.info, produced by makeinfo version 4.8 from
-../../doc/m4.texinfo.
+This is m4.info, produced by makeinfo version 4.8 from m4.texinfo.
 
-   This manual is for GNU M4 (version 1.4.11, 29 March 2008), a package
-containing an implementation of the m4 macro language.
+   This manual (25 September 2008) is for GNU M4 (version 1.4.12), a
+package containing an implementation of the m4 macro language.
 
    Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2004, 2005, 2006,
 2007, 2008 Free Software Foundation, Inc.
@@ -21,113 +20,113 @@ END-INFO-DIR-ENTRY
 
 
 Indirect:
-m4.info-1: 879
-m4.info-2: 298627
+m4.info-1: 864
+m4.info-2: 285796
 
 Tag Table:
 (Indirect)
-Node: Top879
-Node: Preliminaries9552
-Node: Intro10238
-Node: History11870
-Node: Bugs14604
-Node: Manual15855
-Node: Invoking m419253
-Node: Operation modes21401
-Node: Preprocessor features24373
-Node: Limits control27470
-Node: Frozen state30406
-Node: Debugging options31205
-Node: Command line files32944
-Node: Syntax34517
-Node: Names35636
-Node: Quoted strings36098
-Node: Comments36747
-Node: Other tokens37624
-Node: Input processing38202
-Ref: Input processing-Footnote-145875
-Node: Macros46070
-Node: Invocation46564
-Node: Inhibiting Invocation47365
-Node: Macro Arguments51497
-Node: Quoting Arguments54559
-Node: Macro expansion56682
-Node: Definitions57383
-Node: Define58168
-Node: Arguments60606
-Node: Pseudo Arguments64278
-Node: Undefine67820
-Node: Defn68950
-Node: Pushdef73400
-Node: Indir76026
-Node: Builtin78154
-Node: Conditionals80175
-Node: Ifdef80994
-Node: Ifelse81857
-Node: Shift85083
-Node: Forloop95632
-Node: Foreach98268
-Node: Debugging103741
-Node: Dumpdef104326
-Node: Trace105736
-Node: Debug Levels108956
-Node: Debug Output112426
-Node: Input Control113710
-Node: Dnl114247
-Node: Changequote116148
-Node: Changecom122154
-Node: Changeword125850
-Node: M4wrap131291
-Node: File Inclusion135287
-Node: Include135604
-Node: Search Path138284
-Node: Diversions139201
-Node: Divert140992
-Node: Undivert143518
-Node: Divnum146682
-Node: Cleardivert147146
-Node: Text handling148351
-Node: Len149074
-Node: Index macro149459
-Node: Regexp150332
-Node: Substr152873
-Node: Translit153924
-Node: Patsubst156646
-Node: Format161172
-Node: Arithmetic164365
-Node: Incr164814
-Node: Eval165589
-Node: Shell commands173552
-Node: Platform macros174474
-Node: Syscmd176589
-Node: Esyscmd178408
-Node: Sysval179456
-Node: Mkstemp181074
-Node: Miscellaneous185029
-Node: Errprint185462
-Node: Location186681
-Node: M4exit189458
-Node: Frozen files191545
-Node: Using frozen files192326
-Node: Frozen file format195590
-Node: Compatibility198654
-Node: Extensions199720
-Node: Incompatibilities203587
-Node: Other Incompatibilities211278
-Node: Answers213924
-Node: Improved exch214654
-Node: Improved forloop215192
-Node: Improved foreach218647
-Node: Improved m4wrap227996
-Node: Improved cleardivert230423
-Node: Improved capitalize231404
-Node: Improved fatal_error236332
-Node: Copying This Package237393
-Node: GNU General Public License237872
-Node: Copying This Manual275431
-Node: GNU Free Documentation License275951
-Node: Indices298347
-Node: Macro index298627
-Node: Concept index304280
+Node: Top864
+Node: Preliminaries9542
+Node: Intro10228
+Node: History11860
+Node: Bugs14619
+Node: Manual15870
+Node: Invoking m419268
+Node: Operation modes21414
+Node: Preprocessor features24386
+Node: Limits control27483
+Node: Frozen state31385
+Node: Debugging options32184
+Node: Command line files33923
+Node: Syntax35496
+Node: Names36615
+Node: Quoted strings37077
+Node: Comments37726
+Node: Other tokens38603
+Node: Input processing39181
+Ref: Input processing-Footnote-146854
+Node: Macros47049
+Node: Invocation47543
+Node: Inhibiting Invocation48344
+Node: Macro Arguments52475
+Node: Quoting Arguments55537
+Node: Macro expansion57660
+Node: Definitions58361
+Node: Define59146
+Node: Arguments61584
+Node: Pseudo Arguments65256
+Node: Undefine68798
+Node: Defn69928
+Node: Pushdef74378
+Node: Indir77004
+Node: Builtin79132
+Node: Conditionals81358
+Node: Ifdef82177
+Node: Ifelse83040
+Node: Shift88321
+Node: Forloop98870
+Node: Foreach101506
+Node: Debugging106979
+Node: Dumpdef107564
+Node: Trace108974
+Node: Debug Levels112547
+Node: Debug Output117251
+Node: Input Control118535
+Node: Dnl119072
+Node: Changequote120973
+Node: Changecom127070
+Node: Changeword130766
+Node: M4wrap136207
+Node: File Inclusion140203
+Node: Include140520
+Node: Search Path143231
+Node: Diversions144148
+Node: Divert145939
+Node: Undivert148465
+Node: Divnum151629
+Node: Cleardivert152093
+Node: Text handling153298
+Node: Len154021
+Node: Index macro154406
+Node: Regexp155279
+Node: Substr157820
+Node: Translit158871
+Node: Patsubst161593
+Node: Format166119
+Node: Arithmetic169312
+Node: Incr169761
+Node: Eval170536
+Node: Shell commands178499
+Node: Platform macros179421
+Node: Syscmd181536
+Node: Esyscmd183355
+Node: Sysval184403
+Node: Mkstemp186021
+Node: Miscellaneous189976
+Node: Errprint190409
+Node: Location191628
+Node: M4exit194402
+Node: Frozen files196489
+Node: Using frozen files197270
+Node: Frozen file format200534
+Node: Compatibility203598
+Node: Extensions204664
+Node: Incompatibilities208531
+Node: Other Incompatibilities217457
+Node: Answers220103
+Node: Improved exch220833
+Node: Improved forloop221371
+Node: Improved foreach224888
+Node: Improved m4wrap237907
+Node: Improved cleardivert240334
+Node: Improved capitalize241315
+Node: Improved fatal_error246177
+Node: Copying This Package247238
+Node: GNU General Public License247717
+Node: Copying This Manual285276
+Node: GNU Free Documentation License285796
+Node: Indices308192
+Node: Macro index308472
+Node: Concept index314198
 
 End Tag Table

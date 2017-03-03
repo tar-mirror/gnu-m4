@@ -1,25 +1,42 @@
-dnl @ ../doc/m4.texinfo:2971: Origin of test
+dnl @ ../doc/m4.texinfo:2927: Origin of test
 dnl @ expected status: 0
 dnl @ extra options: 
-dnl @ Copyright (C) 2006, 2007 Free Software Foundation
+dnl @ Copyright (C) 2006, 2007, 2008 Free Software Foundation,
+dnl @ Inc.
 dnl @ This file is free software; the Free Software Foundation
 dnl @ gives unlimited permission to copy and/or distribute it
 dnl @ with or without modifications, as long as this notice
 dnl @ is preserved.
-include(`quote.m4')
-dnl @result{}
--quote-dquote-dquote_elt-
-dnl @result{}----
--quote()-dquote()-dquote_elt()-
-dnl @result{}--`'-`'-
--quote(`1')-dquote(`1')-dquote_elt(`1')-
-dnl @result{}-1-`1'-`1'-
--quote(`1', `2')-dquote(`1', `2')-dquote_elt(`1', `2')-
-dnl @result{}-1,2-`1',`2'-`1',`2'-
-define(`n', `$#')dnl
--n(quote(`1', `2'))-n(dquote(`1', `2'))-n(dquote_elt(`1', `2'))-
-dnl @result{}-1-1-2-
-dquote(dquote_elt(`1', `2'))
-dnl @result{}``1'',``2''
-dquote_elt(dquote(`1', `2'))
-dnl @result{}``1',`2''
+define(`cond',
+`ifelse(`$#', `1', `$1',
+        `ifelse($1, `$2', `$3',
+                `$0(shift(shift(shift($@))))')')')dnl
+define(`side', `define(`counter', incr(counter))$1')dnl
+define(`example1',
+`define(`counter', `0')dnl
+ifelse(side(`$1'), `yes', `one comparison: ',
+       side(`$1'), `no', `two comparisons: ',
+       side(`$1'), `maybe', `three comparisons: ',
+       `side(`default answer: ')')counter')dnl
+define(`example2',
+`define(`counter', `0')dnl
+cond(`side(`$1')', `yes', `one comparison: ',
+     `side(`$1')', `no', `two comparisons: ',
+     `side(`$1')', `maybe', `three comparisons: ',
+     `side(`default answer: ')')counter')dnl
+example1(`yes')
+dnl @result{}one comparison: 3
+example1(`no')
+dnl @result{}two comparisons: 3
+example1(`maybe')
+dnl @result{}three comparisons: 3
+example1(`feeling rather indecisive today')
+dnl @result{}default answer: 4
+example2(`yes')
+dnl @result{}one comparison: 1
+example2(`no')
+dnl @result{}two comparisons: 2
+example2(`maybe')
+dnl @result{}three comparisons: 3
+example2(`feeling rather indecisive today')
+dnl @result{}default answer: 4

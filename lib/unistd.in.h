@@ -17,6 +17,8 @@
 
 #ifndef _GL_UNISTD_H
 
+@PRAGMA_SYSTEM_HEADER@
+
 /* The include_next requires a split double-inclusion guard.  */
 #if @HAVE_UNISTD_H@
 # @INCLUDE_NEXT@ @NEXT_UNISTD_H@
@@ -32,6 +34,11 @@
 
 /* mingw fails to declare _exit in <unistd.h>.  */
 #include <stdlib.h>
+
+#if @GNULIB_WRITE@ && @REPLACE_WRITE@ && @GNULIB_UNISTD_H_SIGPIPE@
+/* Get ssize_t.  */
+# include <sys/types.h>
+#endif
 
 /* The definition of GL_LINK_WARNING is copied here.  */
 
@@ -65,6 +72,25 @@ extern int chown (const char *file, uid_t uid, gid_t gid);
                       "doesn't treat a uid or gid of -1 on some systems - " \
                       "use gnulib module chown for portability"), \
      chown (f, u, g))
+#endif
+
+
+#if @GNULIB_CLOSE@
+# if @REPLACE_CLOSE@
+/* Automatically included by modules that need a replacement for close.  */
+#  undef close
+#  define close rpl_close
+extern int close (int);
+# endif
+#elif @UNISTD_H_HAVE_WINSOCK2_H@
+# undef close
+# define close close_used_without_requesting_gnulib_module_close
+#elif defined GNULIB_POSIXCHECK
+# undef close
+# define close(f) \
+    (GL_LINK_WARNING ("close does not portably work on sockets - " \
+                      "use gnulib module close for portability"), \
+     close (f))
 #endif
 
 
@@ -116,8 +142,6 @@ extern char **environ;
    <http://www.opengroup.org/susv3xsh/fchdir.html>.  */
 extern int fchdir (int /*fd*/);
 
-#  define close rpl_close
-extern int close (int);
 #  define dup rpl_dup
 extern int dup (int);
 #  define dup2 rpl_dup2
@@ -130,6 +154,23 @@ extern int dup2 (int, int);
     (GL_LINK_WARNING ("fchdir is unportable - " \
                       "use gnulib module fchdir for portability"), \
      fchdir (f))
+#endif
+
+
+#if @GNULIB_FSYNC@
+/* Synchronize changes to a file.
+   Return 0 if successful, otherwise -1 and errno set.
+   See POSIX:2001 specification
+   <http://www.opengroup.org/susv3xsh/fsync.html>.  */
+# if !@HAVE_FSYNC@
+extern int fsync (int fd);
+# endif
+#elif defined GNULIB_POSIXCHECK
+# undef fsync
+# define fsync(fd) \
+    (GL_LINK_WARNING ("fsync is unportable - " \
+                      "use gnulib module fsync for portability"), \
+     fsync (fd))
 #endif
 
 
@@ -174,6 +215,20 @@ extern char * getcwd (char *buf, size_t size);
     (GL_LINK_WARNING ("getcwd is unportable - " \
                       "use gnulib module getcwd for portability"), \
      getcwd (b, s))
+#endif
+
+
+#if @GNULIB_GETDTABLESIZE@
+# if !@HAVE_GETDTABLESIZE@
+/* Return the maximum number of file descriptors in the current process.  */
+extern int getdtablesize (void);
+# endif
+#elif defined GNULIB_POSIXCHECK
+# undef getdtablesize
+# define getdtablesize() \
+    (GL_LINK_WARNING ("getdtablesize is unportable - " \
+                      "use gnulib module getdtablesize for portability"), \
+     getdtablesize ())
 #endif
 
 
@@ -328,6 +383,22 @@ extern unsigned int sleep (unsigned int n);
     (GL_LINK_WARNING ("sleep is unportable - " \
                       "use gnulib module sleep for portability"), \
      sleep (n))
+#endif
+
+
+#if @GNULIB_WRITE@ && @REPLACE_WRITE@ && @GNULIB_UNISTD_H_SIGPIPE@
+/* Write up to COUNT bytes starting at BUF to file descriptor FD.
+   See the POSIX:2001 specification
+   <http://www.opengroup.org/susv3xsh/write.html>.  */
+# undef write
+# define write rpl_write
+extern ssize_t write (int fd, const void *buf, size_t count);
+#endif
+
+
+#ifdef FCHDIR_REPLACEMENT
+/* gnulib internal function.  */
+extern void _gl_unregister_fd (int fd);
 #endif
 
 

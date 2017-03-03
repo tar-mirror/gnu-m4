@@ -13,8 +13,8 @@
 
 m4_ifndef([AC_AUTOCONF_VERSION],
   [m4_copy([m4_PACKAGE_VERSION], [AC_AUTOCONF_VERSION])])dnl
-m4_if(AC_AUTOCONF_VERSION, [2.61],,
-[m4_warning([this file was generated for autoconf 2.61.
+m4_if(AC_AUTOCONF_VERSION, [2.63],,
+[m4_warning([this file was generated for autoconf 2.63.
 You have another version of autoconf.  It may work, but is not guaranteed to.
 If you have problems, you may need to regenerate the build system entirely.
 To do so, use the procedure documented by the package, typically `autoreconf'.])])
@@ -583,6 +583,40 @@ AC_MSG_RESULT([$_am_result])
 rm -f confinc confmf
 ])
 
+# Copyright (C) 1999, 2000, 2001, 2003, 2004, 2005
+# Free Software Foundation, Inc.
+#
+# This file is free software; the Free Software Foundation
+# gives unlimited permission to copy and/or distribute it,
+# with or without modifications, as long as this notice is preserved.
+
+# serial 5
+
+# AM_PROG_CC_C_O
+# --------------
+# Like AC_PROG_CC_C_O, but changed for automake.
+AC_DEFUN([AM_PROG_CC_C_O],
+[AC_REQUIRE([AC_PROG_CC_C_O])dnl
+AC_REQUIRE([AM_AUX_DIR_EXPAND])dnl
+AC_REQUIRE_AUX_FILE([compile])dnl
+# FIXME: we rely on the cache variable name because
+# there is no other way.
+set dummy $CC
+ac_cc=`echo $[2] | sed ['s/[^a-zA-Z0-9_]/_/g;s/^[0-9]/_/']`
+if eval "test \"`echo '$ac_cv_prog_cc_'${ac_cc}_c_o`\" != yes"; then
+   # Losing compiler, so override with the script.
+   # FIXME: It is wrong to rewrite CC.
+   # But if we don't then we get into trouble of one sort or another.
+   # A longer-term fix would be to have automake use am__CC in this case,
+   # and then we could set am__CC="\$(top_srcdir)/compile \$(CC)"
+   CC="$am_aux_dir/compile $CC"
+fi
+dnl Make sure AC_PROG_CC is never called again, or it will override our
+dnl setting of CC.
+m4_define([AC_PROG_CC],
+          [m4_fatal([AC_PROG_CC cannot be called after AM_PROG_CC_C_O])])
+])
+
 # Fake the existence of programs that GNU maintainers use.  -*- Autoconf -*-
 
 # Copyright (C) 1997, 1999, 2000, 2001, 2003, 2004, 2005
@@ -868,20 +902,31 @@ AC_SUBST([am__untar])
 
 m4_include([m4/alloca.m4])
 m4_include([m4/assert.m4])
+m4_include([m4/autobuild.m4])
+m4_include([m4/c-stack.m4])
 m4_include([m4/cloexec.m4])
 m4_include([m4/close-stream.m4])
 m4_include([m4/closein.m4])
 m4_include([m4/closeout.m4])
 m4_include([m4/codeset.m4])
 m4_include([m4/config-h.m4])
+m4_include([m4/dirname.m4])
+m4_include([m4/dos.m4])
+m4_include([m4/double-slash-root.m4])
 m4_include([m4/eealloc.m4])
-m4_include([m4/eoverflow.m4])
+m4_include([m4/errno_h.m4])
 m4_include([m4/error.m4])
 m4_include([m4/exitfail.m4])
+m4_include([m4/exponentd.m4])
+m4_include([m4/exponentf.m4])
+m4_include([m4/exponentl.m4])
 m4_include([m4/extensions.m4])
 m4_include([m4/fatal-signal.m4])
+m4_include([m4/fcntl_h.m4])
 m4_include([m4/fflush.m4])
+m4_include([m4/filenamecat.m4])
 m4_include([m4/float_h.m4])
+m4_include([m4/fopen.m4])
 m4_include([m4/fpending.m4])
 m4_include([m4/fpieee.m4])
 m4_include([m4/fpurge.m4])
@@ -904,7 +949,12 @@ m4_include([m4/isnand.m4])
 m4_include([m4/isnanf.m4])
 m4_include([m4/isnanl.m4])
 m4_include([m4/ldexpl.m4])
+m4_include([m4/lib-ld.m4])
+m4_include([m4/lib-link.m4])
+m4_include([m4/lib-prefix.m4])
+m4_include([m4/libsigsegv.m4])
 m4_include([m4/localcharset.m4])
+m4_include([m4/lock.m4])
 m4_include([m4/longlong.m4])
 m4_include([m4/lseek.m4])
 m4_include([m4/malloc.m4])
@@ -914,9 +964,11 @@ m4_include([m4/mbrtowc.m4])
 m4_include([m4/mbstate_t.m4])
 m4_include([m4/memchr.m4])
 m4_include([m4/memcmp.m4])
+m4_include([m4/memset.m4])
 m4_include([m4/mkdtemp.m4])
 m4_include([m4/mkstemp.m4])
 m4_include([m4/nocrash.m4])
+m4_include([m4/open.m4])
 m4_include([m4/pathmax.m4])
 m4_include([m4/printf-frexp.m4])
 m4_include([m4/printf-frexpl.m4])
@@ -924,10 +976,12 @@ m4_include([m4/printf.m4])
 m4_include([m4/quotearg.m4])
 m4_include([m4/regex.m4])
 m4_include([m4/sig_atomic_t.m4])
+m4_include([m4/sigaction.m4])
 m4_include([m4/signal_h.m4])
 m4_include([m4/signalblocking.m4])
 m4_include([m4/signbit.m4])
 m4_include([m4/size_max.m4])
+m4_include([m4/snprintf.m4])
 m4_include([m4/ssize_t.m4])
 m4_include([m4/stdarg.m4])
 m4_include([m4/stdbool.m4])
@@ -937,14 +991,21 @@ m4_include([m4/stdio-safer.m4])
 m4_include([m4/stdio_h.m4])
 m4_include([m4/stdlib-safer.m4])
 m4_include([m4/stdlib_h.m4])
+m4_include([m4/strdup.m4])
 m4_include([m4/strerror.m4])
 m4_include([m4/string_h.m4])
+m4_include([m4/strndup.m4])
+m4_include([m4/strnlen.m4])
+m4_include([m4/strsignal.m4])
 m4_include([m4/strstr.m4])
 m4_include([m4/strtod.m4])
 m4_include([m4/strtol.m4])
 m4_include([m4/sys_stat_h.m4])
 m4_include([m4/sys_time_h.m4])
 m4_include([m4/tempname.m4])
+m4_include([m4/thread.m4])
+m4_include([m4/threadlib.m4])
+m4_include([m4/tls.m4])
 m4_include([m4/tmpdir.m4])
 m4_include([m4/unistd-safer.m4])
 m4_include([m4/unistd_h.m4])
@@ -958,5 +1019,7 @@ m4_include([m4/wctype.m4])
 m4_include([m4/wint_t.m4])
 m4_include([m4/xalloc.m4])
 m4_include([m4/xsize.m4])
+m4_include([m4/xstrndup.m4])
 m4_include([m4/xvasprintf.m4])
+m4_include([m4/yield.m4])
 m4_include([acinclude.m4])

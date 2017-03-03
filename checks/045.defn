@@ -1,20 +1,15 @@
-dnl @ ../doc/m4.texinfo:2158: Origin of test
+dnl @ ../doc/m4.texinfo:2180: Origin of test
 dnl @ expected status: 0
 dnl @ extra options: 
-dnl @ Copyright (C) 2006, 2007 Free Software Foundation
+dnl @ Copyright (C) 2006, 2007, 2008 Free Software Foundation,
+dnl @ Inc.
 dnl @ This file is free software; the Free Software Foundation
 dnl @ gives unlimited permission to copy and/or distribute it
 dnl @ with or without modifications, as long as this notice
 dnl @ is preserved.
-define(`foo', a'a)
+define(`foo', `This is `$0'')
 dnl @result{}
-define(`a', `A')
+define(`bar', defn(`foo'))
 dnl @result{}
-define(`echo', `$@')
-dnl @result{}
-foo
-dnl @result{}A'A
-defn(`foo')
-dnl @result{}aA'
-echo(foo)
-dnl @result{}AA'
+bar
+dnl @result{}This is bar

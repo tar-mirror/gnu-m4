@@ -21,17 +21,17 @@
 @c @ovar{ARG}
 @c -------------------
 @c The ARG is an optional argument.  To be used for macro arguments in
-@c their documentation.
+@c their documentation (@defmac).
 @macro ovar{varname}
-@r{[}@var{\varname\}@r{]}
+@r{[}@var{\varname\}@r{]}@c
 @end macro
 
 @c @dvar{ARG, DEFAULT}
 @c -------------------
 @c The ARG is an optional argument, defaulting to DEFAULT.  To be used
-@c for macro arguments in their documentation.
+@c for macro arguments in their documentation (@defmac).
 @macro dvar{varname, default}
-@r{[}@var{\varname\} = @samp{\default\}@r{]}
+@r{[}@var{\varname\} = @samp{\default\}@r{]}@c
 @end macro
 
 @comment %**end of header
@@ -39,8 +39,9 @@
 
 @copying
 
-This manual is for @acronym{GNU} M4 (version @value{VERSION}, @value{UPDATED}),
-a package containing an implementation of the m4 macro language.
+This manual (@value{UPDATED}) is for @acronym{GNU} M4 (version
+@value{VERSION}), a package containing an implementation of the m4 macro
+language.
 
 Copyright @copyright{} 1989, 1990, 1991, 1992, 1993, 1994, 2004, 2005,
 2006, 2007, 2008 Free Software Foundation, Inc.
@@ -346,7 +347,7 @@ debugging their @code{m4} scripts than doing real work.  Beware that
 @cindex history of @code{m4}
 @cindex @acronym{GNU} M4, history of
 @code{GPM} was an important ancestor of @code{m4}.  See
-C. Stratchey: ``A General Purpose Macro generator'', Computer Journal
+C. Strachey: ``A General Purpose Macro generator'', Computer Journal
 8,3 (1965), pp.@: 225 ff.  @code{GPM} is also succinctly described into
 David Gries classic ``Compiler Construction for Digital Computers''.
 
@@ -392,9 +393,9 @@ addressed some long standing bugs in the venerable 1.4 release.  Then in
 2005, Gary V. Vaughan collected together the many patches to
 @acronym{GNU} @code{m4} 1.4 that were floating around the net and
 released 1.4.3 and 1.4.4.  And in 2006, Eric Blake joined the team and
-prepared patches for the release of 1.4.5, 1.4.6, 1.4.7, and 1.4.8.  The
-1.4.x series remains open for bug fixes, including releases 1.4.9,
-1.4.10, and 1.4.11 in 2007.
+prepared patches for the release of 1.4.5, 1.4.6, 1.4.7, and 1.4.8.
+More bug fixes were incorporated in 2007, with releases 1.4.9 and
+1.4.10, closing the series with 1.4.11 and 1.4.12 in 2008.
 
 Meanwhile, development has continued on new features for @code{m4}, such
 as dynamic module loading and additional builtins.  When complete,
@@ -541,8 +542,8 @@ into a single command line argument with subsequent options, options
 with mandatory arguments may be provided either as a single command line
 argument or as two arguments, and options with optional arguments must
 be provided as a single argument.  In other words,
-@kbd{m4 -QPDfoo -d a -d+f} is equivalent to
-@kbd{m4 -Q -P -D foo -d -d+f -- ./a}, although the latter form is
+@kbd{m4 -QPDfoo -d a -df} is equivalent to
+@kbd{m4 -Q -P -D foo -d -df -- ./a}, although the latter form is
 considered canonical.
 
 With long options, options with mandatory arguments may be provided with
@@ -739,6 +740,23 @@ only by your hardware and operating system constraints) in @acronym{GNU}
 @code{m4}.
 
 @table @code
+@item -g
+@itemx --gnu
+Enable all the extensions in this implementation.  In this release of
+M4, this option is always on by default; it is currently only useful
+when overriding a prior use of @option{--traditional}.  However, having
+@acronym{GNU} behavior as default makes it impossible to write a
+strictly @acronym{POSIX}-compliant client that avoids all incompatible
+@acronym{GNU} M4 extensions, since such a client would have to use the
+non-@acronym{POSIX} command-line option to force full @acronym{POSIX}
+behavior.  Thus, a future version of M4 will be changed to implicitly
+use the option @option{--traditional} if the environment variable
+@env{POSIXLY_CORRECT} is set.  Projects that intentionally use
+@acronym{GNU} extensions should consider using @option{--gnu} to state
+their intentions, so that the project will not mysteriously break if the
+user upgrades to a newer M4 and has @env{POSIXLY_CORRECT} set in their
+environment.
+
 @item -G
 @itemx --traditional
 Suppress all the extensions made in this implementation, compared to the
@@ -757,15 +775,16 @@ increase this value, unless you define an excessive number of macros.
 @cindex limit, nesting
 Artificially limit the nesting of macro calls to @var{NUM} levels,
 stopping program execution if this limit is ever exceeded.  When not
-specified, nesting is limited to 1024 levels.  A value of zero means
+specified, nesting defaults to unlimited on platforms that can detect
+stack overflow, and to 1024 levels otherwise.  A value of zero means
 unlimited; but then heavily nested code could potentially cause a stack
 overflow.
 
-The precise effect of this option might be more correctly associated
+The precise effect of this option is more correctly associated
 with textual nesting than dynamic recursion.  It has been useful
-when some complex @code{m4} input was generated by mechanical means.
-Most users would never need this option.  If shown to be obtrusive,
-this option (which is still experimental) might well disappear.
+when some complex @code{m4} input was generated by mechanical means, and
+also in diagnosing recursive algorithms that do not scale well.
+Most users never need to change this option from its default.
 
 @cindex rescanning
 This option does @emph{not} have the ability to break endless
@@ -906,6 +925,19 @@ If you need to read a file whose name starts with a @file{-}, you can
 specify it as @samp{./-file}, or use @option{--} to mark the end of
 options.
 
+@ignore
+@comment Test that 'm4 file/' detects that file is not a directory; we
+@comment can assume that the current directory contains a Makefile.
+@comment mingw fails with EINVAL rather than ENOTDIR.
+
+@comment status: 1
+@comment xerr: ignore
+@comment options: Makefile/
+@example
+@error{}m4: cannot open `Makefile/': Not a directory
+@end example
+@end ignore
+
 @node Syntax
 @chapter Lexical and syntactic conventions
 
@@ -997,6 +1029,27 @@ $ @kbd{m4}
 The comment delimiters can be changed to any string at any time, using
 the builtin macro @code{changecom}.  @xref{Changecom}, for more
 information.
+
+@ignore
+@comment Detect regression in 1.4.10b in regards to reparsing comments.
+@comment Not worth including in the manual.
+@example
+define(`e', `$@@')define(`q', ``$@@'')define(`foo', `bar')
+@result{}
+q(e(`one
+',#two ' foo
+))
+@result{}`one
+@result{}',`#two  bar
+@result{}''
+changecom(`<', `>')define(`n', `$#')
+@result{}
+n(e(<`>, <'>))
+@result{}1
+len(e(<`>, ,<'>))
+@result{}12
+@end example
+@end ignore
 
 @node Other tokens
 @section Other kinds of input tokens
@@ -1250,7 +1303,7 @@ with no arguments.
 @section Preventing macro invocation
 
 An innovation of the @code{m4} language, compared to some of its
-predecessors (like Stratchey's @code{GPM}, for example), is the ability
+predecessors (like Strachey's @code{GPM}, for example), is the ability
 to recognize macro calls without resorting to any special, prefixed
 invocation character.  While generally useful, this feature might
 sometimes be the source of spurious, unwanted macro calls.  So, @acronym{GNU}
@@ -2491,6 +2544,14 @@ builtin(`builtin')
 builtin(`builtin',)
 @error{}m4:stdin:4: undefined builtin `'
 @result{}
+builtin(`builtin', ``'
+')
+@error{}m4:stdin:5: undefined builtin ``'
+@error{}'
+@result{}
+indir(`index')
+@error{}m4:stdin:7: Warning: too few arguments to builtin `index'
+@result{}
 @end example
 
 @ignore
@@ -2641,6 +2702,63 @@ foo()
 @result{}arguments:1
 foo(`a', `b', `c')
 @result{}arguments:3
+@end example
+
+Since m4 is a macro language, it is even possible to write a macro that
+makes defining blind macros easier:
+
+@deffn Composite define_blind (@var{name}, @ovar{value})
+Defines @var{name} as a blind macro, such that @var{name} will expand to
+@var{value} only when given explicit arguments.  @var{value} should not
+be the result of @code{defn} (@pxref{Defn}).  This macro is only
+recognized with parameters, and results in an empty string.
+@end deffn
+
+Defining a macro to define another macro can be a bit tricky.  We want
+to use a literal @samp{$#} in the argument to the nested @code{define}.
+However, if @samp{$} and @samp{#} are adjacent in the definition of
+@code{define_blind}, then it would be expanded as the number of
+arguments to @code{define_blind} rather than the intended number of
+arguments to @var{name}.  The solution is to pass the difficult
+characters through extra arguments to a helper macro
+@code{_define_blind}.
+
+As for the limitation against using @code{defn}, there are two reasons.
+If a macro was previously defined with @code{define_blind}, then it can
+safely be renamed to a new blind macro using plain @code{define}; using
+@code{define_blind} to rename it just adds another layer of
+@code{ifelse}, occupying memory and slowing down execution.  And if a
+macro is a builtin, then it would result in an attempt to define a macro
+consisting of both text and a builtin token; this is not supported, and
+the builtin token is flattened to an empty string.
+
+With that explanation, here's the definition, and some sample usage.
+Notice that @code{define_blind} is itself a blind macro.
+
+@example
+$ @kbd{m4 -d}
+define(`define_blind', `ifelse(`$#', `0', ``$0'',
+`_$0(`$1', `$2', `$'`#', `$'`0')')')
+@result{}
+define(`_define_blind', `define(`$1',
+`ifelse(`$3', `0', ``$4'', `$2')')')
+@result{}
+define_blind
+@result{}define_blind
+define_blind(`foo', `arguments were $*')
+@result{}
+foo
+@result{}foo
+foo(`bar')
+@result{}arguments were bar
+define(`blah', defn(`foo'))
+@result{}
+blah
+@result{}blah
+blah(`a', `b')
+@result{}arguments were a,b
+defn(`blah')
+@result{}ifelse(`$#', `0', ``$0'', `arguments were $*')
 @end example
 
 @cindex multibranches
@@ -3449,6 +3567,8 @@ traceon(`foo')
 @result{}
 foo
 @result{}foo
+defn(`foo')
+@result{}
 define(`foo', `bar')
 @result{}
 foo
@@ -3459,7 +3579,7 @@ undefine(`foo')
 ifdef(`foo', `yes', `no')
 @result{}no
 indir(`foo')
-@error{}m4:stdin:8: undefined macro `foo'
+@error{}m4:stdin:9: undefined macro `foo'
 @result{}
 define(`foo', `blah')
 @result{}
@@ -3477,6 +3597,16 @@ does not transfer tracing status.
 
 @example
 $ @kbd{m4 -d}
+traceon(`traceon')
+@result{}
+traceon(`traceoff')
+@error{}m4trace: -1- traceon(`traceoff')
+@result{}
+traceoff(`traceoff')
+@error{}m4trace: -1- traceoff(`traceoff')
+@result{}
+traceoff(`traceon')
+@result{}
 traceon(`eval', `m4_divnum')
 @result{}
 define(`m4_eval', defn(`eval'))
@@ -3492,7 +3622,24 @@ m4_eval(m4_divnum)
 @end example
 
 @xref{Debug Levels}, for information on controlling the details of the
-display.
+display.  The format of the trace output is not specified by
+@acronym{POSIX}, and varies between implementations of @code{m4}.
+
+@ignore
+@comment not worth including in the manual, but this tests a trace code
+@comment path that was temporarily broken
+@comment options: -de --trace ifelse
+@example
+$ @kbd{m4 -de --trace ifelse}
+define(`e', `ifelse(`$1', `$2', `ifelse(`$1', `$2', `e(shift($@@))')')')
+@result{}
+e(`1', `1')
+@error{}m4trace: -1- ifelse -> ifelse(`1', `1', `e(shift(`1',`1'))')
+@error{}m4trace: -1- ifelse -> e(shift(`1',`1'))
+@error{}m4trace: -1- ifelse
+@result{}
+@end example
+@end ignore
 
 @node Debug Levels
 @section Controlling debugging output
@@ -3517,7 +3664,8 @@ following:
 In trace output, show the actual arguments that were collected before
 invoking the macro.  This applies to all macro calls if the @samp{t}
 flag is used, otherwise only the macros covered by calls of
-@code{traceon}.
+@code{traceon}.  Arguments are subject to length truncation specified by
+the command line option @option{--arglength} (or @option{-l}).
 
 @item c
 In trace output, show several trace lines for each macro call.  A line
@@ -3528,7 +3676,9 @@ after the call has completed.
 @item e
 In trace output, show the expansion of each macro call, if it is not
 void.  This applies to all macro calls if the @samp{t} flag is used,
-otherwise only the macros covered by calls of @code{traceon}.
+otherwise only the macros covered by calls of @code{traceon}.  The
+expansion is subject to length truncation specified by the command line
+option @option{--arglength} (or @option{-l}).
 
 @item f
 In debug and trace output, include the name of the current input file in
@@ -3606,6 +3756,42 @@ debugmode(`+l')
 foo
 @error{}m4trace:8: -1- foo
 @result{}FOO
+@end example
+
+The following example demonstrates the behavior of length truncation,
+when specified on the command line.  Note that each argument and the
+final result are individually truncated.  Also, the special tokens for
+builtin functions are not truncated.
+
+@comment options: -l6
+@example
+$ @kbd{m4 -d -l 6}
+define(`echo', `$@@')debugmode(`+t')
+@result{}
+echo(`1', `long string')
+@error{}m4trace: -1- echo(`1', `long s...') -> ``1',`l...'
+@result{}1,long string
+indir(`echo', defn(`changequote'))
+@error{}m4trace: -2- defn(`change...')
+@error{}m4trace: -1- indir(`echo', <changequote>) -> ``''
+@result{}
+@end example
+
+This example shows the effects of the debug flags that are not related
+to macro tracing.
+
+@comment examples
+@comment options: -dip
+@example
+$ @kbd{m4 -dip -I examples}
+@error{}m4debug: input read from stdin
+include(`foo')dnl
+@error{}m4debug: path search for `foo' found `examples/foo'
+@error{}m4debug: input read from examples/foo
+@result{}bar
+@error{}m4debug: input reverted to stdin, line 1
+^D
+@error{}m4debug: input exhausted
 @end example
 
 @node Debug Output
@@ -3966,6 +4152,13 @@ It is an error if the end of file occurs within a quoted string.
 @error{}m4:stdin:2: ERROR: end of file in string
 @end example
 
+@comment status: 1
+@example
+ifelse(`dangling quote
+^D
+@error{}m4:stdin:1: ERROR: end of file in string
+@end example
+
 @node Changecom
 @section Changing the comment delimiters
 
@@ -4259,7 +4452,7 @@ define(`bar
 ', defn(`__file__'))
 @result{}
 include(`foo')
-@result{}../examples/foo
+@result{}examples/foo
 define(`bar
 ', defn(`__line__'))
 @result{}
@@ -4513,7 +4706,8 @@ the previous input file.
 The expansion of @code{include} and @code{sinclude} is therefore the
 contents of @var{file}.
 
-If @var{file} does not exist (or cannot be read), the expansion is void,
+If @var{file} does not exist, is a directory, or cannot otherwise be
+read, the expansion is void,
 and @code{include} will fail with an error while @code{sinclude} is
 silent.  The empty string counts as a file that does not exist.
 
@@ -4593,6 +4787,42 @@ files on the command line.
 
 In @acronym{GNU} @code{m4}, an alternative method of reading files is
 using @code{undivert} (@pxref{Undivert}) on a named file.
+
+@ignore
+@comment Test that include(`file/') detects that file is not a
+@comment directory; we can assume that the current directory contains a
+@comment Makefile.  mingw fails with EINVAL rather than ENOTDIR.
+
+@comment status: 1
+@comment xerr: ignore
+@example
+include(`Makefile/')
+@error{}m4:stdin:1: cannot open `Makefile/': Not a directory
+@result{}
+@end example
+
+@comment POSIX allows, but doesn't require, failure on reading
+@comment directories.  But since they aren't text files, it never makes
+@comment sense, so we globally forbid it even if fopen doesn't.  mingw
+@comment fails with EACCES rather than EISDIR.
+
+@comment status: 1
+@comment xerr: ignore
+@example
+include(`.')
+@error{}m4:stdin:1: cannot open `.': Is a directory
+@result{}
+@end example
+
+@comment Meanwhile, ignore errors with sinclude.
+
+@example
+sinclude(`Makefile/')
+@result{}
+sinclude(`.')
+@result{}
+@end example
+@end ignore
 
 @node Search Path
 @section Searching for include files
@@ -4714,7 +4944,7 @@ ifdef(`__unix__', ,
 ')m4exit(`77')')dnl
 changequote(`[', `]')dnl
 syscmd([echo 'divert(1)hi
-format(%1000000d, 1)' | m4 | sed 1q])dnl
+format(%1000000d, 1)' | ]__program__[ | sed -n 1p])dnl
 @result{}hi
 sysval
 @result{}0
@@ -6237,11 +6467,13 @@ sysval
 @c the expansion.
 
 @example
-syscmd(`rm -f foo??????')sysval
+syscmd(`rm -rf foodir')sysval
 @result{}0
-len(mkstemp(`fooXXXXX'))
-@result{}9
-syscmd(`rm foo??????')sysval
+syscmd(`mkdir foodir')sysval
+@result{}0
+len(mkstemp(`foodir/fooXXXXX'))
+@result{}16
+syscmd(`rm -r foodir')sysval
 @result{}0
 @end example
 
@@ -6260,7 +6492,7 @@ define(`abc', `def')
 maketemp(`foo-abc')
 @result{}foo-def
 @error{}m4:stdin:4: recommend using mkstemp instead
-syscmd(`test -f foo-*')sysval
+syscmd(`test -f foo-*')ifelse(sysval, `0', `0', `1')
 @result{}1
 @end example
 @end ignore
@@ -6360,7 +6592,7 @@ foo
 @result{}foo called at stdin:2
 include(`incl.m4')
 @result{}Include file start
-@result{}foo called at ../examples/incl.m4:2
+@result{}foo called at examples/incl.m4:2
 @result{}Include file end
 @result{}
 @end example
@@ -6585,10 +6817,33 @@ changed strings for quotes or comments.  And future releases of
 
 @comment options: -F /dev/null
 @example
-ifdef(`__unix__', ,
-      `errprint(` skipping: /dev/null not known to exist
-')m4exit(`77')')dnl
 traceon(`undefined')dnl
+@end example
+
+@c Make sure freezing is successful.
+
+@example
+ifdef(`__unix__', ,
+      `errprint(` skipping: syscmd does not have unix semantics
+')m4exit(`77')')dnl
+changequote(`[', `]')dnl
+syscmd([echo 'changequote([,])pushdef([divnum],[hi])dnl' \
+       | ]__program__[ -F in.m4f \
+     && echo 'divnum popdef([divnum])divnum' \
+       | ]__program__[ -R in.m4f \
+     && rm in.m4f])status sysval
+@result{}hi 0
+@result{}status 0
+@end example
+
+@c Detect inability to freeze.
+
+@comment options: -F /none/such
+@comment status: 1
+@example
+$ @kbd{m4 -F /none/such}
+^D
+@error{}m4: cannot open `/none/such': No such file or directory
 @end example
 @end ignore
 
@@ -6845,7 +7100,7 @@ of @samp{-} on the command line.
 @acronym{POSIX} requires @code{m4wrap} (@pxref{M4wrap}) to act in FIFO
 (first-in, first-out) order, but @acronym{GNU} @code{m4} currently uses
 LIFO order.  Furthermore, @acronym{POSIX} states that only the first
-argument to @code{m4wrap} is saved for later evaluation, bug
+argument to @code{m4wrap} is saved for later evaluation, but
 @acronym{GNU} @code{m4} saves and processes all arguments, with output
 separated by spaces.
 
@@ -6930,6 +7185,13 @@ also traced by name; and tracing by name, such as with @option{-tfoo} at
 the command line or @code{traceon(`foo')} in the input, is an attribute
 that is preserved even if the macro is currently undefined.
 
+Additionally, while @acronym{POSIX} requires trace output, it makes no
+demands on the formatting of that output.  Parsing trace output is not
+guaranteed to be reliable, even between different releases of
+@acronym{GNU} M4; however, the intent is that any future changes in
+trace output will only occur under the direction of additional
+@code{debugmode} flags (@pxref{Debug Levels}).
+
 @item
 @acronym{POSIX} requires @code{eval} (@pxref{Eval}) to treat all
 operators with the same precedence as C@.  However, earlier versions of
@@ -6965,6 +7227,22 @@ However, this appears to be a bug in @acronym{POSIX}, since most
 traditional implementations also ignore all whitespace (formfeed,
 carriage return, and vertical tab).  @acronym{GNU} @code{m4} follows
 tradition and ignores all leading unquoted whitespace.
+
+@item
+@cindex @env{POSIXLY_CORRECT}
+A strictly-compliant @acronym{POSIX} client is not allowed to use
+command-line arguments not specified by @acronym{POSIX}.  However, since
+this version of M4 ignores @env{POSIXLY_CORRECT} and enables the option
+@code{--gnu} by default (@pxref{Limits control, , Invoking m4}), a
+client desiring to be strictly compliant has no way to disable
+@acronym{GNU} extensions that conflict with @acronym{POSIX} when
+directly invoking the compiled @code{m4}.  A future version of
+@code{GNU} M4 will honor the environment variable @env{POSIXLY_CORRECT},
+implicitly enabling @option{--traditional} if it is set, in order to
+allow a strictly-compliant client.  In the meantime, a client needing
+strict @acronym{POSIX} compliance can use the workaround of invoking a
+shell script wrapper, where the wrapper then adds @option{--traditional}
+to the arguments passed to the compiled @code{m4}.
 @end itemize
 
 @node Other Incompatibilities
@@ -7087,24 +7365,25 @@ into an infinite loop if given an iterator that is not parsed as a macro
 name.  It does not do any sanity checking on its numeric bounds, and
 only permits decimal numbers for bounds.  Here is an improved version,
 shipped as @file{m4-@value{VERSION}/@/examples/@/forloop2.m4}; this
-version also optimizes based on the fact that the starting bound does
-not need to be passed to the helper @code{@w{_forloop}}.
+version also optimizes overhead by calling four macros instead of six
+per iteration (excluding those in @var{text}), by not dereferencing the
+@var{iterator} in the helper @code{@w{_forloop}}.
 
 @comment examples
 @example
-$ @kbd{m4 -I examples}
+$ @kbd{m4 -d -I examples}
 undivert(`forloop2.m4')dnl
 @result{}divert(`-1')
 @result{}# forloop(var, from, to, stmt) - improved version:
 @result{}#   works even if VAR is not a strict macro name
 @result{}#   performs sanity check that FROM is larger than TO
 @result{}#   allows complex numerical expressions in TO and FROM
-@result{}define(`forloop', `ifelse(eval(`($3) >= ($2)'), `1',
-@result{}  `pushdef(`$1', eval(`$2'))_$0(`$1',
+@result{}define(`forloop', `ifelse(eval(`($2) <= ($3)'), `1',
+@result{}  `pushdef(`$1')_$0(`$1', eval(`$2'),
 @result{}    eval(`$3'), `$4')popdef(`$1')')')
 @result{}define(`_forloop',
-@result{}  `$3`'ifelse(indir(`$1'), `$2', `',
-@result{}    `define(`$1', incr(indir(`$1')))$0($@@)')')
+@result{}  `define(`$1', `$2')$4`'ifelse(`$2', `$3', `',
+@result{}    `$0(`$1', incr(`$2'), `$3', `$4')')')
 @result{}divert`'dnl
 include(`forloop2.m4')
 @result{}
@@ -7115,7 +7394,7 @@ forloop(`', `1', `2', ` odd iterator name')
 forloop(`i', `5 + 5', `0xc', ` 0x`'eval(i, `16')')
 @result{} 0xa 0xb 0xc
 forloop(`i', `a', `b', `non-numeric bounds')
-@error{}m4:stdin:6: bad expression in eval (bad input): (b) >= (a)
+@error{}m4:stdin:6: bad expression in eval (bad input): (a) <= (b)
 @result{}
 @end example
 
@@ -7140,8 +7419,8 @@ define(`double', `define(`$1'`2',
   arg1(patsubst(dquote(defn(`$1')), `[`']', `\&\&')))')
 @result{}
 double(`forloop')double(`_forloop')defn(`forloop2')
-@result{}ifelse(eval(``($3) >= ($2)''), ``1'',
-@result{}  ``pushdef(``$1'', eval(``$2''))_$0(``$1'',
+@result{}ifelse(eval(``($2) <= ($3)''), ``1'',
+@result{}  ``pushdef(``$1'')_$0(``$1'', eval(``$2''),
 @result{}    eval(``$3''), ``$4'')popdef(``$1'')'')
 forloop(i, 1, 5, `ifelse(')forloop(i, 1, 5, `)')
 @result{}
@@ -7254,15 +7533,17 @@ helper method immediately, the @samp{defn(`@var{iterator}')} no longer
 contains unexpanded macros.
 
 The astute m4 programmer might notice that the solution above still uses
-more memory, and thus more time, than strictly necessary.  Note that
-@samp{$2}, which contains an arbitrarily long quoted list, is expanded
-and rescanned three times per iteration of @code{_foreachq}.
-Furthermore, every iteration of the algorithm effectively unboxes then
-reboxes the list, which costs a couple of macro invocations.  It is
-possible to rewrite the algorithm for a bit more speed by swapping the
-order of the arguments to @code{_foreachq} in order to operate on an
-unboxed list in the first place, and by using the fixed-length @samp{$#}
-instead of an arbitrary length list as the key to end recursion.  This
+more memory and macro invocations, and thus more time, than strictly
+necessary.  Note that @samp{$2}, which contains an arbitrarily long
+quoted list, is expanded and rescanned three times per iteration of
+@code{_foreachq}. Furthermore, every iteration of the algorithm
+effectively unboxes then reboxes the list, which costs a couple of macro
+invocations.  It is possible to rewrite the algorithm for a bit more
+speed by swapping the order of the arguments to @code{_foreachq} in
+order to operate on an unboxed list in the first place, and by using the
+fixed-length @samp{$#} instead of an arbitrary length list as the key to
+end recursion.  The result is an overhead of six macro invocations per
+loop (excluding any macros in @var{text}), instead of eight.  This
 alternative approach is available as
 @file{m4-@value{VERSION}/@/examples/@/foreach3.m4}:
 
@@ -7275,12 +7556,11 @@ undivert(`foreachq3.m4')dnl
 @result{}divert(`-1')
 @result{}# foreachq(x, `item_1, item_2, ..., item_n', stmt)
 @result{}#   quoted list, alternate improved version
-@result{}define(`foreachq',
-@result{}`pushdef(`$1')_$0(`$1', `$3'ifelse(`$2', `', `',
-@result{}  `, $2'))popdef(`$1')')
-@result{}define(`_foreachq', `ifelse(`$#', `2', `',
-@result{}  `define(`$1', `$3')$2`'$0(`$1', `$2'ifelse(`$#', `3', `',
-@result{}    `, shift(shift(shift($@@)))'))')')
+@result{}define(`foreachq', `ifelse(`$2', `', `',
+@result{}  `pushdef(`$1')_$0(`$1', `$3', `', $2)popdef(`$1')')')
+@result{}define(`_foreachq', `ifelse(`$#', `3', `',
+@result{}  `define(`$1', `$4')$2`'$0(`$1', `$2',
+@result{}    shift(shift(shift($@@))))')')
 @result{}divert`'dnl
 traceon(`shift')debugmode(`aq')
 @result{}
@@ -7288,22 +7568,98 @@ foreachq(`x', ``1', `2', `3', `4'', `x
 ')dnl
 @result{}1
 @error{}m4trace: -4- shift(`x', `x
+@error{}', `', `1', `2', `3', `4')
+@error{}m4trace: -3- shift(`x
+@error{}', `', `1', `2', `3', `4')
+@error{}m4trace: -2- shift(`', `1', `2', `3', `4')
+@result{}2
+@error{}m4trace: -4- shift(`x', `x
 @error{}', `1', `2', `3', `4')
 @error{}m4trace: -3- shift(`x
 @error{}', `1', `2', `3', `4')
 @error{}m4trace: -2- shift(`1', `2', `3', `4')
-@result{}2
+@result{}3
 @error{}m4trace: -4- shift(`x', `x
 @error{}', `2', `3', `4')
 @error{}m4trace: -3- shift(`x
 @error{}', `2', `3', `4')
 @error{}m4trace: -2- shift(`2', `3', `4')
-@result{}3
+@result{}4
 @error{}m4trace: -4- shift(`x', `x
 @error{}', `3', `4')
 @error{}m4trace: -3- shift(`x
 @error{}', `3', `4')
 @error{}m4trace: -2- shift(`3', `4')
+@end example
+
+In the current version of M4, every instance of @samp{$@@} is rescanned
+as it is encountered.  Thus, the @file{foreachq3.m4} alternative uses
+much less memory than @file{foreachq2.m4}, and executes as much as 10%
+faster, since each iteration encounters fewer @samp{$@@}.  However, the
+implementation of rescanning every byte in @samp{$@@} is quadratic in
+the number of bytes scanned (for example, making the broken version in
+@file{foreachq.m4} cubic, rather than quadratic, in behavior).  A future
+release of M4 will improve the underlying implementation by reusing
+results of previous scans, so that both styles of @code{foreachq} can
+become linear in the number of bytes scanned.  Notice how the
+implementation injects an empty argument prior to expanding @samp{$2}
+within @code{foreachq}; the helper macro @code{_foreachq} then ignores
+the third argument altogether, and ends recursion when there are three
+arguments left because there was nothing left to pass through
+@code{shift}.  Thus, each iteration only needs one @code{ifelse}, rather
+than the two conditionals used in the version from @file{foreachq2.m4}.
+
+@cindex nine arguments, more than
+@cindex more than nine arguments
+@cindex arguments, more than nine
+So far, all of the implementations of @code{foreachq} presented have
+been quadratic with M4 1.4.x.  But @code{forloop} is linear, because
+each iteration parses a constant amount of arguments.  So, it is
+possible to design a variant that uses @code{forloop} to do the
+iteration, then uses @samp{$@@} only once at the end, giving a linear
+result even with older M4 implementations.  This implementation relies
+on the @acronym{GNU} extension that @samp{$10} expands to the tenth
+argument rather than the first argument concatenated with @samp{0}.  The
+trick is to define an intermediate macro that repeats the text
+@code{m4_define(`$1', `$@var{n}')$2`'}, with @samp{n} set to successive
+integers corresponding to each argument.  The helper macro
+@code{_foreachq_} is needed in order to generate the literal sequences
+such as @samp{$1} into the intermediate macro, rather than expanding
+them as the arguments of @code{_foreachq}.  With this approach, no
+@code{shift} calls are even needed!  Even though there are seven macros
+of overhead per iteration instead of six in @file{foreachq3.m4}, the
+linear scaling is apparent at relatively small list sizes.  However,
+this approach will need adjustment when a future version of M4 follows
+@acronym{POSIX} by no longer treating @samp{$10} as the tenth argument;
+the anticipation is that @samp{$@{10@}} can be used instead, although
+that alternative syntax is not yet supported.
+
+@comment examples
+@example
+$ @kbd{m4 -I examples}
+include(`foreachq4.m4')
+@result{}
+undivert(`foreachq4.m4')dnl
+@result{}include(`forloop2.m4')dnl
+@result{}divert(`-1')
+@result{}# foreachq(x, `item_1, item_2, ..., item_n', stmt)
+@result{}#   quoted list, version based on forloop
+@result{}define(`foreachq',
+@result{}`ifelse(`$2', `', `', `_$0(`$1', `$3', $2)')')
+@result{}define(`_foreachq',
+@result{}`pushdef(`$1', forloop(`$1', `3', `$#',
+@result{}  `$0_(`1', `2', indir(`$1'))')`popdef(
+@result{}    `$1')')indir(`$1', $@@)')
+@result{}define(`_foreachq_',
+@result{}``define(`$$1', `$$3')$$2`''')
+@result{}divert`'dnl
+traceon(`shift')debugmode(`aq')
+@result{}
+foreachq(`x', ``1', `2', `3', `4'', `x
+')dnl
+@result{}1
+@result{}2
+@result{}3
 @result{}4
 @end example
 
@@ -7347,6 +7703,11 @@ foreach(`x', `(`1', `2', `3', `4')', `x
 @error{}m4trace: -3- shift(``4'')
 @end example
 
+It is likewise possible to write a variant of @code{foreach} that
+performs in linear time on M4 1.4.x; the easiest method is probably
+writing a version of @code{foreach} that unboxes its list, then invokes
+@code{_foreachq} as previously defined in @file{foreachq4.m4}.
+
 In summary, recursion over list elements is trickier than it appeared at
 first glance, but provides a powerful idiom within @code{m4} processing.
 As a final demonstration, both list styles are now able to handle
@@ -7354,7 +7715,8 @@ several scenarios that would wreak havoc on one or both of the original
 implementations.  This points out one other difference between the
 list styles.  @code{foreach} evaluates unquoted list elements only once,
 in preparation for calling @code{@w{_foreach}}, similary for
-@code{foreachq} as provided by @file{foreachq3.m4}.  But
+@code{foreachq} as provided by @file{foreachq3.m4} or
+@file{foreachq4.m4}.  But
 @code{foreachq}, as provided by @file{foreachq2.m4},
 evaluates unquoted list elements twice while visiting the first list
 element, once in @code{@w{_arg1q}} and once in @code{@w{_rest}}.  When
@@ -7434,6 +7796,61 @@ foreachq(`x', ```active'', ``active''', `<x>
 @result{}<active>
 @result{}<active>
 @end example
+
+@ignore
+@comment Not worth putting in the manual, but make sure that foreach
+@comment implementations behave, and that final implementation is
+@comment linear.
+
+@comment boxed recursion
+
+@comment examples
+@comment options: -Dlimit=10 -Dverbose
+@example
+$ @kbd {m4 -I examples -Dlimit=10 -Dverbose}
+include(`loop.m4')dnl
+@result{} 1 2 3 4 5 6 7 8 9 10
+@end example
+
+@comment unboxed recursion
+
+@comment examples
+@comment options: -Dlimit=10 -Dverbose -Dalt
+@example
+$ @kbd {m4 -I examples -Dlimit=10 -Dverbose -Dalt}
+include(`loop.m4')dnl
+@result{} 1 2 3 4 5 6 7 8 9 10
+@end example
+
+@comment foreach via forloop recursion
+
+@comment examples
+@comment options: -Dlimit=10 -Dverbose -Dalt=4
+@example
+$ @kbd {m4 -I examples -Dlimit=10 -Dverbose -Dalt=4}
+include(`loop.m4')dnl
+@result{} 1 2 3 4 5 6 7 8 9 10
+@end example
+
+@comment examples
+@comment options: -Dlimit=2500 -Dalt=4
+@example
+$ @kbd {m4 -I examples -Dlimit=2500 -Dalt=4}
+include(`loop.m4')dnl
+@end example
+
+@comment examples
+@comment options: -Dlimit=10000 -Dalt=4
+@example
+$ @kbd {m4 -I examples -Dlimit=10000 -Dalt=4}
+define(`foo', `divert`'len(popdef(`_foreachq')_foreachq($@@))')dnl
+define(`debug', `pushdef(`_foreachq', defn(`foo'))')
+@result{}
+include(`loop.m4')dnl
+@result{}48894
+@end example
+
+@end ignore
 
 @node Improved m4wrap
 @section Solution for @code{m4wrap}
@@ -7635,14 +8052,8 @@ define(`active', `act1, ive')dnl
 define(`Active', `Act2, Ive')dnl
 define(`ACTIVE', `ACT3, IVE')dnl
 define(`A', `OOPS')dnl
-capitalize(active)
-@result{}Act1,Ive
-capitalize(`active')
-@result{}Act2, Ive
-capitalize(``active'')
-@result{}Active
-capitalize(```actIVE''')
-@result{}`Active'
+capitalize(active; `active'; ``active''; ```actIVE''')
+@result{}Act1,Ive; Act2, Ive; Active; `Active'
 undivert(`capitalize2.m4')dnl
 @result{}divert(`-1')
 @result{}# upcase(text)

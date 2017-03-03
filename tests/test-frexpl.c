@@ -1,5 +1,5 @@
 /* Test of splitting a 'long double' into fraction and mantissa.
-   Copyright (C) 2007 Free Software Foundation, Inc.
+   Copyright (C) 2007-2008 Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -27,12 +27,18 @@
 #include "fpucw.h"
 #include "isnanl-nolibm.h"
 
+/* Avoid some warnings from "gcc -Wshadow".
+   This file doesn't use the exp() function.  */
+#undef exp
+#define exp exponent
+
 #define ASSERT(expr) \
   do									     \
     {									     \
       if (!(expr))							     \
         {								     \
           fprintf (stderr, "%s:%d: assertion failed\n", __FILE__, __LINE__); \
+          fflush (stderr);						     \
           abort ();							     \
         }								     \
     }									     \
@@ -50,6 +56,10 @@
 #else
 # define MIN_NORMAL_EXP LDBL_MIN_EXP
 #endif
+
+/* On HP-UX 10.20, negating 0.0L does not yield -0.0L.
+   So we use minus_zero instead.  */
+long double minus_zero = -LDBL_MIN * LDBL_MIN;
 
 static long double
 my_ldexp (long double x, int d)
@@ -107,7 +117,7 @@ main ()
   { /* Negative zero.  */
     int exp = -9999;
     long double mantissa;
-    x = -0.0L;
+    x = minus_zero;
     mantissa = frexpl (x, &exp);
     ASSERT (exp == 0);
     ASSERT (mantissa == x);

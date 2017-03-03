@@ -1,12 +1,15 @@
-dnl @ ../doc/m4.texinfo:1509: Origin of test
-dnl @ expected status: 1
-dnl @ extra options: 
-dnl @ Copyright (C) 2006, 2007 Free Software Foundation
+dnl @ ../doc/m4.texinfo:1520: Origin of test
+dnl @ expected status: 0
+dnl @ extra options:  -Q
+dnl @ Copyright (C) 2006, 2007, 2008 Free Software Foundation,
+dnl @ Inc.
 dnl @ This file is free software; the Free Software Foundation
 dnl @ gives unlimited permission to copy and/or distribute it
 dnl @ with or without modifications, as long as this notice
 dnl @ is preserved.
-hello world
-dnl @result{}hello world
-define(
-dnl @error{}m4:stdin:2: ERROR: end of file in argument list
+index(`abc')
+dnl @result{}0
+index(`abc',)
+dnl @result{}0
+index(`abc', `b', `ignored')
+dnl @result{}1

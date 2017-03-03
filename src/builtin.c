@@ -91,8 +91,7 @@ DECLARE (m4_undivert);
 
 #undef DECLARE
 
-static builtin
-builtin_tab[] =
+static builtin const builtin_tab[] =
 {
 
   /* name		GNUext	macros	blind	function */
@@ -153,16 +152,18 @@ builtin_tab[] =
   { "placeholder",	true,	false,	false,	m4_placeholder },
 };
 
-static predefined const
-predefined_tab[] =
+static predefined const predefined_tab[] =
 {
 #if UNIX
   { "unix",	"__unix__",	"" },
-#elif W32_NATIVE
+#endif
+#if W32_NATIVE
   { "windows",	"__windows__",	"" },
-#elif OS2
+#endif
+#if OS2
   { "os2",	"__os2__",	"" },
-#else
+#endif
+#if !UNIX && !W32_NATIVE && !OS2
 # warning Platform macro not provided
 #endif
   { NULL,	"__gnu__",	"" },
@@ -443,11 +444,11 @@ numeric_arg (token_data *macro, const char *arg, int *valuep)
 }
 
 /*------------------------------------------------------------------------.
-| The function ntoa () converts VALUE to a signed ascii representation in |
+| The function ntoa () converts VALUE to a signed ASCII representation in |
 | radix RADIX.								  |
 `------------------------------------------------------------------------*/
 
-/* Digits for number to ascii conversions.  */
+/* Digits for number to ASCII conversions.  */
 static char const digits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
 
 const char *
@@ -645,18 +646,17 @@ static void
 m4_ifelse (struct obstack *obs, int argc, token_data **argv)
 {
   const char *result;
-  token_data *argv0;
+  token_data *me = argv[0];
 
   if (argc == 2)
     return;
 
-  if (bad_argc (argv[0], argc, 4, -1))
+  if (bad_argc (me, argc, 4, -1))
     return;
   else
     /* Diagnose excess arguments if 5, 8, 11, etc., actual arguments.  */
-    bad_argc (argv[0], (argc + 2) % 3, -1, 1);
+    bad_argc (me, (argc + 2) % 3, -1, 1);
 
-  argv0 = argv[0];
   argv++;
   argc--;
 
@@ -920,6 +920,10 @@ builtin `%s' requested by frozen file is not supported", ARG (i)));
 		      ARG (i)));
 	  else
 	    push_macro (b);
+	  break;
+
+	case TOKEN_VOID:
+	  /* Nothing to do for traced but undefined macro.  */
 	  break;
 
 	default:
@@ -1290,7 +1294,7 @@ m4_changeword (struct obstack *obs, int argc, token_data **argv)
 
 /*-------------------------------------------------------------------------.
 | Generic include function.  Include the file given by the first argument, |
-| if it exists.  Complain about inaccesible files iff SILENT is false.	   |
+| if it exists.  Complain about inaccessible files iff SILENT is false.	   |
 `-------------------------------------------------------------------------*/
 
 static void
@@ -1562,7 +1566,9 @@ m4_traceon (struct obstack *obs, int argc, token_data **argv)
   else
     for (i = 1; i < argc; i++)
       {
-	s = lookup_symbol (TOKEN_DATA_TEXT (argv[i]), SYMBOL_INSERT);
+	s = lookup_symbol (ARG (i), SYMBOL_LOOKUP);
+	if (!s)
+	  s = lookup_symbol (ARG (i), SYMBOL_INSERT);
 	set_trace (s, obs);
       }
 }
@@ -1861,7 +1867,7 @@ m4_format (struct obstack *obs, int argc, token_data **argv)
 {
   if (bad_argc (argv[0], argc, 2, -1))
     return;
-  format (obs, argc - 1, argv + 1);
+  expand_format (obs, argc - 1, argv + 1);
 }
 
 /*-------------------------------------------------------------------------.

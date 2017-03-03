@@ -25,6 +25,9 @@ AC_DEFUN([M4_EARLY],
   m4_pattern_allow([^gl_LIBOBJS$])dnl a variable
   m4_pattern_allow([^gl_LTLIBOBJS$])dnl a variable
   AC_REQUIRE([AC_PROG_RANLIB])
+  AC_REQUIRE([AM_PROG_CC_C_O])
+  AC_REQUIRE([AC_GNU_SOURCE])
+  AB_INIT
   AC_REQUIRE([gl_USE_SYSTEM_EXTENSIONS])
   AC_REQUIRE([AC_FUNC_FSEEKO])
   AC_REQUIRE([gl_FP_IEEE])
@@ -35,6 +38,7 @@ AC_DEFUN([M4_EARLY],
   dnl AC_PROG_CC_STDC arranges for this.  With older Autoconf AC_PROG_CC_STDC
   dnl shouldn't hurt, though installers are on their own to set c99 mode.
   AC_REQUIRE([AC_PROG_CC_STDC])
+  gl_THREADLIB_EARLY
 ])
 
 # This macro should be invoked from ./configure.ac, in the section
@@ -48,10 +52,13 @@ AC_DEFUN([M4_INIT],
   m4_pushdef([AC_LIBOBJ], m4_defn([M4_LIBOBJ]))
   m4_pushdef([AC_REPLACE_FUNCS], m4_defn([M4_REPLACE_FUNCS]))
   m4_pushdef([AC_LIBSOURCES], m4_defn([M4_LIBSOURCES]))
+  m4_pushdef([M4_LIBSOURCES_LIST], [])
+  m4_pushdef([M4_LIBSOURCES_DIR], [])
+  gl_COMMON
   gl_source_base='lib'
-  gl_EOVERFLOW
   gl_FUNC_ALLOCA
   gl_ASSERT
+  gl_C_STACK
   AC_DEFINE([SIGNAL_SAFE_LIST], [1], [Define if lists must be signal-safe.])
   gl_CLOEXEC
   gl_CLOSE_STREAM
@@ -59,15 +66,22 @@ AC_DEFUN([M4_INIT],
   gl_CLOSEIN
   gl_CLOSEOUT
   gl_CONFIG_H
+  gl_DIRNAME
+  gl_DOUBLE_SLASH_ROOT
+  gl_HEADER_ERRNO_H
   gl_ERROR
   m4_ifdef([AM_XGETTEXT_OPTION],
     [AM_XGETTEXT_OPTION([--flag=error:3:c-format])
      AM_XGETTEXT_OPTION([--flag=error_at_line:5:c-format])])
   gl_EXITFAIL
   gl_FATAL_SIGNAL
+  gl_FCNTL_H
   gl_FUNC_FFLUSH
   gl_STDIO_MODULE_INDICATOR([fflush])
+  gl_FILE_NAME_CONCAT
   gl_FLOAT_H
+  gl_FUNC_FOPEN
+  gl_STDIO_MODULE_INDICATOR([fopen])
   gl_FOPEN_SAFER
   gl_MODULE_INDICATOR([fopen-safer])
   gl_FUNC_FPENDING
@@ -99,10 +113,12 @@ AC_DEFUN([M4_INIT],
   gl_FUNC_ISNAND_NO_LIBM
   gl_FUNC_ISNANF_NO_LIBM
   gl_FUNC_ISNANL_NO_LIBM
+  gl_LIBSIGSEGV
   gl_LIST
   gl_LOCALCHARSET
   LOCALCHARSET_TESTS_ENVIRONMENT="CHARSETALIASDIR=\"\$(top_builddir)/$gl_source_base\""
   AC_SUBST([LOCALCHARSET_TESTS_ENVIRONMENT])
+  gl_LOCK
   gl_FUNC_LSEEK
   gl_UNISTD_MODULE_INDICATOR([lseek])
   AC_FUNC_MALLOC
@@ -113,25 +129,34 @@ AC_DEFUN([M4_INIT],
   gl_MATH_H
   gl_FUNC_MEMCHR
   gl_FUNC_MEMCMP
+  gl_FUNC_MEMSET
   gt_FUNC_MKDTEMP
   gl_STDLIB_MODULE_INDICATOR([mkdtemp])
   gl_FUNC_MKSTEMP
   gl_STDLIB_MODULE_INDICATOR([mkstemp])
   AC_FUNC_OBSTACK
   dnl Note: AC_FUNC_OBSTACK does AC_LIBSOURCES([obstack.h, obstack.c]).
+  gl_FUNC_OPEN
+  gl_MODULE_INDICATOR([open])
+  gl_FCNTL_MODULE_INDICATOR([open])
   gl_LIST
   gl_PATHMAX
   gl_FUNC_PRINTF_FREXP
   gl_FUNC_PRINTF_FREXPL
   m4_divert_text([INIT_PREPARE], [gl_printf_safe=yes])
   gl_QUOTEARG
+  AC_REPLACE_FUNCS(raise)
   gl_REGEX
+  gl_SIGACTION
+  gl_SIGNAL_MODULE_INDICATOR([sigaction])
   gl_SIGNAL_H
   gl_SIGNBIT
   gl_MATH_MODULE_INDICATOR([signbit])
   gl_SIGNALBLOCKING
   gl_SIGNAL_MODULE_INDICATOR([sigprocmask])
   gl_SIZE_MAX
+  gl_FUNC_SNPRINTF
+  gl_STDIO_MODULE_INDICATOR([snprintf])
   gt_TYPE_SSIZE_T
   gl_STDARG_H
   AM_STDBOOL_H
@@ -142,6 +167,12 @@ AC_DEFUN([M4_INIT],
   gl_FUNC_STRERROR
   gl_STRING_MODULE_INDICATOR([strerror])
   gl_HEADER_STRING_H
+  gl_FUNC_STRNDUP
+  gl_STRING_MODULE_INDICATOR([strndup])
+  gl_FUNC_STRNLEN
+  gl_STRING_MODULE_INDICATOR([strnlen])
+  gl_FUNC_STRSIGNAL
+  gl_STRING_MODULE_INDICATOR([strsignal])
   gl_FUNC_STRSTR
   gl_STRING_MODULE_INDICATOR([strstr])
   gl_FUNC_STRTOD
@@ -152,6 +183,8 @@ AC_DEFUN([M4_INIT],
   gl_HEADER_SYS_TIME_H
   AC_PROG_MKDIR_P
   gl_FUNC_GEN_TEMPNAME
+  gl_THREADLIB
+  gl_TLS
   gt_TMPDIR
   gl_UNISTD_H
   gl_UNISTD_SAFER
@@ -175,9 +208,23 @@ AC_DEFUN([M4_INIT],
      AM_XGETTEXT_OPTION([--flag=xfprintf:2:c-format])
      AM_XGETTEXT_OPTION([--flag=xvfprintf:2:c-format])])
   gl_XSIZE
+  gl_XSTRNDUP
   gl_XVASPRINTF
   m4_ifdef([AM_XGETTEXT_OPTION],
     [AM_XGETTEXT_OPTION([--flag=xasprintf:1:c-format])])
+  m4_ifval(M4_LIBSOURCES_LIST, [
+    m4_syscmd([test ! -d ]m4_defn([M4_LIBSOURCES_DIR])[ ||
+      for gl_file in ]M4_LIBSOURCES_LIST[ ; do
+        if test ! -r ]m4_defn([M4_LIBSOURCES_DIR])[/$gl_file ; then
+          echo "missing file ]m4_defn([M4_LIBSOURCES_DIR])[/$gl_file" >&2
+          exit 1
+        fi
+      done])dnl
+      m4_if(m4_sysval, [0], [],
+        [AC_FATAL([expected source file, required through AC_LIBSOURCES, not found])])
+  ])
+  m4_popdef([M4_LIBSOURCES_DIR])
+  m4_popdef([M4_LIBSOURCES_LIST])
   m4_popdef([AC_LIBSOURCES])
   m4_popdef([AC_REPLACE_FUNCS])
   m4_popdef([AC_LIBOBJ])
@@ -200,6 +247,9 @@ AC_DEFUN([M4_INIT],
   m4_pushdef([AC_LIBOBJ], m4_defn([M4tests_LIBOBJ]))
   m4_pushdef([AC_REPLACE_FUNCS], m4_defn([M4tests_REPLACE_FUNCS]))
   m4_pushdef([AC_LIBSOURCES], m4_defn([M4tests_LIBSOURCES]))
+  m4_pushdef([M4tests_LIBSOURCES_LIST], [])
+  m4_pushdef([M4tests_LIBSOURCES_DIR], [])
+  gl_COMMON
   gl_source_base='tests'
   gl_DOUBLE_EXPONENT_LOCATION
   gl_FLOAT_EXPONENT_LOCATION
@@ -209,7 +259,24 @@ AC_DEFUN([M4_INIT],
   AC_REQUIRE([gl_LONG_DOUBLE_EXPONENT_LOCATION])
   gt_TYPE_WCHAR_T
   gt_TYPE_WINT_T
+  gl_FUNC_STRDUP
+  gl_STRING_MODULE_INDICATOR([strdup])
   AC_CHECK_DECLS_ONCE([alarm])
+  gl_THREAD
+  gl_YIELD
+  m4_ifval(M4tests_LIBSOURCES_LIST, [
+    m4_syscmd([test ! -d ]m4_defn([M4tests_LIBSOURCES_DIR])[ ||
+      for gl_file in ]M4tests_LIBSOURCES_LIST[ ; do
+        if test ! -r ]m4_defn([M4tests_LIBSOURCES_DIR])[/$gl_file ; then
+          echo "missing file ]m4_defn([M4tests_LIBSOURCES_DIR])[/$gl_file" >&2
+          exit 1
+        fi
+      done])dnl
+      m4_if(m4_sysval, [0], [],
+        [AC_FATAL([expected source file, required through AC_LIBSOURCES, not found])])
+  ])
+  m4_popdef([M4tests_LIBSOURCES_DIR])
+  m4_popdef([M4tests_LIBSOURCES_LIST])
   m4_popdef([AC_LIBSOURCES])
   m4_popdef([AC_REPLACE_FUNCS])
   m4_popdef([AC_LIBOBJ])
@@ -242,13 +309,6 @@ AC_DEFUN([M4_LIBOBJ], [
   M4_LIBOBJS="$M4_LIBOBJS $1.$ac_objext"
 ])
 
-# m4_foreach_w is provided by autoconf-2.59c and later.
-# This definition is to accommodate developers using versions
-# of autoconf older than that.
-m4_ifndef([m4_foreach_w],
-  [m4_define([m4_foreach_w],
-    [m4_foreach([$1], m4_split(m4_normalize([$2]), [ ]), [$3])])])
-
 # Like AC_REPLACE_FUNCS, except that the module name goes
 # into M4_LIBOBJS instead of into LIBOBJS.
 AC_DEFUN([M4_REPLACE_FUNCS], [
@@ -257,15 +317,14 @@ AC_DEFUN([M4_REPLACE_FUNCS], [
 ])
 
 # Like AC_LIBSOURCES, except the directory where the source file is
-# expected is derived from the gnulib-tool parametrization,
+# expected is derived from the gnulib-tool parameterization,
 # and alloca is special cased (for the alloca-opt module).
 # We could also entirely rely on EXTRA_lib..._SOURCES.
 AC_DEFUN([M4_LIBSOURCES], [
   m4_foreach([_gl_NAME], [$1], [
     m4_if(_gl_NAME, [alloca.c], [], [
-      m4_syscmd([test -r lib/]_gl_NAME[ || test ! -d lib])dnl
-      m4_if(m4_sysval, [0], [],
-        [AC_FATAL([missing lib/]_gl_NAME)])
+      m4_define([M4_LIBSOURCES_DIR], [lib])
+      m4_append([M4_LIBSOURCES_LIST], _gl_NAME, [ ])
     ])
   ])
 ])
@@ -277,13 +336,6 @@ AC_DEFUN([M4tests_LIBOBJ], [
   M4tests_LIBOBJS="$M4tests_LIBOBJS $1.$ac_objext"
 ])
 
-# m4_foreach_w is provided by autoconf-2.59c and later.
-# This definition is to accommodate developers using versions
-# of autoconf older than that.
-m4_ifndef([m4_foreach_w],
-  [m4_define([m4_foreach_w],
-    [m4_foreach([$1], m4_split(m4_normalize([$2]), [ ]), [$3])])])
-
 # Like AC_REPLACE_FUNCS, except that the module name goes
 # into M4tests_LIBOBJS instead of into LIBOBJS.
 AC_DEFUN([M4tests_REPLACE_FUNCS], [
@@ -292,15 +344,14 @@ AC_DEFUN([M4tests_REPLACE_FUNCS], [
 ])
 
 # Like AC_LIBSOURCES, except the directory where the source file is
-# expected is derived from the gnulib-tool parametrization,
+# expected is derived from the gnulib-tool parameterization,
 # and alloca is special cased (for the alloca-opt module).
 # We could also entirely rely on EXTRA_lib..._SOURCES.
 AC_DEFUN([M4tests_LIBSOURCES], [
   m4_foreach([_gl_NAME], [$1], [
     m4_if(_gl_NAME, [alloca.c], [], [
-      m4_syscmd([test -r tests/]_gl_NAME[ || test ! -d tests])dnl
-      m4_if(m4_sysval, [0], [],
-        [AC_FATAL([missing tests/]_gl_NAME)])
+      m4_define([M4tests_LIBSOURCES_DIR], [tests])
+      m4_append([M4tests_LIBSOURCES_LIST], _gl_NAME, [ ])
     ])
   ])
 ])
@@ -309,6 +360,7 @@ AC_DEFUN([M4tests_LIBSOURCES], [
 # gnulib-tool and may be removed by future gnulib-tool invocations.
 AC_DEFUN([M4_FILE_LIST], [
   build-aux/announce-gen
+  build-aux/config.rpath
   build-aux/gendocs.sh
   build-aux/git-version-gen
   build-aux/gnupload
@@ -320,9 +372,12 @@ AC_DEFUN([M4_FILE_LIST], [
   lib/alloca.in.h
   lib/asnprintf.c
   lib/asprintf.c
+  lib/basename.c
   lib/binary-io.h
   lib/c-ctype.c
   lib/c-ctype.h
+  lib/c-stack.c
+  lib/c-stack.h
   lib/clean-temp.c
   lib/clean-temp.h
   lib/cloexec.c
@@ -334,18 +389,25 @@ AC_DEFUN([M4_FILE_LIST], [
   lib/closeout.c
   lib/closeout.h
   lib/config.charset
+  lib/dirname.c
+  lib/dirname.h
   lib/dup-safer.c
+  lib/errno.in.h
   lib/error.c
   lib/error.h
   lib/exitfail.c
   lib/exitfail.h
   lib/fatal-signal.c
   lib/fatal-signal.h
+  lib/fcntl.in.h
   lib/fd-safer.c
   lib/fflush.c
+  lib/filenamecat.c
+  lib/filenamecat.h
   lib/float+.h
   lib/float.in.h
   lib/fopen-safer.c
+  lib/fopen.c
   lib/fpending.c
   lib/fpending.h
   lib/fpucw.h
@@ -378,12 +440,17 @@ AC_DEFUN([M4_FILE_LIST], [
   lib/gl_list.h
   lib/gl_oset.c
   lib/gl_oset.h
+  lib/glthread/lock.c
+  lib/glthread/lock.h
+  lib/glthread/threadlib.c
+  lib/glthread/tls.c
+  lib/glthread/tls.h
   lib/intprops.h
   lib/isnan.c
+  lib/isnand-nolibm.h
   lib/isnand.c
-  lib/isnand.h
+  lib/isnanf-nolibm.h
   lib/isnanf.c
-  lib/isnanf.h
   lib/isnanl-nolibm.h
   lib/isnanl.c
   lib/localcharset.c
@@ -396,11 +463,13 @@ AC_DEFUN([M4_FILE_LIST], [
   lib/math.in.h
   lib/memchr.c
   lib/memcmp.c
+  lib/memset.c
   lib/mkdtemp.c
   lib/mkstemp-safer.c
   lib/mkstemp.c
   lib/obstack.c
   lib/obstack.h
+  lib/open.c
   lib/pathmax.h
   lib/pipe-safer.c
   lib/printf-args.c
@@ -411,8 +480,11 @@ AC_DEFUN([M4_FILE_LIST], [
   lib/printf-frexpl.h
   lib/printf-parse.c
   lib/printf-parse.h
+  lib/progname.c
+  lib/progname.h
   lib/quotearg.c
   lib/quotearg.h
+  lib/raise.c
   lib/ref-add.sin
   lib/ref-del.sin
   lib/regcomp.c
@@ -421,17 +493,23 @@ AC_DEFUN([M4_FILE_LIST], [
   lib/regex_internal.c
   lib/regex_internal.h
   lib/regexec.c
+  lib/sig-handler.h
+  lib/sigaction.c
+  lib/siglist.h
   lib/signal.in.h
   lib/signbitd.c
   lib/signbitf.c
   lib/signbitl.c
   lib/sigprocmask.c
   lib/size_max.h
+  lib/snprintf.c
   lib/stdarg.in.h
   lib/stdbool.in.h
   lib/stdint.in.h
   lib/stdio--.h
+  lib/stdio-impl.h
   lib/stdio-safer.h
+  lib/stdio-write.c
   lib/stdio.in.h
   lib/stdlib--.h
   lib/stdlib-safer.h
@@ -439,6 +517,10 @@ AC_DEFUN([M4_FILE_LIST], [
   lib/str-two-way.h
   lib/strerror.c
   lib/string.in.h
+  lib/stripslash.c
+  lib/strndup.c
+  lib/strnlen.c
+  lib/strsignal.c
   lib/strstr.c
   lib/strtod.c
   lib/strtol.c
@@ -471,24 +553,37 @@ AC_DEFUN([M4_FILE_LIST], [
   lib/xprintf.c
   lib/xprintf.h
   lib/xsize.h
+  lib/xstrndup.c
+  lib/xstrndup.h
   lib/xvasprintf.c
   lib/xvasprintf.h
   m4/alloca.m4
   m4/assert.m4
+  m4/autobuild.m4
+  m4/c-stack.m4
   m4/cloexec.m4
   m4/close-stream.m4
   m4/closein.m4
   m4/closeout.m4
   m4/codeset.m4
   m4/config-h.m4
+  m4/dirname.m4
+  m4/dos.m4
+  m4/double-slash-root.m4
   m4/eealloc.m4
-  m4/eoverflow.m4
+  m4/errno_h.m4
   m4/error.m4
   m4/exitfail.m4
+  m4/exponentd.m4
+  m4/exponentf.m4
+  m4/exponentl.m4
   m4/extensions.m4
   m4/fatal-signal.m4
+  m4/fcntl_h.m4
   m4/fflush.m4
+  m4/filenamecat.m4
   m4/float_h.m4
+  m4/fopen.m4
   m4/fpending.m4
   m4/fpieee.m4
   m4/fpurge.m4
@@ -510,7 +605,12 @@ AC_DEFUN([M4_FILE_LIST], [
   m4/isnanf.m4
   m4/isnanl.m4
   m4/ldexpl.m4
+  m4/lib-ld.m4
+  m4/lib-link.m4
+  m4/lib-prefix.m4
+  m4/libsigsegv.m4
   m4/localcharset.m4
+  m4/lock.m4
   m4/longlong.m4
   m4/lseek.m4
   m4/malloc.m4
@@ -520,9 +620,11 @@ AC_DEFUN([M4_FILE_LIST], [
   m4/mbstate_t.m4
   m4/memchr.m4
   m4/memcmp.m4
+  m4/memset.m4
   m4/mkdtemp.m4
   m4/mkstemp.m4
   m4/nocrash.m4
+  m4/open.m4
   m4/pathmax.m4
   m4/printf-frexp.m4
   m4/printf-frexpl.m4
@@ -530,10 +632,12 @@ AC_DEFUN([M4_FILE_LIST], [
   m4/quotearg.m4
   m4/regex.m4
   m4/sig_atomic_t.m4
+  m4/sigaction.m4
   m4/signal_h.m4
   m4/signalblocking.m4
   m4/signbit.m4
   m4/size_max.m4
+  m4/snprintf.m4
   m4/ssize_t.m4
   m4/stdarg.m4
   m4/stdbool.m4
@@ -543,14 +647,21 @@ AC_DEFUN([M4_FILE_LIST], [
   m4/stdio_h.m4
   m4/stdlib-safer.m4
   m4/stdlib_h.m4
+  m4/strdup.m4
   m4/strerror.m4
   m4/string_h.m4
+  m4/strndup.m4
+  m4/strnlen.m4
+  m4/strsignal.m4
   m4/strstr.m4
   m4/strtod.m4
   m4/strtol.m4
   m4/sys_stat_h.m4
   m4/sys_time_h.m4
   m4/tempname.m4
+  m4/thread.m4
+  m4/threadlib.m4
+  m4/tls.m4
   m4/tmpdir.m4
   m4/unistd-safer.m4
   m4/unistd_h.m4
@@ -564,9 +675,10 @@ AC_DEFUN([M4_FILE_LIST], [
   m4/wint_t.m4
   m4/xalloc.m4
   m4/xsize.m4
+  m4/xstrndup.m4
   m4/xvasprintf.m4
+  m4/yield.m4
   tests/nan.h
-  tests/test-EOVERFLOW.c
   tests/test-alloca-opt.c
   tests/test-array_list.c
   tests/test-array_oset.c
@@ -574,11 +686,19 @@ AC_DEFUN([M4_FILE_LIST], [
   tests/test-binary-io.c
   tests/test-binary-io.sh
   tests/test-c-ctype.c
+  tests/test-c-stack.c
+  tests/test-c-stack.sh
+  tests/test-c-stack2.sh
   tests/test-closein.c
   tests/test-closein.sh
+  tests/test-dirname.c
+  tests/test-errno.c
+  tests/test-fcntl.c
   tests/test-fflush.c
   tests/test-fflush2.c
   tests/test-fflush2.sh
+  tests/test-filenamecat.c
+  tests/test-fopen.c
   tests/test-fpending.c
   tests/test-fpending.sh
   tests/test-fpurge.c
@@ -592,29 +712,39 @@ AC_DEFUN([M4_FILE_LIST], [
   tests/test-ftello.c
   tests/test-ftello.sh
   tests/test-gettimeofday.c
-  tests/test-isnand.c
-  tests/test-isnanf.c
+  tests/test-isnand-nolibm.c
+  tests/test-isnand.h
+  tests/test-isnanf-nolibm.c
+  tests/test-isnanf.h
   tests/test-isnanl-nolibm.c
   tests/test-isnanl.h
   tests/test-linkedhash_list.c
+  tests/test-lock.c
   tests/test-lseek.c
   tests/test-lseek.sh
   tests/test-malloca.c
   tests/test-math.c
+  tests/test-memchr.c
+  tests/test-memcmp.c
+  tests/test-open.c
   tests/test-printf-frexp.c
   tests/test-printf-frexpl.c
   tests/test-quotearg.c
+  tests/test-sigaction.c
   tests/test-signbit.c
+  tests/test-snprintf.c
   tests/test-stdbool.c
   tests/test-stdint.c
   tests/test-stdio.c
   tests/test-stdlib.c
   tests/test-strerror.c
   tests/test-string.c
+  tests/test-strsignal.c
   tests/test-strstr.c
   tests/test-strtod.c
   tests/test-sys_stat.c
   tests/test-sys_time.c
+  tests/test-tls.c
   tests/test-unistd.c
   tests/test-vasnprintf.c
   tests/test-vasprintf-posix.c
@@ -626,8 +756,10 @@ AC_DEFUN([M4_FILE_LIST], [
   tests=lib/gl_array_list.h
   tests=lib/gl_array_oset.c
   tests=lib/gl_array_oset.h
-  tests=lib/progname.c
-  tests=lib/progname.h
+  tests=lib/glthread/thread.c
+  tests=lib/glthread/thread.h
+  tests=lib/glthread/yield.h
+  tests=lib/strdup.c
   tests=lib/verify.h
   top/GNUmakefile
 ])

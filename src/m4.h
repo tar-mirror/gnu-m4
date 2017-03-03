@@ -27,6 +27,7 @@
 
 #include <ctype.h>
 #include <errno.h>
+#include <limits.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
@@ -37,8 +38,10 @@
 #include "cloexec.h"
 #include "close-stream.h"
 #include "closein.h"
+#include "dirname.h"
 #include "error.h"
 #include "exitfail.h"
+#include "filenamecat.h"
 #include "obstack.h"
 #include "stdio--.h"
 #include "stdlib--.h"
@@ -64,10 +67,17 @@
 /* Canonicalize OS/2 recognition macro.  */
 #ifdef __EMX__
 # define OS2 1
+# undef UNIX
 #endif
+
+/* Used if any programmer error is detected (not possible, right?)  */
+#define EXIT_INTERNAL_ERROR 2
 
 /* Used for version mismatch, when -R detects a frozen file it can't parse.  */
 #define EXIT_MISMATCH 63
+
+/* No-op, for future gettext compatibility.  */
+#define _(ARG) ARG
 
 /* Various declarations.  */
 
@@ -134,10 +144,6 @@ void m4_error_at_line (int, int, const char *, int,
 #define M4ERROR(Arglist) (m4_error Arglist)
 #define M4ERROR_AT_LINE(Arglist) (m4_error_at_line Arglist)
 
-#ifdef USE_STACKOVF
-void setup_stackovf_trap (char *const *, char *const *,
-			  void (*handler) (void));
-#endif
 
 /* File: debug.c  --- debugging and tracing function.  */
 
@@ -441,7 +447,7 @@ bool evaluate (const char *, int32_t *);
 
 /* File: format.c  --- printf like formatting.  */
 
-void format (struct obstack *, int, token_data **);
+void expand_format (struct obstack *, int, token_data **);
 
 /* File: freeze.c --- frozen state files.  */
 

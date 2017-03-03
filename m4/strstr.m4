@@ -1,4 +1,4 @@
-# strstr.m4 serial 1
+# strstr.m4 serial 5
 dnl Copyright (C) 2008 Free Software Foundation, Inc.
 dnl This file is free software; the Free Software Foundation
 dnl gives unlimited permission to copy and/or distribute it,
@@ -10,16 +10,18 @@ AC_DEFUN([gl_FUNC_STRSTR],
   AC_REQUIRE([gl_HEADER_STRING_H_DEFAULTS])
   AC_CACHE_CHECK([whether strstr works in linear time],
     [gl_cv_func_strstr_linear],
-    [AC_RUN_IFELSE([AC_LANG_PROGRAM([
+    [AC_RUN_IFELSE([AC_LANG_PROGRAM([[
+#include <signal.h> /* for signal */
 #include <string.h> /* for memmem */
 #include <stdlib.h> /* for malloc */
 #include <unistd.h> /* for alarm */
-], [[size_t m = 1000000;
+]], [[size_t m = 1000000;
     char *haystack = (char *) malloc (2 * m + 2);
     char *needle = (char *) malloc (m + 2);
     void *result = 0;
     /* Failure to compile this test due to missing alarm is okay,
        since all such platforms (mingw) also have quadratic strstr.  */
+    signal (SIGALRM, SIG_DFL);
     alarm (5);
     /* Check for quadratic performance.  */
     if (haystack && needle)
@@ -34,9 +36,27 @@ AC_DEFUN([gl_FUNC_STRSTR],
       }
     return !result;]])],
       [gl_cv_func_strstr_linear=yes], [gl_cv_func_strstr_linear=no],
-      [dnl pessimistically assume the worst, since even glibc 2.6.1
-       dnl has quadratic complexity in its strstr
-       gl_cv_func_strstr_linear="guessing no"])])
+      [dnl Only glibc >= 2.9 and cygwin >= 1.7.0 are known to have a
+       dnl strstr that works in linear time.
+       AC_EGREP_CPP([Lucky user],
+	 [
+#include <features.h>
+#ifdef __GNU_LIBRARY__
+ #if (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 9) || (__GLIBC__ > 2)
+  Lucky user
+ #endif
+#endif
+#ifdef __CYGWIN__
+ #include <cygwin/version.h>
+ #if CYGWIN_VERSION_DLL_MAJOR >= 1007
+  Lucky user
+ #endif
+#endif
+	 ],
+	 [gl_cv_func_strstr_linear=yes],
+	 [gl_cv_func_strstr_linear="guessing no"])
+      ])
+    ])
   if test "$gl_cv_func_strstr_linear" != yes; then
     REPLACE_STRSTR=1
     AC_LIBOBJ([strstr])

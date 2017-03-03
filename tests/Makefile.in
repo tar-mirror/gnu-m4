@@ -44,95 +44,119 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-TESTS = test-EOVERFLOW$(EXEEXT) test-alloca-opt$(EXEEXT) \
-	test-array_list$(EXEEXT) test-array_oset$(EXEEXT) \
-	test-avltree_oset$(EXEEXT) test-binary-io.sh \
-	test-c-ctype$(EXEEXT) test-closein.sh test-fflush$(EXEEXT) \
-	test-fflush2.sh test-fpending.sh test-fpurge$(EXEEXT) \
-	test-freadahead.sh test-freading$(EXEEXT) test-frexp$(EXEEXT) \
+TESTS = test-alloca-opt$(EXEEXT) test-array_list$(EXEEXT) \
+	test-array_oset$(EXEEXT) test-avltree_oset$(EXEEXT) \
+	test-binary-io.sh test-c-ctype$(EXEEXT) test-c-stack.sh \
+	test-c-stack2.sh test-closein.sh test-dirname$(EXEEXT) \
+	test-errno$(EXEEXT) test-fcntl$(EXEEXT) test-fflush$(EXEEXT) \
+	test-fflush2.sh test-filenamecat$(EXEEXT) test-fopen$(EXEEXT) \
+	test-fpending.sh test-fpurge$(EXEEXT) test-freadahead.sh \
+	test-freading$(EXEEXT) test-frexp$(EXEEXT) \
 	test-frexpl$(EXEEXT) test-fseeko.sh test-ftello.sh \
-	test-gettimeofday$(EXEEXT) test-isnand$(EXEEXT) \
-	test-isnanf$(EXEEXT) test-isnanl-nolibm$(EXEEXT) \
-	test-linkedhash_list$(EXEEXT) test-lseek.sh \
-	test-malloca$(EXEEXT) test-math$(EXEEXT) \
+	test-gettimeofday$(EXEEXT) test-isnand-nolibm$(EXEEXT) \
+	test-isnanf-nolibm$(EXEEXT) test-isnanl-nolibm$(EXEEXT) \
+	test-linkedhash_list$(EXEEXT) test-lock$(EXEEXT) test-lseek.sh \
+	test-malloca$(EXEEXT) test-math$(EXEEXT) test-memchr$(EXEEXT) \
+	test-memcmp$(EXEEXT) test-open$(EXEEXT) \
 	test-printf-frexp$(EXEEXT) test-printf-frexpl$(EXEEXT) \
-	test-quotearg$(EXEEXT) test-signbit$(EXEEXT) \
+	test-quotearg$(EXEEXT) test-sigaction$(EXEEXT) \
+	test-signbit$(EXEEXT) test-snprintf$(EXEEXT) \
 	test-stdbool$(EXEEXT) test-stdint$(EXEEXT) test-stdio$(EXEEXT) \
 	test-stdlib$(EXEEXT) test-strerror$(EXEEXT) \
-	test-string$(EXEEXT) test-strstr$(EXEEXT) test-strtod$(EXEEXT) \
+	test-string$(EXEEXT) test-strsignal$(EXEEXT) \
+	test-strstr$(EXEEXT) test-strtod$(EXEEXT) \
 	test-sys_stat$(EXEEXT) test-sys_time$(EXEEXT) \
-	test-unistd$(EXEEXT) test-vasnprintf$(EXEEXT) \
-	test-vasprintf-posix$(EXEEXT) test-vasprintf$(EXEEXT) \
-	test-wchar$(EXEEXT) test-wctype$(EXEEXT) \
-	test-xvasprintf$(EXEEXT)
+	test-tls$(EXEEXT) test-unistd$(EXEEXT) \
+	test-vasnprintf$(EXEEXT) test-vasprintf-posix$(EXEEXT) \
+	test-vasprintf$(EXEEXT) test-wchar$(EXEEXT) \
+	test-wctype$(EXEEXT) test-xvasprintf$(EXEEXT)
 noinst_PROGRAMS =
-check_PROGRAMS = test-EOVERFLOW$(EXEEXT) test-alloca-opt$(EXEEXT) \
-	test-array_list$(EXEEXT) test-array_oset$(EXEEXT) \
-	test-avltree_oset$(EXEEXT) test-binary-io$(EXEEXT) \
-	test-c-ctype$(EXEEXT) test-closein$(EXEEXT) \
+check_PROGRAMS = test-alloca-opt$(EXEEXT) test-array_list$(EXEEXT) \
+	test-array_oset$(EXEEXT) test-avltree_oset$(EXEEXT) \
+	test-binary-io$(EXEEXT) test-c-ctype$(EXEEXT) \
+	test-c-stack$(EXEEXT) test-closein$(EXEEXT) \
+	test-dirname$(EXEEXT) test-errno$(EXEEXT) test-fcntl$(EXEEXT) \
 	test-fflush$(EXEEXT) test-fflush2$(EXEEXT) \
+	test-filenamecat$(EXEEXT) test-fopen$(EXEEXT) \
 	test-fpending$(EXEEXT) test-fpurge$(EXEEXT) \
 	test-freadahead$(EXEEXT) test-freading$(EXEEXT) \
 	test-frexp$(EXEEXT) test-frexpl$(EXEEXT) test-fseeko$(EXEEXT) \
 	test-ftello$(EXEEXT) test-gettimeofday$(EXEEXT) \
-	test-isnand$(EXEEXT) test-isnanf$(EXEEXT) \
+	test-isnand-nolibm$(EXEEXT) test-isnanf-nolibm$(EXEEXT) \
 	test-isnanl-nolibm$(EXEEXT) test-linkedhash_list$(EXEEXT) \
-	test-lseek$(EXEEXT) test-malloca$(EXEEXT) test-math$(EXEEXT) \
-	test-printf-frexp$(EXEEXT) test-printf-frexpl$(EXEEXT) \
-	test-quotearg$(EXEEXT) test-signbit$(EXEEXT) \
-	test-stdbool$(EXEEXT) test-stdint$(EXEEXT) test-stdio$(EXEEXT) \
-	test-stdlib$(EXEEXT) test-strerror$(EXEEXT) \
-	test-string$(EXEEXT) test-strstr$(EXEEXT) test-strtod$(EXEEXT) \
-	test-sys_stat$(EXEEXT) test-sys_time$(EXEEXT) \
-	test-unistd$(EXEEXT) test-vasnprintf$(EXEEXT) \
-	test-vasprintf-posix$(EXEEXT) test-vasprintf$(EXEEXT) \
-	test-wchar$(EXEEXT) test-wctype$(EXEEXT) \
-	test-xvasprintf$(EXEEXT)
+	test-lock$(EXEEXT) test-lseek$(EXEEXT) test-malloca$(EXEEXT) \
+	test-math$(EXEEXT) test-memchr$(EXEEXT) test-memcmp$(EXEEXT) \
+	test-open$(EXEEXT) test-printf-frexp$(EXEEXT) \
+	test-printf-frexpl$(EXEEXT) test-quotearg$(EXEEXT) \
+	test-sigaction$(EXEEXT) test-signbit$(EXEEXT) \
+	test-snprintf$(EXEEXT) test-stdbool$(EXEEXT) \
+	test-stdint$(EXEEXT) test-stdio$(EXEEXT) test-stdlib$(EXEEXT) \
+	test-strerror$(EXEEXT) test-string$(EXEEXT) \
+	test-strsignal$(EXEEXT) test-strstr$(EXEEXT) \
+	test-strtod$(EXEEXT) test-sys_stat$(EXEEXT) \
+	test-sys_time$(EXEEXT) test-tls$(EXEEXT) test-unistd$(EXEEXT) \
+	test-vasnprintf$(EXEEXT) test-vasprintf-posix$(EXEEXT) \
+	test-vasprintf$(EXEEXT) test-wchar$(EXEEXT) \
+	test-wctype$(EXEEXT) test-xvasprintf$(EXEEXT)
 subdir = tests
 DIST_COMMON = $(noinst_HEADERS) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/alloca.m4 \
-	$(top_srcdir)/m4/assert.m4 $(top_srcdir)/m4/cloexec.m4 \
+	$(top_srcdir)/m4/assert.m4 $(top_srcdir)/m4/autobuild.m4 \
+	$(top_srcdir)/m4/c-stack.m4 $(top_srcdir)/m4/cloexec.m4 \
 	$(top_srcdir)/m4/close-stream.m4 $(top_srcdir)/m4/closein.m4 \
 	$(top_srcdir)/m4/closeout.m4 $(top_srcdir)/m4/codeset.m4 \
-	$(top_srcdir)/m4/config-h.m4 $(top_srcdir)/m4/eealloc.m4 \
-	$(top_srcdir)/m4/eoverflow.m4 $(top_srcdir)/m4/error.m4 \
-	$(top_srcdir)/m4/exitfail.m4 $(top_srcdir)/m4/extensions.m4 \
-	$(top_srcdir)/m4/fatal-signal.m4 $(top_srcdir)/m4/fflush.m4 \
-	$(top_srcdir)/m4/float_h.m4 $(top_srcdir)/m4/fpending.m4 \
-	$(top_srcdir)/m4/fpieee.m4 $(top_srcdir)/m4/fpurge.m4 \
-	$(top_srcdir)/m4/freading.m4 $(top_srcdir)/m4/frexp.m4 \
-	$(top_srcdir)/m4/frexpl.m4 $(top_srcdir)/m4/fseeko.m4 \
-	$(top_srcdir)/m4/ftello.m4 $(top_srcdir)/m4/getopt.m4 \
-	$(top_srcdir)/m4/gettimeofday.m4 $(top_srcdir)/m4/gl_list.m4 \
-	$(top_srcdir)/m4/glibc21.m4 $(top_srcdir)/m4/gnulib-common.m4 \
+	$(top_srcdir)/m4/config-h.m4 $(top_srcdir)/m4/dirname.m4 \
+	$(top_srcdir)/m4/dos.m4 $(top_srcdir)/m4/double-slash-root.m4 \
+	$(top_srcdir)/m4/eealloc.m4 $(top_srcdir)/m4/errno_h.m4 \
+	$(top_srcdir)/m4/error.m4 $(top_srcdir)/m4/exitfail.m4 \
+	$(top_srcdir)/m4/exponentd.m4 $(top_srcdir)/m4/exponentf.m4 \
+	$(top_srcdir)/m4/exponentl.m4 $(top_srcdir)/m4/extensions.m4 \
+	$(top_srcdir)/m4/fatal-signal.m4 $(top_srcdir)/m4/fcntl_h.m4 \
+	$(top_srcdir)/m4/fflush.m4 $(top_srcdir)/m4/filenamecat.m4 \
+	$(top_srcdir)/m4/float_h.m4 $(top_srcdir)/m4/fopen.m4 \
+	$(top_srcdir)/m4/fpending.m4 $(top_srcdir)/m4/fpieee.m4 \
+	$(top_srcdir)/m4/fpurge.m4 $(top_srcdir)/m4/freading.m4 \
+	$(top_srcdir)/m4/frexp.m4 $(top_srcdir)/m4/frexpl.m4 \
+	$(top_srcdir)/m4/fseeko.m4 $(top_srcdir)/m4/ftello.m4 \
+	$(top_srcdir)/m4/getopt.m4 $(top_srcdir)/m4/gettimeofday.m4 \
+	$(top_srcdir)/m4/gl_list.m4 $(top_srcdir)/m4/glibc21.m4 \
+	$(top_srcdir)/m4/gnulib-common.m4 \
 	$(top_srcdir)/m4/gnulib-comp.m4 \
 	$(top_srcdir)/m4/include_next.m4 $(top_srcdir)/m4/inline.m4 \
 	$(top_srcdir)/m4/intmax_t.m4 $(top_srcdir)/m4/inttypes_h.m4 \
 	$(top_srcdir)/m4/isnand.m4 $(top_srcdir)/m4/isnanf.m4 \
 	$(top_srcdir)/m4/isnanl.m4 $(top_srcdir)/m4/ldexpl.m4 \
-	$(top_srcdir)/m4/localcharset.m4 $(top_srcdir)/m4/longlong.m4 \
-	$(top_srcdir)/m4/lseek.m4 $(top_srcdir)/m4/malloc.m4 \
-	$(top_srcdir)/m4/malloca.m4 $(top_srcdir)/m4/math_h.m4 \
-	$(top_srcdir)/m4/mbrtowc.m4 $(top_srcdir)/m4/mbstate_t.m4 \
-	$(top_srcdir)/m4/memchr.m4 $(top_srcdir)/m4/memcmp.m4 \
+	$(top_srcdir)/m4/lib-ld.m4 $(top_srcdir)/m4/lib-link.m4 \
+	$(top_srcdir)/m4/lib-prefix.m4 $(top_srcdir)/m4/libsigsegv.m4 \
+	$(top_srcdir)/m4/localcharset.m4 $(top_srcdir)/m4/lock.m4 \
+	$(top_srcdir)/m4/longlong.m4 $(top_srcdir)/m4/lseek.m4 \
+	$(top_srcdir)/m4/malloc.m4 $(top_srcdir)/m4/malloca.m4 \
+	$(top_srcdir)/m4/math_h.m4 $(top_srcdir)/m4/mbrtowc.m4 \
+	$(top_srcdir)/m4/mbstate_t.m4 $(top_srcdir)/m4/memchr.m4 \
+	$(top_srcdir)/m4/memcmp.m4 $(top_srcdir)/m4/memset.m4 \
 	$(top_srcdir)/m4/mkdtemp.m4 $(top_srcdir)/m4/mkstemp.m4 \
-	$(top_srcdir)/m4/nocrash.m4 $(top_srcdir)/m4/pathmax.m4 \
-	$(top_srcdir)/m4/printf-frexp.m4 \
+	$(top_srcdir)/m4/nocrash.m4 $(top_srcdir)/m4/open.m4 \
+	$(top_srcdir)/m4/pathmax.m4 $(top_srcdir)/m4/printf-frexp.m4 \
 	$(top_srcdir)/m4/printf-frexpl.m4 $(top_srcdir)/m4/printf.m4 \
 	$(top_srcdir)/m4/quotearg.m4 $(top_srcdir)/m4/regex.m4 \
-	$(top_srcdir)/m4/sig_atomic_t.m4 $(top_srcdir)/m4/signal_h.m4 \
+	$(top_srcdir)/m4/sig_atomic_t.m4 $(top_srcdir)/m4/sigaction.m4 \
+	$(top_srcdir)/m4/signal_h.m4 \
 	$(top_srcdir)/m4/signalblocking.m4 $(top_srcdir)/m4/signbit.m4 \
-	$(top_srcdir)/m4/size_max.m4 $(top_srcdir)/m4/ssize_t.m4 \
-	$(top_srcdir)/m4/stdarg.m4 $(top_srcdir)/m4/stdbool.m4 \
-	$(top_srcdir)/m4/stdint.m4 $(top_srcdir)/m4/stdint_h.m4 \
-	$(top_srcdir)/m4/stdio-safer.m4 $(top_srcdir)/m4/stdio_h.m4 \
-	$(top_srcdir)/m4/stdlib-safer.m4 $(top_srcdir)/m4/stdlib_h.m4 \
+	$(top_srcdir)/m4/size_max.m4 $(top_srcdir)/m4/snprintf.m4 \
+	$(top_srcdir)/m4/ssize_t.m4 $(top_srcdir)/m4/stdarg.m4 \
+	$(top_srcdir)/m4/stdbool.m4 $(top_srcdir)/m4/stdint.m4 \
+	$(top_srcdir)/m4/stdint_h.m4 $(top_srcdir)/m4/stdio-safer.m4 \
+	$(top_srcdir)/m4/stdio_h.m4 $(top_srcdir)/m4/stdlib-safer.m4 \
+	$(top_srcdir)/m4/stdlib_h.m4 $(top_srcdir)/m4/strdup.m4 \
 	$(top_srcdir)/m4/strerror.m4 $(top_srcdir)/m4/string_h.m4 \
-	$(top_srcdir)/m4/strstr.m4 $(top_srcdir)/m4/strtod.m4 \
-	$(top_srcdir)/m4/strtol.m4 $(top_srcdir)/m4/sys_stat_h.m4 \
-	$(top_srcdir)/m4/sys_time_h.m4 $(top_srcdir)/m4/tempname.m4 \
+	$(top_srcdir)/m4/strndup.m4 $(top_srcdir)/m4/strnlen.m4 \
+	$(top_srcdir)/m4/strsignal.m4 $(top_srcdir)/m4/strstr.m4 \
+	$(top_srcdir)/m4/strtod.m4 $(top_srcdir)/m4/strtol.m4 \
+	$(top_srcdir)/m4/sys_stat_h.m4 $(top_srcdir)/m4/sys_time_h.m4 \
+	$(top_srcdir)/m4/tempname.m4 $(top_srcdir)/m4/thread.m4 \
+	$(top_srcdir)/m4/threadlib.m4 $(top_srcdir)/m4/tls.m4 \
 	$(top_srcdir)/m4/tmpdir.m4 $(top_srcdir)/m4/unistd-safer.m4 \
 	$(top_srcdir)/m4/unistd_h.m4 $(top_srcdir)/m4/unlocked-io.m4 \
 	$(top_srcdir)/m4/vasnprintf.m4 \
@@ -140,7 +164,8 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/alloca.m4 \
 	$(top_srcdir)/m4/vasprintf.m4 $(top_srcdir)/m4/wchar.m4 \
 	$(top_srcdir)/m4/wchar_t.m4 $(top_srcdir)/m4/wctype.m4 \
 	$(top_srcdir)/m4/wint_t.m4 $(top_srcdir)/m4/xalloc.m4 \
-	$(top_srcdir)/m4/xsize.m4 $(top_srcdir)/m4/xvasprintf.m4 \
+	$(top_srcdir)/m4/xsize.m4 $(top_srcdir)/m4/xstrndup.m4 \
+	$(top_srcdir)/m4/xvasprintf.m4 $(top_srcdir)/m4/yield.m4 \
 	$(top_srcdir)/acinclude.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
@@ -153,14 +178,9 @@ ARFLAGS = cru
 libtests_a_AR = $(AR) $(ARFLAGS)
 am__DEPENDENCIES_1 =
 am_libtests_a_OBJECTS = gl_array_list.$(OBJEXT) \
-	gl_array_oset.$(OBJEXT) progname.$(OBJEXT)
+	gl_array_oset.$(OBJEXT) thread.$(OBJEXT)
 libtests_a_OBJECTS = $(am_libtests_a_OBJECTS)
 PROGRAMS = $(noinst_PROGRAMS)
-test_EOVERFLOW_SOURCES = test-EOVERFLOW.c
-test_EOVERFLOW_OBJECTS = test-EOVERFLOW.$(OBJEXT)
-test_EOVERFLOW_LDADD = $(LDADD)
-test_EOVERFLOW_DEPENDENCIES = libtests.a ../lib/libm4.a libtests.a \
-	$(am__DEPENDENCIES_1)
 test_alloca_opt_SOURCES = test-alloca-opt.c
 test_alloca_opt_OBJECTS = test-alloca-opt.$(OBJEXT)
 test_alloca_opt_LDADD = $(LDADD)
@@ -187,9 +207,26 @@ test_c_ctype_OBJECTS = test-c-ctype.$(OBJEXT)
 test_c_ctype_LDADD = $(LDADD)
 test_c_ctype_DEPENDENCIES = libtests.a ../lib/libm4.a libtests.a \
 	$(am__DEPENDENCIES_1)
+test_c_stack_SOURCES = test-c-stack.c
+test_c_stack_OBJECTS = test-c-stack.$(OBJEXT)
+test_c_stack_DEPENDENCIES = $(am__DEPENDENCIES_2) \
+	$(am__DEPENDENCIES_1)
 test_closein_SOURCES = test-closein.c
 test_closein_OBJECTS = test-closein.$(OBJEXT)
 test_closein_DEPENDENCIES = $(am__DEPENDENCIES_2)
+test_dirname_SOURCES = test-dirname.c
+test_dirname_OBJECTS = test-dirname.$(OBJEXT)
+test_dirname_DEPENDENCIES = $(am__DEPENDENCIES_2)
+test_errno_SOURCES = test-errno.c
+test_errno_OBJECTS = test-errno.$(OBJEXT)
+test_errno_LDADD = $(LDADD)
+test_errno_DEPENDENCIES = libtests.a ../lib/libm4.a libtests.a \
+	$(am__DEPENDENCIES_1)
+test_fcntl_SOURCES = test-fcntl.c
+test_fcntl_OBJECTS = test-fcntl.$(OBJEXT)
+test_fcntl_LDADD = $(LDADD)
+test_fcntl_DEPENDENCIES = libtests.a ../lib/libm4.a libtests.a \
+	$(am__DEPENDENCIES_1)
 test_fflush_SOURCES = test-fflush.c
 test_fflush_OBJECTS = test-fflush.$(OBJEXT)
 test_fflush_LDADD = $(LDADD)
@@ -199,6 +236,14 @@ test_fflush2_SOURCES = test-fflush2.c
 test_fflush2_OBJECTS = test-fflush2.$(OBJEXT)
 test_fflush2_LDADD = $(LDADD)
 test_fflush2_DEPENDENCIES = libtests.a ../lib/libm4.a libtests.a \
+	$(am__DEPENDENCIES_1)
+test_filenamecat_SOURCES = test-filenamecat.c
+test_filenamecat_OBJECTS = test-filenamecat.$(OBJEXT)
+test_filenamecat_DEPENDENCIES = $(am__DEPENDENCIES_2)
+test_fopen_SOURCES = test-fopen.c
+test_fopen_OBJECTS = test-fopen.$(OBJEXT)
+test_fopen_LDADD = $(LDADD)
+test_fopen_DEPENDENCIES = libtests.a ../lib/libm4.a libtests.a \
 	$(am__DEPENDENCIES_1)
 test_fpending_SOURCES = test-fpending.c
 test_fpending_OBJECTS = test-fpending.$(OBJEXT)
@@ -245,15 +290,15 @@ test_gettimeofday_OBJECTS = test-gettimeofday.$(OBJEXT)
 test_gettimeofday_LDADD = $(LDADD)
 test_gettimeofday_DEPENDENCIES = libtests.a ../lib/libm4.a libtests.a \
 	$(am__DEPENDENCIES_1)
-test_isnand_SOURCES = test-isnand.c
-test_isnand_OBJECTS = test-isnand.$(OBJEXT)
-test_isnand_LDADD = $(LDADD)
-test_isnand_DEPENDENCIES = libtests.a ../lib/libm4.a libtests.a \
+test_isnand_nolibm_SOURCES = test-isnand-nolibm.c
+test_isnand_nolibm_OBJECTS = test-isnand-nolibm.$(OBJEXT)
+test_isnand_nolibm_LDADD = $(LDADD)
+test_isnand_nolibm_DEPENDENCIES = libtests.a ../lib/libm4.a libtests.a \
 	$(am__DEPENDENCIES_1)
-test_isnanf_SOURCES = test-isnanf.c
-test_isnanf_OBJECTS = test-isnanf.$(OBJEXT)
-test_isnanf_LDADD = $(LDADD)
-test_isnanf_DEPENDENCIES = libtests.a ../lib/libm4.a libtests.a \
+test_isnanf_nolibm_SOURCES = test-isnanf-nolibm.c
+test_isnanf_nolibm_OBJECTS = test-isnanf-nolibm.$(OBJEXT)
+test_isnanf_nolibm_LDADD = $(LDADD)
+test_isnanf_nolibm_DEPENDENCIES = libtests.a ../lib/libm4.a libtests.a \
 	$(am__DEPENDENCIES_1)
 test_isnanl_nolibm_SOURCES = test-isnanl-nolibm.c
 test_isnanl_nolibm_OBJECTS = test-isnanl-nolibm.$(OBJEXT)
@@ -263,6 +308,9 @@ test_isnanl_nolibm_DEPENDENCIES = libtests.a ../lib/libm4.a libtests.a \
 test_linkedhash_list_SOURCES = test-linkedhash_list.c
 test_linkedhash_list_OBJECTS = test-linkedhash_list.$(OBJEXT)
 test_linkedhash_list_DEPENDENCIES = $(am__DEPENDENCIES_2)
+test_lock_SOURCES = test-lock.c
+test_lock_OBJECTS = test-lock.$(OBJEXT)
+test_lock_DEPENDENCIES = $(am__DEPENDENCIES_2)
 test_lseek_SOURCES = test-lseek.c
 test_lseek_OBJECTS = test-lseek.$(OBJEXT)
 test_lseek_LDADD = $(LDADD)
@@ -278,6 +326,21 @@ test_math_OBJECTS = test-math.$(OBJEXT)
 test_math_LDADD = $(LDADD)
 test_math_DEPENDENCIES = libtests.a ../lib/libm4.a libtests.a \
 	$(am__DEPENDENCIES_1)
+test_memchr_SOURCES = test-memchr.c
+test_memchr_OBJECTS = test-memchr.$(OBJEXT)
+test_memchr_LDADD = $(LDADD)
+test_memchr_DEPENDENCIES = libtests.a ../lib/libm4.a libtests.a \
+	$(am__DEPENDENCIES_1)
+test_memcmp_SOURCES = test-memcmp.c
+test_memcmp_OBJECTS = test-memcmp.$(OBJEXT)
+test_memcmp_LDADD = $(LDADD)
+test_memcmp_DEPENDENCIES = libtests.a ../lib/libm4.a libtests.a \
+	$(am__DEPENDENCIES_1)
+test_open_SOURCES = test-open.c
+test_open_OBJECTS = test-open.$(OBJEXT)
+test_open_LDADD = $(LDADD)
+test_open_DEPENDENCIES = libtests.a ../lib/libm4.a libtests.a \
+	$(am__DEPENDENCIES_1)
 test_printf_frexp_SOURCES = test-printf-frexp.c
 test_printf_frexp_OBJECTS = test-printf-frexp.$(OBJEXT)
 test_printf_frexp_LDADD = $(LDADD)
@@ -290,13 +353,21 @@ test_printf_frexpl_DEPENDENCIES = libtests.a ../lib/libm4.a libtests.a \
 	$(am__DEPENDENCIES_1)
 test_quotearg_SOURCES = test-quotearg.c
 test_quotearg_OBJECTS = test-quotearg.$(OBJEXT)
-test_quotearg_LDADD = $(LDADD)
-test_quotearg_DEPENDENCIES = libtests.a ../lib/libm4.a libtests.a \
+test_quotearg_DEPENDENCIES = $(am__DEPENDENCIES_2)
+test_sigaction_SOURCES = test-sigaction.c
+test_sigaction_OBJECTS = test-sigaction.$(OBJEXT)
+test_sigaction_LDADD = $(LDADD)
+test_sigaction_DEPENDENCIES = libtests.a ../lib/libm4.a libtests.a \
 	$(am__DEPENDENCIES_1)
 test_signbit_SOURCES = test-signbit.c
 test_signbit_OBJECTS = test-signbit.$(OBJEXT)
 test_signbit_LDADD = $(LDADD)
 test_signbit_DEPENDENCIES = libtests.a ../lib/libm4.a libtests.a \
+	$(am__DEPENDENCIES_1)
+test_snprintf_SOURCES = test-snprintf.c
+test_snprintf_OBJECTS = test-snprintf.$(OBJEXT)
+test_snprintf_LDADD = $(LDADD)
+test_snprintf_DEPENDENCIES = libtests.a ../lib/libm4.a libtests.a \
 	$(am__DEPENDENCIES_1)
 test_stdbool_SOURCES = test-stdbool.c
 test_stdbool_OBJECTS = test-stdbool.$(OBJEXT)
@@ -328,6 +399,9 @@ test_string_OBJECTS = test-string.$(OBJEXT)
 test_string_LDADD = $(LDADD)
 test_string_DEPENDENCIES = libtests.a ../lib/libm4.a libtests.a \
 	$(am__DEPENDENCIES_1)
+test_strsignal_SOURCES = test-strsignal.c
+test_strsignal_OBJECTS = test-strsignal.$(OBJEXT)
+test_strsignal_DEPENDENCIES = $(am__DEPENDENCIES_2)
 test_strstr_SOURCES = test-strstr.c
 test_strstr_OBJECTS = test-strstr.$(OBJEXT)
 test_strstr_LDADD = $(LDADD)
@@ -348,6 +422,9 @@ test_sys_time_OBJECTS = test-sys_time.$(OBJEXT)
 test_sys_time_LDADD = $(LDADD)
 test_sys_time_DEPENDENCIES = libtests.a ../lib/libm4.a libtests.a \
 	$(am__DEPENDENCIES_1)
+test_tls_SOURCES = test-tls.c
+test_tls_OBJECTS = test-tls.$(OBJEXT)
+test_tls_DEPENDENCIES = $(am__DEPENDENCIES_2)
 test_unistd_SOURCES = test-unistd.c
 test_unistd_OBJECTS = test-unistd.$(OBJEXT)
 test_unistd_LDADD = $(LDADD)
@@ -389,33 +466,39 @@ COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
 SOURCES = $(libtests_a_SOURCES) $(EXTRA_libtests_a_SOURCES) \
-	test-EOVERFLOW.c test-alloca-opt.c test-array_list.c \
-	test-array_oset.c test-avltree_oset.c test-binary-io.c \
-	test-c-ctype.c test-closein.c test-fflush.c test-fflush2.c \
-	test-fpending.c test-fpurge.c test-freadahead.c \
+	test-alloca-opt.c test-array_list.c test-array_oset.c \
+	test-avltree_oset.c test-binary-io.c test-c-ctype.c \
+	test-c-stack.c test-closein.c test-dirname.c test-errno.c \
+	test-fcntl.c test-fflush.c test-fflush2.c test-filenamecat.c \
+	test-fopen.c test-fpending.c test-fpurge.c test-freadahead.c \
 	test-freading.c test-frexp.c test-frexpl.c test-fseeko.c \
-	test-ftello.c test-gettimeofday.c test-isnand.c test-isnanf.c \
-	test-isnanl-nolibm.c test-linkedhash_list.c test-lseek.c \
-	test-malloca.c test-math.c test-printf-frexp.c \
-	test-printf-frexpl.c test-quotearg.c test-signbit.c \
-	test-stdbool.c test-stdint.c test-stdio.c test-stdlib.c \
-	test-strerror.c test-string.c test-strstr.c test-strtod.c \
-	test-sys_stat.c test-sys_time.c test-unistd.c \
+	test-ftello.c test-gettimeofday.c test-isnand-nolibm.c \
+	test-isnanf-nolibm.c test-isnanl-nolibm.c \
+	test-linkedhash_list.c test-lock.c test-lseek.c test-malloca.c \
+	test-math.c test-memchr.c test-memcmp.c test-open.c \
+	test-printf-frexp.c test-printf-frexpl.c test-quotearg.c \
+	test-sigaction.c test-signbit.c test-snprintf.c test-stdbool.c \
+	test-stdint.c test-stdio.c test-stdlib.c test-strerror.c \
+	test-string.c test-strsignal.c test-strstr.c test-strtod.c \
+	test-sys_stat.c test-sys_time.c test-tls.c test-unistd.c \
 	test-vasnprintf.c test-vasprintf.c test-vasprintf-posix.c \
 	test-wchar.c test-wctype.c test-xvasprintf.c
 DIST_SOURCES = $(libtests_a_SOURCES) $(EXTRA_libtests_a_SOURCES) \
-	test-EOVERFLOW.c test-alloca-opt.c test-array_list.c \
-	test-array_oset.c test-avltree_oset.c test-binary-io.c \
-	test-c-ctype.c test-closein.c test-fflush.c test-fflush2.c \
-	test-fpending.c test-fpurge.c test-freadahead.c \
+	test-alloca-opt.c test-array_list.c test-array_oset.c \
+	test-avltree_oset.c test-binary-io.c test-c-ctype.c \
+	test-c-stack.c test-closein.c test-dirname.c test-errno.c \
+	test-fcntl.c test-fflush.c test-fflush2.c test-filenamecat.c \
+	test-fopen.c test-fpending.c test-fpurge.c test-freadahead.c \
 	test-freading.c test-frexp.c test-frexpl.c test-fseeko.c \
-	test-ftello.c test-gettimeofday.c test-isnand.c test-isnanf.c \
-	test-isnanl-nolibm.c test-linkedhash_list.c test-lseek.c \
-	test-malloca.c test-math.c test-printf-frexp.c \
-	test-printf-frexpl.c test-quotearg.c test-signbit.c \
-	test-stdbool.c test-stdint.c test-stdio.c test-stdlib.c \
-	test-strerror.c test-string.c test-strstr.c test-strtod.c \
-	test-sys_stat.c test-sys_time.c test-unistd.c \
+	test-ftello.c test-gettimeofday.c test-isnand-nolibm.c \
+	test-isnanf-nolibm.c test-isnanl-nolibm.c \
+	test-linkedhash_list.c test-lock.c test-lseek.c test-malloca.c \
+	test-math.c test-memchr.c test-memcmp.c test-open.c \
+	test-printf-frexp.c test-printf-frexpl.c test-quotearg.c \
+	test-sigaction.c test-signbit.c test-snprintf.c test-stdbool.c \
+	test-stdint.c test-stdio.c test-stdlib.c test-strerror.c \
+	test-string.c test-strsignal.c test-strstr.c test-strtod.c \
+	test-sys_stat.c test-sys_time.c test-tls.c test-unistd.c \
 	test-vasnprintf.c test-vasprintf.c test-vasprintf-posix.c \
 	test-wchar.c test-wctype.c test-xvasprintf.c
 RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
@@ -457,8 +540,15 @@ ECHO_C = @ECHO_C@
 ECHO_N = @ECHO_N@
 ECHO_T = @ECHO_T@
 EGREP = @EGREP@
-EOVERFLOW = @EOVERFLOW@
+EMULTIHOP_HIDDEN = @EMULTIHOP_HIDDEN@
+EMULTIHOP_VALUE = @EMULTIHOP_VALUE@
+ENOLINK_HIDDEN = @ENOLINK_HIDDEN@
+ENOLINK_VALUE = @ENOLINK_VALUE@
+EOVERFLOW_HIDDEN = @EOVERFLOW_HIDDEN@
+EOVERFLOW_VALUE = @EOVERFLOW_VALUE@
+ERRNO_H = @ERRNO_H@
 EXEEXT = @EXEEXT@
+FCNTL_H = @FCNTL_H@
 FLOAT_H = @FLOAT_H@
 GETOPT_H = @GETOPT_H@
 GLIBC21 = @GLIBC21@
@@ -466,6 +556,7 @@ GNULIB_CALLOC_POSIX = @GNULIB_CALLOC_POSIX@
 GNULIB_CEILF = @GNULIB_CEILF@
 GNULIB_CEILL = @GNULIB_CEILL@
 GNULIB_CHOWN = @GNULIB_CHOWN@
+GNULIB_CLOSE = @GNULIB_CLOSE@
 GNULIB_DUP2 = @GNULIB_DUP2@
 GNULIB_ENVIRON = @GNULIB_ENVIRON@
 GNULIB_FCHDIR = @GNULIB_FCHDIR@
@@ -473,22 +564,30 @@ GNULIB_FFLUSH = @GNULIB_FFLUSH@
 GNULIB_FLOORF = @GNULIB_FLOORF@
 GNULIB_FLOORL = @GNULIB_FLOORL@
 GNULIB_FOPEN = @GNULIB_FOPEN@
+GNULIB_FPRINTF = @GNULIB_FPRINTF@
 GNULIB_FPRINTF_POSIX = @GNULIB_FPRINTF_POSIX@
+GNULIB_FPUTC = @GNULIB_FPUTC@
+GNULIB_FPUTS = @GNULIB_FPUTS@
 GNULIB_FREOPEN = @GNULIB_FREOPEN@
 GNULIB_FREXP = @GNULIB_FREXP@
 GNULIB_FREXPL = @GNULIB_FREXPL@
 GNULIB_FSEEK = @GNULIB_FSEEK@
 GNULIB_FSEEKO = @GNULIB_FSEEKO@
+GNULIB_FSYNC = @GNULIB_FSYNC@
 GNULIB_FTELL = @GNULIB_FTELL@
 GNULIB_FTELLO = @GNULIB_FTELLO@
 GNULIB_FTRUNCATE = @GNULIB_FTRUNCATE@
+GNULIB_FWRITE = @GNULIB_FWRITE@
 GNULIB_GETCWD = @GNULIB_GETCWD@
 GNULIB_GETDELIM = @GNULIB_GETDELIM@
+GNULIB_GETDTABLESIZE = @GNULIB_GETDTABLESIZE@
 GNULIB_GETLINE = @GNULIB_GETLINE@
 GNULIB_GETLOGIN_R = @GNULIB_GETLOGIN_R@
 GNULIB_GETPAGESIZE = @GNULIB_GETPAGESIZE@
 GNULIB_GETSUBOPT = @GNULIB_GETSUBOPT@
 GNULIB_ISFINITE = @GNULIB_ISFINITE@
+GNULIB_ISINF = @GNULIB_ISINF@
+GNULIB_ISNAN = @GNULIB_ISNAN@
 GNULIB_LCHOWN = @GNULIB_LCHOWN@
 GNULIB_LDEXPL = @GNULIB_LDEXPL@
 GNULIB_LSEEK = @GNULIB_LSEEK@
@@ -513,19 +612,32 @@ GNULIB_MEMPCPY = @GNULIB_MEMPCPY@
 GNULIB_MEMRCHR = @GNULIB_MEMRCHR@
 GNULIB_MKDTEMP = @GNULIB_MKDTEMP@
 GNULIB_MKSTEMP = @GNULIB_MKSTEMP@
+GNULIB_OBSTACK_PRINTF = @GNULIB_OBSTACK_PRINTF@
+GNULIB_OBSTACK_PRINTF_POSIX = @GNULIB_OBSTACK_PRINTF_POSIX@
+GNULIB_OPEN = @GNULIB_OPEN@
+GNULIB_PERROR = @GNULIB_PERROR@
+GNULIB_PRINTF = @GNULIB_PRINTF@
 GNULIB_PRINTF_POSIX = @GNULIB_PRINTF_POSIX@
+GNULIB_PUTC = @GNULIB_PUTC@
+GNULIB_PUTCHAR = @GNULIB_PUTCHAR@
 GNULIB_PUTENV = @GNULIB_PUTENV@
+GNULIB_PUTS = @GNULIB_PUTS@
+GNULIB_RAWMEMCHR = @GNULIB_RAWMEMCHR@
 GNULIB_READLINK = @GNULIB_READLINK@
 GNULIB_REALLOC_POSIX = @GNULIB_REALLOC_POSIX@
 GNULIB_ROUND = @GNULIB_ROUND@
 GNULIB_ROUNDF = @GNULIB_ROUNDF@
 GNULIB_ROUNDL = @GNULIB_ROUNDL@
+GNULIB_RPMATCH = @GNULIB_RPMATCH@
 GNULIB_SETENV = @GNULIB_SETENV@
+GNULIB_SIGACTION = @GNULIB_SIGACTION@
+GNULIB_SIGNAL_H_SIGPIPE = @GNULIB_SIGNAL_H_SIGPIPE@
 GNULIB_SIGNBIT = @GNULIB_SIGNBIT@
 GNULIB_SIGPROCMASK = @GNULIB_SIGPROCMASK@
 GNULIB_SLEEP = @GNULIB_SLEEP@
 GNULIB_SNPRINTF = @GNULIB_SNPRINTF@
 GNULIB_SPRINTF_POSIX = @GNULIB_SPRINTF_POSIX@
+GNULIB_STDIO_H_SIGPIPE = @GNULIB_STDIO_H_SIGPIPE@
 GNULIB_STPCPY = @GNULIB_STPCPY@
 GNULIB_STPNCPY = @GNULIB_STPNCPY@
 GNULIB_STRCASESTR = @GNULIB_STRCASESTR@
@@ -540,16 +652,21 @@ GNULIB_STRSIGNAL = @GNULIB_STRSIGNAL@
 GNULIB_STRSTR = @GNULIB_STRSTR@
 GNULIB_STRTOD = @GNULIB_STRTOD@
 GNULIB_STRTOK_R = @GNULIB_STRTOK_R@
+GNULIB_STRVERSCMP = @GNULIB_STRVERSCMP@
 GNULIB_TRUNC = @GNULIB_TRUNC@
 GNULIB_TRUNCF = @GNULIB_TRUNCF@
 GNULIB_TRUNCL = @GNULIB_TRUNCL@
+GNULIB_UNISTD_H_SIGPIPE = @GNULIB_UNISTD_H_SIGPIPE@
 GNULIB_UNSETENV = @GNULIB_UNSETENV@
 GNULIB_VASPRINTF = @GNULIB_VASPRINTF@
+GNULIB_VFPRINTF = @GNULIB_VFPRINTF@
 GNULIB_VFPRINTF_POSIX = @GNULIB_VFPRINTF_POSIX@
+GNULIB_VPRINTF = @GNULIB_VPRINTF@
 GNULIB_VPRINTF_POSIX = @GNULIB_VPRINTF_POSIX@
 GNULIB_VSNPRINTF = @GNULIB_VSNPRINTF@
 GNULIB_VSPRINTF_POSIX = @GNULIB_VSPRINTF_POSIX@
 GNULIB_WCWIDTH = @GNULIB_WCWIDTH@
+GNULIB_WRITE = @GNULIB_WRITE@
 GREP = @GREP@
 HAVE_CALLOC_POSIX = @HAVE_CALLOC_POSIX@
 HAVE_DECL_ACOSL = @HAVE_DECL_ACOSL@
@@ -566,7 +683,7 @@ HAVE_DECL_LDEXPL = @HAVE_DECL_LDEXPL@
 HAVE_DECL_LOGL = @HAVE_DECL_LOGL@
 HAVE_DECL_MEMMEM = @HAVE_DECL_MEMMEM@
 HAVE_DECL_MEMRCHR = @HAVE_DECL_MEMRCHR@
-HAVE_DECL_MKDIR = @HAVE_DECL_MKDIR@
+HAVE_DECL_OBSTACK_PRINTF = @HAVE_DECL_OBSTACK_PRINTF@
 HAVE_DECL_SINL = @HAVE_DECL_SINL@
 HAVE_DECL_SNPRINTF = @HAVE_DECL_SNPRINTF@
 HAVE_DECL_SQRTL = @HAVE_DECL_SQRTL@
@@ -579,17 +696,17 @@ HAVE_DECL_STRTOK_R = @HAVE_DECL_STRTOK_R@
 HAVE_DECL_TANL = @HAVE_DECL_TANL@
 HAVE_DECL_TRUNC = @HAVE_DECL_TRUNC@
 HAVE_DECL_TRUNCF = @HAVE_DECL_TRUNCF@
-HAVE_DECL_TRUNCL = @HAVE_DECL_TRUNCL@
 HAVE_DECL_VSNPRINTF = @HAVE_DECL_VSNPRINTF@
 HAVE_DECL_WCWIDTH = @HAVE_DECL_WCWIDTH@
 HAVE_DUP2 = @HAVE_DUP2@
 HAVE_FSEEKO = @HAVE_FSEEKO@
+HAVE_FSYNC = @HAVE_FSYNC@
 HAVE_FTELLO = @HAVE_FTELLO@
 HAVE_FTRUNCATE = @HAVE_FTRUNCATE@
+HAVE_GETDTABLESIZE = @HAVE_GETDTABLESIZE@
 HAVE_GETPAGESIZE = @HAVE_GETPAGESIZE@
 HAVE_GETSUBOPT = @HAVE_GETSUBOPT@
 HAVE_INTTYPES_H = @HAVE_INTTYPES_H@
-HAVE_IO_H = @HAVE_IO_H@
 HAVE_ISWCNTRL = @HAVE_ISWCNTRL@
 HAVE_LONG_LONG_INT = @HAVE_LONG_LONG_INT@
 HAVE_LSTAT = @HAVE_LSTAT@
@@ -598,9 +715,13 @@ HAVE_MEMPCPY = @HAVE_MEMPCPY@
 HAVE_MKDTEMP = @HAVE_MKDTEMP@
 HAVE_OS_H = @HAVE_OS_H@
 HAVE_POSIX_SIGNALBLOCKING = @HAVE_POSIX_SIGNALBLOCKING@
+HAVE_RAWMEMCHR = @HAVE_RAWMEMCHR@
 HAVE_READLINK = @HAVE_READLINK@
 HAVE_REALLOC_POSIX = @HAVE_REALLOC_POSIX@
+HAVE_RPMATCH = @HAVE_RPMATCH@
 HAVE_SETENV = @HAVE_SETENV@
+HAVE_SIGACTION = @HAVE_SIGACTION@
+HAVE_SIGINFO_T = @HAVE_SIGINFO_T@
 HAVE_SIGNED_SIG_ATOMIC_T = @HAVE_SIGNED_SIG_ATOMIC_T@
 HAVE_SIGNED_WCHAR_T = @HAVE_SIGNED_WCHAR_T@
 HAVE_SIGNED_WINT_T = @HAVE_SIGNED_WINT_T@
@@ -615,7 +736,9 @@ HAVE_STRNDUP = @HAVE_STRNDUP@
 HAVE_STRPBRK = @HAVE_STRPBRK@
 HAVE_STRSEP = @HAVE_STRSEP@
 HAVE_STRTOD = @HAVE_STRTOD@
+HAVE_STRUCT_SIGACTION_SA_SIGACTION = @HAVE_STRUCT_SIGACTION_SA_SIGACTION@
 HAVE_STRUCT_TIMEVAL = @HAVE_STRUCT_TIMEVAL@
+HAVE_STRVERSCMP = @HAVE_STRVERSCMP@
 HAVE_SYS_BITYPES_H = @HAVE_SYS_BITYPES_H@
 HAVE_SYS_INTTYPES_H = @HAVE_SYS_INTTYPES_H@
 HAVE_SYS_PARAM_H = @HAVE_SYS_PARAM_H@
@@ -636,21 +759,34 @@ INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 LDFLAGS = @LDFLAGS@
+LIBCSTACK = @LIBCSTACK@
 LIBINTL = @LIBINTL@
 LIBM4_LIBDEPS = @LIBM4_LIBDEPS@
 LIBM4_LTLIBDEPS = @LIBM4_LTLIBDEPS@
+LIBMULTITHREAD = @LIBMULTITHREAD@
 LIBOBJS = @LIBOBJS@
+LIBPTH = @LIBPTH@
+LIBPTH_PREFIX = @LIBPTH_PREFIX@
 LIBS = @LIBS@ $(POW_LIB)
+LIBSIGSEGV = @LIBSIGSEGV@
 LIBTESTS_LIBDEPS = @LIBTESTS_LIBDEPS@
+LIBTHREAD = @LIBTHREAD@
 LOCALCHARSET_TESTS_ENVIRONMENT = @LOCALCHARSET_TESTS_ENVIRONMENT@
+LTLIBCSTACK = @LTLIBCSTACK@
 LTLIBINTL = @LTLIBINTL@
+LTLIBMULTITHREAD = @LTLIBMULTITHREAD@
 LTLIBOBJS = @LTLIBOBJS@
+LTLIBPTH = @LTLIBPTH@
+LTLIBSIGSEGV = @LTLIBSIGSEGV@
+LTLIBTHREAD = @LTLIBTHREAD@
 M4_LIBOBJS = @M4_LIBOBJS@
 M4_LTLIBOBJS = @M4_LTLIBOBJS@
 M4tests_LIBOBJS = @M4tests_LIBOBJS@
 M4tests_LTLIBOBJS = @M4tests_LTLIBOBJS@
 MAKEINFO = @MAKEINFO@
 MKDIR_P = @MKDIR_P@
+NEXT_ERRNO_H = @NEXT_ERRNO_H@
+NEXT_FCNTL_H = @NEXT_FCNTL_H@
 NEXT_FLOAT_H = @NEXT_FLOAT_H@
 NEXT_MATH_H = @NEXT_MATH_H@
 NEXT_SIGNAL_H = @NEXT_SIGNAL_H@
@@ -673,11 +809,13 @@ PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 POW_LIB = @POW_LIB@
+PRAGMA_SYSTEM_HEADER = @PRAGMA_SYSTEM_HEADER@
 PTRDIFF_T_SUFFIX = @PTRDIFF_T_SUFFIX@
 RANLIB = @RANLIB@
 REPLACE_CEILF = @REPLACE_CEILF@
 REPLACE_CEILL = @REPLACE_CEILL@
 REPLACE_CHOWN = @REPLACE_CHOWN@
+REPLACE_CLOSE = @REPLACE_CLOSE@
 REPLACE_FCHDIR = @REPLACE_FCHDIR@
 REPLACE_FFLUSH = @REPLACE_FFLUSH@
 REPLACE_FLOORF = @REPLACE_FLOORF@
@@ -695,12 +833,21 @@ REPLACE_GETCWD = @REPLACE_GETCWD@
 REPLACE_GETLINE = @REPLACE_GETLINE@
 REPLACE_GETPAGESIZE = @REPLACE_GETPAGESIZE@
 REPLACE_GETTIMEOFDAY = @REPLACE_GETTIMEOFDAY@
+REPLACE_HUGE_VAL = @REPLACE_HUGE_VAL@
 REPLACE_ISFINITE = @REPLACE_ISFINITE@
+REPLACE_ISINF = @REPLACE_ISINF@
+REPLACE_ISNAN = @REPLACE_ISNAN@
+REPLACE_ISWCNTRL = @REPLACE_ISWCNTRL@
 REPLACE_LCHOWN = @REPLACE_LCHOWN@
 REPLACE_LDEXPL = @REPLACE_LDEXPL@
 REPLACE_LSEEK = @REPLACE_LSEEK@
 REPLACE_MEMMEM = @REPLACE_MEMMEM@
+REPLACE_MKDIR = @REPLACE_MKDIR@
 REPLACE_MKSTEMP = @REPLACE_MKSTEMP@
+REPLACE_NAN = @REPLACE_NAN@
+REPLACE_OBSTACK_PRINTF = @REPLACE_OBSTACK_PRINTF@
+REPLACE_OPEN = @REPLACE_OPEN@
+REPLACE_PERROR = @REPLACE_PERROR@
 REPLACE_PRINTF = @REPLACE_PRINTF@
 REPLACE_PUTENV = @REPLACE_PUTENV@
 REPLACE_ROUND = @REPLACE_ROUND@
@@ -710,17 +857,21 @@ REPLACE_SIGNBIT = @REPLACE_SIGNBIT@
 REPLACE_SIGNBIT_USING_GCC = @REPLACE_SIGNBIT_USING_GCC@
 REPLACE_SNPRINTF = @REPLACE_SNPRINTF@
 REPLACE_SPRINTF = @REPLACE_SPRINTF@
+REPLACE_STDIO_WRITE_FUNCS = @REPLACE_STDIO_WRITE_FUNCS@
 REPLACE_STRCASESTR = @REPLACE_STRCASESTR@
+REPLACE_STRDUP = @REPLACE_STRDUP@
 REPLACE_STRERROR = @REPLACE_STRERROR@
 REPLACE_STRSIGNAL = @REPLACE_STRSIGNAL@
 REPLACE_STRSTR = @REPLACE_STRSTR@
 REPLACE_STRTOD = @REPLACE_STRTOD@
+REPLACE_TRUNCL = @REPLACE_TRUNCL@
 REPLACE_VASPRINTF = @REPLACE_VASPRINTF@
 REPLACE_VFPRINTF = @REPLACE_VFPRINTF@
 REPLACE_VPRINTF = @REPLACE_VPRINTF@
 REPLACE_VSNPRINTF = @REPLACE_VSNPRINTF@
 REPLACE_VSPRINTF = @REPLACE_VSPRINTF@
 REPLACE_WCWIDTH = @REPLACE_WCWIDTH@
+REPLACE_WRITE = @REPLACE_WRITE@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 SIG_ATOMIC_T_SUFFIX = @SIG_ATOMIC_T_SUFFIX@
@@ -731,12 +882,14 @@ STDINT_H = @STDINT_H@
 STRIP = @STRIP@
 SYS_STAT_H = @SYS_STAT_H@
 SYS_TIME_H = @SYS_TIME_H@
+UNISTD_H_HAVE_WINSOCK2_H = @UNISTD_H_HAVE_WINSOCK2_H@
 VERSION = @VERSION@
 VOID_UNSETENV = @VOID_UNSETENV@
 WCHAR_H = @WCHAR_H@
 WCHAR_T_SUFFIX = @WCHAR_T_SUFFIX@
 WCTYPE_H = @WCTYPE_H@
 WINT_T_SUFFIX = @WINT_T_SUFFIX@
+YIELD_LIB = @YIELD_LIB@
 abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
 abs_top_builddir = @abs_top_builddir@
@@ -784,38 +937,45 @@ sharedstatedir = @sharedstatedir@
 srcdir = @srcdir@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
+top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 AUTOMAKE_OPTIONS = 1.5 foreign
 SUBDIRS = 
 TESTS_ENVIRONMENT = EXEEXT='@EXEEXT@' EXEEXT='@EXEEXT@' \
-	EXEEXT='@EXEEXT@' srcdir='$(srcdir)' EXEEXT='@EXEEXT@' \
-	EXEEXT='@EXEEXT@' srcdir='$(srcdir)' EXEEXT='@EXEEXT@' \
+	LIBSIGSEGV='@LIBSIGSEGV@' EXEEXT='@EXEEXT@' EXEEXT='@EXEEXT@' \
+	srcdir='$(srcdir)' EXEEXT='@EXEEXT@' EXEEXT='@EXEEXT@' \
 	srcdir='$(srcdir)' EXEEXT='@EXEEXT@' srcdir='$(srcdir)' \
-	EXEEXT='@EXEEXT@' srcdir='$(srcdir)'
+	EXEEXT='@EXEEXT@' srcdir='$(srcdir)' EXEEXT='@EXEEXT@' \
+	srcdir='$(srcdir)'
 noinst_HEADERS = 
 noinst_LIBRARIES = 
 check_LIBRARIES = libtests.a
-EXTRA_DIST = test-EOVERFLOW.c test-alloca-opt.c test-array_list.c \
-	test-array_oset.c test-avltree_oset.c test-binary-io.sh \
-	test-binary-io.c test-c-ctype.c test-closein.sh test-closein.c \
-	test-fflush.c test-fflush2.sh test-fflush2.c test-fpending.c \
+EXTRA_DIST = test-alloca-opt.c test-array_list.c test-array_oset.c \
+	test-avltree_oset.c test-binary-io.sh test-binary-io.c \
+	test-c-ctype.c test-c-stack.c test-c-stack.sh test-c-stack2.sh \
+	test-closein.sh test-closein.c test-dirname.c test-errno.c \
+	test-fcntl.c test-fflush.c test-fflush2.sh test-fflush2.c \
+	test-filenamecat.c test-fopen.c test-fpending.c \
 	test-fpending.sh test-fpurge.c test-freadahead.c \
 	test-freadahead.sh test-freading.c test-frexp.c test-frexpl.c \
 	test-fseeko.c test-fseeko.sh test-ftello.c test-ftello.sh \
-	test-gettimeofday.c test-isnand.c nan.h test-isnanf.c nan.h \
-	test-isnanl-nolibm.c test-isnanl.h test-linkedhash_list.c \
-	test-lseek.c test-lseek.sh test-malloca.c test-math.c \
-	test-printf-frexp.c test-printf-frexpl.c test-quotearg.c \
-	test-signbit.c test-stdbool.c test-stdint.c test-stdio.c \
-	test-stdlib.c test-strerror.c test-string.c test-strstr.c \
-	test-strtod.c test-sys_stat.c test-sys_time.c test-unistd.c \
+	test-gettimeofday.c test-isnand-nolibm.c test-isnand.h nan.h \
+	test-isnanf-nolibm.c test-isnanf.h nan.h test-isnanl-nolibm.c \
+	test-isnanl.h test-linkedhash_list.c test-lock.c test-lseek.c \
+	test-lseek.sh test-malloca.c test-math.c test-memchr.c \
+	test-memcmp.c test-open.c test-printf-frexp.c \
+	test-printf-frexpl.c test-quotearg.c test-sigaction.c \
+	test-signbit.c test-snprintf.c test-stdbool.c test-stdint.c \
+	test-stdio.c test-stdlib.c strdup.c test-strerror.c \
+	test-string.c test-strsignal.c test-strstr.c test-strtod.c \
+	test-sys_stat.c test-sys_time.c test-tls.c test-unistd.c \
 	test-vasnprintf.c test-vasprintf-posix.c nan.h \
 	test-vasprintf.c test-wchar.c test-wctype.c test-xvasprintf.c
 BUILT_SOURCES = 
 SUFFIXES = 
-MOSTLYCLEANFILES = core *.stackdump test-fflush.txt test-fpending.t \
-	t-fpurge.tmp t-freading.tmp
+MOSTLYCLEANFILES = core *.stackdump t-c-stack.tmp t-c-stack2.tmp \
+	test-fflush.txt test-fpending.t t-fpurge.tmp t-freading.tmp
 MOSTLYCLEANDIRS = 
 CLEANFILES = 
 DISTCLEANFILES = 
@@ -827,16 +987,24 @@ AM_CPPFLAGS = \
 
 LDADD = libtests.a ../lib/libm4.a libtests.a $(LIBTESTS_LIBDEPS)
 libtests_a_SOURCES = gl_array_list.h gl_array_list.c gl_array_oset.h \
-	gl_array_oset.c progname.h progname.c verify.h
+	gl_array_oset.c glthread/thread.h glthread/thread.c verify.h \
+	glthread/yield.h
 libtests_a_LIBADD = $(M4tests_LIBOBJS)
 libtests_a_DEPENDENCIES = $(M4tests_LIBOBJS)
-EXTRA_libtests_a_SOURCES = 
+EXTRA_libtests_a_SOURCES = strdup.c
 AM_LIBTOOLFLAGS = --preserve-dup-deps
 test_array_list_LDADD = $(LDADD) @LIBINTL@
 test_array_oset_LDADD = $(LDADD) @LIBINTL@
 test_avltree_oset_LDADD = $(LDADD) @LIBINTL@
+test_c_stack_LDADD = $(LDADD) $(LIBCSTACK) @LIBINTL@
 test_closein_LDADD = $(LDADD) @LIBINTL@
+test_dirname_LDADD = $(LDADD) @LIBINTL@
+test_filenamecat_LDADD = $(LDADD) @LIBINTL@
 test_linkedhash_list_LDADD = $(LDADD) @LIBINTL@
+test_lock_LDADD = $(LDADD) @LIBMULTITHREAD@ @YIELD_LIB@
+test_quotearg_LDADD = $(LDADD) @LIBINTL@
+test_strsignal_LDADD = $(LDADD) @LIBINTL@
+test_tls_LDADD = $(LDADD) @LIBMULTITHREAD@ @YIELD_LIB@
 test_xvasprintf_LDADD = $(LDADD) @LIBINTL@
 all: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
@@ -888,9 +1056,6 @@ clean-checkPROGRAMS:
 
 clean-noinstPROGRAMS:
 	-test -z "$(noinst_PROGRAMS)" || rm -f $(noinst_PROGRAMS)
-test-EOVERFLOW$(EXEEXT): $(test_EOVERFLOW_OBJECTS) $(test_EOVERFLOW_DEPENDENCIES) 
-	@rm -f test-EOVERFLOW$(EXEEXT)
-	$(LINK) $(test_EOVERFLOW_OBJECTS) $(test_EOVERFLOW_LDADD) $(LIBS)
 test-alloca-opt$(EXEEXT): $(test_alloca_opt_OBJECTS) $(test_alloca_opt_DEPENDENCIES) 
 	@rm -f test-alloca-opt$(EXEEXT)
 	$(LINK) $(test_alloca_opt_OBJECTS) $(test_alloca_opt_LDADD) $(LIBS)
@@ -909,15 +1074,33 @@ test-binary-io$(EXEEXT): $(test_binary_io_OBJECTS) $(test_binary_io_DEPENDENCIES
 test-c-ctype$(EXEEXT): $(test_c_ctype_OBJECTS) $(test_c_ctype_DEPENDENCIES) 
 	@rm -f test-c-ctype$(EXEEXT)
 	$(LINK) $(test_c_ctype_OBJECTS) $(test_c_ctype_LDADD) $(LIBS)
+test-c-stack$(EXEEXT): $(test_c_stack_OBJECTS) $(test_c_stack_DEPENDENCIES) 
+	@rm -f test-c-stack$(EXEEXT)
+	$(LINK) $(test_c_stack_OBJECTS) $(test_c_stack_LDADD) $(LIBS)
 test-closein$(EXEEXT): $(test_closein_OBJECTS) $(test_closein_DEPENDENCIES) 
 	@rm -f test-closein$(EXEEXT)
 	$(LINK) $(test_closein_OBJECTS) $(test_closein_LDADD) $(LIBS)
+test-dirname$(EXEEXT): $(test_dirname_OBJECTS) $(test_dirname_DEPENDENCIES) 
+	@rm -f test-dirname$(EXEEXT)
+	$(LINK) $(test_dirname_OBJECTS) $(test_dirname_LDADD) $(LIBS)
+test-errno$(EXEEXT): $(test_errno_OBJECTS) $(test_errno_DEPENDENCIES) 
+	@rm -f test-errno$(EXEEXT)
+	$(LINK) $(test_errno_OBJECTS) $(test_errno_LDADD) $(LIBS)
+test-fcntl$(EXEEXT): $(test_fcntl_OBJECTS) $(test_fcntl_DEPENDENCIES) 
+	@rm -f test-fcntl$(EXEEXT)
+	$(LINK) $(test_fcntl_OBJECTS) $(test_fcntl_LDADD) $(LIBS)
 test-fflush$(EXEEXT): $(test_fflush_OBJECTS) $(test_fflush_DEPENDENCIES) 
 	@rm -f test-fflush$(EXEEXT)
 	$(LINK) $(test_fflush_OBJECTS) $(test_fflush_LDADD) $(LIBS)
 test-fflush2$(EXEEXT): $(test_fflush2_OBJECTS) $(test_fflush2_DEPENDENCIES) 
 	@rm -f test-fflush2$(EXEEXT)
 	$(LINK) $(test_fflush2_OBJECTS) $(test_fflush2_LDADD) $(LIBS)
+test-filenamecat$(EXEEXT): $(test_filenamecat_OBJECTS) $(test_filenamecat_DEPENDENCIES) 
+	@rm -f test-filenamecat$(EXEEXT)
+	$(LINK) $(test_filenamecat_OBJECTS) $(test_filenamecat_LDADD) $(LIBS)
+test-fopen$(EXEEXT): $(test_fopen_OBJECTS) $(test_fopen_DEPENDENCIES) 
+	@rm -f test-fopen$(EXEEXT)
+	$(LINK) $(test_fopen_OBJECTS) $(test_fopen_LDADD) $(LIBS)
 test-fpending$(EXEEXT): $(test_fpending_OBJECTS) $(test_fpending_DEPENDENCIES) 
 	@rm -f test-fpending$(EXEEXT)
 	$(LINK) $(test_fpending_OBJECTS) $(test_fpending_LDADD) $(LIBS)
@@ -945,18 +1128,21 @@ test-ftello$(EXEEXT): $(test_ftello_OBJECTS) $(test_ftello_DEPENDENCIES)
 test-gettimeofday$(EXEEXT): $(test_gettimeofday_OBJECTS) $(test_gettimeofday_DEPENDENCIES) 
 	@rm -f test-gettimeofday$(EXEEXT)
 	$(LINK) $(test_gettimeofday_OBJECTS) $(test_gettimeofday_LDADD) $(LIBS)
-test-isnand$(EXEEXT): $(test_isnand_OBJECTS) $(test_isnand_DEPENDENCIES) 
-	@rm -f test-isnand$(EXEEXT)
-	$(LINK) $(test_isnand_OBJECTS) $(test_isnand_LDADD) $(LIBS)
-test-isnanf$(EXEEXT): $(test_isnanf_OBJECTS) $(test_isnanf_DEPENDENCIES) 
-	@rm -f test-isnanf$(EXEEXT)
-	$(LINK) $(test_isnanf_OBJECTS) $(test_isnanf_LDADD) $(LIBS)
+test-isnand-nolibm$(EXEEXT): $(test_isnand_nolibm_OBJECTS) $(test_isnand_nolibm_DEPENDENCIES) 
+	@rm -f test-isnand-nolibm$(EXEEXT)
+	$(LINK) $(test_isnand_nolibm_OBJECTS) $(test_isnand_nolibm_LDADD) $(LIBS)
+test-isnanf-nolibm$(EXEEXT): $(test_isnanf_nolibm_OBJECTS) $(test_isnanf_nolibm_DEPENDENCIES) 
+	@rm -f test-isnanf-nolibm$(EXEEXT)
+	$(LINK) $(test_isnanf_nolibm_OBJECTS) $(test_isnanf_nolibm_LDADD) $(LIBS)
 test-isnanl-nolibm$(EXEEXT): $(test_isnanl_nolibm_OBJECTS) $(test_isnanl_nolibm_DEPENDENCIES) 
 	@rm -f test-isnanl-nolibm$(EXEEXT)
 	$(LINK) $(test_isnanl_nolibm_OBJECTS) $(test_isnanl_nolibm_LDADD) $(LIBS)
 test-linkedhash_list$(EXEEXT): $(test_linkedhash_list_OBJECTS) $(test_linkedhash_list_DEPENDENCIES) 
 	@rm -f test-linkedhash_list$(EXEEXT)
 	$(LINK) $(test_linkedhash_list_OBJECTS) $(test_linkedhash_list_LDADD) $(LIBS)
+test-lock$(EXEEXT): $(test_lock_OBJECTS) $(test_lock_DEPENDENCIES) 
+	@rm -f test-lock$(EXEEXT)
+	$(LINK) $(test_lock_OBJECTS) $(test_lock_LDADD) $(LIBS)
 test-lseek$(EXEEXT): $(test_lseek_OBJECTS) $(test_lseek_DEPENDENCIES) 
 	@rm -f test-lseek$(EXEEXT)
 	$(LINK) $(test_lseek_OBJECTS) $(test_lseek_LDADD) $(LIBS)
@@ -966,6 +1152,15 @@ test-malloca$(EXEEXT): $(test_malloca_OBJECTS) $(test_malloca_DEPENDENCIES)
 test-math$(EXEEXT): $(test_math_OBJECTS) $(test_math_DEPENDENCIES) 
 	@rm -f test-math$(EXEEXT)
 	$(LINK) $(test_math_OBJECTS) $(test_math_LDADD) $(LIBS)
+test-memchr$(EXEEXT): $(test_memchr_OBJECTS) $(test_memchr_DEPENDENCIES) 
+	@rm -f test-memchr$(EXEEXT)
+	$(LINK) $(test_memchr_OBJECTS) $(test_memchr_LDADD) $(LIBS)
+test-memcmp$(EXEEXT): $(test_memcmp_OBJECTS) $(test_memcmp_DEPENDENCIES) 
+	@rm -f test-memcmp$(EXEEXT)
+	$(LINK) $(test_memcmp_OBJECTS) $(test_memcmp_LDADD) $(LIBS)
+test-open$(EXEEXT): $(test_open_OBJECTS) $(test_open_DEPENDENCIES) 
+	@rm -f test-open$(EXEEXT)
+	$(LINK) $(test_open_OBJECTS) $(test_open_LDADD) $(LIBS)
 test-printf-frexp$(EXEEXT): $(test_printf_frexp_OBJECTS) $(test_printf_frexp_DEPENDENCIES) 
 	@rm -f test-printf-frexp$(EXEEXT)
 	$(LINK) $(test_printf_frexp_OBJECTS) $(test_printf_frexp_LDADD) $(LIBS)
@@ -975,9 +1170,15 @@ test-printf-frexpl$(EXEEXT): $(test_printf_frexpl_OBJECTS) $(test_printf_frexpl_
 test-quotearg$(EXEEXT): $(test_quotearg_OBJECTS) $(test_quotearg_DEPENDENCIES) 
 	@rm -f test-quotearg$(EXEEXT)
 	$(LINK) $(test_quotearg_OBJECTS) $(test_quotearg_LDADD) $(LIBS)
+test-sigaction$(EXEEXT): $(test_sigaction_OBJECTS) $(test_sigaction_DEPENDENCIES) 
+	@rm -f test-sigaction$(EXEEXT)
+	$(LINK) $(test_sigaction_OBJECTS) $(test_sigaction_LDADD) $(LIBS)
 test-signbit$(EXEEXT): $(test_signbit_OBJECTS) $(test_signbit_DEPENDENCIES) 
 	@rm -f test-signbit$(EXEEXT)
 	$(LINK) $(test_signbit_OBJECTS) $(test_signbit_LDADD) $(LIBS)
+test-snprintf$(EXEEXT): $(test_snprintf_OBJECTS) $(test_snprintf_DEPENDENCIES) 
+	@rm -f test-snprintf$(EXEEXT)
+	$(LINK) $(test_snprintf_OBJECTS) $(test_snprintf_LDADD) $(LIBS)
 test-stdbool$(EXEEXT): $(test_stdbool_OBJECTS) $(test_stdbool_DEPENDENCIES) 
 	@rm -f test-stdbool$(EXEEXT)
 	$(LINK) $(test_stdbool_OBJECTS) $(test_stdbool_LDADD) $(LIBS)
@@ -996,6 +1197,9 @@ test-strerror$(EXEEXT): $(test_strerror_OBJECTS) $(test_strerror_DEPENDENCIES)
 test-string$(EXEEXT): $(test_string_OBJECTS) $(test_string_DEPENDENCIES) 
 	@rm -f test-string$(EXEEXT)
 	$(LINK) $(test_string_OBJECTS) $(test_string_LDADD) $(LIBS)
+test-strsignal$(EXEEXT): $(test_strsignal_OBJECTS) $(test_strsignal_DEPENDENCIES) 
+	@rm -f test-strsignal$(EXEEXT)
+	$(LINK) $(test_strsignal_OBJECTS) $(test_strsignal_LDADD) $(LIBS)
 test-strstr$(EXEEXT): $(test_strstr_OBJECTS) $(test_strstr_DEPENDENCIES) 
 	@rm -f test-strstr$(EXEEXT)
 	$(LINK) $(test_strstr_OBJECTS) $(test_strstr_LDADD) $(LIBS)
@@ -1008,6 +1212,9 @@ test-sys_stat$(EXEEXT): $(test_sys_stat_OBJECTS) $(test_sys_stat_DEPENDENCIES)
 test-sys_time$(EXEEXT): $(test_sys_time_OBJECTS) $(test_sys_time_DEPENDENCIES) 
 	@rm -f test-sys_time$(EXEEXT)
 	$(LINK) $(test_sys_time_OBJECTS) $(test_sys_time_LDADD) $(LIBS)
+test-tls$(EXEEXT): $(test_tls_OBJECTS) $(test_tls_DEPENDENCIES) 
+	@rm -f test-tls$(EXEEXT)
+	$(LINK) $(test_tls_OBJECTS) $(test_tls_LDADD) $(LIBS)
 test-unistd$(EXEEXT): $(test_unistd_OBJECTS) $(test_unistd_DEPENDENCIES) 
 	@rm -f test-unistd$(EXEEXT)
 	$(LINK) $(test_unistd_OBJECTS) $(test_unistd_LDADD) $(LIBS)
@@ -1038,17 +1245,22 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gl_array_list.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gl_array_oset.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/progname.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-EOVERFLOW.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/strdup.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-alloca-opt.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-array_list.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-array_oset.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-avltree_oset.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-binary-io.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-c-ctype.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-c-stack.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-closein.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-dirname.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-errno.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-fcntl.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-fflush.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-fflush2.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-filenamecat.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-fopen.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-fpending.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-fpurge.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-freadahead.Po@am__quote@
@@ -1058,27 +1270,35 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-fseeko.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-ftello.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-gettimeofday.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-isnand.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-isnanf.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-isnand-nolibm.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-isnanf-nolibm.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-isnanl-nolibm.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-linkedhash_list.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-lock.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-lseek.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-malloca.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-math.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-memchr.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-memcmp.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-open.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-printf-frexp.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-printf-frexpl.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-quotearg.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-sigaction.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-signbit.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-snprintf.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-stdbool.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-stdint.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-stdio.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-stdlib.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-strerror.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-string.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-strsignal.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-strstr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-strtod.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-sys_stat.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-sys_time.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-tls.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-unistd.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-vasnprintf.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-vasprintf-posix.Po@am__quote@
@@ -1086,6 +1306,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-wchar.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-wctype.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-xvasprintf.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/thread.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -1100,6 +1321,20 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(COMPILE) -c `$(CYGPATH_W) '$<'`
+
+thread.o: glthread/thread.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT thread.o -MD -MP -MF $(DEPDIR)/thread.Tpo -c -o thread.o `test -f 'glthread/thread.c' || echo '$(srcdir)/'`glthread/thread.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/thread.Tpo $(DEPDIR)/thread.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='glthread/thread.c' object='thread.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o thread.o `test -f 'glthread/thread.c' || echo '$(srcdir)/'`glthread/thread.c
+
+thread.obj: glthread/thread.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT thread.obj -MD -MP -MF $(DEPDIR)/thread.Tpo -c -o thread.obj `if test -f 'glthread/thread.c'; then $(CYGPATH_W) 'glthread/thread.c'; else $(CYGPATH_W) '$(srcdir)/glthread/thread.c'; fi`
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/thread.Tpo $(DEPDIR)/thread.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='glthread/thread.c' object='thread.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o thread.obj `if test -f 'glthread/thread.c'; then $(CYGPATH_W) 'glthread/thread.c'; else $(CYGPATH_W) '$(srcdir)/glthread/thread.c'; fi`
 
 # This directory's subdirectories are mostly independent; you can cd
 # into them and run `make' without going through this Makefile.

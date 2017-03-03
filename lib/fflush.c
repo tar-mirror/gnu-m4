@@ -27,7 +27,48 @@
 #include "freading.h"
 #include "fpurge.h"
 
+#include "stdio-impl.h"
+
 #undef fflush
+
+static inline void
+clear_ungetc_buffer (FILE *fp)
+{
+#if defined __sferror || defined __DragonFly__ /* FreeBSD, NetBSD, OpenBSD, DragonFly, MacOS X, Cygwin */
+  if (HASUB (fp))
+    {
+      fp_->_p += fp_->_r;
+      fp_->_r = 0;
+    }
+#endif
+}
+
+#if (defined __sferror || defined __DragonFly__) && defined __SNPT /* FreeBSD, NetBSD, OpenBSD, DragonFly, MacOS X, Cygwin */
+
+static inline int
+disable_seek_optimization (FILE *fp)
+{
+  int saved_flags = fp_->_flags & (__SOPT | __SNPT);
+  fp_->_flags = (fp_->_flags & ~__SOPT) | __SNPT;
+  return saved_flags;
+}
+
+static inline void
+restore_seek_optimization (FILE *fp, int saved_flags)
+{
+  fp_->_flags = (fp_->_flags & ~(__SOPT | __SNPT)) | saved_flags;
+}
+
+#endif
+
+static inline void
+update_fpos_cache (FILE *fp, off_t pos)
+{
+#if defined __sferror || defined __DragonFly__ /* FreeBSD, NetBSD, OpenBSD, DragonFly, MacOS X, Cygwin */
+  fp_->_offset = pos;
+  fp_->_flags |= __SOFF;
+#endif
+}
 
 /* Flush all pending data on STREAM according to POSIX rules.  Both
    output and seekable input streams are supported.  */
@@ -80,24 +121,7 @@ rpl_fflush (FILE *stream)
      _IOERR, because an ungetc() on this platform prepends the pushed-back
      bytes to the buffer without an indication of the limit between the
      pushed-back bytes and the read-ahead bytes.  */
-#if defined __sferror               /* FreeBSD, NetBSD, OpenBSD, MacOS X, Cygwin */
-  {
-# if defined __NetBSD__ || defined __OpenBSD__
-    struct __sfileext
-      {
-	struct  __sbuf _ub; /* ungetc buffer */
-	/* More fields, not relevant here.  */
-      };
-    if (((struct __sfileext *) stream->_ext._base)->_ub._base != NULL)
-# else
-    if (stream->_ub._base != NULL)
-# endif
-      {
-	stream->_p += stream->_r;
-	stream->_r = 0;
-      }
-  }
-#endif
+  clear_ungetc_buffer (stream);
 
   /* POSIX does not specify fflush behavior for non-seekable input
      streams.  Some implementations purge unread data, some return
@@ -116,18 +140,17 @@ rpl_fflush (FILE *stream)
   if (result != 0)
     return result;
 
-#if defined __sferror && defined __SNPT /* FreeBSD, NetBSD, OpenBSD, MacOS X, Cygwin */
+#if (defined __sferror || defined __DragonFly__) && defined __SNPT /* FreeBSD, NetBSD, OpenBSD, DragonFly, MacOS X, Cygwin */
 
   {
     /* Disable seek optimization for the next fseeko call.  This tells the
        following fseeko call to seek to the desired position directly, rather
        than to seek to a block-aligned boundary.  */
-    int saved_flags = stream->_flags & (__SOPT | __SNPT);
-    stream->_flags = (stream->_flags & ~__SOPT) | __SNPT;
+    int saved_flags = disable_seek_optimization (stream);
 
     result = fseeko (stream, pos, SEEK_SET);
 
-    stream->_flags = (stream->_flags & ~(__SOPT | __SNPT)) | saved_flags;
+    restore_seek_optimization (stream, saved_flags);
   }
   return result;
 
@@ -138,10 +161,7 @@ rpl_fflush (FILE *stream)
     return EOF;
   /* After a successful lseek, update the file descriptor's position cache
      in the stream.  */
-# if defined __sferror           /* FreeBSD, NetBSD, OpenBSD, MacOS X, Cygwin */
-  stream->_offset = pos;
-  stream->_flags |= __SOFF;
-# endif
+  update_fpos_cache (stream, pos);
 
   return 0;
 

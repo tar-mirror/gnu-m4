@@ -1,5 +1,5 @@
 /* Retrieve information about a FILE stream.
-   Copyright (C) 2007 Free Software Foundation, Inc.
+   Copyright (C) 2007-2008 Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -19,6 +19,8 @@
 /* Specification.  */
 #include "freading.h"
 
+#include "stdio-impl.h"
+
 /* Don't use glibc's __freading function in glibc < 2.7, see
    <http://sourceware.org/bugzilla/show_bug.cgi?id=4359>  */
 #if !(HAVE___FREADING && (!defined __GLIBC__ || __GLIBC__ > 2 || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 7)))
@@ -29,13 +31,15 @@ freading (FILE *fp)
   /* Most systems provide FILE as a struct and the necessary bitmask in
      <stdio.h>, because they need it for implementing getc() and putc() as
      fast macros.  */
-#if defined _IO_ferror_unlocked     /* GNU libc, BeOS */
+#if defined _IO_ferror_unlocked || __GNU_LIBRARY__ == 1 /* GNU libc, BeOS, Linux libc5 */
   return ((fp->_flags & _IO_NO_WRITES) != 0
 	  || ((fp->_flags & (_IO_NO_READS | _IO_CURRENTLY_PUTTING)) == 0
 	      && fp->_IO_read_base != NULL));
-#elif defined __sferror             /* FreeBSD, NetBSD, OpenBSD, MacOS X, Cygwin */
-  return (fp->_flags & __SRD) != 0;
-#elif defined _IOERR                /* AIX, HP-UX, IRIX, OSF/1, Solaris, mingw */
+#elif defined __sferror || defined __DragonFly__ /* FreeBSD, NetBSD, OpenBSD, DragonFly, MacOS X, Cygwin */
+  return (fp_->_flags & __SRD) != 0;
+#elif defined __EMX__               /* emx+gcc */
+  return (fp->_flags & _IOREAD) != 0;
+#elif defined _IOERR                /* AIX, HP-UX, IRIX, OSF/1, Solaris, OpenServer, mingw */
   return (fp->_flag & _IOREAD) != 0;
 #elif defined __UCLIBC__            /* uClibc */
   return (fp->__modeflags & (__FLAG_READONLY | __FLAG_READING)) != 0;

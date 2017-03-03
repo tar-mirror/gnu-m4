@@ -1,3 +1,393 @@
+2008-10-10  Eric Blake  <ebb9@byu.net>
+
+	Release Version 1.4.12.
+	* NEWS: Mention the release.
+
+2008-10-06  Eric Blake  <ebb9@byu.net>
+
+	Work around Solaris' sed inability to process NUL.
+	* checks/check-them (SED): Allow user to override.
+
+2008-09-25  Eric Blake  <ebb9@byu.net>
+
+	Tweak error message on command line failure.
+	* src/m4.c (process_file): Match wording of include builtin.
+	* src/freeze.c (produce_frozen_state): Likewise.
+	* m4/gnulib-cache.m4: Regenerate.
+	* doc/m4.texinfo (Command line files, Using frozen files): Update
+	tests accordingly.
+
+2008-09-24  Eric Blake  <ebb9@byu.net>
+
+	Unify error handling for reading directories.
+	* src/path.c (m4_path_search): Factor open attempts...
+	(m4_fopen): ...into new function, to reject directories.
+	* doc/m4.texinfo (Include): Document that directories cannot be
+	input files.
+
+	Avoid bugs on platforms that mishandle trailing /.
+	* m4/gnulib-cache.m4: Import fopen module.
+	* doc/m4.texinfo (Command line files, Include): Add tests.
+	(Using frozen files): This test now works on mingw.
+	* checks/check-them (examples): Expand xerr to allow ignoring
+	error output because of differences in platform errno values.
+
+2008-09-22  Eric Blake  <ebb9@byu.net>
+
+	Support alternate path separator.
+	* m4/gnulib-cache.m4: Import dirname and filenamecat modules.
+	* src/m4.h (includes): Add headers.
+	* src/path.c (m4_path_search): Avoid literal use of '/' as path
+	separator and when detecting absolute paths.
+
+2008-09-16  Eric Blake  <ebb9@byu.net>
+
+	Fix bootstrap for Solaris /bin/sh.
+	* bootstrap: Avoid shell quoting pitfall.
+
+2008-09-01  Eric Blake  <ebb9@byu.net>
+
+	Fix building with -DDEBUG=1.
+	* src/input.c (lex_debug) [DEBUG_INPUT]: Fix compilation failure.
+	* src/symtab.c (symtab_debug) [DEBUG_SYM]: Likewise.
+	* src/m4.c (includes) [DEBUG_STKOVF]: Likewise.
+	Reported by Tom G. Christensen.
+
+2008-09-01  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
+
+	Typos in source code comments.
+	* src/builtin.c: Fix typos in comments.
+	* src/input.c: Likewise.
+
+2008-08-29  Eric Blake  <ebb9@byu.net>
+
+	Fix manual date information.
+	* doc/m4.texinfo: UPDATED refers to the day the manual was built,
+	not the release date of M4.
+	Based on a bison patch by Akim Demaille.
+
+2008-08-27  Eric Blake  <ebb9@byu.net>
+
+	Fix typo.
+	* doc/m4.texinfo (Invoking m4): 'm4 -d+f' is not supported in this
+	branch.
+
+2008-08-25  Eric Blake  <ebb9@byu.net>
+
+	Update recommendation now that libsigsegv 2.6 is released.
+	* NEWS: Recommend libsigsegv 2.6+.
+	* README: Likewise.
+
+2008-08-21  Eric Blake  <ebb9@byu.net>
+
+	Fix crash with traced defn(undef), regression from 2007-08-09.
+	* src/builtin.c (m4_defn): Handle traced but undefined macros.
+	* doc/m4.texinfo (Trace): Test it.
+	* NEWS: Document it.
+
+2008-08-18  Eric Blake  <ebb9@byu.net>
+
+	Fix crash with 'm4 -N9', regression from 2006-09-14.
+	* src/m4.c (main): Add missing break.
+	* NEWS: Document it.
+
+2008-08-15  Eric Blake  <ebb9@byu.net>
+
+	Documentation updates.
+	* doc/m4.texinfo (History): Mention 1.4.12.
+	(Builtin): Enhance regression tests.
+	(Debug Levels): Mention effect of -l.  Enhance regression tests.
+	(Incompatibilities): Fix typo, and mention trace output.
+	(Improved capitalize): Simplify example.
+
+	Avoid compiler warning.
+	* src/builtin.c (m4_ifelse): Avoid unused variable.
+	* THANKS: Update.
+	Reported by Tom G. Christensen.
+
+	Improve 'git diff' of manual source.
+	* .gitattributes (*.texi*): Add diff attribute.
+	* bootstrap: Tell git how to use it.
+	Inspired by Jim Meyering's similar patch for coreutils.
+
+2008-08-11  Eric Blake  <ebb9@byu.net>
+
+	Avoid triggering OS/2 bug in testsuite.
+	* doc/m4.texinfo (Mkstemp): Don't assume test(1) status is 1.
+	Reported by Elbert Pol.
+
+2008-08-03  Eric Blake  <ebb9@byu.net>
+
+	Increase ulimit stack value to be larger than SIGSTKSZ.
+	* checks/stackovf.test (tmpfile): Use 300K rather than 50K, since
+	at least OpenBSD's sh died early from an undersized stack limit.
+
+2008-07-17  Eric Blake  <ebb9@byu.net>
+
+	Fix missing copyright notices.
+	* acinclude.m4: Add copyright license details.
+	* c-boxes.el: Likewise.
+	* checks/get-them: Likewise.
+	* checks/check-them: Likewise.
+
+2008-07-17  Eric Blake  <ebb9@byu.net>
+
+	Remove redundant examples/stackovf.sh.
+	* examples/stackovf.sh: Delete, now that checks has better
+	version.
+	* examples/Makefile.am (EXTRA_DIST): Don't distribute it.
+
+2008-07-17  Eric Blake  <ebb9@byu.net>
+
+	Adjust to c-stack changes in gnulib.
+	* src/Makefile.am (m4_LDADD): Use libsigsegv when available and
+	necessary, via LIBCSTACK.
+	* src/m4.c (main) [DEBUG_STACKOVF]: Make it easier to test fault
+	handlers.
+	* checks/stackovf.test: New file.
+	* checks/Makefile.in (CHECKS): Add stackovf.test, and factor...
+	(DOC_CHECKS): ...generated documentation tests into new macro.
+	(DISTFILES): Distribute stackovf.test.
+	* checks/check-them: Special-case stackovf.test.
+	* NEWS: Enhance the NEWS item for -L improvements.
+	* README: Mention the optional dependency.
+	* HACKING: Mention maintenance burden added by libsigsegv.
+
+2008-06-21  Eric Blake  <ebb9@byu.net>
+
+	Use new sigaction module.
+	* m4/gnulib-cache.m4: Import sigaction module.
+	* src/m4.c (main): Drop signal() calls.
+
+2008-06-18  Eric Blake  <ebb9@byu.net>
+
+	Also trap SIGILL, SIGFPE, SIGBUS.
+	* m4/gnulib-cache.m4: Import strsignal module.
+	* src/m4.c (main): Register more handlers, and prefer sigaction
+	when available.
+	(SIGBUS, NSIG): Provide fallback when lacking.
+	(signal_message): New variable, to keep async-safety.
+	(fault_handler): Display faulting signal description.
+	* configure.ac (gl_DISABLE_THREADS): Request gnulib modules to
+	optimize for single-threaded operation.
+
+2008-06-06  Eric Blake  <ebb9@byu.net>
+
+	Inform users what to do in case of programmer error.
+	* src/m4.h (EXIT_INTERNAL_ERROR): New macro.
+	* configure.ac (AC_TYPE_SIGNAL): Delete, now that we assume C89.
+	* src/m4.c (fault_handler): New method.
+	(program_error_message): New variable, for async-safety.
+	(main): Print bug reporting address rather than dump core on any
+	failed assertions or detected non-stack-overflow faults.
+
+2008-06-06  Eric Blake  <ebb9@byu.net>
+
+	Replace stackovf with gnulib c-stack.
+	* m4/gnulib.cache.m4: Import c-stack module.
+	* configure.ac (AC_CHECK_HEADERS_ONCE): Remove check for
+	siginfo.h, sys/wait.h.
+	(AC_CHECK_TYPES): Likewise for siginfo_t.
+	(AC_CHECK_MEMBERS): Likewise for sa_sigaction, ss_sp.
+	(AC_CHECK_FUNCS_ONCE): Likewise for sigaction, sigaltstack,
+	sigstack, sigvec, strerror.
+	(M4_cv_use_stackovf): Likewise for stack overflow detection.
+	* src/Makefile.am (m4_SOURCES): Don't build stackovf.c.
+	* src/stackovf.c: Delete.
+	* src/m4.h (setup_stackovf_trap): Delete.
+	* src/m4.c (stackovf_handler): Delete.
+	(main): Use c_stack_action instead of setup_stackovf_trap.  If
+	stack overflow is detectable, don't limit -L artificially.
+	(usage): Document unlimited default on supported systems.
+	* doc/m4.texinfo (Limits control): Document new default nesting
+	limit.
+	* NEWS: Document this change.
+
+2008-07-30  Eric Blake  <ebb9@byu.net>
+
+	Avoid regressions in trace and comment output.
+	* doc/m4.texinfo (Trace): Add test.
+	(Comments): Likewise.
+
+2008-07-28  Eric Blake  <ebb9@byu.net>
+
+	Optimize iteration examples.
+	* examples/forloop2.m4: Avoid excess indir, by passing current
+	counter value as parameter.
+	* examples/foreachq3.m4: Avoid unneeded ifelse, by injecting an
+	ignored argument.
+	* doc/m4.texinfo (Improved forloop, Improved foreach): Update the
+	documentation to match.
+
+2008-07-26  Eric Blake  <ebb9@byu.net>
+
+	Give example for O(n) foreach on m4 1.4.x.
+	* examples/foreachq4.m4: New file.
+	* examples/Makefile.am (EXTRA_DIST): Distribute it.
+	* doc/m4.texinfo (Improved foreach): Document linear foreach with
+	m4 1.4.5 and greater.
+
+2008-07-17  Eric Blake  <ebb9@byu.net>
+
+	Fix missing copyright notices.
+	* acinclude.m4: Add copyright license details.
+	* c-boxes.el: Likewise.
+	* checks/get-them: Likewise.
+	* checks/check-them: Likewise.
+
+2008-07-13  Eric Blake  <ebb9@byu.net>
+
+	Add -g/--gnu command line argument.
+	* src/m4.c (usage): Mention the new option.
+	(long_options, OPTSTRING): Add new option.
+	(main): Use it.
+	* NEWS: Document this addition.
+	* doc/m4.texinfo (Limits control): Likewise.
+	(Incompatibilities): Mention future use of POSIXLY_CORRECT.
+	* THANKS: Update.
+	Reported by Joel E. Denny.
+
+2008-07-11  Eric Blake  <ebb9@byu.net>
+
+	Avoid bogus whitespace in @ovar, @dvar.
+	* doc/m4.texinfo (ovar, dvar): Add @c.
+	Based on patch by Ralf Wildenhues to Autoconf manual.
+
+2008-06-16  Eric Blake  <ebb9@byu.net>
+
+	Add missing const qualifications.
+	* src/builtin.c (builtin_tab): Declare array elements as const.
+
+2008-06-03  Eric Blake  <ebb9@byu.net>
+
+	Use progname module rather than rolling our own program_name.
+	* m4/gnulib-cache.m4: Import progname module.
+	* src/m4.c (program_name): Replace...
+	(main): ...with a call to set_program_name.
+
+2008-06-02  Eric Blake  <ebb9@byu.net>
+
+	Allow autobuild usage.
+	* m4/gnulib.cache: Import autobuild module.
+
+2008-05-23  Eric Blake  <ebb9@byu.net>
+
+	Make closing files be consistent.
+	* src/freeze.c (reload_frozen_state): Use close_stream.
+	Reported by Jean-Charles Longuet.
+
+2008-05-22  Eric Blake  <ebb9@byu.net>
+
+	Don't allow failure to freeze give exit status of 0.
+	* src/freeze.c (produce_frozen_state): Guarantee non-zero exit on
+	fopen failure.
+	* doc/m4.texinfo (Using frozen files): Test the fix.
+	* THANKS: Update.
+	Reported by Jean-Charles Longuet.
+
+2008-05-09  Eric Blake  <ebb9@byu.net>
+
+	Improve error message when frozen file is invalid.
+	* src/freeze.c (reload_frozen_state): Track current line.
+	[GET_STRING]: New helper macro.
+
+2008-05-09  Eric Blake  <ebb9@byu.net>
+
+	Detect integer overflow when loading frozen file.
+	* src/m4.h (includes): Add limits.h.
+	(_): Define as a no-op placeholder for now.
+	* src/freeze.c (reload_frozen_state) [GET_NUMBER]: Rewrite to fail
+	immediately on overflow.
+	Reported by Jim Meyering.
+
+2008-05-07  Eric Blake  <ebb9@byu.net>
+
+	Fix traceon regression introduced 2006-06-06.
+	* src/builtin.m4 (traceon): Only perform insertion if lookup
+	fails.
+	* doc/m4.texinfo (Trace): Test for the bug.
+	* NEWS: Document it.
+
+2008-05-03  Eric Blake  <ebb9@byu.net>
+
+	Document define_blind.
+	* doc/m4.texinfo (Ifelse): Add a new composite macro.
+	* THANKS: Update.
+	Suggested by Mike R.
+
+2008-04-24  Eric Blake  <ebb9@byu.net>
+
+	Add debugmode test.
+	* doc/m4.texinfo (Debug Levels): Test -di behavior.
+	(Changeword, Location): Correct examples.
+	* checks/check-them (examples): Update to account for recommended
+	location for running tests.
+	* doc/m4.texinfo (Debug Levels): Test this behavior.
+
+2008-04-21  Eric Blake  <ebb9@byu.net>
+
+	Fix spelling of attribution to Christopher Strachey.
+	* doc/m4.texinfo (History, Inhibiting Invocation): Fix typo.
+	* THANKS: Update.
+	Reported by Fernando Carrijo.
+
+2008-04-17  Eric Blake  <ebb9@byu.net>
+
+	Fix buildbot failure.
+	* doc/m4.texinfo (Diversions): Consume all of m4's output, in case
+	SIGPIPE is ignored.
+	* THANKS: Update.
+	Detected by Bob Proulx's buildbot.
+
+2008-04-17  Eric Blake  <ebb9@byu.net>
+
+	Avoid gcc shadowing warnings.
+	* src/builtin.c (m4_format): s/format/expand_format, so local
+	variables can be named format.
+	* src/format.c (format): Rename...
+	(expand_format): ...to this, and avoid the name index.
+	* src/input.c (push_file): Avoid the name close.
+	* src/m4.h (expand_format): Adjust prototype.
+	* src/output.c (threshold_diversion_CB): Avoid the name div.
+
+2008-04-15  Eric Blake  <ebb9@byu.net>
+
+	Another 'make installcheck' fix.
+	* doc/m4.texinfo (Diversions): s/m4/__program__/ in case
+	--program-prefix was active.
+
+2008-04-11  Eric Blake  <ebb9@byu.net>
+
+	Ensure --program-prefix doesn't regress.
+	* Makefile.am (DISTCHECK_CONFIGURE_FLAGS): Enforce change from
+	2008-03-10 by testing it at 'make distcheck' time.
+
+2008-04-11  Eric Blake  <ebb9@byu.net>
+
+	Improve OS/2+emx build.
+	* src/m4.h [__EMX__]: OS/2 does not have a Unix-compatible
+	system(3), no matter what other macros it pre-defined.
+	* doc/m4.texinfo (Mkstemp): Rework test to avoid globbing failure
+	on OS/2.
+	* src/builtin.c (predefined_tab): Ensure all possible system
+	identifiers are defined, not just the first; the testsuite will
+	catch if multiple identifiers mistakenly made it through.
+	* THANKS: Update.
+	Reported by Elbert Pol.
+
+2008-04-09  Eric Blake  <ebb9@byu.net>
+
+	Remove redundant configure macros.
+	* configure.ac (AC_CANONICAL_BUILD, AC_CANONICAL_HOST)
+	(AC_SYS_LARGEFILE, AC_TYPE_SIZE_T): Delete, since gnulib does
+	this.
+	(AC_CHECK_HEADERS_ONCE): Remove limits.h.
+
+2008-08-07  Bruno Haible  <bruno@clisp.org>  (tiny change)
+
+	Run m4 tests prior to gnulib unit tests.
+	* Makefile.am (SUBDIRS): Swap order of directories.
+
 2008-04-02  Eric Blake  <ebb9@byu.net>
 
 	Release Version 1.4.11.

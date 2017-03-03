@@ -1,6 +1,6 @@
 /* A GNU-like <signal.h>.
 
-   Copyright (C) 2006-2007 Free Software Foundation, Inc.
+   Copyright (C) 2006-2008 Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -14,6 +14,8 @@
 
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
+
+@PRAGMA_SYSTEM_HEADER@
 
 #if defined __need_sig_atomic_t || defined __need_sigset_t
 /* Special invocation convention inside glibc header files.  */
@@ -33,16 +35,27 @@
 
 /* The definition of GL_LINK_WARNING is copied here.  */
 
+/* Define pid_t, uid_t.
+   Also, mingw defines sigset_t not in <signal.h>, but in <sys/types.h>.  */
+#include <sys/types.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 
-#if !@HAVE_POSIX_SIGNALBLOCKING@
+#if @GNULIB_SIGNAL_H_SIGPIPE@
+# ifndef SIGPIPE
+/* Define SIGPIPE to a value that does not overlap with other signals.  */
+#  define SIGPIPE 13
+#  define GNULIB_defined_SIGPIPE 1
+/* To actually use SIGPIPE, you also need the gnulib modules 'sigprocmask',
+   'write', 'stdio'.  */
+# endif
+#endif
 
-/* Mingw defines sigset_t not in <signal.h>, but in <sys/types.h>.  */
-# include <sys/types.h>
+
+#if !@HAVE_POSIX_SIGNALBLOCKING@
 
 /* Maximum signal number + 1.  */
 # ifndef NSIG
@@ -85,7 +98,82 @@ extern int sigpending (sigset_t *set);
 # define SIG_UNBLOCK 2  /* blocked_set = blocked_set & ~*set; */
 extern int sigprocmask (int operation, const sigset_t *set, sigset_t *old_set);
 
-#endif
+# define signal rpl_signal
+/* Install the handler FUNC for signal SIG, and return the previous
+   handler.  */
+extern void (*signal (int sig, void (*func) (int))) (int);
+
+# if GNULIB_defined_SIGPIPE
+
+/* Raise signal SIG.  */
+#  undef raise
+#  define raise rpl_raise
+extern int raise (int sig);
+
+# endif
+
+#endif /* !@HAVE_POSIX_SIGNALBLOCKING@ */
+
+
+#if !@HAVE_SIGACTION@
+
+# if !@HAVE_SIGINFO_T@
+/* Present to allow compilation, but unsupported by gnulib.  */
+union sigval
+{
+  int sival_int;
+  void *sival_ptr;
+};
+
+/* Present to allow compilation, but unsupported by gnulib.  */
+struct siginfo_t
+{
+  int si_signo;
+  int si_code;
+  int si_errno;
+  pid_t si_pid;
+  uid_t si_uid;
+  void *si_addr;
+  int si_status;
+  long si_band;
+  union sigval si_value;
+};
+typedef struct siginfo_t siginfo_t;
+# endif /* !@HAVE_SIGINFO_T@ */
+
+/* We assume that platforms which lack the sigaction() function also lack
+   the 'struct sigaction' type, and vice versa.  */
+
+struct sigaction
+{
+  union
+  {
+    void (*_sa_handler) (int);
+    /* Present to allow compilation, but unsupported by gnulib.  POSIX
+       says that implementations may, but not must, make sa_sigaction
+       overlap with sa_handler, but we know of no implementation where
+       they do not overlap.  */
+    void (*_sa_sigaction) (int, siginfo_t *, void *);
+  } _sa_func;
+  sigset_t sa_mask;
+  /* Not all POSIX flags are supported.  */
+  int sa_flags;
+};
+# define sa_handler _sa_func._sa_handler
+# define sa_sigaction _sa_func._sa_sigaction
+/* Unsupported flags are not present.  */
+# define SA_RESETHAND 1
+# define SA_NODEFER 2
+# define SA_RESTART 4
+
+extern int sigaction (int, const struct sigaction *restrict,
+                      struct sigaction *restrict);
+
+#elif !@HAVE_STRUCT_SIGACTION_SA_SIGACTION@
+
+# define sa_sigaction sa_handler
+
+#endif /* !@HAVE_SIGACTION@, !@HAVE_STRUCT_SIGACTION_SA_SIGACTION@ */
 
 
 #ifdef __cplusplus

@@ -1,5 +1,5 @@
 /* Test of isnanl() substitute.
-   Copyright (C) 2007 Free Software Foundation, Inc.
+   Copyright (C) 2007-2008 Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -27,10 +27,15 @@
       if (!(expr))							     \
         {								     \
           fprintf (stderr, "%s:%d: assertion failed\n", __FILE__, __LINE__); \
+          fflush (stderr);						     \
           abort ();							     \
         }								     \
     }									     \
   while (0)
+
+/* On HP-UX 10.20, negating 0.0L does not yield -0.0L.
+   So we use minus_zero instead.  */
+long double minus_zero = -LDBL_MIN * LDBL_MIN;
 
 int
 main ()
@@ -48,7 +53,7 @@ main ()
   ASSERT (!isnanl (-2.718e30L));
   ASSERT (!isnanl (-2.718e-30L));
   ASSERT (!isnanl (0.0L));
-  ASSERT (!isnanl (-0.0L));
+  ASSERT (!isnanl (minus_zero));
   /* Infinite values.  */
   ASSERT (!isnanl (1.0L / 0.0L));
   ASSERT (!isnanl (-1.0L / 0.0L));

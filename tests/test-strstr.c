@@ -19,6 +19,7 @@
 
 #include <string.h>
 
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -29,6 +30,7 @@
       if (!(expr))							     \
 	{								     \
 	  fprintf (stderr, "%s:%d: assertion failed\n", __FILE__, __LINE__); \
+	  fflush (stderr);						     \
 	  abort ();							     \
 	}								     \
     }									     \
@@ -42,6 +44,7 @@ main (int argc, char *argv[])
      caused by SIGALRM.  All known platforms that lack alarm also have
      a quadratic strstr, and the replacement strstr is known to not
      take too long.  */
+  signal (SIGALRM, SIG_DFL);
   alarm (50);
 #endif
 
