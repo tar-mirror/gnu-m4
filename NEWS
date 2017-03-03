@@ -2,6 +2,37 @@ GNU M4 NEWS - User visible changes.
 Copyright (C) 1992, 1993, 1994, 2004, 2005, 2006 Free Software
 Foundation, Inc.
 
+Version 1.4.7 - 25 September 2006, by Eric Blake  (CVS version 1.4.6a)
+
+* Fix regression from 1.4.5 in handling a file that ends in a macro
+  expansion without arguments instead of a newline.
+* The define and pushdef macros now warn when the first argument is not
+  a string, rather than silently doing nothing.
+* Standard input can now be read more than once, as in 'm4 - file -', and
+  is not closed until all wrapped text is handled.  This makes a
+  difference when stdin is not a regular file, and also fixes bugs when
+  using the syscmd or esyscmd macros from wrapped text.
+* When standard input is a seekable file, the m4exit, syscmd, and esyscmd
+  macros now restore the current position to the next unread byte rather
+  than discarding an arbitrary amount of buffered data.
+* SysV command-line compatibility is no longer a goal of GNU M4; the
+  focus will be instead on POSIX compatibility.  This release continues to
+  support previous usage, but adds warnings in areas which will allow a
+  future version of GNU M4 to use its own extensions without being tied to
+  the SysV command line interface.
+* The no-op compatibility command line options -B, -N, -S, -T, and
+  --diversions may be withdrawn or assigned new meanings in future
+  releases, so they now issue a warning if used.
+* A new command line option -i replaces the compatibility -e as the
+  short spelling of --interactive, for consistency with other GNU tools; a
+  warning is issued if the old spelling is used, and it may be assigned new
+  meaning in future releases.
+* A new command line option --debugfile replaces the options -o and
+  --error-output as the preferred spelling.  The old options were
+  misleading in their names and inconsistent with other GNU tools; they are
+  still silently accepted, but no longer documented in --help, and may be
+  assigned new meanings in future releases.
+
 Version 1.4.6 - 25 August 2006, by Eric Blake  (CVS version 1.4.5a)
 
 * Fix buffer overruns in regexp and patsubst macros when handed a trailing

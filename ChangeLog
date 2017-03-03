@@ -1,3 +1,104 @@
+2006-09-25  Eric Blake  <ebb9@byu.net>
+
+	Release	1.4.7:
+
+	* configure.ac (AC_INIT): Bump version number.
+	* NEWS: Describe changes since 1.4.6.
+
+2006-09-21  Eric Blake  <ebb9@byu.net>
+
+	* doc/m4.texinfo (Invoking m4): Add clarification on option
+	processing behavior.
+	* THANKS: Update.
+	Reported by Mikhail Teterin.
+
+	* bootstrap: Add --force option, based on idea from coreutils.
+	* README: Document that ./bootstrap and autoreconf are for
+	developers, and not lightly done in tarballs.
+
+2006-09-20  Eric Blake  <ebb9@byu.net>
+
+	* src/m4.c (usage, OPTSTRING, main): Rename -e to -i, and give
+	deprecation warning on -e.
+	* doc/m4.texinfo (Invoking m4, Extensions): Document this.
+	* NEWS: Document this.
+
+2006-09-19  Eric Blake  <ebb9@byu.net>
+
+	* src/m4.c (usage, long_options, main, DEBUGFILE_OPTION): Rename
+	-o/--error-output to --debugfile, and deprecate the former.  This
+	will allow a future release to be more consistent with other GNU
+	tools, with -o/--output affecting stdout, not debug.
+	* doc/m4.texinfo (Invoking m4, Debug Output): Document this.
+	* NEWS: Document this.
+
+2006-09-14  Eric Blake  <ebb9@byu.net>
+
+	* src/m4.c (main): Warn on deprecated options -B, -S, -T, -N,
+	--diversions. `m4 --help --version' now displays help, not
+	version.
+	(interactive, frozen_file_to_read, frozen_file_to_write): Move to
+	smaller scope.
+	(show_help, show_version): No longer needed.
+	(long_options, DIVERSIONS_OPTION): Backport patch from head to
+	distinguish between -N and --diversions in warning.
+	* doc/m4.texinfo (Invoking m4): Document this.
+	* NEWS: Likewise.
+
+2006-09-11  Eric Blake  <ebb9@byu.net>
+
+	* src/Makefile.am (m4_LDADD): Add any gnulib dependent libraries.
+	* src/debug.c (debug_flush_files) [UNIX]: Flush stdin if it is
+	seekable.
+	(debug_set_file): Use STDOUT_FILENO.
+	* src/builtin.c (m4_m4exit): Flush stdin before exiting, to comply
+	with POSIX in regards to unread input.
+	* NEWS: Document this fix.
+	* doc/m4.texinfo (Syscmd, Esyscmd, M4exit): Likewise.
+
+2006-09-07  Eric Blake  <ebb9@byu.net>
+
+	* m4/gnulib-cache.m4: Update to newer gnulib-tool.
+	* src/m4.h (push_file): Change prototype.
+	* src/input.c (push_file, peek_input, next_char_1): Only call getc
+	once at EOF, to avoid double ^D on terminal stdin; regression from
+	2006-09-04.
+	(push_file, pop_file): Allow reading stdin twice.
+	* src/m4.c (main): Likewise.
+	* src/builtin.c (include): Update caller.
+	* NEWS: Document this change.
+	* doc/m4.texinfo (Invoking m4, Incompatibilities): Likewise.
+	(Syscmd): Add a test that failed before this patch.
+
+2006-09-07  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
+
+	* checks/check-them: Quote $pwd.
+
+2006-09-05  Eric Blake  <ebb9@byu.net>
+
+	* src/builtin.c (define_macro): Warn on invalid macro name.
+	* NEWS: Document this change.
+	* doc/m4.texinfo: Fix typos.
+	(Invoking m4, Macro Arguments, Pseudo Arguments, Defn, Indir)
+	(Ifelse): Backport some improvements from head.
+
+2006-09-04  Eric Blake  <ebb9@byu.net>
+
+	* doc/m4.texinfo (Changeword): Skip test on mingw, where the
+	native echo is braindead.
+	* checks/check-them (strip_needed): Ignore \r in output.  Now the
+	testsuite will pass when cross-compiling from cygwin to mingw.
+
+	* src/input.c (peek_input): Fix regression in handling macro
+	without arguments as last token in file; debian bug 385720.
+	(next_token): Always consume an input character.
+	Reported by Andreas Schultz.
+	* configure.ac (AC_INIT): Bump version number.
+	* NEWS: Document this fix.
+	* doc/m4.texinfo (History): Mention next version.
+	(Changeword): Add example that exposes this bug.
+	* THANKS: Update.
+
 2006-08-25  Eric Blake  <ebb9@byu.net>
 
 	Release 1.4.6:
@@ -2904,7 +3005,7 @@ Mon Jan 22 21:08:52 1990  Rene' Seindal (seindal at diku.dk)
 
 	-----
 
-	$Revision: 1.1.1.1.2.169 $ $Date: 2006/08/25 14:08:32 $
+	$Revision: 1.1.1.1.2.181 $ $Date: 2006/09/25 12:15:00 $
 
 	Local Variables:
 	coding: utf-8

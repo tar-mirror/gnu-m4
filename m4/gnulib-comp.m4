@@ -31,6 +31,10 @@ AC_DEFUN([M4_EARLY],
 AC_DEFUN([M4_INIT],
 [
   AM_CONDITIONAL([GL_COND_LIBTOOL], [false])
+  gl_cond_libtool=false
+  gl_libdeps=
+  gl_ltlibdeps=
+  gl_source_base='lib'
   gl_FUNC_ALLOCA
   gl_CLOEXEC
   gl_CLOSE_STREAM
@@ -69,6 +73,10 @@ AC_DEFUN([M4_INIT],
   gl_XALLOC
   gl_XSIZE
   gl_XVASPRINTF
+  LIBM4_LIBDEPS="$gl_libdeps"
+  AC_SUBST([LIBM4_LIBDEPS])
+  LIBM4_LTLIBDEPS="$gl_ltlibdeps"
+  AC_SUBST([LIBM4_LTLIBDEPS])
 ])
 
 # This macro records the list of files which have been installed by
@@ -110,6 +118,7 @@ AC_DEFUN([M4_FILE_LIST], [
   lib/memchr.c
   lib/mkstemp-safer.c
   lib/mkstemp.c
+  lib/mkstemp.h
   lib/obstack.c
   lib/obstack.h
   lib/pipe-safer.c

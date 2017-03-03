@@ -83,7 +83,8 @@ am_m4_OBJECTS = m4.$(OBJEXT) builtin.$(OBJEXT) debug.$(OBJEXT) \
 	input.$(OBJEXT) macro.$(OBJEXT) output.$(OBJEXT) \
 	path.$(OBJEXT) symtab.$(OBJEXT) $(am__objects_1)
 m4_OBJECTS = $(am_m4_OBJECTS)
-m4_DEPENDENCIES = ../lib/libm4.a
+am__DEPENDENCIES_1 =
+m4_DEPENDENCIES = ../lib/libm4.a $(am__DEPENDENCIES_1)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -147,6 +148,8 @@ INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 LDFLAGS = @LDFLAGS@
+LIBM4_LIBDEPS = @LIBM4_LIBDEPS@
+LIBM4_LTLIBDEPS = @LIBM4_LTLIBDEPS@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
 LTLIBOBJS = @LTLIBOBJS@
@@ -221,7 +224,7 @@ target_alias = @target_alias@
 AM_CPPFLAGS = -I$(top_srcdir)/lib -I../lib
 m4_SOURCES = m4.h m4.c builtin.c debug.c eval.c format.c freeze.c \
 	input.c macro.c output.c path.c symtab.c $(am__append_1)
-m4_LDADD = ../lib/libm4.a
+m4_LDADD = ../lib/libm4.a $(LIBM4_LIBDEPS)
 all: all-am
 
 .SUFFIXES:

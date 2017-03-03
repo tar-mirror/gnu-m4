@@ -456,7 +456,11 @@ define_macro (int argc, token_data **argv, symbol_lookup mode)
     return;
 
   if (TOKEN_DATA_TYPE (argv[1]) != TOKEN_TEXT)
-    return;
+    {
+      M4ERROR ((warning_status, 0,
+		"Warning: %s: invalid macro name ignored", ARG (0)));
+      return;
+    }
 
   if (argc == 2)
     {
@@ -1171,7 +1175,7 @@ include (int argc, token_data **argv, boolean silent)
       return;
     }
 
-  push_file (fp, name);
+  push_file (fp, name, TRUE);
   free ((char *) name);
 }
 
@@ -1287,15 +1291,16 @@ m4_m4exit (struct obstack *obs, int argc, token_data **argv)
 		"exit status out of range: `%d'", exit_code));
       exit_code = EXIT_FAILURE;
     }
+  /* Change debug stream back to stderr, to force flushing debug stream and
+     detect any errors it might have encountered.  */
+  debug_set_output (NULL);
+  debug_flush_files ();
   if (close_stream (stdout) != 0)
     {
       M4ERROR ((warning_status, errno, "write error"));
       if (exit_code == 0)
 	exit_code = EXIT_FAILURE;
     }
-  /* Change debug stream back to stderr, to force flushing debug stream and
-     detect any errors it might have encountered.  */
-  debug_set_output (NULL);
   if (exit_code == 0 && retcode != 0)
     exit_code = retcode;
   exit (exit_code);

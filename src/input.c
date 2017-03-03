@@ -82,10 +82,11 @@ struct input_block
       struct
 	{
 	  FILE *file;		/* input file handle */
+	  boolean end;		/* true if peek has seen EOF */
+	  boolean close;	/* true if we should close file on pop */
 	  const char *name;	/* name of PREVIOUS input file */
-	  int lineno;		/* current line number for do */
-	  /* Yet another attack of "The curse of global variables" (sic) */
-	  int out_lineno;	/* current output line number do */
+	  int lineno;		/* current line of previous file */
+	  int out_lineno;	/* current output line of previous file */
 	  boolean advance_line;	/* start_of_input_line from next_char () */
 	}
       u_f;
@@ -156,14 +157,16 @@ static const char *token_type_string (token_type);
 #endif
 
 
-/*-------------------------------------------------------------------------.
-| push_file () pushes an input file on the input stack, saving the current |
-| file name and line number.  If next is non-NULL, this push invalidates a |
-| call to push_string_init (), whose storage are consequentely released.   |
-`-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------.
+| push_file () pushes an input file on the input stack, saving the   |
+| current file name and line number.  If next is non-NULL, this push |
+| invalidates a call to push_string_init (), whose storage is        |
+| consequently released.  If CLOSE, then close FP after EOF is       |
+| detected.                                                          |
+`-------------------------------------------------------------------*/
 
 void
-push_file (FILE *fp, const char *title)
+push_file (FILE *fp, const char *title, boolean close)
 {
   input_block *i;
 
@@ -180,6 +183,8 @@ push_file (FILE *fp, const char *title)
 				     sizeof (struct input_block));
   i->type = INPUT_FILE;
 
+  i->u.u_f.end = FALSE;
+  i->u.u_f.close = close;
   i->u.u_f.name = current_file;
   i->u.u_f.lineno = current_line;
   i->u.u_f.out_lineno = output_current_line;
@@ -325,7 +330,7 @@ pop_input (void)
 	  fclose (isp->u.u_f.file);
 	  retcode = EXIT_FAILURE;
 	}
-      else if (fclose (isp->u.u_f.file) == EOF)
+      else if (isp->u.u_f.close && fclose (isp->u.u_f.file) == EOF)
 	{
 	  M4ERROR ((warning_status, errno, "error reading file"));
 	  retcode = EXIT_FAILURE;
@@ -445,6 +450,7 @@ peek_input (void)
 	      ungetc (ch, isp->u.u_f.file);
 	      return ch;
 	    }
+	  isp->u.u_f.end = TRUE;
 	  break;
 
 	case INPUT_MACRO:
@@ -455,8 +461,12 @@ peek_input (void)
 		    "INTERNAL ERROR: input stack botch in peek_input ()"));
 	  abort ();
 	}
-      /* End of input source --- pop one level.  */
-      pop_input ();
+      /* End of current input source --- pop one level if another
+	 level still exists.  */
+      if (isp->prev != NULL)
+	pop_input ();
+      else
+	return CHAR_EOF;
     }
 }
 
@@ -500,7 +510,10 @@ next_char_1 (void)
 	  break;
 
 	case INPUT_FILE:
-	  ch = getc (isp->u.u_f.file);
+	  /* If stdin is a terminal, calling getc after peek_input
+	     already called it would make the user have to hit ^D
+	     twice to quit.  */
+	  ch = isp->u.u_f.end ? EOF : getc (isp->u.u_f.file);
 	  if (ch != EOF)
 	    {
 	      if (ch == '\n')
@@ -783,18 +796,20 @@ next_token (token_data *td)
   obstack_1grow (&token_stack, '\0');
   token_bottom = obstack_finish (&token_stack);
 
+ /* Can't consume character until after CHAR_MACRO is handled.  */
   ch = peek_input ();
   if (ch == CHAR_EOF)
     {
 #ifdef DEBUG_INPUT
       fprintf (stderr, "next_token -> EOF\n");
 #endif
+      next_char ();
       return TOKEN_EOF;
     }
   if (ch == CHAR_MACRO)
     {
       init_macro_token (td);
-      (void) next_char ();
+      next_char ();
 #ifdef DEBUG_INPUT
       fprintf (stderr, "next_token -> MACDEF (%s)\n",
 	       find_builtin_by_addr (TOKEN_DATA_FUNC (td))->name);
@@ -802,7 +817,7 @@ next_token (token_data *td)
       return TOKEN_MACDEF;
     }
 
-  (void) next_char ();
+  next_char (); /* Consume character we already peeked at.  */
   if (MATCH (ch, bcomm.string, TRUE))
     {
       obstack_grow (&token_stack, bcomm.string, bcomm.length);

@@ -22,12 +22,10 @@
 #include "m4.h"
 
 #include <getopt.h>
+#include <limits.h>
 #include <signal.h>
 
 static void usage (int);
-
-/* Operate interactively (-e).  */
-static int interactive = 0;
 
 /* Enable sync output for /lib/cpp (-s).  */
 int sync_output = 0;
@@ -61,20 +59,8 @@ int nesting_limit = 1024;
 const char *user_word_regexp = "";
 #endif
 
-/* Name of frozen file to digest after initialization.  */
-const char *frozen_file_to_read = NULL;
-
-/* Name of frozen file to produce near completion.  */
-const char *frozen_file_to_write = NULL;
-
 /* The name this program was run with. */
 const char *program_name;
-
-/* If non-zero, display usage information and exit.  */
-static int show_help = 0;
-
-/* If non-zero, print the version on standard output and exit.  */
-static int show_version = 0;
 
 struct macro_definition
 {
@@ -96,7 +82,7 @@ m4_error (int status, int errnum, const char *format, ...)
   va_list args;
   va_start (args, format);
   verror_at_line (status, errnum, current_line ? current_file : NULL,
-                  current_line, format, args);
+		  current_line, format, args);
 }
 
 /*-------------------------------.
@@ -105,7 +91,7 @@ m4_error (int status, int errnum, const char *format, ...)
 
 void
 m4_error_at_line (int status, int errnum, const char *file, int line,
-                  const char *format, ...)
+		  const char *format, ...)
 {
   va_list args;
   va_start (args, format);
@@ -153,7 +139,7 @@ Operation modes:\n\
       --help                   display this help and exit\n\
       --version                output version information and exit\n\
   -E, --fatal-warnings         stop execution after first warning\n\
-  -e, --interactive            unbuffer output, ignore interrupts\n\
+  -i, --interactive            unbuffer output, ignore interrupts\n\
   -P, --prefix-builtins        force a `m4_' prefix to all builtins\n\
   -Q, --quiet, --silent        suppress some warnings for builtins\n\
 ", stdout);
@@ -165,7 +151,7 @@ Operation modes:\n\
       fputs ("\
 \n\
 Preprocessor features:\n\
-  -D, --define=NAME[=VALUE]    define NAME has having VALUE, or empty\n\
+  -D, --define=NAME[=VALUE]    define NAME as having VALUE, or empty\n\
   -I, --include=DIRECTORY      append DIRECTORY to include path\n\
   -s, --synclines              generate `#line NUM \"FILE\"' lines\n\
   -U, --undefine=NAME          undefine NAME\n\
@@ -187,9 +173,9 @@ Frozen state files:\n\
 \n\
 Debugging:\n\
   -d, --debug[=FLAGS]          set debug level (no FLAGS implies `aeq')\n\
+      --debugfile=FILE         redirect debug and trace output\n\
   -l, --arglength=NUM          restrict macro tracing size\n\
-  -o, --error-output=FILE      redirect debug and trace output\n\
-  -t, --trace=NAME             trace NAME when it will be defined\n\
+  -t, --trace=NAME             trace NAME when it is defined\n\
 ", stdout);
       fputs ("\
 \n\
@@ -228,35 +214,46 @@ mismatch, or whatever value was passed to the m4exit macro.\n\
 | Decode options and launch execution.  |
 `--------------------------------------*/
 
+/* For long options that have no equivalent short option, use a
+   non-character as a pseudo short option, starting with CHAR_MAX + 1.  */
+enum
+{
+  DEBUGFILE_OPTION = CHAR_MAX + 1,	/* no short opt */
+  DIVERSIONS_OPTION,			/* not quite -N, because of message */
+
+  HELP_OPTION,				/* no short opt */
+  VERSION_OPTION			/* no short opt */
+};
+
 static const struct option long_options[] =
 {
   {"arglength", required_argument, NULL, 'l'},
   {"debug", optional_argument, NULL, 'd'},
-  {"diversions", required_argument, NULL, 'N'},
-  {"error-output", required_argument, NULL, 'o'},
+  {"define", required_argument, NULL, 'D'},
+  {"error-output", required_argument, NULL, 'o'}, /* FIXME: deprecate in 2.0 */
   {"fatal-warnings", no_argument, NULL, 'E'},
   {"freeze-state", required_argument, NULL, 'F'},
   {"hashsize", required_argument, NULL, 'H'},
   {"include", required_argument, NULL, 'I'},
-  {"interactive", no_argument, NULL, 'e'},
+  {"interactive", no_argument, NULL, 'i'},
   {"nesting-limit", required_argument, NULL, 'L'},
   {"prefix-builtins", no_argument, NULL, 'P'},
   {"quiet", no_argument, NULL, 'Q'},
   {"reload-state", required_argument, NULL, 'R'},
   {"silent", no_argument, NULL, 'Q'},
   {"synclines", no_argument, NULL, 's'},
+  {"trace", required_argument, NULL, 't'},
   {"traditional", no_argument, NULL, 'G'},
+  {"undefine", required_argument, NULL, 'U'},
   {"word-regexp", required_argument, NULL, 'W'},
 
-  {"help", no_argument, &show_help, 1},
-  {"version", no_argument, &show_version, 1},
+  {"debugfile", required_argument, NULL, DEBUGFILE_OPTION},
+  {"diversions", required_argument, NULL, DIVERSIONS_OPTION},
 
-  /* These are somewhat troublesome.  */
-  { "define", required_argument, NULL, 'D' },
-  { "undefine", required_argument, NULL, 'U' },
-  { "trace", required_argument, NULL, 't' },
+  {"help", no_argument, NULL, HELP_OPTION},
+  {"version", no_argument, NULL, VERSION_OPTION},
 
-  { 0, 0, 0, 0 },
+  { NULL, 0, NULL, 0 },
 };
 
 /* Global catchall for any errors that should affect final error status, but
@@ -264,9 +261,9 @@ static const struct option long_options[] =
 int retcode;
 
 #ifdef ENABLE_CHANGEWORD
-#define OPTSTRING "B:D:EF:GH:I:L:N:PQR:S:T:U:W:d::el:o:st:"
+#define OPTSTRING "B:D:EF:GH:I:L:N:PQR:S:T:U:W:d::eil:o:st:"
 #else
-#define OPTSTRING "B:D:EF:GH:I:L:N:PQR:S:T:U:d::el:o:st:"
+#define OPTSTRING "B:D:EF:GH:I:L:N:PQR:S:T:U:d::eil:o:st:"
 #endif
 
 int
@@ -279,6 +276,10 @@ main (int argc, char *const *argv, char *const *envp)
 
   macro_definition *defines;
   FILE *fp;
+  boolean read_stdin = FALSE;
+  boolean interactive = FALSE;
+  const char *frozen_file_to_read = NULL;
+  const char *frozen_file_to_write = NULL;
 
   program_name = argv[0];
   retcode = EXIT_SUCCESS;
@@ -301,14 +302,21 @@ main (int argc, char *const *argv, char *const *envp)
       default:
 	usage (EXIT_FAILURE);
 
-      case 0:
-	break;
-
-      case 'B':			/* compatibility junk */
-      case 'N':
+      case 'B':
       case 'S':
       case 'T':
+	/* Compatibility junk: options that other implementations
+	   support, but which we ignore as no-ops and don't list in
+	   --help.  */
+	error (0, 0, "Warning: `m4 -%c' may be removed in a future release",
+	       optchar);
 	break;
+
+      case 'N':
+      case DIVERSIONS_OPTION:
+	/* -N became an obsolete no-op in 1.4.x.  */
+	error (0, 0, "Warning: `m4 %s' is deprecated",
+	       optchar == 'N' ? "-N" : "--diversions");
 
       case 'D':
       case 'U':
@@ -383,7 +391,10 @@ main (int argc, char *const *argv, char *const *envp)
 	break;
 
       case 'e':
-	interactive = 1;
+	error (0, 0, "Warning: `m4 -e' is deprecated, use `-i' instead");
+	/* fall through */
+      case 'i':
+	interactive = TRUE;
 	break;
 
       case 'l':
@@ -393,6 +404,11 @@ main (int argc, char *const *argv, char *const *envp)
 	break;
 
       case 'o':
+	/* -o/--error-output are deprecated synonyms of --debugfile,
+	   but don't issue a deprecation warning until autoconf 2.61
+	   or later is more widely established, as such a warning
+	   would interfere with all earlier versions of autoconf.  */
+      case DEBUGFILE_OPTION:
 	if (!debug_set_output (optarg))
 	  error (0, errno, "%s", optarg);
 	break;
@@ -400,12 +416,10 @@ main (int argc, char *const *argv, char *const *envp)
       case 's':
 	sync_output = 1;
 	break;
-      }
 
-  if (show_version)
-    {
-      printf ("%s\n", PACKAGE_STRING);
-      fputs ("\
+      case VERSION_OPTION:
+	 printf ("%s\n", PACKAGE_STRING);
+	 fputs ("\
 Copyright (C) 2006 Free Software Foundation, Inc.\n\
 This is free software; see the source for copying conditions.  There is NO\n\
 warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\
@@ -413,13 +427,15 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\
 Written by Rene' Seindal.\n\
 ", stdout);
 
-      if (close_stream (stdout) != 0)
-	M4ERROR ((EXIT_FAILURE, errno, "write error"));
-      exit (EXIT_SUCCESS);
-    }
+	 if (close_stream (stdout) != 0)
+	    M4ERROR ((EXIT_FAILURE, errno, "write error"));
+	 exit (EXIT_SUCCESS);
+	break;
 
-  if (show_help)
-    usage (EXIT_SUCCESS);
+      case HELP_OPTION:
+	usage (EXIT_SUCCESS);
+	break;
+      }
 
   defines = head;
 
@@ -488,14 +504,24 @@ Written by Rene' Seindal.\n\
 
   if (optind == argc)
     {
-      push_file (stdin, "stdin");
+      /* No point closing stdin until after wrapped text is
+	 processed.  */
+      push_file (stdin, "stdin", FALSE);
+      read_stdin = TRUE;
       expand_input ();
     }
   else
     for (; optind < argc; optind++)
       {
 	if (strcmp (argv[optind], "-") == 0)
-	  push_file (stdin, "stdin");
+	  {
+	    /* If stdin is a terminal, we want to allow 'm4 - file -'
+	       to read input from stdin twice, like GNU cat.  Besides,
+	       there is no point closing stdin before wrapped text, to
+	       minimize bugs in syscmd called from wrapped text.  */
+	    push_file (stdin, "stdin", FALSE);
+	    read_stdin = TRUE;
+	  }
 	else
 	  {
 	    const char *name;
@@ -508,7 +534,7 @@ Written by Rene' Seindal.\n\
 		retcode = EXIT_FAILURE;
 		continue;
 	      }
-	    push_file (fp, name);
+	    push_file (fp, name, TRUE);
 	    free ((char *) name);
 	  }
 	expand_input ();
@@ -520,9 +546,15 @@ Written by Rene' Seindal.\n\
   while (pop_wrapup ())
     expand_input ();
 
-  /* Change debug stream back to stderr, to force flushing debug stream and
-     detect any errors it might have encountered.  */
+  /* Change debug stream back to stderr, to force flushing the debug
+     stream and detect any errors it might have encountered.  Close
+     stdin if we read from it, to detect any errors.  */
   debug_set_output (NULL);
+  if (read_stdin && fclose (stdin) == EOF)
+    {
+      M4ERROR ((warning_status, errno, "error reading file"));
+      retcode = EXIT_FAILURE;
+    }
 
   if (frozen_file_to_write)
     produce_frozen_state (frozen_file_to_write);

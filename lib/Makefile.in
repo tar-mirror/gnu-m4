@@ -93,7 +93,8 @@ LIBRARIES = $(noinst_LIBRARIES)
 AR = ar
 ARFLAGS = cru
 libm4_a_AR = $(AR) $(ARFLAGS)
-libm4_a_DEPENDENCIES = @LIBOBJS@ @ALLOCA@
+am__DEPENDENCIES_1 = @LIBOBJS@
+libm4_a_DEPENDENCIES = $(am__DEPENDENCIES_1) @ALLOCA@
 am_libm4_a_OBJECTS = strnlen1.$(OBJEXT) verror.$(OBJEXT) \
 	xalloc-die.$(OBJEXT) xvasprintf.$(OBJEXT) xasprintf.$(OBJEXT)
 libm4_a_OBJECTS = $(am_libm4_a_OBJECTS)
@@ -161,6 +162,8 @@ INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 LDFLAGS = @LDFLAGS@
+LIBM4_LIBDEPS = @LIBM4_LIBDEPS@
+LIBM4_LTLIBDEPS = @LIBM4_LTLIBDEPS@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
 LTLIBOBJS = @LTLIBOBJS@
@@ -239,14 +242,14 @@ libm4_a_SOURCES = binary-io.h exit.h gettext.h mbchar.h mbuiter.h \
 	printf-parse.h vasnprintf.h vasprintf.h verror.h verror.c \
 	wcwidth.h xalloc-die.c xsize.h xvasprintf.h xvasprintf.c \
 	xasprintf.c
-libm4_a_LIBADD = @LIBOBJS@ @ALLOCA@
+libm4_a_LIBADD = $(LIBOBJS) @ALLOCA@
 noinst_HEADERS = 
 EXTRA_DIST = alloca_.h cloexec.h close-stream.h exitfail.h \
 	stdio-safer.h stdio--.h __fpending.h getopt_.h getopt_int.h \
-	regcomp.c regex.h regex_internal.c regex_internal.h regexec.c \
-	stat-macros.h stdbool_.h stdint_.h stdlib-safer.h stdlib--.h \
-	stat_.h stdio-safer.h stdio--.h unistd-safer.h unistd--.h \
-	unlocked-io.h xalloc.h
+	mkstemp.h regcomp.c regex.h regex_internal.c regex_internal.h \
+	regexec.c stat-macros.h stdbool_.h stdint_.h stdlib-safer.h \
+	stdlib--.h stat_.h stdio-safer.h stdio--.h unistd-safer.h \
+	unistd--.h unlocked-io.h xalloc.h
 BUILT_SOURCES = $(ALLOCA_H) $(GETOPT_H) $(STDBOOL_H) $(STDINT_H) \
 	$(SYS_STAT_H) $(UNISTD_H)
 SUFFIXES = 
@@ -486,28 +489,30 @@ uninstall-am: uninstall-info-am
 # We need the following in order to create <alloca.h> when the system
 # doesn't have one that works with the given compiler.
 alloca.h: alloca_.h
-	cp $(srcdir)/alloca_.h $@-t
-	mv $@-t $@
+	cp -f $(srcdir)/alloca_.h $@-t
+	mv -f $@-t $@
 
 # We need the following in order to create <getopt.h> when the system
 # doesn't have one that works with the given compiler.
 getopt.h: getopt_.h
-	cp $(srcdir)/getopt_.h $@-t
-	mv $@-t $@
+	cp -f $(srcdir)/getopt_.h $@-t
+	mv -f $@-t $@
 
 # We need the following in order to create <stdbool.h> when the system
 # doesn't have one that works.
 stdbool.h: stdbool_.h
+	rm -f $@-t $@
 	sed -e 's/@''HAVE__BOOL''@/$(HAVE__BOOL)/g' < $(srcdir)/stdbool_.h > $@-t
 	mv $@-t $@
 
 # We need the following in order to create <stdint.h> when the system
 # doesn't have one that works with the given compiler.
 stdint.h: stdint_.h
+	rm -f $@-t $@
 	sed -e 's/@''HAVE_WCHAR_H''@/$(HAVE_WCHAR_H)/g' \
 	    -e 's/@''HAVE_STDINT_H''@/$(HAVE_STDINT_H)/g' \
-	    -e 's/@''HAVE_SYS_TYPES_H''@/$(HAVE_SYS_TYPES_H)/g' \
 	    -e 's|@''ABSOLUTE_STDINT_H''@|$(ABSOLUTE_STDINT_H)|g' \
+	    -e 's/@''HAVE_SYS_TYPES_H''@/$(HAVE_SYS_TYPES_H)/g' \
 	    -e 's/@''HAVE_INTTYPES_H''@/$(HAVE_INTTYPES_H)/g' \
 	    -e 's/@''HAVE_SYS_INTTYPES_H''@/$(HAVE_SYS_INTTYPES_H)/g' \
 	    -e 's/@''HAVE_SYS_BITYPES_H''@/$(HAVE_SYS_BITYPES_H)/g' \
@@ -532,6 +537,7 @@ stdint.h: stdint_.h
 # has one that is incomplete.
 sys/stat.h: stat_.h
 	test -d sys || mkdir sys
+	rm -f $@-t $@
 	sed -e 's|@''ABSOLUTE_SYS_STAT_H''@|$(ABSOLUTE_SYS_STAT_H)|g' \
 	    < $(srcdir)/stat_.h > $@-t
 	mv $@-t $@
@@ -548,8 +554,6 @@ mostlyclean-local: mostlyclean-generic
 	      echo "rmdir $$dir"; rmdir $$dir; \
 	    fi; \
 	  done
-
-# Makefile.am ends here
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:
