@@ -15,9 +15,7 @@
    with this program; if not, write to the Free Software Foundation,
    Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.  */
 
-#ifdef HAVE_CONFIG_H
-# include <config.h>
-#endif
+#include <config.h>
 
 /* Specification.  */
 #include "xvasprintf.h"
@@ -66,7 +64,7 @@ xstrcat (size_t argcount, va_list args)
     }
 
   /* Allocate and fill the result string.  */
-  result = (char *) xmalloc (totalsize + 1);
+  result = XNMALLOC (totalsize + 1, char);
   p = result;
   for (i = argcount; i > 0; i--)
     {

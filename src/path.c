@@ -51,13 +51,17 @@ include_env_init (void)
 {
   char *path;
   char *path_end;
+  char *env_path;
 
   if (no_gnu_extensions)
     return;
 
-  path = getenv ("M4PATH");
-  if (path == NULL)
+  env_path = getenv ("M4PATH");
+  if (env_path == NULL)
     return;
+
+  env_path = xstrdup (env_path);
+  path = env_path;
 
   do
     {
@@ -68,6 +72,7 @@ include_env_init (void)
       path = path_end + 1;
     }
   while (path_end);
+  free (env_path);
 }
 
 void
@@ -106,7 +111,7 @@ add_include_directory (const char *dir)
    respect to the current working directory.  */
 
 FILE *
-path_search (const char *file, const char **result)
+m4_path_search (const char *file, char **result)
 {
   FILE *fp;
   includes *incl;
@@ -149,7 +154,7 @@ path_search (const char *file, const char **result)
       strcpy (name + incl->len + 1, file);
 
 #ifdef DEBUG_INCL
-      fprintf (stderr, "path_search (%s) -- trying %s\n", file, name);
+      fprintf (stderr, "m4_path_search (%s) -- trying %s\n", file, name);
 #endif
 
       fp = fopen (name, "r");

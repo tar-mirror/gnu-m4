@@ -1,3 +1,369 @@
+2006-11-20  Eric Blake  <ebb9@byu.net>
+
+	Release	1.4.8:
+
+	* configure.ac (AC_INIT): Bump version number.
+	* NEWS: Describe changes since 1.4.7.
+
+2006-11-16  Eric Blake  <ebb9@byu.net>
+
+	* doc/m4.texinfo (Include, Search Path, Diversions, Divert):
+	Minor tweaks noticed while porting to head.
+
+2006-11-14  Eric Blake  <ebb9@byu.net>
+
+	* src/output.c (cleanup_tmpfile, freeze_diversions): Clean up
+	spent iterators.
+	(m4_tmpname): Avoid memory leak.
+
+2006-11-13  Eric Blake  <ebb9@byu.net>
+
+	* src/output.c (cleanup_tmpfile): Avoid double error message when
+	umask is prohibitive.
+	(m4_tmpname, m4_tmpopen, m4_tmpclose, m4_tmpremove): New
+	functions.
+	(m4_tmpfile): Add parameter, move cloexec action here.
+	(make_room_for): Adjust caller.  Don't keep too many files open.
+	(insert_diversion_helper): Unlink emptied temp files.
+	(make_diversion): Don't keep too many files open.
+	* doc/m4.texinfo (Diversions): Tweak wording, now that open file
+	descriptors are no longer a limiting factor.
+	* NEWS: Document this change.
+
+	Backport sparse diversion handling from head.
+	* m4/gnulib-cache.m4: Augment with 'gnulib-tool --import
+	avltree-oset'.
+	* src/output.c (struct m4_diversion): Rename from struct
+	diversion, and update members.  All users changed.
+	(diversion_table): Change to an ordered set, instead of an array.
+	(div0): New storage for diversion 0.
+	(diversions): No longer needed.
+	(free_list): New list to allow recycling diversion storage.
+	(diversion_storage): New storage to reduce malloc overhead.
+	(cmp_diversion_CB, threshold_diversion_CB): New callbacks.
+	(output_init, output_exit, cleanup_tmpfile, make_room_for)
+	(make_diversion): Handle new diversion storage scheme.
+	(insert_diversion_helper): New function.
+	(insert_diversion, undivert_all, freeze_diversions): Use it.
+	* doc/m4.texinfo (Divert, Diversions): Move hidden test of memory
+	exhaustion to visible test of large diversion numbers.
+	* NEWS: Document this fix.
+
+2006-11-11  Eric Blake  <ebb9@byu.net>
+
+	* src/builtin.c (m4_translit): Slight optimization.
+
+	* src/m4.h (to_uchar): Depend on HAVE_INLINE.
+
+	* src/builtin.c: Remove unnecessary casts.
+	(expand_ranges): Make 8-bit clean.
+	* doc/m4.texinfo (Translit): Add tests and wording.
+	* NEWS: Document this fix.
+
+2006-11-07  Eric Blake  <ebb9@byu.net>
+
+	* src/m4.h (output_exit): New prototype.
+	* src/m4.c (main): Use it.
+	* src/output.c (cleanup_tmpfile): Close files before removing
+	directory.
+	(insert_diversion): Check for failure.
+	(output_exit): Avoid memory leak.
+	* doc/m4.texinfo (Diversions): Test this bug.
+
+	* doc/m4.texinfo (Esyscmd, Errprint): Minor touchups.
+
+2006-11-01  Eric Blake  <ebb9@byu.net>
+
+	Allow C++ compilation on Linux, as a safety measure in type
+	checking.
+	* m4/gnulib-cache.m4: Augment with 'gnulib-tool --import
+	stdbool'.
+	* src/m4.h (hack_symbol, hack_all_symbols): Use full prototype.
+	(boolean): Kill this, and use stdbool.h instead.
+	* src/debug.c, src/eval.c, src/input.c, src/macro.c, src/m4.c:
+	* src/output.c, src/symtab.c: All users changed.
+	* src/symtab.c (hack_all_symbols): Update prototype.
+	* src/builtin.c (dump_symbol, set_trace): Update signature.
+	(m4_dumpdef, m4_traceon, m4_traceoff): Update callers.
+	(mkstemp_helper, m4_m4wrap, expand_ranges, m4_translit): Allow
+	C++ compilation.
+	* src/debug.c (trace_flush): Likewise.
+	* src/freeze.c (reload_frozen_state): Likewise.
+	* src/input.c (push_file, push_string_finish, push_wrapup):
+	(token_bottom, next_token): Likewise.
+	* src/m4.c (main): Likewise.
+
+	* doc/m4.texinfo (Invoking m4): Update according to POSIX 200x
+	draft wording.
+	* src/m4.h (m4_path_search): Tweak signature.
+	* src/path.c (m4_path_search): Likewise.
+	* src/builtin.c (include): Update caller.
+	* src/m4.c (main): Allow -D, -U, -t, and -s to be interspersed
+	with file names.  Don't write to **argv.
+	(process_file): New helper method.
+	* NEWS: Document this fix.
+
+2006-10-31  Eric Blake  <ebb9@byu.net>
+
+	* m4/gnulib-cache.m4: Augment with 'gnulib-tool --import strstr'.
+	* doc/m4.texinfo (Translit): Improve the documentation.
+	* src/builtin.c (m4_translit): Optimize to O(n) instead of O(n^2)
+	algorithm.
+	(m4_index): Simplify, and speed up slightly.
+	* NEWS: Document this fix.
+
+2006-10-28  Eric Blake  <ebb9@byu.net>
+
+	* src/input.c (set_quotes): Don't allow empty end-quote with
+	non-empty start-quote.
+	(set_comment): Likewise for end-comment.
+	* src/builtin.c (m4_changecom): Adjust caller.
+	* doc/m4.texinfo (Changequote, Changecom): Update documentation to
+	match behavior.
+	(Incompatibilities): Document another POSIX bug.
+	* NEWS: Mention this change.
+
+2006-10-27  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
+
+	* examples/Makefile.am (EXTRA_DIST): Distribute recently-added
+	files.
+
+2006-10-26  Eric Blake  <ebb9@byu.net>
+
+	Silence -Wwrite-strings -Wpointer-arith warnings.
+	* src/builtin.c (define_user_macro): Allow NULL argument.
+	(m4_builtin, m4_indir): Cast away const of "".
+	* src/format.c (format): Likewise.
+	* src/macro.c (collect_arguments): Likewise.
+	(expand_macro): Avoid math on void*.
+	* src/m4.c (main): Adjust caller.
+	* src/output.c (freeze_diversions): Detect off_t overflow.
+
+	* src/input.c (pop_input): Remove unnecessary code.
+
+2006-10-25  Eric Blake  <ebb9@byu.net>
+
+	* src/symtab.c (symtab_init): Avoid size_t overflow.
+	* src/output.c (make_diversion): Avoid size_t overflow.
+	* doc/m4.texinfo (Diversions): Test this fix.
+	* src/input.c (input_block): Remove unused member.  Reduce size
+	of struct.
+	(push_file, pop_input): Avoid useless assignment.
+	* NEWS: Document the bug fix.
+
+	Redo location tracking.  Instead of having just files track the
+	line to return to when popping input, now all input blocks track
+	their current line.
+	* src/input.c (INPUT_STRING_WRAP, INPUT_FILE_INIT): No longer
+	needed.
+	(input_block): Have line and file storage for all input types, and
+	rename some members.
+	(input_change): New global flag.
+	(push_file, push_macro, push_string_init, push_wrapup): Store
+	location.
+	(push_string_finish, pop_input, pop_wrapup): Notice changes in
+	input blocks.
+	(peek_input): Adjust to new member names.
+	(next_char, next_char1): Adjust location if needed.
+	(skip_line): Simplify restoring location.
+	* doc/m4.texinfo (Location): Augment the test to catch line
+	location of expansion of multi-line arguments.
+	Reported by Stepan Kasal.
+
+2006-10-23  Eric Blake  <ebb9@byu.net>
+
+	* doc/m4.texinfo (Macro Arguments): Document that leading space
+	in argument collection stops at macro expansion.
+	(Incompatibilities): Document POSIX whitespace wording issue.
+
+2006-10-20  Eric Blake  <ebb9@byu.net>
+
+	* doc/m4.texinfo: Trailing '@comment' doesn't format nicely in
+	TeX, so recognize '@w{ }' instead.  Likewise, @code{_name} at the
+	end of a TeX line splits incorrectly.
+	(Foreach, Improved foreach): Write these sections, borrowing ideas
+	from CVS head and from m4sugar.
+	* checks/get-them: Accomodate new way to show trailing space in
+	examples.
+	* examples/foreach.m4: Make usable in documentation.
+	* examples/foreachq.m4: New file.
+	* examples/foreachq2.m4: New file.
+	* examples/foreach2.m4: New file.
+	* NEWS: Document the documentation updates.
+
+2006-10-19  Eric Blake  <ebb9@byu.net>
+
+	* src/builtin.c (mkstemp_helper, m4_mkstemp): New functions.
+	(m4_maketemp): Provide traditional behavior.
+	* doc/m4.texinfo (Mkstemp): Rename from Maketemp.  Document the
+	new `mkstemp' macro and the flaws of the old `maketemp'.
+	(Incompatibilities): Move maketemp discussion to...
+	(Extensions): ...here, since -G now supresses the GNU extension.
+	* NEWS: Document this.
+
+	* examples/forloop.m4: Simplify.
+	* examples/forloop2.m4: New file.
+	* examples/quote.m4: New file.
+	* doc/m4.texinfo (Loops): Rename to...
+	(Shift): ...this node.
+	(Forloop, Foreach, Improved forloop, Improved foreach): New
+	nodes.
+
+2006-10-17  Eric Blake  <ebb9@byu.net>
+
+	* m4/gnulib-cache.m4: Update with 'gnulib-tool --import
+	config-h'.
+	* configure.ac (AC_CONFIG_HEADERS): Create config.h alongside
+	gnulib headers, rather than in top directory.
+	* src/Makefile.am (AUTOMAKE_OPTIONS): Add nostdinc, to reduce make
+	output clutter.
+
+2006-10-16  Eric Blake  <ebb9@byu.net>
+
+	* doc/m4.texinfo: Backport some minor cleanups from head.
+	(Cleardivert): Rename from cleardiv.
+
+	* doc/m4.texinfo (Invoking m4): Promote to a chapter, instead of
+	a section of Preliminaries.
+	(Operation modes, Preprocessor features, Limits control)
+	(Frozen state, Debugging options, Command line files): Subdivide
+	into new sections.
+	(Input processing, Quoting Arguments, Define, Arguments)
+	(Cleardiv, Format, M4exit): Fix grammar of references.
+	(Inhibiting Invocation, Macro Arguments, Builtin, Trace)
+	(Debug Levels, Debug Output, Include, Search Path, Divert)
+	(Platform macros, Syscmd, Location, Extensions): Point to new
+	sections.
+	(Top, Loops, Include, Undivert, Location, Incompatibilities):
+	Improve file references.
+
+2006-10-14  Eric Blake  <ebb9@byu.net>
+
+	* m4/input.c (file_clean): Don't close stdin twice, POSIX says it
+	is not portable.
+	Reported by Ralf Wildenhues.
+
+	* src/builtin.c (m4_undivert): Check for read error.
+
+2006-10-13  Eric Blake  <ebb9@byu.net>
+
+	* src/m4.h (UNIX, W32_NATIVE, OS2): Move platform checks after
+	header files are included, since <unistd.h> can affect the tests.
+	* THANKS: Updated.
+	Reported by Martin Koeppe.
+
+	Backport head's usage of clean-temp module, as it is cleaner than
+	using tmpfile-safer.
+	* m4/gnulib-cache.m4: Augment with 'gnulib-tool --import
+	clean-temp closeout', and remove tmpfile-safer.
+	* src/m4.h (includes): Adjust.
+	(m4_path_search): Rename from path_search, to avoid collision
+	with gnulib.
+	* src/m4.c (main): Install closeout handler.  Adjust caller.
+	(usage): Now done by closeout module.
+	* src/builtin.c (m4_m4exit): Likewise.
+	(m4_undivert, include): Adjust callers.
+	* src/freeze.c (reload_frozen_state): Likewise.
+	* src/path.c (m4_path_search): Rename from path_search.
+	* src/output.c (output_temp_dir): New variable.
+	(cleanup_tmpfile, m4_tmpfile): New functions, from head.
+	(insert_diversion, make_room_for): Use them.
+	* doc/m4.texinfo (Diversions): Document this, and add a test.
+	(Improved fatal_error): Fix typo.
+	(Maketemp): Port test to mingw, and no longer hide from
+	documentation.
+	* NEWS: Document the change in TMPDIR behavior.
+
+	* configure.ac (m4_pattern_forbid): Narrow the range of forbidden
+	macros, to work with recent gnulib-tool update.
+
+	* src/builtin.c (m4_builtin, m4_indir): Allow transparent
+	handling of defn results.
+	* doc/m4.texinfo (Builtin, Indir): Add test cases.
+	* NEWS: Document this.
+
+2006-10-12  Eric Blake  <ebb9@byu.net>
+
+	* doc/m4.texinfo (Location): Fix typo in previous commit.
+	(Changeword): Catch one more case.
+	* src/input.c (skip_line): Fix case when outer file used macro to
+	supply the \n.
+
+2006-10-11  Eric Blake  <ebb9@byu.net>
+
+	* src/input.c (enum input_type): Add additional types, to shave
+	time off the common case.
+	(push_wrapup): Wrapped strings remember location.
+	(push_string_finish): Normal strings carry no location.
+	(push_file): Start new files uninitialized.
+	(peek_input, next_char_1): Optimize common cases by updating
+	location only on new input types.
+	(pop_input): Update to honor new input types.
+	(skip_line, push_string_finish): Fix regression in previous patch
+	when dnl is not followed by newline in included file.
+	(push_string_init): Initialize all fields of INPUT_STRING sooner.
+	(peek_token): Simplify.
+	(peek_input): Don't pop input files on peek, so that __file__ and
+	__line__ as last token of include file work correctly.
+	* doc/m4.texinfo (History): Mention 1.4.8.
+	(Answers): Split into sections, one per answer.
+	(Improved exch, Improved cleardivert, Improved fatal_error): New
+	nodes.
+	(Dnl, M4wrap, Location, M4exit, Improved fatal_error): Update to
+	new m4wrap location semantics.
+	(Changeword): Add test that caught the regression.
+	* NEWS: Document this.
+
+	* src/macro.c (expand_macro): In macro expansion errors, report
+	line number at open parenthesis.
+	* src/input.c (next_token): Fix off-by-one bug in reporting end
+	of file in unterminated comment and string.
+	(file_names): New obstack, necessary since expand_macro now hangs
+	on to file names longer than the files remain open.
+	(input_init): Initialize new obstack.
+	(push_file): Use new obstack.  Delay updates to current_file
+	until after expand_macro has restored state.
+	(peek_input, next_char_1): Update current_file if necessary.
+	(pop_wrapup): Release memory.
+	* doc/m4.texinfo (Macro Arguments, Changequote, Changecom): Catch
+	the off-by-one bug.
+	(Dnl): Update to the new location reporting rules.
+	* NEWS: Document these changes.
+
+2006-10-10  Eric Blake  <ebb9@byu.net>
+
+	* src/macro.c (argc_stack, argv_stack): New variables for sharing
+	obstacks across multiple macro calls.
+	(expand_input): Initialize and tear down stack once per input
+	file, instead of once per macro.
+	(expand_macro): Reuse existing stacks when possible.
+	(collect_arguments): Simplify slightly.
+
+	* src/path.c (include_env_init): Fix botched patch application.
+	Reported by Ralf Wildenhues.
+
+2006-10-09  Eric Blake  <ebb9@byu.net>
+
+	* src/m4.c (usage, main): Detect write failures to stderr.
+	* src/builtin.c (m4_m4exit): Likewise.
+	* NEWS: Document this.
+
+	* src/macro.c (expand_macro): Allow --nesting-limit=0 to remove
+	the limit.
+	* NEWS: Document this.
+	* doc/m4.texinfo (Invoking m4): Likewise.
+
+2006-10-09  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
+
+	* src/path.c (include_env_init): Copy the string returned
+	by getenv before overwriting it; POSIX disallows this.
+
+2006-10-09  Eric Blake  <ebb9@byu.net>
+
+	* src/m4.c (main): Defer debugfile until after --help.
+	* configure.ac (AC_INIT): Bump version number.
+	* NEWS: Start changes of 1.4.7a.
+
 2006-09-25  Eric Blake  <ebb9@byu.net>
 
 	Release	1.4.7:
@@ -3005,7 +3371,7 @@ Mon Jan 22 21:08:52 1990  Rene' Seindal (seindal at diku.dk)
 
 	-----
 
-	$Revision: 1.1.1.1.2.181 $ $Date: 2006/09/25 12:15:00 $
+	$Revision: 1.1.1.1.2.224 $ $Date: 2006/11/21 04:08:44 $
 
 	Local Variables:
 	coding: utf-8

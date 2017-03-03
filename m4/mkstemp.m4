@@ -1,4 +1,4 @@
-#serial 14
+#serial 16
 
 # Copyright (C) 2001, 2003, 2004, 2005, 2006 Free Software Foundation, Inc.
 # This file is free software; the Free Software Foundation
@@ -28,9 +28,9 @@ AC_DEFUN([gl_FUNC_MKSTEMP],
 	      large = 2147483647;
 	    for (i = 0; i < 70; i++)
 	      {
-		char template[] = "conftest.mkstemp/coXXXXXX";
+		char templ[] = "conftest.mkstemp/coXXXXXX";
 		int (*mkstemp_function) (char *) = mkstemp;
-		int fd = mkstemp_function (template);
+		int fd = mkstemp_function (templ);
 		if (fd < 0 || lseek (fd, large, SEEK_SET) != large)
 		  return 1;
 		close (fd);
@@ -45,21 +45,12 @@ AC_DEFUN([gl_FUNC_MKSTEMP],
   if test $gl_cv_func_working_mkstemp != yes; then
     AC_DEFINE([__MKSTEMP_PREFIX], [[rpl_]],
       [Define to rpl_ if the mkstemp replacement function should be used.])
-    AC_LIBOBJ(mkstemp)
-    AC_LIBOBJ(tempname)
+    AC_LIBOBJ([mkstemp])
     gl_PREREQ_MKSTEMP
-    gl_PREREQ_TEMPNAME
   fi
 ])
 
 # Prerequisites of lib/mkstemp.c.
 AC_DEFUN([gl_PREREQ_MKSTEMP],
 [
-])
-
-# Prerequisites of lib/tempname.c.
-AC_DEFUN([gl_PREREQ_TEMPNAME],
-[
-  AC_CHECK_HEADERS_ONCE(sys/time.h)
-  AC_CHECK_FUNCS(__secure_getenv gettimeofday)
 ])

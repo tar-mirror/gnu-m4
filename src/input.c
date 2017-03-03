@@ -49,11 +49,14 @@
    pointer to the final text.  The input_block *next is used to manage
    the coordination between the different push routines.
 
-   The current file and line number are stored in two global variables,
-   for use by the error handling functions in m4.c.  Whenever a file
-   input_block is pushed, the current file name and line number is saved
-   in the input_block, and the two variables are reset to match the new
-   input file.  */
+   The current file and line number are stored in two global
+   variables, for use by the error handling functions in m4.c.  Macro
+   expansion wants to report the line where a macro name was detected,
+   rather than where it finished collecting arguments.  This also
+   applies to text resulting from macro expansions.  So each input
+   block maintains its own notion of the current file and line, and
+   swapping between input blocks updates the global variables
+   accordingly.  */
 
 #ifdef ENABLE_CHANGEWORD
 #include "regex.h"
@@ -61,9 +64,9 @@
 
 enum input_type
 {
-  INPUT_FILE,
-  INPUT_STRING,
-  INPUT_MACRO
+  INPUT_STRING,		/* String resulting from macro expansion.  */
+  INPUT_FILE,		/* File from command line or include.  */
+  INPUT_MACRO		/* Builtin resulting from defn.  */
 };
 
 typedef enum input_type input_type;
@@ -71,25 +74,24 @@ typedef enum input_type input_type;
 struct input_block
 {
   struct input_block *prev;	/* previous input_block on the input stack */
-  input_type type;		/* INPUT_FILE, INPUT_STRING or INPUT_MACRO */
+  input_type type;		/* see enum values */
+  const char *file;		/* file where this input is from */
+  int line;			/* line where this input is from */
   union
     {
       struct
 	{
-	  char *string;		/* string value */
+	  char *string;		/* remaining string value */
 	}
-      u_s;
+	u_s;	/* INPUT_STRING */
       struct
 	{
-	  FILE *file;		/* input file handle */
-	  boolean end;		/* true if peek has seen EOF */
-	  boolean close;	/* true if we should close file on pop */
-	  const char *name;	/* name of PREVIOUS input file */
-	  int lineno;		/* current line of previous file */
-	  int out_lineno;	/* current output line of previous file */
-	  boolean advance_line;	/* start_of_input_line from next_char () */
+	  FILE *fp;		/* input file handle */
+	  bool end : 1;		/* true if peek has seen EOF */
+	  bool close : 1;	/* true if we should close file on pop */
+	  bool advance_line : 1; /* track previous start_of_input_line */
 	}
-      u_f;
+	u_f;	/* INPUT_FILE */
       builtin_func *func;	/* pointer to macro's function */
     }
   u;
@@ -107,6 +109,9 @@ int current_line;
 /* Obstack for storing individual tokens.  */
 static struct obstack token_stack;
 
+/* Obstack for storing file names.  */
+static struct obstack file_names;
+
 /* Wrapup input stack.  */
 static struct obstack *wrapup_stack;
 
@@ -114,7 +119,7 @@ static struct obstack *wrapup_stack;
 static struct obstack *current_input;
 
 /* Bottom of token_stack, for obstack_free.  */
-static char *token_bottom;
+static void *token_bottom;
 
 /* Pointer to top of current_input.  */
 static input_block *isp;
@@ -126,7 +131,10 @@ static input_block *wsp;
 static input_block *next;
 
 /* Flag for next_char () to increment current_line.  */
-static boolean start_of_input_line;
+static bool start_of_input_line;
+
+/* Flag for next_char () to recognize change in input block.  */
+static bool input_change;
 
 #define CHAR_EOF	256	/* character return on EOF */
 #define CHAR_MACRO	257	/* character return for MACRO token */
@@ -166,7 +174,7 @@ static const char *token_type_string (token_type);
 `-------------------------------------------------------------------*/
 
 void
-push_file (FILE *fp, const char *title, boolean close)
+push_file (FILE *fp, const char *title, bool close)
 {
   input_block *i;
 
@@ -182,18 +190,16 @@ push_file (FILE *fp, const char *title, boolean close)
   i = (input_block *) obstack_alloc (current_input,
 				     sizeof (struct input_block));
   i->type = INPUT_FILE;
+  i->file = (char *) obstack_copy0 (&file_names, title, strlen (title));
+  i->line = 1;
+  input_change = true;
 
-  i->u.u_f.end = FALSE;
+  i->u.u_f.fp = fp;
+  i->u.u_f.end = false;
   i->u.u_f.close = close;
-  i->u.u_f.name = current_file;
-  i->u.u_f.lineno = current_line;
-  i->u.u_f.out_lineno = output_current_line;
   i->u.u_f.advance_line = start_of_input_line;
-  current_file = obstack_copy0 (current_input, title, strlen (title));
-  current_line = 1;
   output_current_line = -1;
 
-  i->u.u_f.file = fp;
   i->prev = isp;
   isp = i;
 }
@@ -218,6 +224,9 @@ push_macro (builtin_func *func)
   i = (input_block *) obstack_alloc (current_input,
 				     sizeof (struct input_block));
   i->type = INPUT_MACRO;
+  i->file = current_file;
+  i->line = current_line;
+  input_change = true;
 
   i->u.func = func;
   i->prev = isp;
@@ -242,6 +251,9 @@ push_string_init (void)
   next = (input_block *) obstack_alloc (current_input,
 					sizeof (struct input_block));
   next->type = INPUT_STRING;
+  next->file = current_file;
+  next->line = current_line;
+
   return current_input;
 }
 
@@ -265,10 +277,11 @@ push_string_finish (void)
   if (obstack_object_size (current_input) > 0)
     {
       obstack_1grow (current_input, '\0');
-      next->u.u_s.string = obstack_finish (current_input);
+      next->u.u_s.string = (char *) obstack_finish (current_input);
       next->prev = isp;
       isp = next;
       ret = isp->u.u_s.string;	/* for immediate use only */
+      input_change = true;
     }
   else
     obstack_free (current_input, next); /* people might leave garbage on it. */
@@ -276,13 +289,14 @@ push_string_finish (void)
   return ret;
 }
 
-/*--------------------------------------------------------------------------.
-| The function push_wrapup () pushes a string on the wrapup stack.  When    |
-| he normal input stack gets empty, the wrapup stack will become the input  |
-| stack, and push_string () and push_file () will operate on wrapup_stack.  |
-| Push_wrapup should be done as push_string (), but this will suffice, as   |
-| long as arguments to m4_m4wrap () are moderate in size.		    |
-`--------------------------------------------------------------------------*/
+/*------------------------------------------------------------------.
+| The function push_wrapup () pushes a string on the wrapup stack.  |
+| When the normal input stack gets empty, the wrapup stack will     |
+| become the input stack, and push_string () and push_file () will  |
+| operate on wrapup_stack.  Push_wrapup should be done as           |
+| push_string (), but this will suffice, as long as arguments to    |
+| m4_m4wrap () are moderate in size.                                |
+`------------------------------------------------------------------*/
 
 void
 push_wrapup (const char *s)
@@ -292,7 +306,9 @@ push_wrapup (const char *s)
 				     sizeof (struct input_block));
   i->prev = wsp;
   i->type = INPUT_STRING;
-  i->u.u_s.string = obstack_copy0 (wrapup_stack, s, strlen (s));
+  i->file = current_file;
+  i->line = current_line;
+  i->u.u_s.string = (char *) obstack_copy0 (wrapup_stack, s, strlen (s));
   wsp = i;
 }
 
@@ -317,43 +333,26 @@ pop_input (void)
     case INPUT_FILE:
       if (debug_level & DEBUG_TRACE_INPUT)
 	{
-	  if (isp->u.u_f.lineno)
+	  if (tmp)
 	    DEBUG_MESSAGE2 ("input reverted to %s, line %d",
-			    isp->u.u_f.name, isp->u.u_f.lineno);
+			    tmp->file, tmp->line);
 	  else
 	    DEBUG_MESSAGE ("input exhausted");
 	}
 
-      if (ferror (isp->u.u_f.file))
+      if (ferror (isp->u.u_f.fp))
 	{
 	  M4ERROR ((warning_status, 0, "read error"));
-	  fclose (isp->u.u_f.file);
+	  if (isp->u.u_f.close)
+	    fclose (isp->u.u_f.fp);
 	  retcode = EXIT_FAILURE;
 	}
-      else if (isp->u.u_f.close && fclose (isp->u.u_f.file) == EOF)
+      else if (isp->u.u_f.close && fclose (isp->u.u_f.fp) == EOF)
 	{
 	  M4ERROR ((warning_status, errno, "error reading file"));
 	  retcode = EXIT_FAILURE;
 	}
-      current_file = isp->u.u_f.name;
-      current_line = isp->u.u_f.lineno;
-      output_current_line = isp->u.u_f.out_lineno;
       start_of_input_line = isp->u.u_f.advance_line;
-      if (tmp == NULL)
-	{
-	  /* We have exhausted the current input stack.  However,
-	     freeing the obstack now is a bad idea, since if we are in
-	     the middle of a quote, comment, dnl, or argument
-	     collection, there is still a pointer to the former
-	     current_file that we must not invalidate until after the
-	     warning message has been issued.  Setting next to a
-	     non-string is safe in this case, because the only place
-	     more input could come from is another push_file or
-	     pop_wrapup, both of which then free the input_block.  */
-	  next = isp;
-	  isp = NULL;
-	  return;
-	}
       output_current_line = -1;
       break;
 
@@ -366,15 +365,16 @@ pop_input (void)
   next = NULL;			/* might be set in push_string_init () */
 
   isp = tmp;
+  input_change = true;
 }
 
 /*------------------------------------------------------------------------.
 | To switch input over to the wrapup stack, main () calls pop_wrapup ().  |
 | Since wrapup text can install new wrapup text, pop_wrapup () returns	  |
-| FALSE when there is no wrapup text on the stack, and TRUE otherwise.	  |
+| false when there is no wrapup text on the stack, and true otherwise.	  |
 `------------------------------------------------------------------------*/
 
-boolean
+bool
 pop_wrapup (void)
 {
   next = NULL;
@@ -383,9 +383,13 @@ pop_wrapup (void)
 
   if (wsp == NULL)
     {
+      /* End of the program.  Free all memory even though we are about
+	 to exit, since it makes leak detection easier.  */
+      obstack_free (&token_stack, NULL);
+      obstack_free (&file_names, NULL);
       obstack_free (wrapup_stack, NULL);
       free (wrapup_stack);
-      return FALSE;
+      return false;
     }
 
   current_input = wrapup_stack;
@@ -394,8 +398,9 @@ pop_wrapup (void)
 
   isp = wsp;
   wsp = NULL;
+  input_change = true;
 
-  return TRUE;
+  return true;
 }
 
 /*-------------------------------------------------------------------.
@@ -429,28 +434,29 @@ static int
 peek_input (void)
 {
   int ch;
+  input_block *block = isp;
 
   while (1)
     {
-      if (isp == NULL)
+      if (block == NULL)
 	return CHAR_EOF;
 
-      switch (isp->type)
+      switch (block->type)
 	{
 	case INPUT_STRING:
-	  ch = to_uchar (isp->u.u_s.string[0]);
+	  ch = to_uchar (block->u.u_s.string[0]);
 	  if (ch != '\0')
 	    return ch;
 	  break;
 
 	case INPUT_FILE:
-	  ch = getc (isp->u.u_f.file);
+	  ch = getc (block->u.u_f.fp);
 	  if (ch != EOF)
 	    {
-	      ungetc (ch, isp->u.u_f.file);
+	      ungetc (ch, block->u.u_f.fp);
 	      return ch;
 	    }
-	  isp->u.u_f.end = TRUE;
+	  block->u.u_f.end = true;
 	  break;
 
 	case INPUT_MACRO:
@@ -461,12 +467,7 @@ peek_input (void)
 		    "INTERNAL ERROR: input stack botch in peek_input ()"));
 	  abort ();
 	}
-      /* End of current input source --- pop one level if another
-	 level still exists.  */
-      if (isp->prev != NULL)
-	pop_input ();
-      else
-	return CHAR_EOF;
+      block = block->prev;
     }
 }
 
@@ -481,8 +482,9 @@ peek_input (void)
 `-------------------------------------------------------------------------*/
 
 #define next_char() \
-  (isp && isp->type == INPUT_STRING && isp->u.u_s.string[0]		\
-   ? to_uchar (*isp->u.u_s.string++)					\
+  (isp && isp->type == INPUT_STRING && isp->u.u_s.string[0]	\
+   && !input_change						\
+   ? to_uchar (*isp->u.u_s.string++)				\
    : next_char_1 ())
 
 static int
@@ -490,16 +492,21 @@ next_char_1 (void)
 {
   int ch;
 
-  if (start_of_input_line)
-    {
-      start_of_input_line = FALSE;
-      current_line++;
-    }
-
   while (1)
     {
       if (isp == NULL)
-	return CHAR_EOF;
+	{
+	  current_file = "";
+	  current_line = 0;
+	  return CHAR_EOF;
+	}
+
+      if (input_change)
+	{
+	  current_file = isp->file;
+	  current_line = isp->line;
+	  input_change = false;
+	}
 
       switch (isp->type)
 	{
@@ -510,14 +517,20 @@ next_char_1 (void)
 	  break;
 
 	case INPUT_FILE:
+	  if (start_of_input_line)
+	    {
+	      start_of_input_line = false;
+	      current_line = ++isp->line;
+	    }
+
 	  /* If stdin is a terminal, calling getc after peek_input
 	     already called it would make the user have to hit ^D
 	     twice to quit.  */
-	  ch = isp->u.u_f.end ? EOF : getc (isp->u.u_f.file);
+	  ch = isp->u.u_f.end ? EOF : getc (isp->u.u_f.fp);
 	  if (ch != EOF)
 	    {
 	      if (ch == '\n')
-		start_of_input_line = TRUE;
+		start_of_input_line = true;
 	      return ch;
 	    }
 	  break;
@@ -557,34 +570,41 @@ skip_line (void)
        previous value we stored earlier.  */
     M4ERROR_AT_LINE ((warning_status, 0, file, line,
 		      "Warning: end of file treated as newline"));
+  /* On the rare occasion that dnl crosses include file boundaries
+     (either the input file did not end in a newline, or changeword
+     was used), calling next_char can update current_file and
+     current_line, and that update will be undone as we return to
+     expand_macro.  This informs next_char to fix things again.  */
+  if (file != current_file || line != current_line)
+    input_change = true;
 }
 
 
 /*------------------------------------------------------------------.
 | This function is for matching a string against a prefix of the    |
 | input stream.  If the string matches the input and consume is     |
-| TRUE, the input is discarded; otherwise any characters read are   |
+| true, the input is discarded; otherwise any characters read are   |
 | pushed back again.  The function is used only when multicharacter |
 | quotes or comment delimiters are used.                            |
 `------------------------------------------------------------------*/
 
-static boolean
-match_input (const char *s, boolean consume)
+static bool
+match_input (const char *s, bool consume)
 {
   int n;			/* number of characters matched */
   int ch;			/* input character */
   const char *t;
-  boolean result = FALSE;
+  bool result = false;
 
   ch = peek_input ();
   if (ch != to_uchar (*s))
-    return FALSE;			/* fail */
+    return false;			/* fail */
 
   if (s[1] == '\0')
     {
       if (consume)
 	(void) next_char ();
-      return TRUE;			/* short match */
+      return true;			/* short match */
     }
 
   (void) next_char ();
@@ -595,8 +615,8 @@ match_input (const char *s, boolean consume)
       if (*s == '\0')		/* long match */
 	{
 	  if (consume)
-	    return TRUE;
-	  result = TRUE;
+	    return true;
+	  result = true;
 	  break;
 	}
     }
@@ -638,21 +658,25 @@ input_init (void)
   current_file = "";
   current_line = 0;
 
-  obstack_init (&token_stack);
-
   current_input = (struct obstack *) xmalloc (sizeof (struct obstack));
   obstack_init (current_input);
   wrapup_stack = (struct obstack *) xmalloc (sizeof (struct obstack));
   obstack_init (wrapup_stack);
 
-  obstack_1grow (&token_stack, '\0');
-  token_bottom = obstack_finish (&token_stack);
+  obstack_init (&file_names);
+
+  /* Allocate an object in the current chunk, so that obstack_free
+     will always work even if the first token parsed spills to a new
+     chunk.  */
+  obstack_init (&token_stack);
+  obstack_alloc (&token_stack, 1);
+  token_bottom = obstack_base (&token_stack);
 
   isp = NULL;
   wsp = NULL;
   next = NULL;
 
-  start_of_input_line = FALSE;
+  start_of_input_line = false;
 
   lquote.string = xstrdup (DEF_LQUOTE);
   lquote.length = strlen (lquote.string);
@@ -669,10 +693,11 @@ input_init (void)
 }
 
 
-/*--------------------------------------------------------------.
-| Functions for setting quotes and comment delimiters.  Used by |
-| m4_changecom () and m4_changequote ().		        |
-`--------------------------------------------------------------*/
+/*------------------------------------------------------------------.
+| Functions for setting quotes and comment delimiters.  Used by	    |
+| m4_changecom () and m4_changequote ().  Pass NULL if the argument |
+| was not present, to distinguish from an explicit empty string.    |
+`------------------------------------------------------------------*/
 
 void
 set_quotes (const char *lq, const char *rq)
@@ -680,9 +705,24 @@ set_quotes (const char *lq, const char *rq)
   free (lquote.string);
   free (rquote.string);
 
-  lquote.string = xstrdup (lq ? lq : DEF_LQUOTE);
+  /* POSIX states that with 0 arguments, the default quotes are used.
+     POSIX XCU ERN 112 states that behavior is implementation-defined
+     if there was only one argument, or if there is an empty string in
+     either position when there are two arguments.  We allow an empty
+     left quote to disable quoting, but a non-empty left quote will
+     always create a non-empty right quote.  See the texinfo for what
+     some other implementations do.  */
+  if (!lq)
+    {
+      lq = DEF_LQUOTE;
+      rq = DEF_RQUOTE;
+    }
+  else if (!rq || (*lq && !*rq))
+    rq = DEF_RQUOTE;
+
+  lquote.string = xstrdup (lq);
   lquote.length = strlen (lquote.string);
-  rquote.string = xstrdup (rq ? rq : DEF_RQUOTE);
+  rquote.string = xstrdup (rq);
   rquote.length = strlen (rquote.string);
 }
 
@@ -692,9 +732,21 @@ set_comment (const char *bc, const char *ec)
   free (bcomm.string);
   free (ecomm.string);
 
-  bcomm.string = xstrdup (bc ? bc : DEF_BCOMM);
+  /* POSIX requires no arguments to disable comments.  It requires
+     empty arguments to be used as-is, but this is counter to
+     traditional behavior, because a non-null begin and null end makes
+     it impossible to end a comment.  An aardvark has been filed:
+     http://www.opengroup.org/austin/mailarchives/ag-review/msg02168.html
+     This implementation assumes the aardvark will be approved.  See
+     the texinfo for what some other implementations do.  */
+  if (!bc)
+    bc = ec = "";
+  else if (!ec || (*bc && !*ec))
+    ec = DEF_ECOMM;
+
+  bcomm.string = xstrdup (bc);
   bcomm.length = strlen (bcomm.string);
-  ecomm.string = xstrdup (ec ? ec : DEF_ECOMM);
+  ecomm.string = xstrdup (ec);
   ecomm.length = strlen (ecomm.string);
 }
 
@@ -719,7 +771,7 @@ set_word_regexp (const char *regexp)
 
   if (!*regexp || !strcmp (regexp, DEFAULT_WORD_REGEXP))
     {
-      default_word_regexp = TRUE;
+      default_word_regexp = true;
       return;
     }
 
@@ -748,10 +800,10 @@ set_word_regexp (const char *regexp)
 		regexp, msg));
     }
 
-  default_word_regexp = FALSE;
+  default_word_regexp = false;
 
   if (word_start == NULL)
-    word_start = xmalloc (256);
+    word_start = (char *) xmalloc (256);
 
   word_start[0] = '\0';
   test[1] = '\0';
@@ -787,14 +839,12 @@ next_token (token_data *td)
   token_type type;
 #ifdef ENABLE_CHANGEWORD
   int startpos;
-  char *orig_text = 0;
+  char *orig_text = NULL;
 #endif
-  const char *file = current_file;
-  int line = current_line;
+  const char *file;
+  int line;
 
   obstack_free (&token_stack, token_bottom);
-  obstack_1grow (&token_stack, '\0');
-  token_bottom = obstack_finish (&token_stack);
 
  /* Can't consume character until after CHAR_MACRO is handled.  */
   ch = peek_input ();
@@ -818,11 +868,13 @@ next_token (token_data *td)
     }
 
   next_char (); /* Consume character we already peeked at.  */
-  if (MATCH (ch, bcomm.string, TRUE))
+  file = current_file;
+  line = current_line;
+  if (MATCH (ch, bcomm.string, true))
     {
       obstack_grow (&token_stack, bcomm.string, bcomm.length);
       while ((ch = next_char ()) != CHAR_EOF
-	     && !MATCH (ch, ecomm.string, TRUE))
+	     && !MATCH (ch, ecomm.string, true))
 	obstack_1grow (&token_stack, ch);
       if (ch != CHAR_EOF)
 	obstack_grow (&token_stack, ecomm.string, ecomm.length);
@@ -856,7 +908,8 @@ next_token (token_data *td)
 	  if (ch == CHAR_EOF)
 	    break;
 	  obstack_1grow (&token_stack, ch);
-	  startpos = re_search (&word_regexp, obstack_base (&token_stack),
+	  startpos = re_search (&word_regexp,
+				(char *) obstack_base (&token_stack),
 				obstack_object_size (&token_stack), 0, 0,
 				&regs);
 	  if (startpos != 0 ||
@@ -870,7 +923,7 @@ next_token (token_data *td)
 	}
 
       obstack_1grow (&token_stack, '\0');
-      orig_text = obstack_finish (&token_stack);
+      orig_text = (char *) obstack_finish (&token_stack);
 
       if (regs.start[1] != -1)
 	obstack_grow (&token_stack,orig_text + regs.start[1],
@@ -883,7 +936,7 @@ next_token (token_data *td)
 
 #endif /* ENABLE_CHANGEWORD */
 
-  else if (!MATCH (ch, lquote.string, TRUE))
+  else if (!MATCH (ch, lquote.string, true))
     {
       switch (ch)
 	{
@@ -914,13 +967,13 @@ next_token (token_data *td)
 	    M4ERROR_AT_LINE ((EXIT_FAILURE, 0, file, line,
 			      "ERROR: end of file in string"));
 
-	  if (MATCH (ch, rquote.string, TRUE))
+	  if (MATCH (ch, rquote.string, true))
 	    {
 	      if (--quote_level == 0)
 		break;
 	      obstack_grow (&token_stack, rquote.string, rquote.length);
 	    }
-	  else if (MATCH (ch, lquote.string, TRUE))
+	  else if (MATCH (ch, lquote.string, true))
 	    {
 	      quote_level++;
 	      obstack_grow (&token_stack, lquote.string, lquote.length);
@@ -934,7 +987,7 @@ next_token (token_data *td)
   obstack_1grow (&token_stack, '\0');
 
   TOKEN_DATA_TYPE (td) = TOKEN_TEXT;
-  TOKEN_DATA_TEXT (td) = obstack_finish (&token_stack);
+  TOKEN_DATA_TEXT (td) = (char *) obstack_finish (&token_stack);
 #ifdef ENABLE_CHANGEWORD
   if (orig_text == NULL)
     orig_text = TOKEN_DATA_TEXT (td);
@@ -954,74 +1007,53 @@ next_token (token_data *td)
 token_type
 peek_token (void)
 {
+  token_type result;
   int ch = peek_input ();
 
   if (ch == CHAR_EOF)
     {
-#ifdef DEBUG_INPUT
-      fprintf (stderr, "peek_token -> EOF\n");
-#endif
-      return TOKEN_EOF;
+      result = TOKEN_EOF;
     }
-  if (ch == CHAR_MACRO)
+  else if (ch == CHAR_MACRO)
     {
-#ifdef DEBUG_INPUT
-      fprintf (stderr, "peek_token -> MACDEF\n");
-#endif
-      return TOKEN_MACDEF;
+      result = TOKEN_MACDEF;
     }
-
-  if (MATCH (ch, bcomm.string, FALSE))
+  else if (MATCH (ch, bcomm.string, false))
     {
-#ifdef DEBUG_INPUT
-      fprintf (stderr, "peek_token -> COMMENT\n");
-#endif
-      return TOKEN_STRING;
+      result = TOKEN_STRING;
     }
-
-  if ((default_word_regexp && (isalpha (ch) || ch == '_'))
+  else if ((default_word_regexp && (isalpha (ch) || ch == '_'))
 #ifdef ENABLE_CHANGEWORD
       || (! default_word_regexp && word_start[ch])
 #endif /* ENABLE_CHANGEWORD */
       )
     {
-#ifdef DEBUG_INPUT
-      fprintf (stderr, "peek_token -> WORD\n");
-#endif
-      return TOKEN_WORD;
+      result = TOKEN_WORD;
     }
-
-  if (MATCH (ch, lquote.string, FALSE))
+  else if (MATCH (ch, lquote.string, false))
     {
-#ifdef DEBUG_INPUT
-      fprintf (stderr, "peek_token -> QUOTE\n");
-#endif
-      return TOKEN_STRING;
+      result = TOKEN_STRING;
     }
+  else
+    switch (ch)
+      {
+      case '(':
+	result = TOKEN_OPEN;
+	break;
+      case ',':
+	result = TOKEN_COMMA;
+	break;
+      case ')':
+	result = TOKEN_CLOSE;
+	break;
+      default:
+	result = TOKEN_SIMPLE;
+      }
 
-  switch (ch)
-    {
-    case '(':
 #ifdef DEBUG_INPUT
-      fprintf (stderr, "peek_token -> OPEN\n");
-#endif
-      return TOKEN_OPEN;
-    case ',':
-#ifdef DEBUG_INPUT
-      fprintf (stderr, "peek_token -> COMMA\n");
-#endif
-      return TOKEN_COMMA;
-    case ')':
-#ifdef DEBUG_INPUT
-      fprintf (stderr, "peek_token -> CLOSE\n");
-#endif
-      return TOKEN_CLOSE;
-    default:
-#ifdef DEBUG_INPUT
-      fprintf (stderr, "peek_token -> SIMPLE\n");
-#endif
-      return TOKEN_SIMPLE;
-    }
+  fprintf (stderr, "peek_token -> %s\n", token_type_string (result));
+#endif /* DEBUG_INPUT */
+  return result;
 }
 
 

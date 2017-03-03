@@ -18,16 +18,15 @@
 # 02110-1301  USA
 
 AC_PREREQ([2.60])
-AC_INIT([GNU M4], [1.4.7], [bug-m4@gnu.org])
+AC_INIT([GNU M4], [1.4.8], [bug-m4@gnu.org])
 AM_INIT_AUTOMAKE([1.9.6 dist-bzip2 gnu])
 PACKAGE=$PACKAGE_TARNAME; AC_SUBST([PACKAGE])
 VERSION=$PACKAGE_VERSION; AC_SUBST([VERSION])
 
-m4_pattern_forbid([^M4_])
-m4_pattern_allow([^M4_cv_])
+m4_pattern_forbid([^M4_[A-Z]])
 
 AC_CONFIG_SRCDIR([src/m4.h])
-AC_CONFIG_HEADERS([config.h:config-h.in])
+AC_CONFIG_HEADERS([lib/config.h:lib/config.hin])
 
 AC_CANONICAL_BUILD
 AC_CANONICAL_HOST

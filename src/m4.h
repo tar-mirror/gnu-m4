@@ -25,6 +25,28 @@
 
 #include <config.h>
 
+#include <ctype.h>
+#include <errno.h>
+#include <stdbool.h>
+#include <string.h>
+#include <sys/types.h>
+
+#include "binary-io.h"
+#include "clean-temp.h"
+#include "cloexec.h"
+#include "close-stream.h"
+#include "closeout.h"
+#include "error.h"
+#include "exit.h"
+#include "exitfail.h"
+#include "obstack.h"
+#include "stdio--.h"
+#include "stdlib--.h"
+#include "unistd--.h"
+#include "verror.h"
+#include "xalloc.h"
+#include "xvasprintf.h"
+
 /* Canonicalize UNIX recognition macros.  */
 #if defined unix || defined __unix || defined __unix__ \
   || defined _POSIX_VERSION || defined _POSIX2_VERSION \
@@ -41,36 +63,6 @@
 /* Canonicalize OS/2 recognition macro.  */
 #ifdef __EMX__
 # define OS2 1
-#endif
-
-#include <ctype.h>
-#include <errno.h>
-#include <string.h>
-#include <sys/types.h>
-
-#include "binary-io.h"
-#include "cloexec.h"
-#include "close-stream.h"
-#include "error.h"
-#include "exit.h"
-#include "obstack.h"
-#include "stdio--.h"
-#include "stdlib--.h"
-#include "unistd--.h"
-#include "verror.h"
-#include "xalloc.h"
-
-/* If FALSE is defined, we presume TRUE is defined too.  In this case,
-   merely typedef boolean as being int.  Or else, define these all.  */
-#ifndef FALSE
-/* Do not use `enum boolean': this tag is used in SVR4 <sys/types.h>.  */
-typedef enum { FALSE = 0, TRUE = 1 } boolean;
-#else
-typedef int boolean;
-#endif
-
-#if ! HAVE_MKSTEMP
-int mkstemp (char *);
 #endif
 
 /* Used for version mismatch, when -R detects a frozen file it can't parse.  */
@@ -224,7 +216,7 @@ extern FILE *debug;
 void debug_init (void);
 int debug_decode (const char *);
 void debug_flush_files (void);
-boolean debug_set_output (const char *);
+bool debug_set_output (const char *);
 void debug_message_prefix (void);
 
 void trace_prepre (const char *, int);
@@ -288,12 +280,12 @@ token_type next_token (token_data *);
 void skip_line (void);
 
 /* push back input */
-void push_file (FILE *, const char *, boolean);
+void push_file (FILE *, const char *, bool);
 void push_macro (builtin_func *);
 struct obstack *push_string_init (void);
 const char *push_string_finish (void);
 void push_wrapup (const char *);
-boolean pop_wrapup (void);
+bool pop_wrapup (void);
 
 /* current input file, and line */
 extern const char *current_file;
@@ -319,6 +311,7 @@ extern int current_diversion;
 extern int output_current_line;
 
 void output_init (void);
+void output_exit (void);
 void shipout_text (struct obstack *, const char *, int);
 void make_diversion (int);
 void insert_diversion (int);
@@ -341,11 +334,11 @@ enum symbol_lookup
 struct symbol
 {
   struct symbol *next;
-  boolean traced : 1;
-  boolean shadowed : 1;
-  boolean macro_args : 1;
-  boolean blind_no_args : 1;
-  boolean deleted : 1;
+  bool traced : 1;
+  bool shadowed : 1;
+  bool macro_args : 1;
+  bool blind_no_args : 1;
+  bool deleted : 1;
   int pending_expansions;
 
   char *name;
@@ -366,7 +359,7 @@ struct symbol
 
 typedef enum symbol_lookup symbol_lookup;
 typedef struct symbol symbol;
-typedef void hack_symbol ();
+typedef void hack_symbol (symbol *, void *);
 
 #define HASHMAX 509		/* default, overridden by -Hsize */
 
@@ -375,7 +368,7 @@ extern symbol **symtab;
 void free_symbol (symbol *sym);
 void symtab_init (void);
 symbol *lookup_symbol (const char *, symbol_lookup);
-void hack_all_symbols (hack_symbol *, const char *);
+void hack_all_symbols (hack_symbol *, void *);
 
 /* File: macro.c  --- macro expansion.  */
 
@@ -387,9 +380,9 @@ void call_macro (symbol *, int, token_data **, struct obstack *);
 struct builtin
 {
   const char *name;
-  boolean gnu_extension : 1;
-  boolean groks_macro_args : 1;
-  boolean blind_if_no_args : 1;
+  bool gnu_extension : 1;
+  bool groks_macro_args : 1;
+  bool blind_if_no_args : 1;
   builtin_func *func;
 };
 
@@ -418,7 +411,7 @@ const builtin *find_builtin_by_name (const char *);
 void include_init (void);
 void include_env_init (void);
 void add_include_directory (const char *);
-FILE *path_search (const char *, const char **);
+FILE *m4_path_search (const char *, char **);
 
 /* File: eval.c  --- expression evaluation.  */
 
@@ -426,7 +419,7 @@ FILE *path_search (const char *, const char **);
 typedef int eval_t;
 typedef unsigned int unsigned_eval_t;
 
-boolean evaluate (const char *, eval_t *);
+bool evaluate (const char *, eval_t *);
 
 /* File: format.c  --- printf like formatting.  */
 
@@ -458,4 +451,8 @@ void reload_frozen_state (const char *);
 /* Convert a possibly-signed character to an unsigned character.  This is
    a bit safer than casting to unsigned char, since it catches some type
    errors that the cast doesn't.  */
+#if HAVE_INLINE
 static inline unsigned char to_uchar (char ch) { return ch; }
+#else
+# define to_uchar(C) ((unsigned char) (C))
+#endif

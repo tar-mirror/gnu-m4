@@ -1,12 +1,12 @@
-dnl @ ../doc/m4.texinfo:1560: Origin of test
+dnl @ ../doc/m4.texinfo:1633: Origin of test
 dnl @ Copyright (C) 2006 Free Software Foundation
 dnl @ This file is free software; the Free Software Foundation
 dnl @ gives unlimited permission to copy and/or distribute it
 dnl @ with or without modifications, as long as this notice
 dnl @ is preserved.
-define(`foo', `This is `$0'')
+define(`zap', defn(`undefine'))
 dnl @result{}
-define(`bar', defn(`foo'))
+zap(`undefine')
 dnl @result{}
-bar
-dnl @result{}This is bar
+undefine(`zap')
+dnl @result{}undefine(zap)

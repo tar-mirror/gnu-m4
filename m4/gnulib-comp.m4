@@ -1,3 +1,4 @@
+# DO NOT EDIT! GENERATED AUTOMATICALLY!
 # Copyright (C) 2004-2006 Free Software Foundation, Inc.
 #
 # This file is free software, distributed under the terms of the GNU
@@ -21,6 +22,8 @@ AC_DEFUN([M4_EARLY],
 [
   m4_pattern_forbid([^gl_[A-Z]])dnl the gnulib macro namespace
   m4_pattern_allow([^gl_ES$])dnl a valid locale name
+  m4_pattern_allow([^gl_LIBOBJS$])dnl a variable
+  m4_pattern_allow([^gl_LTLIBOBJS$])dnl a variable
   AC_REQUIRE([AC_PROG_RANLIB])
   AC_REQUIRE([AC_GNU_SOURCE])
   AC_REQUIRE([gl_USE_SYSTEM_EXTENSIONS])
@@ -30,40 +33,56 @@ AC_DEFUN([M4_EARLY],
 # "Check for header files, types and library functions".
 AC_DEFUN([M4_INIT],
 [
+  m4_pushdef([AC_LIBOBJ], m4_defn([M4_LIBOBJ]))
+  m4_pushdef([AC_REPLACE_FUNCS], m4_defn([M4_REPLACE_FUNCS]))
+  m4_pushdef([AC_LIBSOURCES], m4_defn([M4_LIBSOURCES]))
   AM_CONDITIONAL([GL_COND_LIBTOOL], [false])
   gl_cond_libtool=false
   gl_libdeps=
   gl_ltlibdeps=
   gl_source_base='lib'
   gl_FUNC_ALLOCA
+  gl_ALLOCSA
+  AC_DEFINE([SIGNAL_SAFE_LIST], [1], [Define if lists must be signal-safe.])
   gl_CLOEXEC
   gl_CLOSE_STREAM
+  gl_CLOSEOUT
+  gl_CONFIG_H
   gl_ERROR
   gl_EXITFAIL
   dnl gl_USE_SYSTEM_EXTENSIONS must be added quite early to configure.ac.
+  gl_FATAL_SIGNAL
   gl_FOPEN_SAFER
   gl_FUNC_FPENDING
   gl_FUNC_FREE
   gl_GETOPT
+  gl_INLINE
+  gl_LIST
   AC_FUNC_MALLOC
   gl_MBCHAR
   gl_MBITER
   gl_FUNC_MEMCHR
+  gt_FUNC_MKDTEMP
   gl_FUNC_MKSTEMP
   AC_FUNC_OBSTACK
   dnl Note: AC_FUNC_OBSTACK does AC_LIBSOURCES([obstack.h, obstack.c]).
+  gl_LIST
+  gl_PATHMAX
+  gl_QUOTEARG
   gl_REGEX
+  gl_SIGNALBLOCKING
   gl_SIZE_MAX
   gt_TYPE_SSIZE_T
-  gl_STAT_MACROS
   gl_STDARG_H
   AM_STDBOOL_H
   gl_STDINT_H
   gl_STDLIB_SAFER
   gl_STRCASE
+  gl_FUNC_STRSTR
   gl_FUNC_STRTOL
   gl_HEADER_SYS_STAT_H
-  gl_TMPFILE_SAFER
+  gl_FUNC_GEN_TEMPNAME
+  gt_TMPDIR
   gl_HEADER_UNISTD
   gl_UNISTD_SAFER
   gl_FUNC_GLIBC_UNLOCKED_IO
@@ -77,7 +96,39 @@ AC_DEFUN([M4_INIT],
   AC_SUBST([LIBM4_LIBDEPS])
   LIBM4_LTLIBDEPS="$gl_ltlibdeps"
   AC_SUBST([LIBM4_LTLIBDEPS])
+  m4_popdef([AC_LIBSOURCES])
+  m4_popdef([AC_REPLACE_FUNCS])
+  m4_popdef([AC_LIBOBJ])
+  AC_CONFIG_COMMANDS_PRE([
+    M4_libobjs=
+    M4_ltlibobjs=
+    if test -n "$M4_LIBOBJS"; then
+      # Remove the extension.
+      sed_drop_objext='s/\.o$//;s/\.obj$//'
+      for i in `for i in $M4_LIBOBJS; do echo "$i"; done | sed "$sed_drop_objext" | sort | uniq`; do
+        M4_libobjs="$M4_libobjs $i.$ac_objext"
+        M4_ltlibobjs="$M4_ltlibobjs $i.lo"
+      done
+    fi
+    AC_SUBST([M4_LIBOBJS], [$M4_libobjs])
+    AC_SUBST([M4_LTLIBOBJS], [$M4_ltlibobjs])
+  ])
 ])
+
+# Like AC_LIBOBJ, except that the module name goes
+# into M4_LIBOBJS instead of into LIBOBJS.
+AC_DEFUN([M4_LIBOBJ],
+  [M4_LIBOBJS="$M4_LIBOBJS $1.$ac_objext"])
+
+# Like AC_REPLACE_FUNCS, except that the module name goes
+# into M4_LIBOBJS instead of into LIBOBJS.
+AC_DEFUN([M4_REPLACE_FUNCS],
+  [AC_CHECK_FUNCS([$1], , [M4_LIBOBJ($ac_func)])])
+
+# Like AC_LIBSOURCES, except that it does nothing.
+# We rely on EXTRA_lib..._SOURCES instead.
+AC_DEFUN([M4_LIBSOURCES],
+  [])
 
 # This macro records the list of files which have been installed by
 # gnulib-tool and may be removed by future gnulib-tool invocations.
@@ -90,19 +141,28 @@ AC_DEFUN([M4_FILE_LIST], [
   lib/__fpending.h
   lib/alloca.c
   lib/alloca_.h
+  lib/allocsa.c
+  lib/allocsa.h
+  lib/allocsa.valgrind
   lib/asnprintf.c
   lib/asprintf.c
   lib/binary-io.h
+  lib/clean-temp.c
+  lib/clean-temp.h
   lib/cloexec.c
   lib/cloexec.h
   lib/close-stream.c
   lib/close-stream.h
+  lib/closeout.c
+  lib/closeout.h
   lib/dup-safer.c
   lib/error.c
   lib/error.h
   lib/exit.h
   lib/exitfail.c
   lib/exitfail.h
+  lib/fatal-signal.c
+  lib/fatal-signal.h
   lib/fd-safer.c
   lib/fopen-safer.c
   lib/free.c
@@ -111,29 +171,48 @@ AC_DEFUN([M4_FILE_LIST], [
   lib/getopt_.h
   lib/getopt_int.h
   lib/gettext.h
+  lib/gl_anyhash_list1.h
+  lib/gl_anyhash_list2.h
+  lib/gl_anylinked_list1.h
+  lib/gl_anylinked_list2.h
+  lib/gl_anytree_oset.h
+  lib/gl_avltree_oset.c
+  lib/gl_avltree_oset.h
+  lib/gl_linkedhash_list.c
+  lib/gl_linkedhash_list.h
+  lib/gl_list.c
+  lib/gl_list.h
+  lib/gl_oset.c
+  lib/gl_oset.h
   lib/malloc.c
   lib/mbchar.c
   lib/mbchar.h
   lib/mbuiter.h
   lib/memchr.c
+  lib/mkdtemp.c
+  lib/mkdtemp.h
   lib/mkstemp-safer.c
   lib/mkstemp.c
   lib/mkstemp.h
   lib/obstack.c
   lib/obstack.h
+  lib/pathmax.h
   lib/pipe-safer.c
   lib/printf-args.c
   lib/printf-args.h
   lib/printf-parse.c
   lib/printf-parse.h
+  lib/quotearg.c
+  lib/quotearg.h
   lib/regcomp.c
   lib/regex.c
   lib/regex.h
   lib/regex_internal.c
   lib/regex_internal.h
   lib/regexec.c
+  lib/sigprocmask.c
+  lib/sigprocmask.h
   lib/size_max.h
-  lib/stat-macros.h
   lib/stat_.h
   lib/stdbool_.h
   lib/stdint_.h
@@ -146,9 +225,13 @@ AC_DEFUN([M4_FILE_LIST], [
   lib/strncasecmp.c
   lib/strnlen1.c
   lib/strnlen1.h
+  lib/strstr.c
+  lib/strstr.h
   lib/strtol.c
   lib/tempname.c
-  lib/tmpfile-safer.c
+  lib/tempname.h
+  lib/tmpdir.c
+  lib/tmpdir.h
   lib/unistd--.h
   lib/unistd-safer.h
   lib/unlocked-io.h
@@ -156,11 +239,14 @@ AC_DEFUN([M4_FILE_LIST], [
   lib/vasnprintf.h
   lib/vasprintf.c
   lib/vasprintf.h
+  lib/verify.h
   lib/verror.c
   lib/verror.h
   lib/wcwidth.h
   lib/xalloc-die.c
   lib/xalloc.h
+  lib/xallocsa.c
+  lib/xallocsa.h
   lib/xasprintf.c
   lib/xmalloc.c
   lib/xsize.h
@@ -168,16 +254,23 @@ AC_DEFUN([M4_FILE_LIST], [
   lib/xvasprintf.h
   m4/absolute-header.m4
   m4/alloca.m4
+  m4/allocsa.m4
   m4/cloexec.m4
   m4/close-stream.m4
+  m4/closeout.m4
   m4/codeset.m4
+  m4/config-h.m4
+  m4/eealloc.m4
   m4/eoverflow.m4
   m4/error.m4
   m4/exitfail.m4
   m4/extensions.m4
+  m4/fatal-signal.m4
   m4/fpending.m4
   m4/free.m4
   m4/getopt.m4
+  m4/gl_list.m4
+  m4/inline.m4
   m4/intmax_t.m4
   m4/inttypes_h.m4
   m4/longdouble.m4
@@ -185,13 +278,17 @@ AC_DEFUN([M4_FILE_LIST], [
   m4/mbchar.m4
   m4/mbiter.m4
   m4/mbrtowc.m4
+  m4/mbstate_t.m4
   m4/memchr.m4
+  m4/mkdtemp.m4
   m4/mkstemp.m4
+  m4/pathmax.m4
+  m4/quotearg.m4
   m4/regex.m4
-  m4/signed.m4
+  m4/sig_atomic_t.m4
+  m4/signalblocking.m4
   m4/size_max.m4
   m4/ssize_t.m4
-  m4/stat-macros.m4
   m4/stdarg.m4
   m4/stdbool.m4
   m4/stdint.m4
@@ -199,8 +296,12 @@ AC_DEFUN([M4_FILE_LIST], [
   m4/stdio-safer.m4
   m4/stdlib-safer.m4
   m4/strcase.m4
+  m4/strstr.m4
   m4/strtol.m4
   m4/sys_stat_h.m4
+  m4/tempname.m4
+  m4/tmpdir.m4
+  m4/ulonglong.m4
   m4/unistd-safer.m4
   m4/unistd_h.m4
   m4/unlocked-io.m4

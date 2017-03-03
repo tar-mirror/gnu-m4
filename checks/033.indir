@@ -1,15 +1,12 @@
-dnl @ ../doc/m4.texinfo:1749: Origin of test
+dnl @ ../doc/m4.texinfo:1819: Origin of test
 dnl @ Copyright (C) 2006 Free Software Foundation
 dnl @ This file is free software; the Free Software Foundation
 dnl @ gives unlimited permission to copy and/or distribute it
 dnl @ with or without modifications, as long as this notice
 dnl @ is preserved.
-define(`f', `1')
+define(`$$internal$macro', `Internal macro (name `$0')')
 dnl @result{}
-f(define(`f', `2'))
-dnl @result{}1
-indir(`f', define(`f', `3'))
-dnl @result{}3
-indir(`f', undefine(`f'))
-dnl @error{}m4:stdin:4: undefined macro `f'
-dnl @result{}
+$$internal$macro
+dnl @result{}$$internal$macro
+indir(`$$internal$macro')
+dnl @result{}Internal macro (name $$internal$macro)

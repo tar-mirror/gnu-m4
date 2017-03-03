@@ -33,6 +33,23 @@ int expansion_level = 0;
 /* The number of the current call of expand_macro ().  */
 static int macro_call_id = 0;
 
+/* The shared stack of collected arguments for macro calls; as each
+   argument is collected, it is finished and its location stored in
+   argv_stack.  Normally, this stack can be used simultaneously by
+   multiple macro calls; the exception is when an outer macro has
+   generated some text, then calls a nested macro, in which case the
+   nested macro must use a local stack to leave the unfinished text
+   alone.  Too bad obstack.h does not provide an easy way to reopen a
+   finished object for further growth, but in practice this does not
+   hurt us too much.  */
+static struct obstack argc_stack;
+
+/* The shared stack of pointers to collected arguments for macro
+   calls.  This object is never finished; we exploit the fact that
+   obstack_blank is documented to take a negative size to reduce the
+   size again.  */
+static struct obstack argv_stack;
+
 /*----------------------------------------------------------------------.
 | This function read all input, and expands each token, one at a time.  |
 `----------------------------------------------------------------------*/
@@ -43,8 +60,14 @@ expand_input (void)
   token_type t;
   token_data td;
 
+  obstack_init (&argc_stack);
+  obstack_init (&argv_stack);
+
   while ((t = next_token (&td)) != TOKEN_EOF)
     expand_token ((struct obstack *) NULL, t, &td);
+
+  obstack_free (&argc_stack, NULL);
+  obstack_free (&argv_stack, NULL);
 }
 
 
@@ -111,7 +134,7 @@ expand_token (struct obstack *obs, token_type t, token_data *td)
 | obstack OBS, indirectly through expand_token ().			   |
 `-------------------------------------------------------------------------*/
 
-static boolean
+static bool
 expand_argument (struct obstack *obs, token_data *argp)
 {
   token_type t;
@@ -143,14 +166,14 @@ expand_argument (struct obstack *obs, token_data *argp)
 	    {
 	      /* The argument MUST be finished, whether we want it or not.  */
 	      obstack_1grow (obs, '\0');
-	      text = obstack_finish (obs);
+	      text = (char *) obstack_finish (obs);
 
 	      if (TOKEN_DATA_TYPE (argp) == TOKEN_VOID)
 		{
 		  TOKEN_DATA_TYPE (argp) = TOKEN_TEXT;
 		  TOKEN_DATA_TEXT (argp) = text;
 		}
-	      return (boolean) (t == TOKEN_COMMA);
+	      return t == TOKEN_COMMA;
 	    }
 	  /* fallthru */
 	case TOKEN_OPEN:
@@ -206,13 +229,13 @@ collect_arguments (symbol *sym, struct obstack *argptr,
 {
   token_data td;
   token_data *tdp;
-  boolean more_args;
-  boolean groks_macro_args = SYMBOL_MACRO_ARGS (sym);
+  bool more_args;
+  bool groks_macro_args = SYMBOL_MACRO_ARGS (sym);
 
   TOKEN_DATA_TYPE (&td) = TOKEN_TEXT;
   TOKEN_DATA_TEXT (&td) = SYMBOL_NAME (sym);
-  tdp = (token_data *) obstack_copy (arguments, &td, sizeof (td));
-  obstack_grow (argptr, &tdp, sizeof (tdp));
+  tdp = (token_data *) obstack_copy (arguments, &td, sizeof td);
+  obstack_ptr_grow (argptr, tdp);
 
   if (peek_token () == TOKEN_OPEN)
     {
@@ -224,11 +247,10 @@ collect_arguments (symbol *sym, struct obstack *argptr,
 	  if (!groks_macro_args && TOKEN_DATA_TYPE (&td) == TOKEN_FUNC)
 	    {
 	      TOKEN_DATA_TYPE (&td) = TOKEN_TEXT;
-	      TOKEN_DATA_TEXT (&td) = "";
+	      TOKEN_DATA_TEXT (&td) = (char *) "";
 	    }
-	  tdp = (token_data *)
-	    obstack_copy (arguments, &td, sizeof (td));
-	  obstack_grow (argptr, &tdp, sizeof (tdp));
+	  tdp = (token_data *) obstack_copy (arguments, &td, sizeof td);
+	  obstack_ptr_grow (argptr, tdp);
 	}
       while (more_args);
     }
@@ -278,18 +300,30 @@ call_macro (symbol *sym, int argc, token_data **argv,
 static void
 expand_macro (symbol *sym)
 {
-  struct obstack arguments;
-  struct obstack argptr;
+  struct obstack arguments;	/* Alternate obstack if argc_stack is busy.  */
+  unsigned argv_base;		/* Size of argv_stack on entry.  */
+  bool use_argc_stack = true;	/* Whether argc_stack is safe.  */
   token_data **argv;
   int argc;
   struct obstack *expansion;
   const char *expanded;
-  boolean traced;
+  bool traced;
   int my_call_id;
+
+  /* Report errors at the location where the open parenthesis (if any)
+     was found, but after expansion, restore global state back to the
+     location of the close parenthesis.  This is safe since we
+     guarantee that macro expansion does not alter the state of
+     current_file/current_line (dnl, include, and sinclude are special
+     cased in the input engine to ensure this fact).  */
+  const char *loc_open_file = current_file;
+  int loc_open_line = current_line;
+  const char *loc_close_file;
+  int loc_close_line;
 
   SYMBOL_PENDING_EXPANSIONS (sym)++;
   expansion_level++;
-  if (expansion_level > nesting_limit)
+  if (nesting_limit > 0 && expansion_level > nesting_limit)
     M4ERROR ((EXIT_FAILURE, 0,
 	      "ERROR: recursion limit of %d exceeded, use -L<N> to change it",
 	      nesting_limit));
@@ -297,18 +331,32 @@ expand_macro (symbol *sym)
   macro_call_id++;
   my_call_id = macro_call_id;
 
-  traced = (boolean) ((debug_level & DEBUG_TRACE_ALL) || SYMBOL_TRACED (sym));
+  traced = (debug_level & DEBUG_TRACE_ALL) || SYMBOL_TRACED (sym);
 
-  obstack_init (&argptr);
-  obstack_init (&arguments);
+  argv_base = obstack_object_size (&argv_stack);
+  if (obstack_object_size (&argc_stack) > 0)
+    {
+      /* We cannot use argc_stack if this is a nested invocation, and an
+	 outer invocation has an unfinished argument being
+	 collected.  */
+      obstack_init (&arguments);
+      use_argc_stack = false;
+    }
 
   if (traced && (debug_level & DEBUG_TRACE_CALL))
     trace_prepre (SYMBOL_NAME (sym), my_call_id);
 
-  collect_arguments (sym, &argptr, &arguments);
+  collect_arguments (sym, &argv_stack,
+		     use_argc_stack ? &argc_stack : &arguments);
 
-  argc = obstack_object_size (&argptr) / sizeof (token_data *);
-  argv = (token_data **) obstack_finish (&argptr);
+  argc = ((obstack_object_size (&argv_stack) - argv_base)
+	  / sizeof (token_data *));
+  argv = (token_data **) ((char *) obstack_base (&argv_stack) + argv_base);
+
+  loc_close_file = current_file;
+  loc_close_line = current_line;
+  current_file = loc_open_file;
+  current_line = loc_open_line;
 
   if (traced)
     trace_pre (SYMBOL_NAME (sym), my_call_id, argc, argv);
@@ -320,12 +368,18 @@ expand_macro (symbol *sym)
   if (traced)
     trace_post (SYMBOL_NAME (sym), my_call_id, argc, argv, expanded);
 
+  current_file = loc_close_file;
+  current_line = loc_close_line;
+
   --expansion_level;
   --SYMBOL_PENDING_EXPANSIONS (sym);
 
   if (SYMBOL_DELETED (sym))
     free_symbol (sym);
 
-  obstack_free (&arguments, NULL);
-  obstack_free (&argptr, NULL);
+  if (use_argc_stack)
+    obstack_free (&argc_stack, argv[0]);
+  else
+    obstack_free (&arguments, NULL);
+  obstack_blank (&argv_stack, -argc * sizeof (token_data *));
 }

@@ -65,8 +65,8 @@ const char *program_name;
 struct macro_definition
 {
   struct macro_definition *next;
-  int code;			/* D, U or t */
-  const char *macro;
+  int code;			/* D, U, s, t, or '\1' */
+  const char *arg;
 };
 typedef struct macro_definition macro_definition;
 
@@ -204,9 +204,6 @@ mismatch, or whatever value was passed to the m4exit macro.\n\
 ", stdout);
       printf ("\nReport bugs to <%s>.\n", PACKAGE_BUGREPORT);
     }
-
-  if (close_stream (stdout) != 0)
-    M4ERROR ((EXIT_FAILURE, errno, "write error"));
   exit (status);
 }
 
@@ -260,10 +257,49 @@ static const struct option long_options[] =
    where we try to continue execution in the meantime.  */
 int retcode;
 
+/* Process a command line file NAME, and return true only if it was
+   stdin.  */
+static bool
+process_file (const char *name)
+{
+  bool result = false;
+  if (strcmp (name, "-") == 0)
+    {
+      /* If stdin is a terminal, we want to allow 'm4 - file -'
+	 to read input from stdin twice, like GNU cat.  Besides,
+	 there is no point closing stdin before wrapped text, to
+	 minimize bugs in syscmd called from wrapped text.  */
+      push_file (stdin, "stdin", false);
+      result = true;
+    }
+  else
+    {
+      char *full_name;
+      FILE *fp = m4_path_search (name, &full_name);
+      if (fp == NULL)
+	{
+	  error (0, errno, "%s", name);
+	  /* Set the status to EXIT_FAILURE, even though we
+	     continue to process files after a missing file.  */
+	  retcode = EXIT_FAILURE;
+	  return false;
+	}
+      push_file (fp, full_name, true);
+      free (full_name);
+    }
+  expand_input ();
+  return result;
+}
+
+/* POSIX requires only -D, -U, and -s; and says that the first two
+   must be recognized when interspersed with file names.  Traditional
+   behavior also handles -s between files.  Starting OPTSTRING with
+   '-' forces getopt_long to hand back file names as arguments to opt
+   '\1', rather than reordering the command line.  */
 #ifdef ENABLE_CHANGEWORD
-#define OPTSTRING "B:D:EF:GH:I:L:N:PQR:S:T:U:W:d::eil:o:st:"
+#define OPTSTRING "-B:D:EF:GH:I:L:N:PQR:S:T:U:W:d::eil:o:st:"
 #else
-#define OPTSTRING "B:D:EF:GH:I:L:N:PQR:S:T:U:d::eil:o:st:"
+#define OPTSTRING "-B:D:EF:GH:I:L:N:PQR:S:T:U:d::eil:o:st:"
 #endif
 
 int
@@ -271,18 +307,20 @@ main (int argc, char *const *argv, char *const *envp)
 {
   macro_definition *head;	/* head of deferred argument list */
   macro_definition *tail;
-  macro_definition *new;
+  macro_definition *defn;
   int optchar;			/* option character */
 
   macro_definition *defines;
-  FILE *fp;
-  boolean read_stdin = FALSE;
-  boolean interactive = FALSE;
+  bool read_stdin = false;
+  bool interactive = false;
+  bool seen_file = false;
+  const char *debugfile = NULL;
   const char *frozen_file_to_read = NULL;
   const char *frozen_file_to_write = NULL;
 
   program_name = argv[0];
   retcode = EXIT_SUCCESS;
+  atexit (close_stdout);
 
   include_init ();
   debug_init ();
@@ -294,9 +332,8 @@ main (int argc, char *const *argv, char *const *envp)
 
   head = tail = NULL;
 
-  while (optchar = getopt_long (argc, (char **) argv, OPTSTRING,
-				long_options, NULL),
-	 optchar != EOF)
+  while ((optchar = getopt_long (argc, (char **) argv, OPTSTRING,
+				 long_options, NULL)) != -1)
     switch (optchar)
       {
       default:
@@ -320,20 +357,21 @@ main (int argc, char *const *argv, char *const *envp)
 
       case 'D':
       case 'U':
+      case 's':
       case 't':
-
+      case '\1':
 	/* Arguments that cannot be handled until later are accumulated.  */
 
-	new = (macro_definition *) xmalloc (sizeof (macro_definition));
-	new->code = optchar;
-	new->macro = optarg;
-	new->next = NULL;
+	defn = (macro_definition *) xmalloc (sizeof (macro_definition));
+	defn->code = optchar;
+	defn->arg = optarg;
+	defn->next = NULL;
 
 	if (head == NULL)
-	  head = new;
+	  head = defn;
 	else
-	  tail->next = new;
-	tail = new;
+	  tail->next = defn;
+	tail = defn;
 
 	break;
 
@@ -394,7 +432,7 @@ main (int argc, char *const *argv, char *const *envp)
 	error (0, 0, "Warning: `m4 -e' is deprecated, use `-i' instead");
 	/* fall through */
       case 'i':
-	interactive = TRUE;
+	interactive = true;
 	break;
 
       case 'l':
@@ -409,27 +447,20 @@ main (int argc, char *const *argv, char *const *envp)
 	   or later is more widely established, as such a warning
 	   would interfere with all earlier versions of autoconf.  */
       case DEBUGFILE_OPTION:
-	if (!debug_set_output (optarg))
-	  error (0, errno, "%s", optarg);
-	break;
-
-      case 's':
-	sync_output = 1;
+	/* Don't call debug_set_output here, as it has side effects.  */
+	debugfile = optarg;
 	break;
 
       case VERSION_OPTION:
-	 printf ("%s\n", PACKAGE_STRING);
-	 fputs ("\
+	printf ("%s\n", PACKAGE_STRING);
+	fputs ("\
 Copyright (C) 2006 Free Software Foundation, Inc.\n\
 This is free software; see the source for copying conditions.  There is NO\n\
 warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\
 \n\
 Written by Rene' Seindal.\n\
 ", stdout);
-
-	 if (close_stream (stdout) != 0)
-	    M4ERROR ((EXIT_FAILURE, errno, "write error"));
-	 exit (EXIT_SUCCESS);
+	exit (EXIT_SUCCESS);
 	break;
 
       case HELP_OPTION:
@@ -439,7 +470,9 @@ Written by Rene' Seindal.\n\
 
   defines = head;
 
-  /* Do the basic initialisations.  */
+  /* Do the basic initializations.  */
+  if (debugfile && !debug_set_output (debugfile))
+    M4ERROR ((0, errno, "cannot set debug file `%s'", debugfile));
 
   input_init ();
   output_init ();
@@ -451,33 +484,53 @@ Written by Rene' Seindal.\n\
   else
     builtin_init ();
 
+  /* Interactive mode means unbuffered output, and interrupts ignored.  */
+
+  if (interactive)
+    {
+      signal (SIGINT, SIG_IGN);
+      setbuf (stdout, (char *) NULL);
+    }
+
   /* Handle deferred command line macro definitions.  Must come after
-     initialisation of the symbol table.  */
+     initialization of the symbol table.  */
 
   while (defines != NULL)
     {
       macro_definition *next;
-      char *macro_value;
       symbol *sym;
 
       switch (defines->code)
 	{
 	case 'D':
-	  macro_value = strchr (defines->macro, '=');
-	  if (macro_value == NULL)
-	    macro_value = "";
-	  else
-	    *macro_value++ = '\0';
-	  define_user_macro (defines->macro, macro_value, SYMBOL_INSERT);
+	  {
+	    /* defines->arg is read-only, so we need a copy.  */
+	    char *macro_name = xstrdup (defines->arg);
+	    char *macro_value = strchr (macro_name, '=');
+	    if (macro_value)
+	      *macro_value++ = '\0';
+	    define_user_macro (macro_name, macro_value, SYMBOL_INSERT);
+	    free (macro_name);
+	  }
 	  break;
 
 	case 'U':
-	  lookup_symbol (defines->macro, SYMBOL_DELETE);
+	  lookup_symbol (defines->arg, SYMBOL_DELETE);
 	  break;
 
 	case 't':
-	  sym = lookup_symbol (defines->macro, SYMBOL_INSERT);
-	  SYMBOL_TRACED (sym) = TRUE;
+	  sym = lookup_symbol (defines->arg, SYMBOL_INSERT);
+	  SYMBOL_TRACED (sym) = true;
+	  break;
+
+	case 's':
+	  sync_output = 1;
+	  break;
+
+	case '\1':
+	  seen_file = true;
+	  if (process_file (defines->arg))
+	    read_stdin = true;
 	  break;
 
 	default:
@@ -491,55 +544,15 @@ Written by Rene' Seindal.\n\
       defines = next;
     }
 
-  /* Interactive mode means unbuffered output, and interrupts ignored.  */
-
-  if (interactive)
-    {
-      signal (SIGINT, SIG_IGN);
-      setbuf (stdout, (char *) NULL);
-    }
-
-  /* Handle the various input files.  Each file is pushed on the input,
+  /* Handle remaining input files.  Each file is pushed on the input,
      and the input read.  Wrapup text is handled separately later.  */
 
-  if (optind == argc)
-    {
-      /* No point closing stdin until after wrapped text is
-	 processed.  */
-      push_file (stdin, "stdin", FALSE);
-      read_stdin = TRUE;
-      expand_input ();
-    }
+  if (optind == argc && !seen_file)
+    read_stdin = process_file ("-");
   else
     for (; optind < argc; optind++)
-      {
-	if (strcmp (argv[optind], "-") == 0)
-	  {
-	    /* If stdin is a terminal, we want to allow 'm4 - file -'
-	       to read input from stdin twice, like GNU cat.  Besides,
-	       there is no point closing stdin before wrapped text, to
-	       minimize bugs in syscmd called from wrapped text.  */
-	    push_file (stdin, "stdin", FALSE);
-	    read_stdin = TRUE;
-	  }
-	else
-	  {
-	    const char *name;
-	    fp = path_search (argv[optind], &name);
-	    if (fp == NULL)
-	      {
-		error (0, errno, "%s", argv[optind]);
-		/* Set the status to EXIT_FAILURE, even though we
-		   continue to process files after a missing file.  */
-		retcode = EXIT_FAILURE;
-		continue;
-	      }
-	    push_file (fp, name, TRUE);
-	    free ((char *) name);
-	  }
-	expand_input ();
-      }
-#undef NEXTARG
+      if (process_file (defines->arg))
+	read_stdin = true;
 
   /* Now handle wrapup text.  */
 
@@ -563,8 +576,6 @@ Written by Rene' Seindal.\n\
       make_diversion (0);
       undivert_all ();
     }
-
-  if (close_stream (stdout) != 0)
-    M4ERROR ((EXIT_FAILURE, errno, "write error"));
+  output_exit ();
   exit (retcode);
 }

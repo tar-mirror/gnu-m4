@@ -1,4 +1,4 @@
-dnl @ ../doc/m4.texinfo:1680: Origin of test
+dnl @ ../doc/m4.texinfo:1738: Origin of test
 dnl @ Copyright (C) 2006 Free Software Foundation
 dnl @ This file is free software; the Free Software Foundation
 dnl @ gives unlimited permission to copy and/or distribute it
@@ -12,11 +12,19 @@ pushdef(`foo', `Expansion two.')
 dnl @result{}
 foo
 dnl @result{}Expansion two.
-define(`foo', `Second expansion two.')
+pushdef(`foo', `Expansion three.')
+dnl @result{}
+pushdef(`foo', `Expansion four.')
+dnl @result{}
+popdef(`foo')
 dnl @result{}
 foo
-dnl @result{}Second expansion two.
-undefine(`foo')
+dnl @result{}Expansion three.
+popdef(`foo', `foo')
+dnl @result{}
+foo
+dnl @result{}Expansion one.
+popdef(`foo')
 dnl @result{}
 foo
 dnl @result{}foo
