@@ -4,7 +4,7 @@
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2 of the License, or
+# the Free Software Foundation; either version 3 of the License, or
 # (at your option) any later version.
 #
 # This program is distributed in the hope that it will be useful,
@@ -18,7 +18,7 @@
 # 02110-1301  USA
 
 AC_PREREQ([2.60])
-AC_INIT([GNU M4], [1.4.9], [bug-m4@gnu.org])
+AC_INIT([GNU M4], [1.4.10], [bug-m4@gnu.org])
 AM_INIT_AUTOMAKE([1.9.6 dist-bzip2 gnu])
 PACKAGE=$PACKAGE_TARNAME; AC_SUBST([PACKAGE])
 VERSION=$PACKAGE_VERSION; AC_SUBST([VERSION])
@@ -165,6 +165,7 @@ AC_CONFIG_FILES([Makefile
 		 doc/Makefile
 		 lib/Makefile
 		 src/Makefile
+		 tests/Makefile
 		 checks/Makefile
 		 examples/Makefile
 ])

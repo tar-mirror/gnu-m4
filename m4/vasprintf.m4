@@ -1,4 +1,4 @@
-# vasprintf.m4 serial 3
+# vasprintf.m4 serial 5
 dnl Copyright (C) 2002-2003, 2006-2007 Free Software Foundation, Inc.
 dnl This file is free software; the Free Software Foundation
 dnl gives unlimited permission to copy and/or distribute it,
@@ -16,16 +16,18 @@ AC_DEFUN([gl_REPLACE_VASPRINTF],
 [
   AC_LIBOBJ([vasprintf])
   AC_LIBOBJ([asprintf])
+  AC_REQUIRE([gl_STDIO_H_DEFAULTS])
   if test $ac_cv_func_vasprintf = yes; then
-    AC_DEFINE([REPLACE_VASPRINTF], 1,
-      [Define if vasprintf exists but is overridden by gnulib.])
+    REPLACE_VASPRINTF=1
+  else
+    HAVE_VASPRINTF=0
   fi
   gl_PREREQ_VASPRINTF_H
   gl_PREREQ_VASPRINTF
   gl_PREREQ_ASPRINTF
 ])
 
-# Prerequisites of lib/vasprintf.h.
+# Prerequisites of the vasprintf portion of lib/stdio.h.
 AC_DEFUN([gl_PREREQ_VASPRINTF_H],
 [
   dnl Persuade glibc <stdio.h> to declare asprintf() and vasprintf().

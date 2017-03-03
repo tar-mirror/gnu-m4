@@ -1,10 +1,10 @@
 ## This file is part of GNU M4.
 ##
-## Copyright (C) 2006 Free Software Foundation, Inc.
+## Copyright (C) 2006, 2007 Free Software Foundation, Inc.
 ##
 ## This program is free software; you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation; either version 2 of the License, or
+## the Free Software Foundation; either version 3 of the License, or
 ## (at your option) any later version.
 ##
 ## This program is distributed in the hope that it will be useful,
@@ -20,7 +20,7 @@
 ## This file written by Eric Blake <ebb9@byu.net>
 
 info_TEXINFOS = m4.texinfo
-m4_TEXINFOS = fdl.texi
+m4_TEXINFOS = fdl.texi gpl-3.0.texi
 man_MANS = m4.1
 EXTRA_DIST = $(man_MANS) gendocs_template
 MAINTAINERCLEANFILES = $(man_MANS) gendocs_template

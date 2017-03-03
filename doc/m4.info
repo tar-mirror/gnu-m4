@@ -1,6 +1,6 @@
 This is m4.info, produced by makeinfo version 4.8 from m4.texinfo.
 
-   This manual is for GNU M4 (version 1.4.9, 23 March 2007), a package
+   This manual is for GNU M4 (version 1.4.10, 4 July 2007), a package
 containing an implementation of the m4 macro language.
 
    Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2004, 2005, 2006,
@@ -13,7 +13,7 @@ containing an implementation of the m4 macro language.
      no Back-Cover Texts.  A copy of the license is included in the
      section entitled "GNU Free Documentation License."
 
-INFO-DIR-SECTION GNU programming tools
+INFO-DIR-SECTION Text creation and manipulation
 START-INFO-DIR-ENTRY
 * M4: (m4).                     A powerful macro processor.
 END-INFO-DIR-ENTRY
@@ -24,7 +24,7 @@ File: m4.info,  Node: Top,  Next: Preliminaries,  Up: (dir)
 GNU M4
 ******
 
-This manual is for GNU M4 (version 1.4.9, 23 March 2007), a package
+This manual is for GNU M4 (version 1.4.10, 4 July 2007), a package
 containing an implementation of the m4 macro language.
 
    Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2004, 2005, 2006,
@@ -46,10 +46,10 @@ generating `configure' scripts, but not for running them.
 
    GNU `m4' was originally written by Rene' Seindal, with subsequent
 changes by Franc,ois Pinard and other volunteers on the Internet.  All
-names and email addresses can be found in the files `m4-1.4.9/AUTHORS'
-and `m4-1.4.9/THANKS' from the GNU M4 distribution.
+names and email addresses can be found in the files `m4-1.4.10/AUTHORS'
+and `m4-1.4.10/THANKS' from the GNU M4 distribution.
 
-   This is release 1.4.9.  It is now considered stable:  future
+   This is release 1.4.10.  It is now considered stable:  future
 releases in the 1.4.x series are only meant to fix bugs, increase speed,
 or improve documentation.  However...
 
@@ -86,6 +86,7 @@ will go away and _you should not count on it_.
 
 * Compatibility::               Compatibility with other versions of `m4'
 * Answers::                     Correct version of some examples
+* Copying This Package::        How to make copies of the overall M4 package
 * Copying This Manual::         How to make copies of this manual
 * Indices::                     Indices of concepts and macros
 
@@ -218,8 +219,9 @@ Correct version of some examples
 * Improved cleardivert::        Solution for `cleardivert'
 * Improved fatal_error::        Solution for `fatal_error'
 
-How to make copies of this manual
+How to make copies of this package or manual
 
+* Copying::                     GNU General Public License
 * GNU Free Documentation License::  License for copying this manual
 
 Indices of concepts and macros
@@ -332,7 +334,7 @@ addressed some long standing bugs in the venerable 1.4 release.  Then in
 1.4 that were floating around the net and released 1.4.3 and 1.4.4.
 And in 2006, Eric Blake joined the team and prepared patches for the
 release of 1.4.5, 1.4.6, 1.4.7, and 1.4.8.  The 1.4.x series remains
-open for bug fixes, including release 1.4.9 in 2007.
+open for bug fixes, including release 1.4.9 and 1.4.10 in 2007.
 
    Meanwhile, development has continued on new features for `m4', such
 as dynamic module loading and additional builtins.  When complete, GNU
@@ -381,8 +383,11 @@ shown in a fixed width font, like this
 
    To distinguish input from output, all output from `m4' is prefixed
 by the string `=>', and all error messages by the string `error-->'.
-Thus
+When showing how command line options affect matters, the command line
+is shown with a prompt `$ like this', otherwise, you can assume that a
+simple `m4' invocation will work.  Thus:
 
+     $ command line to invoke m4
      Example of input line
      =>Output line from m4
      error-->and an error message
@@ -391,7 +396,12 @@ Thus
 The sequence `<NL>' refers to the newline character.  The majority of
 these examples are self-contained, and you can run them with similar
 results by invoking `m4 -d'.  In fact, the testsuite that is bundled in
-the GNU M4 package consists of the examples in this document!
+the GNU M4 package consists of the examples in this document!  Some of
+the examples assume that your current directory is located where you
+unpacked the installation, so if you plan on following along, you may
+find it helpful to do this now:
+
+     $ cd m4-1.4.10
 
    As each of the predefined macros in `m4' is described, a prototype
 call of the macro will be shown, giving descriptive names to the
@@ -587,7 +597,39 @@ from.  These features occur with the following options:
      Synchronization directives are always given on complete lines by
      themselves.  When a synchronization discrepancy occurs in the
      middle of an output line, the associated synchronization directive
-     is delayed until the beginning of the next generated line.
+     is delayed until the next newline that does not occur in the
+     middle of a quoted string or comment.
+
+          define(`twoline', `1
+          2')
+          =>#line 2 "stdin"
+          =>
+          changecom(`/*', `*/')
+          =>
+          define(`comment', `/*1
+          2*/')
+          =>#line 5
+          =>
+          dnl no line
+          hello
+          =>#line 7
+          =>hello
+          twoline
+          =>1
+          =>#line 8
+          =>2
+          comment
+          =>/*1
+          =>2*/
+          one comment `two
+          three'
+          =>#line 10
+          =>one /*1
+          =>2*/ two
+          =>three
+          goodbye
+          =>#line 12
+          =>goodbye
 
 `-U NAME'
 `--undefine=NAME'
@@ -749,7 +791,17 @@ string.
 
    The options `--define' (`-D'), `--undefine' (`-U'), `--synclines'
 (`-s'), and `--trace' (`-t') only take effect after processing input
-from any file names that occur earlier on the command line.
+from any file names that occur earlier on the command line.  For
+example, assume the file `foo' contains:
+
+     $ cat foo
+     bar
+
+   The text `bar' can then be redefined over multiple uses of `foo':
+
+     $ m4 -Dbar=hello foo -Dbar=world foo
+     =>hello
+     =>world
 
    If none of the input files invoked `m4exit' (*note M4exit::), the
 exit status of `m4' will be 0 for success, 1 for general failure (such
@@ -768,13 +820,14 @@ File: m4.info,  Node: Syntax,  Next: Macros,  Prev: Invoking m4,  Up: Top
 As `m4' reads its input, it separates it into "tokens".  A token is
 either a name, a quoted string, or any single character, that is not a
 part of either a name or a string.  Input to `m4' can also contain
-comments.  GNU `m4' does not yet understand locales; all operations are
-byte-oriented rather than character-oriented (although if your locale
-uses a single byte encoding, such as ISO-8859-1, you will not notice a
-difference).  However, `m4' is eight-bit clean, so you can use
-non-ASCII characters in quoted strings (*note Changequote::), comments
-(*note Changecom::), and macro names (*note Indir::), with the
-exception of the NUL character (the zero byte `'\0'').
+comments.  GNU `m4' does not yet understand multibyte locales; all
+operations are byte-oriented rather than character-oriented (although
+if your locale uses a single byte encoding, such as ISO-8859-1, you
+will not notice a difference).  However, `m4' is eight-bit clean, so
+you can use non-ASCII characters in quoted strings (*note
+Changequote::), comments (*note Changecom::), and macro names (*note
+Indir::), with the exception of the NUL character (the zero byte
+`'\0'').
 
 * Menu:
 
@@ -835,6 +888,7 @@ the output--comments are _not_ discarded by `m4'.
 comment.  The commenting effect of the begin-comment string can be
 inhibited by quoting it.
 
+     $ m4
      `quoted text' # `commented text'
      =>quoted text # `commented text'
      `quoting inhibits' `#' `comments'
@@ -1090,6 +1144,7 @@ specifically states that invoking those builtins without arguments is
 unspecified, because many other implementations simply invoke the
 builtin as though it were given one empty argument instead.
 
+     $ m4
      eval
      =>eval
      eval(`1')
@@ -1101,6 +1156,16 @@ with a prefix of `m4_' at startup.  The option has no effect whatsoever
 on user defined macros.  For example, with this option, one has to
 write `m4_dnl' and even `m4_m4exit'.  It also has no effect on whether
 a macro requires parameters.
+
+     $ m4 -P
+     eval
+     =>eval
+     eval(`1')
+     =>eval(1)
+     m4_eval
+     =>m4_eval
+     m4_eval(`1')
+     =>1
 
    Another alternative is to redefine problematic macros to a name less
 likely to cause conflicts, *Note Definitions::.
@@ -1219,6 +1284,24 @@ an inappropriate number of arguments, but it can be suppressed with the
 m4: Operation modes.).  For user defined macros, there is no check of
 the number of arguments given.
 
+     $ m4
+     index(`abc')
+     error-->m4:stdin:1: Warning: too few arguments to builtin `index'
+     =>0
+     index(`abc',)
+     =>0
+     index(`abc', `b', `ignored')
+     error-->m4:stdin:3: Warning: excess arguments to builtin `index' ignored
+     =>1
+
+     $ m4 -Q
+     index(`abc')
+     =>0
+     index(`abc',)
+     =>0
+     index(`abc', `b', `ignored')
+     =>1
+
    Macros are expanded normally during argument collection, and whatever
 commas, quotes and parentheses that might show up in the resulting
 expanded text will serve to define the arguments as well.  Thus, if FOO
@@ -1315,12 +1398,14 @@ therefore result in more macros being called, if the calls are included,
 completely or partially, in the first macro calls' expansion.
 
    Taking a very simple example, if FOO expands to `bar', and BAR
-expands to `Hello world', the input
+expands to `Hello', the input
 
+     $ m4 -Dbar=Hello -Dfoo=bar
      foo
+     =>Hello
 
 will expand first to `bar', and when this is reread and expanded, into
-`Hello world'.
+`Hello'.
 
 
 File: m4.info,  Node: Definitions,  Next: Conditionals,  Prev: Macros,  Up: Top
@@ -1906,6 +1991,7 @@ NAME, that will be reflected in the final expansion.  This is different
 than the behavior when invoking macros directly, where the definition
 that was in effect before argument collection is used.
 
+     $ m4 -d
      define(`f', `1')
      =>
      f(define(`f', `2'))
@@ -1920,6 +2006,7 @@ that was in effect before argument collection is used.
 arguments, `indir' defers to the invoked NAME for whether a token
 representing a builtin is recognized or flattened to the empty string.
 
+     $ m4 -d
      indir(defn(`defn'), `divnum')
      error-->m4:stdin:1: Warning: indir: invalid macro name ignored
      =>
@@ -1982,6 +2069,18 @@ the builtin.
 even when the `--prefix-builtins' option (or `-P', *note Invoking m4:
 Operation modes.) is in effect.  This is different from `indir', which
 only tracks current macro names.
+
+     $ m4 -P
+     m4_builtin(`divnum')
+     =>0
+     m4_builtin(`m4_divnum')
+     error-->m4:stdin:2: undefined builtin `m4_divnum'
+     =>
+     m4_indir(`divnum')
+     error-->m4:stdin:3: undefined macro `divnum'
+     =>
+     m4_indir(`m4_divnum')
+     =>0
 
    Note that `indir' and `builtin' can be used to invoke builtins
 without arguments, even when they normally require parameters to be
@@ -2197,9 +2296,10 @@ requires adding quotes to each element:
      levels of quoting are added around each element.
 
    An actual implementation of these three macros is distributed as
-`m4-1.4.9/examples/quote.m4' in this package.  First, let's examine
+`m4-1.4.10/examples/quote.m4' in this package.  First, let's examine
 their usage:
 
+     $ m4 -I examples
      include(`quote.m4')
      =>
      -quote-dquote-dquote_elt-
@@ -2228,6 +2328,7 @@ an empty first argument.  `dquote', on the other hand, results in a
 string no matter what, since it is still possible to tell whether it
 was invoked without arguments based on the resulting string.
 
+     $ m4 -I examples
      undivert(`quote.m4')dnl
      =>divert(`-1')
      =># quote(args) - convert args to single-quoted string
@@ -2277,6 +2378,7 @@ Here is an example of a loop macro that implements a simple for loop.
 
    It can, for example, be used for simple counting:
 
+     $ m4 -I examples
      include(`forloop.m4')
      =>
      forloop(`i', `1', `8', `i ')
@@ -2284,6 +2386,7 @@ Here is an example of a loop macro that implements a simple for loop.
 
    For-loops can be nested, like:
 
+     $ m4 -I examples
      include(`forloop.m4')
      =>
      forloop(`i', `1', `4', `forloop(`j', `1', `8', ` (i, j)')
@@ -2306,8 +2409,9 @@ finished, it increments the iterator (using the predefined macro
 `incr', *note Incr::), and recurses.
 
    Here is an actual implementation of `forloop', distributed as
-`m4-1.4.9/examples/forloop.m4' in this package:
+`m4-1.4.10/examples/forloop.m4' in this package:
 
+     $ m4 -I examples
      undivert(`forloop.m4')dnl
      =>divert(`-1')
      =># forloop(var, from, to, stmt) - simple version
@@ -2346,9 +2450,10 @@ Here is an example of a loop macro that implements list iteration.
 
    As an example, this displays each word in a list inside of a
 sentence, using an implementation of `foreach' distributed as
-`m4-1.4.9/examples/foreach.m4', and `foreachq' in
-`m4-1.4.9/examples/foreachq.m4'.
+`m4-1.4.10/examples/foreach.m4', and `foreachq' in
+`m4-1.4.10/examples/foreachq.m4'.
 
+     $ m4 -I examples
      include(`foreach.m4')
      =>
      foreach(`x', (foo, bar, foobar), `Word was: x
@@ -2368,6 +2473,7 @@ sentence, using an implementation of `foreach' distributed as
 QUOTE-LIST can itself be a list, to pass as further arguments to a
 helper macro.  This example generates a shell case statement:
 
+     $ m4 -I examples
      include(`foreach.m4')
      =>
      define(`_case', `  $1)
@@ -2393,6 +2499,7 @@ grab the first element of a list.  Second, `_foreach' implements the
 recursion, successively walking through the original list.  Here is a
 simple implementation of `foreach':
 
+     $ m4 -I examples
      undivert(`foreach.m4')dnl
      =>divert(`-1')
      =># foreach(x, (item_1, item_2, ..., item_n), stmt)
@@ -2415,6 +2522,7 @@ pass double-quoted macro names in a list, expecting the macro name on
 output after one layer of quotes is removed during list iteration and
 the final layer removed during the final rescan:
 
+     $ m4 -I examples
      define(`a', `1')define(`b', `2')define(`c', `3')
      =>
      include(`foreach.m4')
@@ -2436,6 +2544,7 @@ the final layer removed during the final rescan:
 
    Obviously, `foreachq' did a better job; here is its implementation:
 
+     $ m4 -I examples
      undivert(`foreachq.m4')dnl
      =>include(`quote.m4')dnl
      =>divert(`-1')
@@ -2495,6 +2604,7 @@ If you want to see what a name expands into, you can use the builtin
 
      The expansion of `dumpdef' is void.
 
+     $ m4 -d
      define(`foo', `Hello world.')
      =>
      dumpdef(`foo')
@@ -2509,6 +2619,7 @@ The definition that is dumped corresponds to what would occur if the
 macro were to be called at that point, even if other definitions are
 still live due to redefining a macro during argument collection.
 
+     $ m4 -d
      pushdef(`f', ``$0'1')pushdef(`f', ``$0'2')
      =>
      f(popdef(`f')dumpdef(`f'))
@@ -2547,6 +2658,7 @@ is not void, the expansion can be displayed after the call.  The output
 is printed to the current debug file (defaulting to standard error,
 *note Debug Output::).
 
+     $ m4 -d
      define(`foo', `Hello World.')
      =>
      define(`echo', `$@')
@@ -2564,12 +2676,27 @@ is printed to the current debug file (defaulting to standard error,
 most of the time, signifying an expansion at the outermost level, but it
 increases when macro arguments contain unquoted macro calls.  The
 maximum number that will appear between dashes is controlled by the
-option `--nesting-limit' (*note Invoking m4: Limits control.).
+option `--nesting-limit' (or `-L', *note Invoking m4: Limits control.).
+Additionally, the option `--trace' (or `-t') can be used to invoke
+`traceon(NAME)' before parsing input.
+
+     $ m4 -L 3 -t ifelse
+     ifelse(`one level')
+     error-->m4trace: -1- ifelse
+     =>
+     ifelse(ifelse(ifelse(`three levels')))
+     error-->m4trace: -3- ifelse
+     error-->m4trace: -2- ifelse
+     error-->m4trace: -1- ifelse
+     =>
+     ifelse(ifelse(ifelse(ifelse(`four levels'))))
+     error-->m4:stdin:3: recursion limit of 3 exceeded, use -L<N> to change it
 
    Tracing by name is an attribute that is preserved whether the macro
-is defined or not.  This allows the `-t' option to select macros to
-trace before those macros are defined.
+is defined or not.  This allows the selection of macros to trace before
+those macros are defined.
 
+     $ m4 -d
      traceoff(`foo')
      =>
      traceon(`foo')
@@ -2601,6 +2728,7 @@ trace before those macros are defined.
    Tracing even works on builtins.  However, `defn' (*note Defn::) does
 not transfer tracing status.
 
+     $ m4 -d
      traceon(`eval', `m4_divnum')
      =>
      define(`m4_eval', defn(`eval'))
@@ -2701,6 +2829,7 @@ control of the debugging output format:
 
      The expansion of `debugmode' is void.
 
+     $ m4
      define(`foo', `FOO')
      =>
      traceon(`foo')
@@ -2742,6 +2871,7 @@ or with the builtin macro `debugfile':
 
      The expansion of `debugfile' is void.
 
+     $ m4
      traceon(`divnum')
      =>
      divnum(`extra')
@@ -3391,18 +3521,20 @@ There are two builtin macros in `m4' for including files:
 
    The rest of this section assumes that `m4' is invoked with the `-I'
 option (*note Invoking m4: Preprocessor features.)  pointing to the
-`m4-1.4.9/examples' directory shipped as part of the GNU `m4' package.
-The file `m4-1.4.9/examples/incl.m4' in the distribution contains the
+`m4-1.4.10/examples' directory shipped as part of the GNU `m4' package.
+The file `m4-1.4.10/examples/incl.m4' in the distribution contains the
 lines:
 
-     Include file start
-     foo
-     Include file end
+     $ cat examples/incl.m4
+     =>Include file start
+     =>foo
+     =>Include file end
 
    Normally file inclusion is used to insert the contents of a file
 into the input stream.  The contents of the file will be read by `m4'
 and macro calls in the file will be expanded:
 
+     $ m4 -I examples
      define(`foo', `FOO')
      =>
      include(`incl.m4')
@@ -3416,6 +3548,7 @@ file can be used to define macros that operate on entire files.  Here
 is an example, which defines `bar' to expand to the contents of
 `incl.m4':
 
+     $ m4 -I examples
      define(`bar', include(`incl.m4'))
      =>
      This is `bar':  >>bar<<
@@ -3660,8 +3793,13 @@ not get rearranged among the other diversions.
    GNU `m4' allows named files to be undiverted.  Given a non-numeric
 argument, the contents of the file named will be copied, uninterpreted,
 to the current output.  This complements the builtin `include' (*note
-Include::).  To illustrate the difference, the file
-`m4-1.4.9/examples/foo' contains the word `bar':
+Include::).  To illustrate the difference, assume the file `foo'
+contains:
+
+     $ cat foo
+     bar
+
+then
 
      define(`bar', `BAR')
      =>
@@ -3673,7 +3811,18 @@ Include::).  To illustrate the difference, the file
      =>
 
    If the file is not found (or cannot be read), an error message is
-issued, and the expansion is void.
+issued, and the expansion is void.  It is possible to intermix files
+and diversion numbers.
+
+     divert(`1')diversion one
+     divert(`2')undivert(`foo')dnl
+     divert(`3')diversion three
+     divert`'dnl
+     undivert(`1', `2', `foo', `3')dnl
+     =>diversion one
+     =>bar
+     =>bar
+     =>diversion three
 
 
 File: m4.info,  Node: Divnum,  Next: Cleardivert,  Prev: Undivert,  Up: Diversions
@@ -4064,14 +4213,25 @@ Formatted output can be made with `format':
      =>
      format(`The string "%s" uses %d characters', foo, len(foo))
      =>The string "The brown fox jumped over the lazy dog" uses 38 characters
+     format(`%*.*d', `-1', `-1', `1')
+     =>1
      format(`%.0f', `56789.9876')
      =>56790
-     len(format(`%-*X', `300', `1'))
-     =>300
+     len(format(`%-*X', `5000', `1'))
+     =>5000
+     ifelse(format(`%010F', `infinity'), `       INF', `success',
+            format(`%010F', `infinity'), `  INFINITY', `success',
+            format(`%010F', `infinity'))
+     =>success
+     ifelse(format(`%.1A', `1.999'), `0X1.0P+1', `success',
+            format(`%.1A', `1.999'), `0X2.0P+0', `success',
+            format(`%.1A', `1.999'))
+     =>success
 
    Using the `forloop' macro defined earlier (*note Forloop::), this
 example shows how `format' can be used to produce tabular output.
 
+     $ m4 -I examples
      include(`forloop.m4')
      =>
      forloop(`i', `1', `10', `format(`%6d squared is %10d
@@ -4090,15 +4250,26 @@ example shows how `format' can be used to produce tabular output.
 
    The builtin `format' is modeled after the ANSI C `printf' function,
 and supports these `%' specifiers: `c', `s', `d', `o', `x', `X', `u',
-`e', `E', `f', `F', `g', `G', and `%'; it supports field widths and
-precisions, and the modifiers `+', `-', ` ', `0', `#', `h' and `l'.
-For more details on the functioning of `printf', see the C Library
-Manual.
+`a', `A', `e', `E', `f', `F', `g', `G', and `%'; it supports field
+widths and precisions, and the flags `+', `-', ` ', `0', `#', and `''.
+For integer specifiers, the width modifiers `hh', `h', and `l' are
+recognized, and for floating point specifiers, the width modifier `l'
+is recognized.  Items not yet supported include positional arguments,
+the `n', `p', `S', and `C' specifiers, the `z', `t', `j', `L' and `ll'
+modifiers, and any platform extensions available in the native
+`printf'.  For more details on the functioning of `printf', see the C
+Library Manual, or the POSIX specification (for example, `%a' is
+supported even on platforms that haven't yet implemented C99
+hexadecimal floating point output natively).
 
-   For now, unrecognized specifiers are silently ignored, but it is
-anticipated that a future release of GNU `m4' will support more
-specifiers, and give warnings when problems are encountered.  Likewise,
-escape sequences are not yet recognized.
+   Unrecognized specifiers result in a warning.  It is anticipated that
+a future release of GNU `m4' will support more specifiers, and give
+better warnings when various problems such as overflow are encountered.
+Likewise, escape sequences are not yet recognized.
+
+     format(`%p', `0')
+     error-->m4:stdin:1: Warning: unrecognized specifier in `%p'
+     =>
 
 
 File: m4.info,  Node: Arithmetic,  Next: Shell commands,  Prev: Text handling,  Up: Top
@@ -4308,6 +4479,12 @@ relation return `0'.
 
      eval(`-3 * 5')
      =>-15
+     eval(`-99 / 10')
+     =>-9
+     eval(`-99 % 10')
+     =>-9
+     eval(`99 % -10')
+     =>9
      eval(index(`Hello world', `llo') >= 0)
      =>1
      eval(`0r1:0111 + 0b100 + 0r3:12')
@@ -4321,7 +4498,7 @@ relation return `0'.
      define(`foo', `666')
      =>
      eval(`foo / 6')
-     error-->m4:stdin:8: bad expression in eval: foo / 6
+     error-->m4:stdin:11: bad expression in eval: foo / 6
      =>
      eval(foo / 6)
      =>111
@@ -4501,13 +4678,17 @@ Any shell command can be executed, using `syscmd':
    Note how the expansion of `syscmd' keeps the trailing newline of the
 command, as well as using the newline that appeared after the macro.
 
-   As an example of SHELL-COMMAND using the same standard input as
-`m4', the command line `echo "m4wrap(\`syscmd(\`cat')')" | m4' will
-tell `m4' to read all of its input before executing the wrapped text,
-then hand a valid (albeit emptied) pipe as standard input for the `cat'
-subcommand.  Therefore, you should be careful when using standard input
-(either by specifying no files, or by passing `-' as a file name on the
-command line, *note Invoking m4: Command line files.), and also
+   The following is an example of SHELL-COMMAND using the same standard
+input as `m4':
+
+     $ echo "m4wrap(\`syscmd(\`cat')')" | m4
+     =>
+
+   It tells `m4' to read all of its input before executing the wrapped
+text, then hand a valid (albeit emptied) pipe as standard input for the
+`cat' subcommand.  Therefore, you should be careful when using standard
+input (either by specifying no files, or by passing `-' as a file name
+on the command line, *note Invoking m4: Command line files.), and also
 invoking subcommands via `syscmd' or `esyscmd' that consume data from
 standard input.  When standard input is a seekable file, the subprocess
 will pick up with the next character not yet processed by `m4'; when it
@@ -4658,6 +4839,7 @@ file, for output or for some other purpose.  There is a builtin macro,
 output for the two file names, since the replacement characters are
 randomly chosen:
 
+     $ m4
      maketemp(`/tmp/fooXXXXXX')
      =>/tmp/fooa07346
      ifdef(`mkstemp', `define(`maketemp', defn(`mkstemp'))',
@@ -4675,6 +4857,7 @@ generate multiple files.  However, we recommend that you use the new
 `mkstemp' macro, introduced in GNU M4 1.4.8, which is secure even in
 traditional mode.
 
+     $ m4
      syscmd(`echo foo??????')dnl
      =>foo??????
      define(`file1', maketemp(`fooXXXXXX'))dnl
@@ -4771,11 +4954,12 @@ the file name.  The syncline option (`-s', *note Invoking m4:
 Preprocessor features.), and the `f' and `l' flags of `debugmode'
 (*note Debug Levels::), also use this notion of current file and line.
 Redefining the three location macros has no effect on syncline, debug,
-or warning message output.  Assume this example is run in the
-`m4-1.4.9/checks' directory of the GNU M4 package, using
-`--include=../examples' in the command line to find the file `incl.m4'
-mentioned earlier:
+warning, or error message output.
 
+   This example reuses the file `incl.m4' mentioned earlier (*note
+Include::):
+
+     $ m4 -I examples
      define(`foo', ``$0' called at __file__:__line__')
      =>
      foo
@@ -4912,20 +5096,20 @@ File: m4.info,  Node: Using frozen files,  Next: Frozen file format,  Up: Frozen
 Suppose a user has a library of `m4' initializations in `base.m4',
 which is then used with multiple input files:
 
-     m4 base.m4 input1.m4
-     m4 base.m4 input2.m4
-     m4 base.m4 input3.m4
+     $ m4 base.m4 input1.m4
+     $ m4 base.m4 input2.m4
+     $ m4 base.m4 input3.m4
 
    Rather than spending time parsing the fixed contents of `base.m4'
 every time, the user might rather execute:
 
-     m4 -F base.m4f base.m4
+     $ m4 -F base.m4f base.m4
 
 once, and further execute, as often as needed:
 
-     m4 -R base.m4f input1.m4
-     m4 -R base.m4f input2.m4
-     m4 -R base.m4f input3.m4
+     $ m4 -R base.m4f input1.m4
+     $ m4 -R base.m4f input2.m4
+     $ m4 -R base.m4f input3.m4
 
 with the varying input.  The first call, containing the `-F' option,
 only reads and executes file `base.m4', defining various application
@@ -4948,15 +5132,15 @@ However, frozen files may be updated incrementally, through using `-R'
 and `-F' options simultaneously.  For example, if some care is taken,
 the command:
 
-     m4 file1.m4 file2.m4 file3.m4 file4.m4
+     $ m4 file1.m4 file2.m4 file3.m4 file4.m4
 
 could be broken down in the following sequence, accumulating the same
 output:
 
-     m4 -F file1.m4f file1.m4
-     m4 -R file1.m4f -F file2.m4f file2.m4
-     m4 -R file2.m4f -F file3.m4f file3.m4
-     m4 -R file3.m4f file4.m4
+     $ m4 -F file1.m4f file1.m4
+     $ m4 -R file1.m4f -F file2.m4f file2.m4
+     $ m4 -R file2.m4f -F file3.m4f file3.m4
+     $ m4 -R file3.m4f file4.m4
 
    Some care is necessary because not every effort has been made for
 this to work in all cases.  In particular, the trace attribute of
@@ -5041,7 +5225,7 @@ characters.  The directives are:
      the same name, and its order, along with `F', is important.
 
 `V NUMBER <NL>'
-     Confirms the format of the file.  `m4' 1.4.9 only creates and
+     Confirms the format of the file.  `m4' 1.4.10 only creates and
      understands frozen files where NUMBER is 1.  This directive must
      be the first non-comment in the file, and may not appear more than
      once.
@@ -5192,7 +5376,7 @@ behaviors is non-portable, as a future release of GNU `m4' may change.
      all arguments, with output separated by spaces.
 
      However, it is possible to emulate POSIX behavior by including the
-     file `m4-1.4.9/examples/wrapfifo.m4' from the distribution:
+     file `m4-1.4.10/examples/wrapfifo.m4' from the distribution:
 
           undivert(`wrapfifo.m4')dnl
           =>dnl Redefine m4wrap to have FIFO semantics.
@@ -5336,7 +5520,26 @@ There are a few other incompatibilities between this implementation of
      The sync line option is used mostly when using `m4' as a front end
      to a compiler.  If a diverted line causes a compiler error, the
      error messages should most probably refer to the place where the
-     diversion were made, and not where it was inserted again.
+     diversion was made, and not where it was inserted again.
+
+          divert(2)2
+          divert(1)1
+          divert`'0
+          =>#line 3 "stdin"
+          =>0
+          ^D
+          =>#line 2 "stdin"
+          =>1
+          =>#line 1 "stdin"
+          =>2
+
+     The current `m4' implementation has a limitation that the syncline
+     output at the start of each diversion occurs no matter what, even
+     if the previous diversion did not end with a newline.  This goes
+     contrary to the claim that synclines appear on a line by
+     themselves, so this limitation may be corrected in a future
+     version of `m4'.  In the meantime, when using `-s', it is wisest
+     to make sure all diversions end with newline.
 
    * GNU `m4' makes no attempt at prohibiting self-referential
      definitions like:
@@ -5361,7 +5564,7 @@ There are a few other incompatibilities between this implementation of
      endless loops in traditional programming languages.
 
 
-File: m4.info,  Node: Answers,  Next: Copying This Manual,  Prev: Compatibility,  Up: Top
+File: m4.info,  Node: Answers,  Next: Copying This Package,  Prev: Compatibility,  Up: Top
 
 17 Correct version of some examples
 ***********************************
@@ -5407,10 +5610,11 @@ The `forloop' macro (*note Forloop::) as presented earlier can go into
 an infinite loop if given an iterator that is not parsed as a macro
 name.  It does not do any sanity checking on its numeric bounds, and
 only permits decimal numbers for bounds.  Here is an improved version,
-shipped as `m4-1.4.9/examples/forloop2.m4'; this version also optimizes
-based on the fact that the starting bound does not need to be passed to
-the helper `_forloop'.
+shipped as `m4-1.4.10/examples/forloop2.m4'; this version also
+optimizes based on the fact that the starting bound does not need to be
+passed to the helper `_forloop'.
 
+     $ m4 -I examples
      undivert(`forloop2.m4')dnl
      =>divert(`-1')
      =># forloop(var, from, to, stmt) - improved version:
@@ -5451,6 +5655,7 @@ The `foreach' and `foreachq' macros (*note Foreach::) as presented
 earlier each have flaws.  First, we will examine and fix the quadratic
 behavior of `foreachq':
 
+     $ m4 -I examples
      include(`foreachq.m4')
      =>
      traceon(`shift')debugmode(`aq')
@@ -5485,8 +5690,9 @@ recursion use fewer arguments, rather than adding additional quoted
 uses of `shift'.  By doing so, `m4' uses less memory, invokes fewer
 macros, is less likely to run into machine limits, and most
 importantly, performs faster.  The fixed version of `foreachq' can be
-found in `m4-1.4.9/examples/foreachq2.m4':
+found in `m4-1.4.10/examples/foreachq2.m4':
 
+     $ m4 -I examples
      include(`foreachq2.m4')
      =>
      undivert(`foreachq2.m4')dnl
@@ -5520,11 +5726,12 @@ Contrast the use of `_arg1q', which quotes the first list element, with
 element directly.
 
    For a different approach, the improved version of `foreach',
-available in `m4-1.4.9/examples/foreach2.m4', simply overquotes the
+available in `m4-1.4.10/examples/foreach2.m4', simply overquotes the
 arguments to `_foreach' to begin with, using `dquote_elt'.  Then
 `_foreach' can just use `_arg1' to remove the extra layer of quoting
 that was added up front:
 
+     $ m4 -I examples
      include(`foreach2.m4')
      =>
      undivert(`foreach2.m4')dnl
@@ -5566,6 +5773,7 @@ list elements twice while visiting the first list element, once in
 one must take into account whether repeating the side effects of
 unquoted list elements will have any detrimental effects.
 
+     $ m4 -I examples
      include(`foreach2.m4')
      =>
      include(`foreachq2.m4')
@@ -5695,10 +5903,752 @@ series, a better implementation would be:
      error-->m4:stdin:6: fatal error: inside wrapped text
 
 
-File: m4.info,  Node: Copying This Manual,  Next: Indices,  Prev: Answers,  Up: Top
+File: m4.info,  Node: Copying This Package,  Next: Copying This Manual,  Prev: Answers,  Up: Top
 
-Appendix A How to make copies of this manual
+Appendix A How to make copies of the overall M4 package
+*******************************************************
+
+This appendix covers the license for copying the source code of the
+overall M4 package.  This manual is under a different set of
+restrictions, covered later (*note Copying This Manual::).
+
+* Menu:
+
+* Copying::                     GNU General Public License
+
+
+File: m4.info,  Node: Copying,  Up: Copying This Package
+
+A.1 GNU General Public License
+==============================
+
+                        Version 3, 29 June 2007
+
+     Copyright (C) 2007 Free Software Foundation, Inc. `http://fsf.org/'
+
+     Everyone is permitted to copy and distribute verbatim copies of this
+     license document, but changing it is not allowed.
+
+Preamble
+========
+
+The GNU General Public License is a free, copyleft license for software
+and other kinds of works.
+
+   The licenses for most software and other practical works are designed
+to take away your freedom to share and change the works.  By contrast,
+the GNU General Public License is intended to guarantee your freedom to
+share and change all versions of a program-to make sure it remains free
+software for all its users.  We, the Free Software Foundation, use the
+GNU General Public License for most of our software; it applies also to
+any other work released this way by its authors.  You can apply it to
+your programs, too.
+
+   When we speak of free software, we are referring to freedom, not
+price.  Our General Public Licenses are designed to make sure that you
+have the freedom to distribute copies of free software (and charge for
+them if you wish), that you receive source code or can get it if you
+want it, that you can change the software or use pieces of it in new
+free programs, and that you know you can do these things.
+
+   To protect your rights, we need to prevent others from denying you
+these rights or asking you to surrender the rights.  Therefore, you
+have certain responsibilities if you distribute copies of the software,
+or if you modify it: responsibilities to respect the freedom of others.
+
+   For example, if you distribute copies of such a program, whether
+gratis or for a fee, you must pass on to the recipients the same
+freedoms that you received.  You must make sure that they, too, receive
+or can get the source code.  And you must show them these terms so they
+know their rights.
+
+   Developers that use the GNU GPL protect your rights with two steps:
+(1) assert copyright on the software, and (2) offer you this License
+giving you legal permission to copy, distribute and/or modify it.
+
+   For the developers' and authors' protection, the GPL clearly explains
+that there is no warranty for this free software.  For both users' and
+authors' sake, the GPL requires that modified versions be marked as
+changed, so that their problems will not be attributed erroneously to
+authors of previous versions.
+
+   Some devices are designed to deny users access to install or run
+modified versions of the software inside them, although the
+manufacturer can do so.  This is fundamentally incompatible with the
+aim of protecting users' freedom to change the software.  The
+systematic pattern of such abuse occurs in the area of products for
+individuals to use, which is precisely where it is most unacceptable.
+Therefore, we have designed this version of the GPL to prohibit the
+practice for those products.  If such problems arise substantially in
+other domains, we stand ready to extend this provision to those domains
+in future versions of the GPL, as needed to protect the freedom of
+users.
+
+   Finally, every program is threatened constantly by software patents.
+States should not allow patents to restrict development and use of
+software on general-purpose computers, but in those that do, we wish to
+avoid the special danger that patents applied to a free program could
+make it effectively proprietary.  To prevent this, the GPL assures that
+patents cannot be used to render the program non-free.
+
+   The precise terms and conditions for copying, distribution and
+modification follow.
+
+TERMS AND CONDITIONS
+====================
+
+  0. Definitions.
+
+     "This License" refers to version 3 of the GNU General Public
+     License.
+
+     "Copyright" also means copyright-like laws that apply to other
+     kinds of works, such as semiconductor masks.
+
+     "The Program" refers to any copyrightable work licensed under this
+     License.  Each licensee is addressed as "you".  "Licensees" and
+     "recipients" may be individuals or organizations.
+
+     To "modify" a work means to copy from or adapt all or part of the
+     work in a fashion requiring copyright permission, other than the
+     making of an exact copy.  The resulting work is called a "modified
+     version" of the earlier work or a work "based on" the earlier work.
+
+     A "covered work" means either the unmodified Program or a work
+     based on the Program.
+
+     To "propagate" a work means to do anything with it that, without
+     permission, would make you directly or secondarily liable for
+     infringement under applicable copyright law, except executing it
+     on a computer or modifying a private copy.  Propagation includes
+     copying, distribution (with or without modification), making
+     available to the public, and in some countries other activities as
+     well.
+
+     To "convey" a work means any kind of propagation that enables other
+     parties to make or receive copies.  Mere interaction with a user
+     through a computer network, with no transfer of a copy, is not
+     conveying.
+
+     An interactive user interface displays "Appropriate Legal Notices"
+     to the extent that it includes a convenient and prominently visible
+     feature that (1) displays an appropriate copyright notice, and (2)
+     tells the user that there is no warranty for the work (except to
+     the extent that warranties are provided), that licensees may
+     convey the work under this License, and how to view a copy of this
+     License.  If the interface presents a list of user commands or
+     options, such as a menu, a prominent item in the list meets this
+     criterion.
+
+  1. Source Code.
+
+     The "source code" for a work means the preferred form of the work
+     for making modifications to it.  "Object code" means any
+     non-source form of a work.
+
+     A "Standard Interface" means an interface that either is an
+     official standard defined by a recognized standards body, or, in
+     the case of interfaces specified for a particular programming
+     language, one that is widely used among developers working in that
+     language.
+
+     The "System Libraries" of an executable work include anything,
+     other than the work as a whole, that (a) is included in the normal
+     form of packaging a Major Component, but which is not part of that
+     Major Component, and (b) serves only to enable use of the work
+     with that Major Component, or to implement a Standard Interface
+     for which an implementation is available to the public in source
+     code form.  A "Major Component", in this context, means a major
+     essential component (kernel, window system, and so on) of the
+     specific operating system (if any) on which the executable work
+     runs, or a compiler used to produce the work, or an object code
+     interpreter used to run it.
+
+     The "Corresponding Source" for a work in object code form means all
+     the source code needed to generate, install, and (for an executable
+     work) run the object code and to modify the work, including
+     scripts to control those activities.  However, it does not include
+     the work's System Libraries, or general-purpose tools or generally
+     available free programs which are used unmodified in performing
+     those activities but which are not part of the work.  For example,
+     Corresponding Source includes interface definition files
+     associated with source files for the work, and the source code for
+     shared libraries and dynamically linked subprograms that the work
+     is specifically designed to require, such as by intimate data
+     communication or control flow between those subprograms and other
+     parts of the work.
+
+     The Corresponding Source need not include anything that users can
+     regenerate automatically from other parts of the Corresponding
+     Source.
+
+     The Corresponding Source for a work in source code form is that
+     same work.
+
+  2. Basic Permissions.
+
+     All rights granted under this License are granted for the term of
+     copyright on the Program, and are irrevocable provided the stated
+     conditions are met.  This License explicitly affirms your unlimited
+     permission to run the unmodified Program.  The output from running
+     a covered work is covered by this License only if the output,
+     given its content, constitutes a covered work.  This License
+     acknowledges your rights of fair use or other equivalent, as
+     provided by copyright law.
+
+     You may make, run and propagate covered works that you do not
+     convey, without conditions so long as your license otherwise
+     remains in force.  You may convey covered works to others for the
+     sole purpose of having them make modifications exclusively for
+     you, or provide you with facilities for running those works,
+     provided that you comply with the terms of this License in
+     conveying all material for which you do not control copyright.
+     Those thus making or running the covered works for you must do so
+     exclusively on your behalf, under your direction and control, on
+     terms that prohibit them from making any copies of your
+     copyrighted material outside their relationship with you.
+
+     Conveying under any other circumstances is permitted solely under
+     the conditions stated below.  Sublicensing is not allowed; section
+     10 makes it unnecessary.
+
+  3. Protecting Users' Legal Rights From Anti-Circumvention Law.
+
+     No covered work shall be deemed part of an effective technological
+     measure under any applicable law fulfilling obligations under
+     article 11 of the WIPO copyright treaty adopted on 20 December
+     1996, or similar laws prohibiting or restricting circumvention of
+     such measures.
+
+     When you convey a covered work, you waive any legal power to forbid
+     circumvention of technological measures to the extent such
+     circumvention is effected by exercising rights under this License
+     with respect to the covered work, and you disclaim any intention
+     to limit operation or modification of the work as a means of
+     enforcing, against the work's users, your or third parties' legal
+     rights to forbid circumvention of technological measures.
+
+  4. Conveying Verbatim Copies.
+
+     You may convey verbatim copies of the Program's source code as you
+     receive it, in any medium, provided that you conspicuously and
+     appropriately publish on each copy an appropriate copyright notice;
+     keep intact all notices stating that this License and any
+     non-permissive terms added in accord with section 7 apply to the
+     code; keep intact all notices of the absence of any warranty; and
+     give all recipients a copy of this License along with the Program.
+
+     You may charge any price or no price for each copy that you convey,
+     and you may offer support or warranty protection for a fee.
+
+  5. Conveying Modified Source Versions.
+
+     You may convey a work based on the Program, or the modifications to
+     produce it from the Program, in the form of source code under the
+     terms of section 4, provided that you also meet all of these
+     conditions:
+
+       a. The work must carry prominent notices stating that you
+          modified it, and giving a relevant date.
+
+       b. The work must carry prominent notices stating that it is
+          released under this License and any conditions added under
+          section 7.  This requirement modifies the requirement in
+          section 4 to "keep intact all notices".
+
+       c. You must license the entire work, as a whole, under this
+          License to anyone who comes into possession of a copy.  This
+          License will therefore apply, along with any applicable
+          section 7 additional terms, to the whole of the work, and all
+          its parts, regardless of how they are packaged.  This License
+          gives no permission to license the work in any other way, but
+          it does not invalidate such permission if you have separately
+          received it.
+
+       d. If the work has interactive user interfaces, each must display
+          Appropriate Legal Notices; however, if the Program has
+          interactive interfaces that do not display Appropriate Legal
+          Notices, your work need not make them do so.
+
+     A compilation of a covered work with other separate and independent
+     works, which are not by their nature extensions of the covered
+     work, and which are not combined with it such as to form a larger
+     program, in or on a volume of a storage or distribution medium, is
+     called an "aggregate" if the compilation and its resulting
+     copyright are not used to limit the access or legal rights of the
+     compilation's users beyond what the individual works permit.
+     Inclusion of a covered work in an aggregate does not cause this
+     License to apply to the other parts of the aggregate.
+
+  6. Conveying Non-Source Forms.
+
+     You may convey a covered work in object code form under the terms
+     of sections 4 and 5, provided that you also convey the
+     machine-readable Corresponding Source under the terms of this
+     License, in one of these ways:
+
+       a. Convey the object code in, or embodied in, a physical product
+          (including a physical distribution medium), accompanied by the
+          Corresponding Source fixed on a durable physical medium
+          customarily used for software interchange.
+
+       b. Convey the object code in, or embodied in, a physical product
+          (including a physical distribution medium), accompanied by a
+          written offer, valid for at least three years and valid for
+          as long as you offer spare parts or customer support for that
+          product model, to give anyone who possesses the object code
+          either (1) a copy of the Corresponding Source for all the
+          software in the product that is covered by this License, on a
+          durable physical medium customarily used for software
+          interchange, for a price no more than your reasonable cost of
+          physically performing this conveying of source, or (2) access
+          to copy the Corresponding Source from a network server at no
+          charge.
+
+       c. Convey individual copies of the object code with a copy of
+          the written offer to provide the Corresponding Source.  This
+          alternative is allowed only occasionally and noncommercially,
+          and only if you received the object code with such an offer,
+          in accord with subsection 6b.
+
+       d. Convey the object code by offering access from a designated
+          place (gratis or for a charge), and offer equivalent access
+          to the Corresponding Source in the same way through the same
+          place at no further charge.  You need not require recipients
+          to copy the Corresponding Source along with the object code.
+          If the place to copy the object code is a network server, the
+          Corresponding Source may be on a different server (operated
+          by you or a third party) that supports equivalent copying
+          facilities, provided you maintain clear directions next to
+          the object code saying where to find the Corresponding Source.
+          Regardless of what server hosts the Corresponding Source, you
+          remain obligated to ensure that it is available for as long
+          as needed to satisfy these requirements.
+
+       e. Convey the object code using peer-to-peer transmission,
+          provided you inform other peers where the object code and
+          Corresponding Source of the work are being offered to the
+          general public at no charge under subsection 6d.
+
+
+     A separable portion of the object code, whose source code is
+     excluded from the Corresponding Source as a System Library, need
+     not be included in conveying the object code work.
+
+     A "User Product" is either (1) a "consumer product", which means
+     any tangible personal property which is normally used for personal,
+     family, or household purposes, or (2) anything designed or sold for
+     incorporation into a dwelling.  In determining whether a product
+     is a consumer product, doubtful cases shall be resolved in favor of
+     coverage.  For a particular product received by a particular user,
+     "normally used" refers to a typical or common use of that class of
+     product, regardless of the status of the particular user or of the
+     way in which the particular user actually uses, or expects or is
+     expected to use, the product.  A product is a consumer product
+     regardless of whether the product has substantial commercial,
+     industrial or non-consumer uses, unless such uses represent the
+     only significant mode of use of the product.
+
+     "Installation Information" for a User Product means any methods,
+     procedures, authorization keys, or other information required to
+     install and execute modified versions of a covered work in that
+     User Product from a modified version of its Corresponding Source.
+     The information must suffice to ensure that the continued
+     functioning of the modified object code is in no case prevented or
+     interfered with solely because modification has been made.
+
+     If you convey an object code work under this section in, or with,
+     or specifically for use in, a User Product, and the conveying
+     occurs as part of a transaction in which the right of possession
+     and use of the User Product is transferred to the recipient in
+     perpetuity or for a fixed term (regardless of how the transaction
+     is characterized), the Corresponding Source conveyed under this
+     section must be accompanied by the Installation Information.  But
+     this requirement does not apply if neither you nor any third party
+     retains the ability to install modified object code on the User
+     Product (for example, the work has been installed in ROM).
+
+     The requirement to provide Installation Information does not
+     include a requirement to continue to provide support service,
+     warranty, or updates for a work that has been modified or
+     installed by the recipient, or for the User Product in which it
+     has been modified or installed.  Access to a network may be denied
+     when the modification itself materially and adversely affects the
+     operation of the network or violates the rules and protocols for
+     communication across the network.
+
+     Corresponding Source conveyed, and Installation Information
+     provided, in accord with this section must be in a format that is
+     publicly documented (and with an implementation available to the
+     public in source code form), and must require no special password
+     or key for unpacking, reading or copying.
+
+  7. Additional Terms.
+
+     "Additional permissions" are terms that supplement the terms of
+     this License by making exceptions from one or more of its
+     conditions.  Additional permissions that are applicable to the
+     entire Program shall be treated as though they were included in
+     this License, to the extent that they are valid under applicable
+     law.  If additional permissions apply only to part of the Program,
+     that part may be used separately under those permissions, but the
+     entire Program remains governed by this License without regard to
+     the additional permissions.
+
+     When you convey a copy of a covered work, you may at your option
+     remove any additional permissions from that copy, or from any part
+     of it.  (Additional permissions may be written to require their own
+     removal in certain cases when you modify the work.)  You may place
+     additional permissions on material, added by you to a covered work,
+     for which you have or can give appropriate copyright permission.
+
+     Notwithstanding any other provision of this License, for material
+     you add to a covered work, you may (if authorized by the copyright
+     holders of that material) supplement the terms of this License
+     with terms:
+
+       a. Disclaiming warranty or limiting liability differently from
+          the terms of sections 15 and 16 of this License; or
+
+       b. Requiring preservation of specified reasonable legal notices
+          or author attributions in that material or in the Appropriate
+          Legal Notices displayed by works containing it; or
+
+       c. Prohibiting misrepresentation of the origin of that material,
+          or requiring that modified versions of such material be
+          marked in reasonable ways as different from the original
+          version; or
+
+       d. Limiting the use for publicity purposes of names of licensors
+          or authors of the material; or
+
+       e. Declining to grant rights under trademark law for use of some
+          trade names, trademarks, or service marks; or
+
+       f. Requiring indemnification of licensors and authors of that
+          material by anyone who conveys the material (or modified
+          versions of it) with contractual assumptions of liability to
+          the recipient, for any liability that these contractual
+          assumptions directly impose on those licensors and authors.
+
+     All other non-permissive additional terms are considered "further
+     restrictions" within the meaning of section 10.  If the Program as
+     you received it, or any part of it, contains a notice stating that
+     it is governed by this License along with a term that is a further
+     restriction, you may remove that term.  If a license document
+     contains a further restriction but permits relicensing or
+     conveying under this License, you may add to a covered work
+     material governed by the terms of that license document, provided
+     that the further restriction does not survive such relicensing or
+     conveying.
+
+     If you add terms to a covered work in accord with this section, you
+     must place, in the relevant source files, a statement of the
+     additional terms that apply to those files, or a notice indicating
+     where to find the applicable terms.
+
+     Additional terms, permissive or non-permissive, may be stated in
+     the form of a separately written license, or stated as exceptions;
+     the above requirements apply either way.
+
+  8. Termination.
+
+     You may not propagate or modify a covered work except as expressly
+     provided under this License.  Any attempt otherwise to propagate or
+     modify it is void, and will automatically terminate your rights
+     under this License (including any patent licenses granted under
+     the third paragraph of section 11).
+
+     However, if you cease all violation of this License, then your
+     license from a particular copyright holder is reinstated (a)
+     provisionally, unless and until the copyright holder explicitly
+     and finally terminates your license, and (b) permanently, if the
+     copyright holder fails to notify you of the violation by some
+     reasonable means prior to 60 days after the cessation.
+
+     Moreover, your license from a particular copyright holder is
+     reinstated permanently if the copyright holder notifies you of the
+     violation by some reasonable means, this is the first time you have
+     received notice of violation of this License (for any work) from
+     that copyright holder, and you cure the violation prior to 30 days
+     after your receipt of the notice.
+
+     Termination of your rights under this section does not terminate
+     the licenses of parties who have received copies or rights from
+     you under this License.  If your rights have been terminated and
+     not permanently reinstated, you do not qualify to receive new
+     licenses for the same material under section 10.
+
+  9. Acceptance Not Required for Having Copies.
+
+     You are not required to accept this License in order to receive or
+     run a copy of the Program.  Ancillary propagation of a covered work
+     occurring solely as a consequence of using peer-to-peer
+     transmission to receive a copy likewise does not require
+     acceptance.  However, nothing other than this License grants you
+     permission to propagate or modify any covered work.  These actions
+     infringe copyright if you do not accept this License.  Therefore,
+     by modifying or propagating a covered work, you indicate your
+     acceptance of this License to do so.
+
+ 10. Automatic Licensing of Downstream Recipients.
+
+     Each time you convey a covered work, the recipient automatically
+     receives a license from the original licensors, to run, modify and
+     propagate that work, subject to this License.  You are not
+     responsible for enforcing compliance by third parties with this
+     License.
+
+     An "entity transaction" is a transaction transferring control of an
+     organization, or substantially all assets of one, or subdividing an
+     organization, or merging organizations.  If propagation of a
+     covered work results from an entity transaction, each party to that
+     transaction who receives a copy of the work also receives whatever
+     licenses to the work the party's predecessor in interest had or
+     could give under the previous paragraph, plus a right to
+     possession of the Corresponding Source of the work from the
+     predecessor in interest, if the predecessor has it or can get it
+     with reasonable efforts.
+
+     You may not impose any further restrictions on the exercise of the
+     rights granted or affirmed under this License.  For example, you
+     may not impose a license fee, royalty, or other charge for
+     exercise of rights granted under this License, and you may not
+     initiate litigation (including a cross-claim or counterclaim in a
+     lawsuit) alleging that any patent claim is infringed by making,
+     using, selling, offering for sale, or importing the Program or any
+     portion of it.
+
+ 11. Patents.
+
+     A "contributor" is a copyright holder who authorizes use under this
+     License of the Program or a work on which the Program is based.
+     The work thus licensed is called the contributor's "contributor
+     version".
+
+     A contributor's "essential patent claims" are all patent claims
+     owned or controlled by the contributor, whether already acquired or
+     hereafter acquired, that would be infringed by some manner,
+     permitted by this License, of making, using, or selling its
+     contributor version, but do not include claims that would be
+     infringed only as a consequence of further modification of the
+     contributor version.  For purposes of this definition, "control"
+     includes the right to grant patent sublicenses in a manner
+     consistent with the requirements of this License.
+
+     Each contributor grants you a non-exclusive, worldwide,
+     royalty-free patent license under the contributor's essential
+     patent claims, to make, use, sell, offer for sale, import and
+     otherwise run, modify and propagate the contents of its
+     contributor version.
+
+     In the following three paragraphs, a "patent license" is any
+     express agreement or commitment, however denominated, not to
+     enforce a patent (such as an express permission to practice a
+     patent or covenant not to sue for patent infringement).  To
+     "grant" such a patent license to a party means to make such an
+     agreement or commitment not to enforce a patent against the party.
+
+     If you convey a covered work, knowingly relying on a patent
+     license, and the Corresponding Source of the work is not available
+     for anyone to copy, free of charge and under the terms of this
+     License, through a publicly available network server or other
+     readily accessible means, then you must either (1) cause the
+     Corresponding Source to be so available, or (2) arrange to deprive
+     yourself of the benefit of the patent license for this particular
+     work, or (3) arrange, in a manner consistent with the requirements
+     of this License, to extend the patent license to downstream
+     recipients.  "Knowingly relying" means you have actual knowledge
+     that, but for the patent license, your conveying the covered work
+     in a country, or your recipient's use of the covered work in a
+     country, would infringe one or more identifiable patents in that
+     country that you have reason to believe are valid.
+
+     If, pursuant to or in connection with a single transaction or
+     arrangement, you convey, or propagate by procuring conveyance of, a
+     covered work, and grant a patent license to some of the parties
+     receiving the covered work authorizing them to use, propagate,
+     modify or convey a specific copy of the covered work, then the
+     patent license you grant is automatically extended to all
+     recipients of the covered work and works based on it.
+
+     A patent license is "discriminatory" if it does not include within
+     the scope of its coverage, prohibits the exercise of, or is
+     conditioned on the non-exercise of one or more of the rights that
+     are specifically granted under this License.  You may not convey a
+     covered work if you are a party to an arrangement with a third
+     party that is in the business of distributing software, under
+     which you make payment to the third party based on the extent of
+     your activity of conveying the work, and under which the third
+     party grants, to any of the parties who would receive the covered
+     work from you, a discriminatory patent license (a) in connection
+     with copies of the covered work conveyed by you (or copies made
+     from those copies), or (b) primarily for and in connection with
+     specific products or compilations that contain the covered work,
+     unless you entered into that arrangement, or that patent license
+     was granted, prior to 28 March 2007.
+
+     Nothing in this License shall be construed as excluding or limiting
+     any implied license or other defenses to infringement that may
+     otherwise be available to you under applicable patent law.
+
+ 12. No Surrender of Others' Freedom.
+
+     If conditions are imposed on you (whether by court order,
+     agreement or otherwise) that contradict the conditions of this
+     License, they do not excuse you from the conditions of this
+     License.  If you cannot convey a covered work so as to satisfy
+     simultaneously your obligations under this License and any other
+     pertinent obligations, then as a consequence you may not convey it
+     at all.  For example, if you agree to terms that obligate you to
+     collect a royalty for further conveying from those to whom you
+     convey the Program, the only way you could satisfy both those
+     terms and this License would be to refrain entirely from conveying
+     the Program.
+
+ 13. Use with the GNU Affero General Public License.
+
+     Notwithstanding any other provision of this License, you have
+     permission to link or combine any covered work with a work licensed
+     under version 3 of the GNU Affero General Public License into a
+     single combined work, and to convey the resulting work.  The terms
+     of this License will continue to apply to the part which is the
+     covered work, but the special requirements of the GNU Affero
+     General Public License, section 13, concerning interaction through
+     a network will apply to the combination as such.
+
+ 14. Revised Versions of this License.
+
+     The Free Software Foundation may publish revised and/or new
+     versions of the GNU General Public License from time to time.
+     Such new versions will be similar in spirit to the present
+     version, but may differ in detail to address new problems or
+     concerns.
+
+     Each version is given a distinguishing version number.  If the
+     Program specifies that a certain numbered version of the GNU
+     General Public License "or any later version" applies to it, you
+     have the option of following the terms and conditions either of
+     that numbered version or of any later version published by the
+     Free Software Foundation.  If the Program does not specify a
+     version number of the GNU General Public License, you may choose
+     any version ever published by the Free Software Foundation.
+
+     If the Program specifies that a proxy can decide which future
+     versions of the GNU General Public License can be used, that
+     proxy's public statement of acceptance of a version permanently
+     authorizes you to choose that version for the Program.
+
+     Later license versions may give you additional or different
+     permissions.  However, no additional obligations are imposed on any
+     author or copyright holder as a result of your choosing to follow a
+     later version.
+
+ 15. Disclaimer of Warranty.
+
+     THERE IS NO WARRANTY FOR THE PROGRAM, TO THE EXTENT PERMITTED BY
+     APPLICABLE LAW.  EXCEPT WHEN OTHERWISE STATED IN WRITING THE
+     COPYRIGHT HOLDERS AND/OR OTHER PARTIES PROVIDE THE PROGRAM "AS IS"
+     WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED OR IMPLIED,
+     INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+     MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.  THE ENTIRE
+     RISK AS TO THE QUALITY AND PERFORMANCE OF THE PROGRAM IS WITH YOU.
+     SHOULD THE PROGRAM PROVE DEFECTIVE, YOU ASSUME THE COST OF ALL
+     NECESSARY SERVICING, REPAIR OR CORRECTION.
+
+ 16. Limitation of Liability.
+
+     IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED TO IN
+     WRITING WILL ANY COPYRIGHT HOLDER, OR ANY OTHER PARTY WHO MODIFIES
+     AND/OR CONVEYS THE PROGRAM AS PERMITTED ABOVE, BE LIABLE TO YOU
+     FOR DAMAGES, INCLUDING ANY GENERAL, SPECIAL, INCIDENTAL OR
+     CONSEQUENTIAL DAMAGES ARISING OUT OF THE USE OR INABILITY TO USE
+     THE PROGRAM (INCLUDING BUT NOT LIMITED TO LOSS OF DATA OR DATA
+     BEING RENDERED INACCURATE OR LOSSES SUSTAINED BY YOU OR THIRD
+     PARTIES OR A FAILURE OF THE PROGRAM TO OPERATE WITH ANY OTHER
+     PROGRAMS), EVEN IF SUCH HOLDER OR OTHER PARTY HAS BEEN ADVISED OF
+     THE POSSIBILITY OF SUCH DAMAGES.
+
+ 17. Interpretation of Sections 15 and 16.
+
+     If the disclaimer of warranty and limitation of liability provided
+     above cannot be given local legal effect according to their terms,
+     reviewing courts shall apply local law that most closely
+     approximates an absolute waiver of all civil liability in
+     connection with the Program, unless a warranty or assumption of
+     liability accompanies a copy of the Program in return for a fee.
+
+
+END OF TERMS AND CONDITIONS
+===========================
+
+How to Apply These Terms to Your New Programs
+=============================================
+
+If you develop a new program, and you want it to be of the greatest
+possible use to the public, the best way to achieve this is to make it
+free software which everyone can redistribute and change under these
+terms.
+
+   To do so, attach the following notices to the program.  It is safest
+to attach them to the start of each source file to most effectively
+state the exclusion of warranty; and each file should have at least the
+"copyright" line and a pointer to where the full notice is found.
+
+     ONE LINE TO GIVE THE PROGRAM'S NAME AND A BRIEF IDEA OF WHAT IT DOES.
+     Copyright (C) YEAR NAME OF AUTHOR
+
+     This program is free software: you can redistribute it and/or modify
+     it under the terms of the GNU General Public License as published by
+     the Free Software Foundation, either version 3 of the License, or (at
+     your option) any later version.
+
+     This program is distributed in the hope that it will be useful, but
+     WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+     General Public License for more details.
+
+     You should have received a copy of the GNU General Public License
+     along with this program.  If not, see `http://www.gnu.org/licenses/'.
+
+   Also add information on how to contact you by electronic and paper
+mail.
+
+   If the program does terminal interaction, make it output a short
+notice like this when it starts in an interactive mode:
+
+     PROGRAM Copyright (C) YEAR NAME OF AUTHOR
+     This program comes with ABSOLUTELY NO WARRANTY; for details type `show w'.
+     This is free software, and you are welcome to redistribute it
+     under certain conditions; type `show c' for details.
+
+   The hypothetical commands `show w' and `show c' should show the
+appropriate parts of the General Public License.  Of course, your
+program's commands might be different; for a GUI interface, you would
+use an "about box".
+
+   You should also get your employer (if you work as a programmer) or
+school, if any, to sign a "copyright disclaimer" for the program, if
+necessary.  For more information on this, and how to apply and follow
+the GNU GPL, see `http://www.gnu.org/licenses/'.
+
+   The GNU General Public License does not permit incorporating your
+program into proprietary programs.  If your program is a subroutine
+library, you may consider it more useful to permit linking proprietary
+applications with the library.  If this is what you want to do, use the
+GNU Lesser General Public License instead of this License.  But first,
+please read `http://www.gnu.org/philosophy/why-not-lgpl.html'.
+
+
+File: m4.info,  Node: Copying This Manual,  Next: Indices,  Prev: Copying This Package,  Up: Top
+
+Appendix B How to make copies of this manual
 ********************************************
+
+This appendix covers the license for copying this manual.  Note that
+some of the longer examples in this manual are also distributed in the
+directory `m4-1.4.10/examples/', where a more permissive license is in
+effect when copying just the examples.
 
 * Menu:
 
@@ -5707,7 +6657,7 @@ Appendix A How to make copies of this manual
 
 File: m4.info,  Node: GNU Free Documentation License,  Up: Copying This Manual
 
-A.1 GNU Free Documentation License
+B.1 GNU Free Documentation License
 ==================================
 
                       Version 1.2, November 2002
@@ -6139,7 +7089,7 @@ permit their use in free software.
 
 File: m4.info,  Node: Indices,  Prev: Copying This Manual,  Up: Top
 
-Appendix B Indices of concepts and macros
+Appendix C Indices of concepts and macros
 *****************************************
 
 * Menu:
@@ -6150,7 +7100,7 @@ Appendix B Indices of concepts and macros
 
 File: m4.info,  Node: Macro index,  Next: Concept index,  Up: Indices
 
-B.1 Index for all `m4' macros
+C.1 Index for all `m4' macros
 =============================
 
 This index covers all `m4' builtins, as well as several useful
@@ -6167,7 +7117,7 @@ macro is introduced the first time.
 * __program__:                           Location.            (line  12)
 * __unix__:                              Platform macros.     (line  15)
 * __windows__:                           Platform macros.     (line  17)
-* argn:                                  Shift.               (line 110)
+* argn:                                  Shift.               (line 112)
 * array:                                 Define.              (line  56)
 * array_set:                             Define.              (line  57)
 * builtin:                               Builtin.             (line   9)
@@ -6191,7 +7141,7 @@ macro is introduced the first time.
 * errprint:                              Errprint.            (line   9)
 * esyscmd:                               Esyscmd.             (line   9)
 * eval:                                  Eval.                (line   9)
-* example:                               Manual.              (line  32)
+* example:                               Manual.              (line  40)
 * exch:                                  Arguments.           (line  13)
 * fatal_error:                           M4exit.              (line  25)
 * foreach:                               Foreach.             (line   9)
@@ -6234,7 +7184,7 @@ macro is introduced the first time.
 
 File: m4.info,  Node: Concept index,  Prev: Macro index,  Up: Indices
 
-B.2 Index for many concepts
+C.2 Index for many concepts
 ===========================
 
  [index ]
@@ -6244,16 +7194,16 @@ B.2 Index for many concepts
 * arguments to macros:                   Arguments.           (line   6)
 * arguments to macros, special:          Pseudo Arguments.    (line   6)
 * arguments, more than nine <1>:         Arguments.           (line  54)
-* arguments, more than nine:             Shift.               (line 104)
+* arguments, more than nine:             Shift.               (line 106)
 * arguments, quoted macro:               Quoting Arguments.   (line   6)
 * arithmetic:                            Arithmetic.          (line   6)
 * arrays:                                Define.              (line  52)
-* avoiding quadratic behavior:           Improved foreach.    (line  37)
-* basic regular expressions <1>:         Regexp.              (line   6)
-* basic regular expressions:             Patsubst.            (line   6)
-* blind macro <1>:                       Ifelse.              (line  52)
-* blind macro:                           Inhibiting Invocation.
+* avoiding quadratic behavior:           Improved foreach.    (line  38)
+* basic regular expressions <1>:         Patsubst.            (line   6)
+* basic regular expressions:             Regexp.              (line   6)
+* blind macro <1>:                       Inhibiting Invocation.
                                                               (line  14)
+* blind macro:                           Ifelse.              (line  52)
 * bug reports:                           Bugs.                (line   6)
 * builtins, indirect call of:            Builtin.             (line   6)
 * builtins, special tokens:              Defn.                (line  79)
@@ -6291,12 +7241,12 @@ B.2 Index for many concepts
 * definitions, displaying macro:         Defn.                (line   6)
 * deleting macros:                       Undefine.            (line   6)
 * deleting whitespace in input:          Dnl.                 (line   6)
-* delimiters, changing <1>:              Changecom.           (line   6)
-* delimiters, changing:                  Changequote.         (line   6)
+* delimiters, changing <1>:              Changequote.         (line   6)
+* delimiters, changing:                  Changecom.           (line   6)
 * discarding diverted text:              Cleardivert.         (line   6)
-* discarding input <1>:                  Ifelse.              (line   6)
-* discarding input <2>:                  Divert.              (line  42)
-* discarding input:                      Dnl.                 (line   6)
+* discarding input <1>:                  Dnl.                 (line   6)
+* discarding input <2>:                  Ifelse.              (line   6)
+* discarding input:                      Divert.              (line  42)
 * displaying macro definitions:          Dumpdef.             (line   6)
 * diversion numbers:                     Divnum.              (line   6)
 * diverted text, discarding:             Cleardivert.         (line   6)
@@ -6321,8 +7271,8 @@ B.2 Index for many concepts
 * FDL, GNU Free Documentation License:   GNU Free Documentation License.
                                                               (line   6)
 * file format, frozen file:              Frozen file format.  (line   6)
-* file inclusion <1>:                    Undivert.            (line  13)
-* file inclusion:                        File Inclusion.      (line   6)
+* file inclusion <1>:                    File Inclusion.      (line   6)
+* file inclusion:                        Undivert.            (line  13)
 * file names, on the command line:       Command line files.  (line   6)
 * files, diverting output to:            Divert.              (line   6)
 * files, names of temporary:             Mkstemp.             (line   6)
@@ -6331,25 +7281,26 @@ B.2 Index for many concepts
 * formatted output:                      Format.              (line   6)
 * frozen file format:                    Frozen file format.  (line   6)
 * frozen files for fast loading:         Using frozen files.  (line   6)
-* GNU extensions <1>:                    Mkstemp.             (line  55)
-* GNU extensions <2>:                    Divert.              (line  54)
-* GNU extensions <3>:                    Undivert.            (line  81)
-* GNU extensions <4>:                    Patsubst.            (line   6)
-* GNU extensions <5>:                    Inhibiting Invocation.
+* GNU extensions <1>:                    Inhibiting Invocation.
                                                               (line  14)
-* GNU extensions <6>:                    Builtin.             (line   6)
-* GNU extensions <7>:                    Esyscmd.             (line   6)
-* GNU extensions <8>:                    Eval.                (line 125)
-* GNU extensions <9>:                    Extensions.          (line   6)
-* GNU extensions <10>:                   Debug Output.        (line   6)
-* GNU extensions <11>:                   Arguments.           (line  54)
-* GNU extensions <12>:                   Format.              (line   6)
-* GNU extensions <13>:                   Debug Levels.        (line  71)
-* GNU extensions <14>:                   Search Path.         (line   6)
-* GNU extensions <15>:                   Indir.               (line   6)
-* GNU extensions <16>:                   Define.              (line  41)
-* GNU extensions <17>:                   Using frozen files.  (line   6)
-* GNU extensions:                        Regexp.              (line   6)
+* GNU extensions <2>:                    Search Path.         (line   6)
+* GNU extensions <3>:                    Divert.              (line  54)
+* GNU extensions <4>:                    Undivert.            (line  13)
+* GNU extensions <5>:                    Esyscmd.             (line   6)
+* GNU extensions <6>:                    Regexp.              (line   6)
+* GNU extensions <7>:                    Builtin.             (line   6)
+* GNU extensions <8>:                    Using frozen files.  (line   6)
+* GNU extensions <9>:                    Debug Output.        (line   6)
+* GNU extensions <10>:                   Define.              (line  41)
+* GNU extensions <11>:                   Debug Levels.        (line  71)
+* GNU extensions <12>:                   Eval.                (line 125)
+* GNU extensions <13>:                   Patsubst.            (line   6)
+* GNU extensions <14>:                   Mkstemp.             (line  56)
+* GNU extensions <15>:                   Undivert.            (line  81)
+* GNU extensions <16>:                   Format.              (line   6)
+* GNU extensions <17>:                   Extensions.          (line   6)
+* GNU extensions <18>:                   Arguments.           (line  54)
+* GNU extensions:                        Indir.               (line   6)
 * GNU M4, history of:                    History.             (line   6)
 * history of m4:                         History.             (line   6)
 * included files, search path for:       Search Path.         (line   6)
@@ -6359,9 +7310,9 @@ B.2 Index for many concepts
 * indirect call of builtins:             Builtin.             (line   6)
 * indirect call of macros:               Indir.               (line   6)
 * initialization, frozen state:          Using frozen files.  (line   6)
-* input location <1>:                    Preprocessor features.
+* input location <1>:                    Location.            (line   6)
+* input location:                        Preprocessor features.
                                                               (line  28)
-* input location:                        Location.            (line   6)
 * input tokens:                          Syntax.              (line   6)
 * input, discarding <1>:                 Divert.              (line  42)
 * input, discarding <2>:                 Ifelse.              (line   6)
@@ -6374,13 +7325,15 @@ B.2 Index for many concepts
 * iterating over lists:                  Foreach.             (line   6)
 * length of strings:                     Len.                 (line   6)
 * lexical structure of words:            Changeword.          (line   6)
-* License:                               Copying This Manual. (line   6)
+* License, code:                         Copying This Package.
+                                                              (line   6)
+* License, manual:                       Copying This Manual. (line   6)
 * limit, nesting:                        Limits control.      (line  27)
 * literal output:                        Pseudo Arguments.    (line 106)
 * local variables:                       Pushdef.             (line  79)
-* location, input <1>:                   Location.            (line   6)
-* location, input:                       Preprocessor features.
+* location, input <1>:                   Preprocessor features.
                                                               (line  28)
+* location, input:                       Location.            (line   6)
 * loops:                                 Shift.               (line  10)
 * loops, counting:                       Forloop.             (line   6)
 * loops, list iteration:                 Foreach.             (line   6)
@@ -6395,8 +7348,8 @@ B.2 Index for many concepts
 * macros, arguments to <1>:              Macro Arguments.     (line   6)
 * macros, arguments to:                  Arguments.           (line   6)
 * macros, debugging:                     Debugging.           (line   6)
-* macros, displaying definitions <1>:    Dumpdef.             (line   6)
-* macros, displaying definitions:        Defn.                (line   6)
+* macros, displaying definitions <1>:    Defn.                (line   6)
+* macros, displaying definitions:        Dumpdef.             (line   6)
 * macros, expansion of:                  Macro expansion.     (line   6)
 * macros, how to define new:             Definitions.         (line   6)
 * macros, how to delete:                 Undefine.            (line   6)
@@ -6408,13 +7361,13 @@ B.2 Index for many concepts
 * macros, temporary redefinition of:     Pushdef.             (line   6)
 * messages, printing error:              Errprint.            (line   6)
 * more than nine arguments <1>:          Arguments.           (line  54)
-* more than nine arguments:              Shift.               (line 104)
+* more than nine arguments:              Shift.               (line 106)
 * multibranches:                         Ifelse.              (line  66)
 * names:                                 Names.               (line   6)
 * nesting limit:                         Limits control.      (line  27)
-* nine arguments, more than <1>:         Shift.               (line 104)
+* nine arguments, more than <1>:         Shift.               (line 106)
 * nine arguments, more than:             Arguments.           (line  54)
-* numbers:                               Manual.              (line  49)
+* numbers:                               Manual.              (line  57)
 * options, command line:                 Invoking m4.         (line  10)
 * output, diverting to files:            Divert.              (line   6)
 * output, formatted:                     Format.              (line   6)
@@ -6429,7 +7382,7 @@ B.2 Index for many concepts
 * preprocessor features:                 Preprocessor features.
                                                               (line   6)
 * printing error messages:               Errprint.            (line   6)
-* quadratic behavior, avoiding:          Improved foreach.    (line  37)
+* quadratic behavior, avoiding:          Improved foreach.    (line  38)
 * quote delimiters, changing:            Changequote.         (line   6)
 * quoted macro arguments:                Quoting Arguments.   (line   6)
 * quoted string:                         Quoted strings.      (line   6)
@@ -6442,13 +7395,13 @@ B.2 Index for many concepts
 * reloading a frozen file:               Using frozen files.  (line   6)
 * renaming macros:                       Defn.                (line   6)
 * reporting bugs:                        Bugs.                (line   6)
-* rescanning <1>:                        Other Incompatibilities.
-                                                              (line  33)
-* rescanning <2>:                        Pseudo Arguments.    (line 106)
-* rescanning <3>:                        Inhibiting Invocation.
-                                                              (line  76)
-* rescanning <4>:                        Limits control.      (line  40)
-* rescanning:                            Defn.                (line  59)
+* rescanning <1>:                        Pseudo Arguments.    (line 106)
+* rescanning <2>:                        Defn.                (line  59)
+* rescanning <3>:                        Other Incompatibilities.
+                                                              (line  52)
+* rescanning <4>:                        Inhibiting Invocation.
+                                                              (line  87)
+* rescanning:                            Limits control.      (line  40)
 * rule of thumb, quoting:                Quoting Arguments.   (line  22)
 * running shell commands:                Shell commands.      (line   6)
 * saving debugging output:               Debug Output.        (line   6)
@@ -6458,9 +7411,9 @@ B.2 Index for many concepts
 * shell commands, running:               Shell commands.      (line   6)
 * special arguments to macros:           Pseudo Arguments.    (line   6)
 * stack, macro definition:               Pushdef.             (line   6)
-* standard error, output to <1>:         Dumpdef.             (line   6)
+* standard error, output to <1>:         Trace.               (line   6)
 * standard error, output to <2>:         Errprint.            (line   6)
-* standard error, output to:             Trace.               (line   6)
+* standard error, output to:             Dumpdef.             (line   6)
 * status of shell commands:              Sysval.              (line   6)
 * status, setting m4 exit:               M4exit.              (line   6)
 * string, quoted:                        Quoted strings.      (line   6)
@@ -6493,104 +7446,106 @@ B.2 Index for many concepts
 
 
 Tag Table:
-Node: Top843
-Node: Preliminaries9202
-Node: Intro9888
-Node: History11520
-Node: Bugs14233
-Node: Manual15484
-Node: Invoking m418470
-Node: Operation modes20618
-Node: Preprocessor features23590
-Node: Limits control26054
-Node: Frozen state28990
-Node: Debugging options29789
-Node: Command line files31528
-Node: Syntax32891
-Node: Names34000
-Node: Quoted strings34462
-Node: Comments35111
-Node: Other tokens35978
-Node: Input processing36556
-Ref: Input processing-Footnote-144229
-Node: Macros44424
-Node: Invocation44918
-Node: Inhibiting Invocation45719
-Node: Macro Arguments49668
-Node: Quoting Arguments52360
-Node: Macro expansion54483
-Node: Definitions55151
-Node: Define55936
-Node: Arguments58374
-Node: Pseudo Arguments62046
-Node: Undefine65588
-Node: Defn66718
-Node: Pushdef69451
-Node: Indir72077
-Node: Builtin74179
-Node: Conditionals75941
-Node: Ifdef76760
-Node: Ifelse77623
-Node: Shift80836
-Node: Forloop85291
-Node: Foreach87860
-Node: Debugging92839
-Node: Dumpdef93424
-Node: Trace94808
-Node: Debug Levels97511
-Node: Debug Output100971
-Node: Input Control102242
-Node: Dnl102779
-Node: Changequote104680
-Node: Changecom109476
-Node: Changeword112992
-Node: M4wrap118433
-Node: File Inclusion120694
-Node: Include121011
-Node: Search Path123611
-Node: Diversions124528
-Node: Divert126319
-Node: Undivert128845
-Node: Divnum131727
-Node: Cleardivert132191
-Node: Text handling133396
-Node: Len134119
-Node: Index macro134504
-Node: Regexp135275
-Node: Substr137695
-Node: Translit138746
-Node: Patsubst141468
-Node: Format145009
-Node: Arithmetic147108
-Node: Incr147557
-Node: Eval148332
-Node: Shell commands156199
-Node: Platform macros157121
-Node: Syscmd158865
-Node: Esyscmd160670
-Node: Sysval161718
-Node: Mkstemp163336
-Node: Miscellaneous166733
-Node: Errprint167166
-Node: Location168385
-Node: M4exit171187
-Node: Frozen files173274
-Node: Using frozen files174055
-Node: Frozen file format177295
-Node: Compatibility180358
-Node: Extensions180973
-Node: Incompatibilities184795
-Node: Other Incompatibilities193002
-Node: Answers194985
-Node: Improved exch195602
-Node: Improved forloop196140
-Node: Improved foreach197976
-Node: Improved cleardivert204915
-Node: Improved fatal_error205898
-Node: Copying This Manual206960
-Node: GNU Free Documentation License207216
-Node: Indices229610
-Node: Macro index229890
-Node: Concept index235324
+Node: Top851
+Node: Preliminaries9359
+Node: Intro10045
+Node: History11677
+Node: Bugs14401
+Node: Manual15652
+Node: Invoking m419050
+Node: Operation modes21198
+Node: Preprocessor features24170
+Node: Limits control27267
+Node: Frozen state30203
+Node: Debugging options31002
+Node: Command line files32741
+Node: Syntax34314
+Node: Names35433
+Node: Quoted strings35895
+Node: Comments36544
+Node: Other tokens37421
+Node: Input processing37999
+Ref: Input processing-Footnote-145672
+Node: Macros45867
+Node: Invocation46361
+Node: Inhibiting Invocation47162
+Node: Macro Arguments51242
+Node: Quoting Arguments54304
+Node: Macro expansion56427
+Node: Definitions57128
+Node: Define57913
+Node: Arguments60351
+Node: Pseudo Arguments64023
+Node: Undefine67565
+Node: Defn68695
+Node: Pushdef71428
+Node: Indir74054
+Node: Builtin76182
+Node: Conditionals78203
+Node: Ifdef79022
+Node: Ifelse79885
+Node: Shift83098
+Node: Forloop87598
+Node: Foreach90234
+Node: Debugging95325
+Node: Dumpdef95910
+Node: Trace97320
+Node: Debug Levels100540
+Node: Debug Output104010
+Node: Input Control105291
+Node: Dnl105828
+Node: Changequote107729
+Node: Changecom112525
+Node: Changeword116041
+Node: M4wrap121482
+Node: File Inclusion123743
+Node: Include124060
+Node: Search Path126740
+Node: Diversions127657
+Node: Divert129448
+Node: Undivert131974
+Node: Divnum135138
+Node: Cleardivert135602
+Node: Text handling136807
+Node: Len137530
+Node: Index macro137915
+Node: Regexp138686
+Node: Substr141106
+Node: Translit142157
+Node: Patsubst144879
+Node: Format148420
+Node: Arithmetic151574
+Node: Incr152023
+Node: Eval152798
+Node: Shell commands160761
+Node: Platform macros161683
+Node: Syscmd163427
+Node: Esyscmd165246
+Node: Sysval166294
+Node: Mkstemp167912
+Node: Miscellaneous171329
+Node: Errprint171762
+Node: Location172981
+Node: M4exit175710
+Node: Frozen files177797
+Node: Using frozen files178578
+Node: Frozen file format181842
+Node: Compatibility184906
+Node: Extensions185521
+Node: Incompatibilities189343
+Node: Other Incompatibilities197551
+Node: Answers200197
+Node: Improved exch200815
+Node: Improved forloop201353
+Node: Improved foreach203212
+Node: Improved cleardivert210241
+Node: Improved fatal_error211224
+Node: Copying This Package212286
+Node: Copying212757
+Node: Copying This Manual250280
+Node: GNU Free Documentation License250800
+Node: Indices273194
+Node: Macro index273474
+Node: Concept index278908
 
 End Tag Table

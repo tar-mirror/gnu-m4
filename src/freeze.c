@@ -1,11 +1,11 @@
 /* GNU m4 -- A simple macro processor
 
-   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2006
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2006, 2007
    Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2 of the License, or
+   the Free Software Foundation; either version 3 of the License, or
    (at your option) any later version.
 
    This program is distributed in the hope that it will be useful,
@@ -329,7 +329,7 @@ reload_frozen_state (const char *name)
 
               make_diversion (number[0]);
               if (number[1] > 0)
-                shipout_text (NULL, string[1], number[1]);
+                output_text (string[1], number[1]);
               break;
 
             case 'F':

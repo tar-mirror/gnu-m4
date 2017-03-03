@@ -19,28 +19,18 @@
 #if defined __need_malloc_and_calloc
 /* Special invocation convention inside glibc header files.  */
 
-/* This #pragma avoids a warning with "gcc -Wall" on some glibc systems
-   on which <stdlib.h> has an inappropriate declaration, see
-   <http://sourceware.org/bugzilla/show_bug.cgi?id=1079>.  */
-#ifdef __GNUC__
-# pragma GCC system_header
-#endif
-
-#include @ABSOLUTE_STDLIB_H@
+#@INCLUDE_NEXT@ @NEXT_STDLIB_H@
 
 #else
 /* Normal invocation convention.  */
+
+#ifndef _GL_STDLIB_H
+
+/* The include_next requires a split double-inclusion guard.  */
+#@INCLUDE_NEXT@ @NEXT_STDLIB_H@
+
 #ifndef _GL_STDLIB_H
 #define _GL_STDLIB_H
-
-/* This #pragma avoids a warning with "gcc -Wall" on some glibc systems
-   on which <stdlib.h> has an inappropriate declaration, see
-   <http://sourceware.org/bugzilla/show_bug.cgi?id=1079>.  */
-#ifdef __GNUC__
-# pragma GCC system_header
-#endif
-
-#include @ABSOLUTE_STDLIB_H@
 
 
 /* The definition of GL_LINK_WARNING is copied here.  */
@@ -96,7 +86,7 @@ extern int getsubopt (char **optionp, char *const *tokens, char **valuep);
    they are replaced with a string that makes the directory name unique.
    Returns TEMPLATE, or a null pointer if it cannot get a unique name.
    The directory is created mode 700.  */
-extern char * mkdtemp (char *template);
+extern char * mkdtemp (char * /*template*/);
 # endif
 #elif defined GNULIB_POSIXCHECK
 # undef mkdtemp
@@ -119,7 +109,7 @@ extern char * mkdtemp (char *template);
    Returns the open file descriptor if successful, otherwise -1 and errno
    set.  */
 #  define mkstemp rpl_mkstemp
-extern int mkstemp (char *template);
+extern int mkstemp (char * /*template*/);
 # else
 /* On MacOS X 10.3, only <unistd.h> declares mkstemp.  */
 #  include <unistd.h>
@@ -137,5 +127,6 @@ extern int mkstemp (char *template);
 }
 #endif
 
+#endif /* _GL_STDLIB_H */
 #endif /* _GL_STDLIB_H */
 #endif

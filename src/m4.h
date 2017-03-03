@@ -5,7 +5,7 @@
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2 of the License, or
+   the Free Software Foundation; either version 3 of the License, or
    (at your option) any later version.
 
    This program is distributed in the hope that it will be useful,
@@ -36,7 +36,7 @@
 #include "clean-temp.h"
 #include "cloexec.h"
 #include "close-stream.h"
-#include "closeout.h"
+#include "closein.h"
 #include "error.h"
 #include "exitfail.h"
 #include "obstack.h"
@@ -285,7 +285,7 @@ typedef enum token_data_type token_data_type;
 
 void input_init (void);
 token_type peek_token (void);
-token_type next_token (token_data *);
+token_type next_token (token_data *, int *);
 void skip_line (void);
 
 /* push back input */
@@ -321,7 +321,8 @@ extern int output_current_line;
 
 void output_init (void);
 void output_exit (void);
-void shipout_text (struct obstack *, const char *, int);
+void output_text (const char *, int);
+void shipout_text (struct obstack *, const char *, int, int);
 void make_diversion (int);
 void insert_diversion (int);
 void insert_file (FILE *);

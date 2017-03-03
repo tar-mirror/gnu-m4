@@ -5,7 +5,7 @@
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2 of the License, or
+   the Free Software Foundation; either version 3 of the License, or
    (at your option) any later version.
 
    This program is distributed in the hope that it will be useful,
@@ -215,7 +215,6 @@ m4_tmpfile (int divnum)
 
   if (output_temp_dir == NULL)
     {
-      errno = 0;
       output_temp_dir = create_temp_dir ("m4-", NULL, true);
       if (output_temp_dir == NULL)
 	M4ERROR ((EXIT_FAILURE, errno,
@@ -224,7 +223,6 @@ m4_tmpfile (int divnum)
     }
   name = m4_tmpname (divnum);
   register_temp_file (output_temp_dir, name);
-  errno = 0;
   file = fopen_temp (name, O_BINARY ? "wb+" : "w+");
   if (file == NULL)
     {
@@ -247,7 +245,6 @@ m4_tmpopen (int divnum)
   const char *name = m4_tmpname (divnum);
   FILE *file;
 
-  errno = 0;
   file = fopen_temp (name, O_BINARY ? "ab+" : "a+");
   if (file == NULL)
     M4ERROR ((EXIT_FAILURE, errno,
@@ -373,7 +370,7 @@ make_room_for (int length)
       if (selected_diversion)
 	{
 	  FILE *file = selected_diversion->u.file;
-	  selected_diversion->u.file = 0;
+	  selected_diversion->u.file = NULL;
 	  if (m4_tmpclose (file) != 0)
 	    M4ERROR ((0, errno, "cannot close temporary file for diversion"));
 	}
@@ -422,10 +419,13 @@ output_character_helper (int character)
 | to a diversion file or an in-memory diversion buffer.			  |
 `------------------------------------------------------------------------*/
 
-static void
+void
 output_text (const char *text, int length)
 {
   int count;
+
+  if (!output_diversion || !length)
+    return;
 
   if (!output_file && length > output_unused)
     make_room_for (length);
@@ -444,23 +444,26 @@ output_text (const char *text, int length)
     }
 }
 
-/*-------------------------------------------------------------------------.
-| Add some text into an obstack OBS, taken from TEXT, having LENGTH	   |
-| characters.  If OBS is NULL, rather output the text to an external file  |
-| or an in-memory diversion buffer.  If OBS is NULL, and there is no	   |
-| output file, the text is discarded.					   |
-|									   |
-| If we are generating sync lines, the output have to be examined, because |
-| we need to know how much output each input line generates.  In general,  |
-| sync lines are output whenever a single input lines generates several	   |
-| output lines, or when several input lines does not generate any output.  |
-`-------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------.
+| Add some text into an obstack OBS, taken from TEXT, having LENGTH   |
+| characters.  If OBS is NULL, output the text to an external file    |
+| or an in-memory diversion buffer instead.  If OBS is NULL, and      |
+| there is no output file, the text is discarded.  LINE is the line   |
+| where the token starts (not necessarily current_line, in the case   |
+| of multiline tokens).                                               |
+|                                                                     |
+| If we are generating sync lines, the output has to be examined,     |
+| because we need to know how much output each input line generates.  |
+| In general, sync lines are output whenever a single input lines     |
+| generates several output lines, or when several input lines do not  |
+| generate any output.                                                |
+`--------------------------------------------------------------------*/
 
 void
-shipout_text (struct obstack *obs, const char *text, int length)
+shipout_text (struct obstack *obs, const char *text, int length, int line)
 {
   static bool start_of_output_line = true;
-  char line[20];
+  char linebuf[20];
   const char *cursor;
 
   /* If output goes to an obstack, merely add TEXT to it.  */
@@ -501,43 +504,59 @@ shipout_text (struct obstack *obs, const char *text, int length)
 	output_text (text, length);
       }
   else
-    for (; length-- > 0; text++)
-      {
-	if (start_of_output_line)
-	  {
-	    start_of_output_line = false;
-	    output_current_line++;
-
+    {
+      /* Check for syncline only at the start of a token.  Multiline
+	 tokens, and tokens that are out of sync but in the middle of
+	 the line, must wait until the next raw newline triggers a
+	 syncline.  */
+      if (start_of_output_line)
+	{
+	  start_of_output_line = false;
+	  output_current_line++;
 #ifdef DEBUG_OUTPUT
-	    printf ("DEBUG: cur %d, cur out %d\n",
-		    current_line, output_current_line);
+	  fprintf (stderr, "DEBUG: line %d, cur %d, cur out %d\n",
+		   line, current_line, output_current_line);
 #endif
 
-	    /* Output a `#line NUM' synchronization directive if needed.
-	       If output_current_line was previously given a negative
-	       value (invalidated), rather output `#line NUM "FILE"'.  */
+	  /* Output a `#line NUM' synchronization directive if needed.
+	     If output_current_line was previously given a negative
+	     value (invalidated), output `#line NUM "FILE"' instead.  */
 
-	    if (output_current_line != current_line)
-	      {
-		sprintf (line, "#line %d", current_line);
-		for (cursor = line; *cursor; cursor++)
-		  OUTPUT_CHARACTER (*cursor);
-		if (output_current_line < 1 && current_file[0] != '\0')
-		  {
-		    OUTPUT_CHARACTER (' ');
-		    OUTPUT_CHARACTER ('"');
-		    for (cursor = current_file; *cursor; cursor++)
-		      OUTPUT_CHARACTER (*cursor);
-		    OUTPUT_CHARACTER ('"');
-		  }
-		OUTPUT_CHARACTER ('\n');
-		output_current_line = current_line;
-	      }
-	  }
-	OUTPUT_CHARACTER (*text);
-	if (*text == '\n')
-	  start_of_output_line = true;
-      }
+	  if (output_current_line != line)
+	    {
+	      sprintf (linebuf, "#line %d", line);
+	      for (cursor = linebuf; *cursor; cursor++)
+		OUTPUT_CHARACTER (*cursor);
+	      if (output_current_line < 1 && current_file[0] != '\0')
+		{
+		  OUTPUT_CHARACTER (' ');
+		  OUTPUT_CHARACTER ('"');
+		  for (cursor = current_file; *cursor; cursor++)
+		    OUTPUT_CHARACTER (*cursor);
+		  OUTPUT_CHARACTER ('"');
+		}
+	      OUTPUT_CHARACTER ('\n');
+	      output_current_line = line;
+	    }
+	}
+
+      /* Output the token, and track embedded newlines.  */
+      for (; length-- > 0; text++)
+	{
+	  if (start_of_output_line)
+	    {
+	      start_of_output_line = false;
+	      output_current_line++;
+#ifdef DEBUG_OUTPUT
+	      fprintf (stderr, "DEBUG: line %d, cur %d, cur out %d\n",
+		       line, current_line, output_current_line);
+#endif
+	    }
+	  OUTPUT_CHARACTER (*text);
+	  if (*text == '\n')
+	    start_of_output_line = true;
+	}
+    }
 }
 
 /* Functions for use by diversions.  */
@@ -683,13 +702,9 @@ insert_diversion_helper (m4_diversion *diversion)
 	output_text (diversion->u.buffer, diversion->used);
       else
 	{
-	  if (!diversion->u.file && diversion->used)
+	  if (!diversion->u.file)
 	    diversion->u.file = m4_tmpopen (diversion->divnum);
-	  if (diversion->u.file)
-	    {
-	      rewind (diversion->u.file);
-	      insert_file (diversion->u.file);
-	    }
+	  insert_file (diversion->u.file);
 	}
 
       output_current_line = -1;
@@ -784,20 +799,20 @@ freeze_diversions (FILE *file)
   while (gl_oset_iterator_next (&iter, &elt))
     {
       m4_diversion *diversion = (m4_diversion *) elt;;
-      if (diversion->size || diversion->u.file)
+      if (diversion->size || diversion->used)
 	{
 	  if (diversion->size)
 	    fprintf (file, "D%d,%d\n", diversion->divnum, diversion->used);
 	  else
 	    {
 	      struct stat file_stat;
-	      fflush (diversion->u.file);
+	      diversion->u.file = m4_tmpopen (diversion->divnum);
 	      if (fstat (fileno (diversion->u.file), &file_stat) < 0)
 		M4ERROR ((EXIT_FAILURE, errno, "cannot stat diversion"));
 	      if (file_stat.st_size < 0
 		  || file_stat.st_size != (unsigned long int) file_stat.st_size)
 		M4ERROR ((EXIT_FAILURE, 0, "diversion too large"));
-	      fprintf (file, "D%d,%lu", diversion->divnum,
+	      fprintf (file, "D%d,%lu\n", diversion->divnum,
 		       (unsigned long int) file_stat.st_size);
 	    }
 

@@ -55,7 +55,7 @@ entitled ``@acronym{GNU} Free Documentation License.''
 @end quotation
 @end copying
 
-@dircategory GNU programming tools
+@dircategory Text creation and manipulation
 @direntry
 * M4: (m4).                     A powerful macro processor.
 @end direntry
@@ -137,6 +137,7 @@ changeword will go away and @emph{you should not count on it}.
 
 * Compatibility::               Compatibility with other versions of @code{m4}
 * Answers::                     Correct version of some examples
+* Copying This Package::        How to make copies of the overall M4 package
 * Copying This Manual::         How to make copies of this manual
 * Indices::                     Indices of concepts and macros
 
@@ -270,8 +271,9 @@ Correct version of some examples
 * Improved cleardivert::        Solution for @code{cleardivert}
 * Improved fatal_error::        Solution for @code{fatal_error}
 
-How to make copies of this manual
+How to make copies of this package or manual
 
+* Copying::                     GNU General Public License
 * GNU Free Documentation License::  License for copying this manual
 
 Indices of concepts and macros
@@ -385,8 +387,8 @@ addressed some long standing bugs in the venerable 1.4 release.  Then in
 @acronym{GNU} @code{m4} 1.4 that were floating around the net and
 released 1.4.3 and 1.4.4.  And in 2006, Eric Blake joined the team and
 prepared patches for the release of 1.4.5, 1.4.6, 1.4.7, and 1.4.8.  The
-1.4.x series remains open for bug fixes, including release 1.4.9 in
-2007.
+1.4.x series remains open for bug fixes, including release 1.4.9 and
+1.4.10 in 2007.
 
 Meanwhile, development has continued on new features for @code{m4}, such
 as dynamic module loading and additional builtins.  When complete,
@@ -437,10 +439,14 @@ This is an example of an example!
 
 To distinguish input from output, all output from @code{m4} is prefixed
 by the string @samp{@result{}}, and all error messages by the string
-@samp{@error{}}.  Thus
+@samp{@error{}}.  When showing how command line options affect matters,
+the command line is shown with a prompt @samp{$ @kbd{like this}},
+otherwise, you can assume that a simple @kbd{m4} invocation will work.
+Thus:
 
 @comment ignore
 @example
+$ @kbd{command line to invoke m4}
 Example of input line
 @result{}Output line from m4
 @error{}and an error message
@@ -451,7 +457,14 @@ file.  The sequence @samp{@key{NL}} refers to the newline character.
 The majority of these examples are self-contained, and you can run them
 with similar results by invoking @kbd{m4 -d}.  In fact, the testsuite
 that is bundled in the @acronym{GNU} M4 package consists of the examples
-in this document!
+in this document!  Some of the examples assume that your current
+directory is located where you unpacked the installation, so if you plan
+on following along, you may find it helpful to do this now:
+
+@comment ignore
+@example
+$ @kbd{cd m4-@value{VERSION}}
+@end example
 
 As each of the predefined macros in @code{m4} is described, a prototype
 call of the macro will be shown, giving descriptive names to the
@@ -664,7 +677,42 @@ the file name did not change from the previous directive.
 Synchronization directives are always given on complete lines by
 themselves.  When a synchronization discrepancy occurs in the middle of
 an output line, the associated synchronization directive is delayed
-until the beginning of the next generated line.
+until the next newline that does not occur in the middle of a quoted
+string or comment.
+
+@comment options: -s
+@example
+define(`twoline', `1
+2')
+@result{}#line 2 "stdin"
+@result{}
+changecom(`/*', `*/')
+@result{}
+define(`comment', `/*1
+2*/')
+@result{}#line 5
+@result{}
+dnl no line
+hello
+@result{}#line 7
+@result{}hello
+twoline
+@result{}1
+@result{}#line 8
+@result{}2
+comment
+@result{}/*1
+@result{}2*/
+one comment `two
+three'
+@result{}#line 10
+@result{}one /*1
+@result{}2*/ two
+@result{}three
+goodbye
+@result{}#line 12
+@result{}goodbye
+@end example
 
 @item -U @var{NAME}
 @itemx --undefine=@var{NAME}
@@ -824,7 +872,24 @@ string.
 The options @option{--define} (@option{-D}), @option{--undefine}
 (@option{-U}), @option{--synclines} (@option{-s}), and @option{--trace}
 (@option{-t}) only take effect after processing input from any file
-names that occur earlier on the command line.
+names that occur earlier on the command line.  For example, assume the
+file @file{foo} contains:
+
+@comment ignore
+@example
+$ @kbd{cat foo}
+bar
+@end example
+
+The text @samp{bar} can then be redefined over multiple uses of
+@file{foo}:
+
+@comment options: -Dbar=hello foo -Dbar=world foo
+@example
+$ @kbd{m4 -Dbar=hello foo -Dbar=world foo}
+@result{}hello
+@result{}world
+@end example
 
 If none of the input files invoked @code{m4exit} (@pxref{M4exit}), the
 exit status of @code{m4} will be 0 for success, 1 for general failure
@@ -844,7 +909,7 @@ As @code{m4} reads its input, it separates it into @dfn{tokens}.  A
 token is either a name, a quoted string, or any single character, that
 is not a part of either a name or a string.  Input to @code{m4} can also
 contain comments.  @acronym{GNU} @code{m4} does not yet understand
-locales; all operations are byte-oriented rather than
+multibyte locales; all operations are byte-oriented rather than
 character-oriented (although if your locale uses a single byte
 encoding, such as @sc{ISO-8859-1}, you will not notice a difference).
 However, @code{m4} is eight-bit clean, so you can
@@ -916,6 +981,7 @@ the comment.  The commenting effect of the begin-comment string
 can be inhibited by quoting it.
 
 @example
+$ @kbd{m4}
 `quoted text' # `commented text'
 @result{}quoted text # `commented text'
 `quoting inhibits' `#' `comments'
@@ -1202,6 +1268,7 @@ implementations simply invoke the builtin as though it were given one
 empty argument instead.
 
 @example
+$ @kbd{m4}
 eval
 @result{}eval
 eval(`1')
@@ -1214,6 +1281,19 @@ builtin macros with a prefix of @samp{m4_} at startup.  The option has
 no effect whatsoever on user defined macros.  For example, with this option,
 one has to write @code{m4_dnl} and even @code{m4_m4exit}.  It also has
 no effect on whether a macro requires parameters.
+
+@comment options: -P
+@example
+$ @kbd{m4 -P}
+eval
+@result{}eval
+eval(`1')
+@result{}eval(1)
+m4_eval
+@result{}m4_eval
+m4_eval(`1')
+@result{}1
+@end example
 
 Another alternative is to redefine problematic macros to a name less
 likely to cause conflicts, @xref{Definitions}.
@@ -1349,6 +1429,29 @@ the @option{--quiet} command line option (or @option{--silent}, or
 @option{-Q}, @pxref{Operation modes, , Invoking m4}).  For user
 defined macros, there is no check of the number of arguments given.
 
+@example
+$ @kbd{m4}
+index(`abc')
+@error{}m4:stdin:1: Warning: too few arguments to builtin `index'
+@result{}0
+index(`abc',)
+@result{}0
+index(`abc', `b', `ignored')
+@error{}m4:stdin:3: Warning: excess arguments to builtin `index' ignored
+@result{}1
+@end example
+
+@comment options: -Q
+@example
+$ @kbd{m4 -Q}
+index(`abc')
+@result{}0
+index(`abc',)
+@result{}0
+index(`abc', `b', `ignored')
+@result{}1
+@end example
+
 Macros are expanded normally during argument collection, and whatever
 commas, quotes and parentheses that might show up in the resulting
 expanded text will serve to define the arguments as well.  Thus, if
@@ -1465,16 +1568,18 @@ therefore result in more macros being called, if the calls are included,
 completely or partially, in the first macro calls' expansion.
 
 Taking a very simple example, if @var{foo} expands to @samp{bar}, and
-@var{bar} expands to @samp{Hello world}, the input
+@var{bar} expands to @samp{Hello}, the input
 
-@comment ignore
+@comment options: -Dbar=Hello -Dfoo=bar
 @example
+$ @kbd{m4 -Dbar=Hello -Dfoo=bar}
 foo
+@result{}Hello
 @end example
 
 @noindent
 will expand first to @samp{bar}, and when this is reread and
-expanded, into @samp{Hello world}.
+expanded, into @samp{Hello}.
 
 @node Definitions
 @chapter How to define new macros
@@ -2148,6 +2253,7 @@ where the definition that was in effect before argument collection is
 used.
 
 @example
+$ @kbd{m4 -d}
 define(`f', `1')
 @result{}
 f(define(`f', `2'))
@@ -2165,6 +2271,7 @@ token representing a builtin is recognized or flattened to the empty
 string.
 
 @example
+$ @kbd{m4 -d}
 indir(defn(`defn'), `divnum')
 @error{}m4:stdin:1: Warning: indir: invalid macro name ignored
 @result{}
@@ -2232,6 +2339,21 @@ The @var{name} argument only matches the original name of the builtin,
 even when the @option{--prefix-builtins} option (or @option{-P},
 @pxref{Operation modes, , Invoking m4}) is in effect.  This is different
 from @code{indir}, which only tracks current macro names.
+
+@comment options: -P
+@example
+$ @kbd{m4 -P}
+m4_builtin(`divnum')
+@result{}0
+m4_builtin(`m4_divnum')
+@error{}m4:stdin:2: undefined builtin `m4_divnum'
+@result{}
+m4_indir(`divnum')
+@error{}m4:stdin:3: undefined macro `divnum'
+@result{}
+m4_indir(`m4_divnum')
+@result{}0
+@end example
 
 Note that @code{indir} and @code{builtin} can be used to invoke builtins
 without arguments, even when they normally require parameters to be
@@ -2473,6 +2595,7 @@ An actual implementation of these three macros is distributed as
 let's examine their usage:
 
 @example
+$ @kbd{m4 -I examples}
 include(`quote.m4')
 @result{}
 -quote-dquote-dquote_elt-
@@ -2504,6 +2627,7 @@ possible to tell whether it was invoked without arguments based on the
 resulting string.
 
 @example
+$ @kbd{m4 -I examples}
 undivert(`quote.m4')dnl
 @result{}divert(`-1')
 @result{}# quote(args) - convert args to single-quoted string
@@ -2564,6 +2688,7 @@ invocation is restored.
 It can, for example, be used for simple counting:
 
 @example
+$ @kbd{m4 -I examples}
 include(`forloop.m4')
 @result{}
 forloop(`i', `1', `8', `i ')
@@ -2573,6 +2698,7 @@ forloop(`i', `1', `8', `i ')
 For-loops can be nested, like:
 
 @example
+$ @kbd{m4 -I examples}
 include(`forloop.m4')
 @result{}
 forloop(`i', `1', `4', `forloop(`j', `1', `8', ` (i, j)')
@@ -2599,6 +2725,7 @@ Here is an actual implementation of @code{forloop}, distributed as
 @file{m4-@value{VERSION}/@/examples/@/forloop.m4} in this package:
 
 @example
+$ @kbd{m4 -I examples}
 undivert(`forloop.m4')dnl
 @result{}divert(`-1')
 @result{}# forloop(var, from, to, stmt) - simple version
@@ -2644,6 +2771,7 @@ using an implementation of @code{foreach} distributed as
 in @file{m4-@value{VERSION}/@/examples/@/foreachq.m4}.
 
 @example
+$ @kbd{m4 -I examples}
 include(`foreach.m4')
 @result{}
 foreach(`x', (foo, bar, foobar), `Word was: x
@@ -2665,6 +2793,7 @@ or @var{quote-list} can itself be a list, to pass as further arguments
 to a helper macro.  This example generates a shell case statement:
 
 @example
+$ @kbd{m4 -I examples}
 include(`foreach.m4')
 @result{}
 define(`_case', `  $1)
@@ -2693,6 +2822,7 @@ through the original list.  Here is a simple implementation of
 @code{foreach}:
 
 @example
+$ @kbd{m4 -I examples}
 undivert(`foreach.m4')dnl
 @result{}divert(`-1')
 @result{}# foreach(x, (item_1, item_2, ..., item_n), stmt)
@@ -2718,6 +2848,7 @@ during list iteration and the final layer removed during the final
 rescan:
 
 @example
+$ @kbd{m4 -I examples}
 define(`a', `1')define(`b', `2')define(`c', `3')
 @result{}
 include(`foreach.m4')
@@ -2741,6 +2872,7 @@ foreachq(`x', ```a'', ``(b'', ``c)''', `x
 Obviously, @code{foreachq} did a better job; here is its implementation:
 
 @example
+$ @kbd{m4 -I examples}
 undivert(`foreachq.m4')dnl
 @result{}include(`quote.m4')dnl
 @result{}divert(`-1')
@@ -2803,6 +2935,7 @@ The expansion of @code{dumpdef} is void.
 @end deffn
 
 @example
+$ @kbd{m4 -d}
 define(`foo', `Hello world.')
 @result{}
 dumpdef(`foo')
@@ -2819,6 +2952,7 @@ macro were to be called at that point, even if other definitions are
 still live due to redefining a macro during argument collection.
 
 @example
+$ @kbd{m4 -d}
 pushdef(`f', ``$0'1')pushdef(`f', ``$0'2')
 @result{}
 f(popdef(`f')dumpdef(`f'))
@@ -2861,6 +2995,7 @@ to the current debug file (defaulting to standard error, @pxref{Debug
 Output}).
 
 @example
+$ @kbd{m4 -d}
 define(`foo', `Hello World.')
 @result{}
 define(`echo', `$@@')
@@ -2879,13 +3014,33 @@ The number between dashes is the depth of the expansion.  It is one most
 of the time, signifying an expansion at the outermost level, but it
 increases when macro arguments contain unquoted macro calls.  The
 maximum number that will appear between dashes is controlled by the
-option @option{--nesting-limit} (@pxref{Limits control, , Invoking m4}).
+option @option{--nesting-limit} (or @option{-L}, @pxref{Limits control,
+, Invoking m4}).  Additionally, the option @option{--trace} (or
+@option{-t}) can be used to invoke @code{traceon(@var{name})} before
+parsing input.
+
+@comment options: -dp -L3 -tifelse
+@comment status: 1
+@example
+$ @kbd{m4 -L 3 -t ifelse}
+ifelse(`one level')
+@error{}m4trace: -1- ifelse
+@result{}
+ifelse(ifelse(ifelse(`three levels')))
+@error{}m4trace: -3- ifelse
+@error{}m4trace: -2- ifelse
+@error{}m4trace: -1- ifelse
+@result{}
+ifelse(ifelse(ifelse(ifelse(`four levels'))))
+@error{}m4:stdin:3: recursion limit of 3 exceeded, use -L<N> to change it
+@end example
 
 Tracing by name is an attribute that is preserved whether the macro is
-defined or not.  This allows the @option{-t} option to select macros to
-trace before those macros are defined.
+defined or not.  This allows the selection of macros to trace before
+those macros are defined.
 
 @example
+$ @kbd{m4 -d}
 traceoff(`foo')
 @result{}
 traceon(`foo')
@@ -2919,6 +3074,7 @@ Tracing even works on builtins.  However, @code{defn} (@pxref{Defn})
 does not transfer tracing status.
 
 @example
+$ @kbd{m4 -d}
 traceon(`eval', `m4_divnum')
 @result{}
 define(`m4_eval', defn(`eval'))
@@ -3025,7 +3181,9 @@ are reset to the default of @samp{aeq}.
 The expansion of @code{debugmode} is void.
 @end deffn
 
+@comment options: -dp
 @example
+$ @kbd{m4}
 define(`foo', `FOO')
 @result{}
 traceon(`foo')
@@ -3071,6 +3229,7 @@ The expansion of @code{debugfile} is void.
 @end deffn
 
 @example
+$ @kbd{m4}
 traceon(`divnum')
 @result{}
 divnum(`extra')
@@ -3878,9 +4037,10 @@ contains the lines:
 
 @comment ignore
 @example
-Include file start
-foo
-Include file end
+$ @kbd{cat examples/incl.m4}
+@result{}Include file start
+@result{}foo
+@result{}Include file end
 @end example
 
 Normally file inclusion is used to insert the contents of a file
@@ -3888,6 +4048,7 @@ into the input stream.  The contents of the file will be read by
 @code{m4} and macro calls in the file will be expanded:
 
 @example
+$ @kbd{m4 -I examples}
 define(`foo', `FOO')
 @result{}
 include(`incl.m4')
@@ -3903,6 +4064,7 @@ Here is an example, which defines @samp{bar} to expand to the contents
 of @file{incl.m4}:
 
 @example
+$ @kbd{m4 -I examples}
 define(`bar', include(`incl.m4'))
 @result{}
 This is `bar':  >>bar<<
@@ -4241,11 +4403,19 @@ divert`'undivert`'dnl
 @cindex file inclusion
 @cindex inclusion, of files
 @acronym{GNU} @code{m4} allows named files to be undiverted.  Given a
-non-numeric
-argument, the contents of the file named will be copied, uninterpreted, to
-the current output.  This complements the builtin @code{include}
-(@pxref{Include}).  To illustrate the difference, the file
-@file{m4-@value{VERSION}/@/examples/@/foo} contains the word @samp{bar}:
+non-numeric argument, the contents of the file named will be copied,
+uninterpreted, to the current output.  This complements the builtin
+@code{include} (@pxref{Include}).  To illustrate the difference, assume
+the file @file{foo} contains:
+
+@comment ignore
+@example
+$ @kbd{cat foo}
+bar
+@end example
+
+@noindent
+then
 
 @example
 define(`bar', `BAR')
@@ -4259,7 +4429,20 @@ include(`foo')
 @end example
 
 If the file is not found (or cannot be read), an error message is
-issued, and the expansion is void.
+issued, and the expansion is void.  It is possible to intermix files
+and diversion numbers.
+
+@example
+divert(`1')diversion one
+divert(`2')undivert(`foo')dnl
+divert(`3')diversion three
+divert`'dnl
+undivert(`1', `2', `foo', `3')dnl
+@result{}diversion one
+@result{}bar
+@result{}bar
+@result{}diversion three
+@end example
 
 @node Divnum
 @section Diversion numbers
@@ -4706,21 +4889,34 @@ The macro @code{format} is recognized only with parameters.
 
 Its use is best described by a few examples:
 
+@comment This test is a bit fragile, if someone tries to port to a
+@comment platform without infinity.
 @example
 define(`foo', `The brown fox jumped over the lazy dog')
 @result{}
 format(`The string "%s" uses %d characters', foo, len(foo))
 @result{}The string "The brown fox jumped over the lazy dog" uses 38 characters
+format(`%*.*d', `-1', `-1', `1')
+@result{}1
 format(`%.0f', `56789.9876')
 @result{}56790
-len(format(`%-*X', `300', `1'))
-@result{}300
+len(format(`%-*X', `5000', `1'))
+@result{}5000
+ifelse(format(`%010F', `infinity'), `       INF', `success',
+       format(`%010F', `infinity'), `  INFINITY', `success',
+       format(`%010F', `infinity'))
+@result{}success
+ifelse(format(`%.1A', `1.999'), `0X1.0P+1', `success',
+       format(`%.1A', `1.999'), `0X2.0P+0', `success',
+       format(`%.1A', `1.999'))
+@result{}success
 @end example
 
 Using the @code{forloop} macro defined earlier (@pxref{Forloop}), this
 example shows how @code{format} can be used to produce tabular output.
 
 @example
+$ @kbd{m4 -I examples}
 include(`forloop.m4')
 @result{}
 forloop(`i', `1', `10', `format(`%6d squared is %10d
@@ -4739,18 +4935,32 @@ forloop(`i', `1', `10', `format(`%6d squared is %10d
 @end example
 
 The builtin @code{format} is modeled after the ANSI C @samp{printf}
-function, and supports these @samp{%} specifiers: @samp{c},
-@samp{s}, @samp{d}, @samp{o}, @samp{x}, @samp{X}, @samp{u}, @samp{e},
-@samp{E}, @samp{f}, @samp{F}, @samp{g}, @samp{G}, and @samp{%}; it
-supports field widths and precisions, and the
-modifiers @samp{+}, @samp{-}, @samp{@w{ }}, @samp{0}, @samp{#}, @samp{h} and
-@samp{l}.  For more details on the functioning of @code{printf}, see the
-C Library Manual.
+function, and supports these @samp{%} specifiers: @samp{c}, @samp{s},
+@samp{d}, @samp{o}, @samp{x}, @samp{X}, @samp{u}, @samp{a}, @samp{A},
+@samp{e}, @samp{E}, @samp{f}, @samp{F}, @samp{g}, @samp{G}, and
+@samp{%}; it supports field widths and precisions, and the flags
+@samp{+}, @samp{-}, @samp{ }, @samp{0}, @samp{#}, and @samp{'}.  For
+integer specifiers, the width modifiers @samp{hh}, @samp{h}, and
+@samp{l} are recognized, and for floating point specifiers, the width
+modifier @samp{l} is recognized.  Items not yet supported include
+positional arguments, the @samp{n}, @samp{p}, @samp{S}, and @samp{C}
+specifiers, the @samp{z}, @samp{t}, @samp{j}, @samp{L} and @samp{ll}
+modifiers, and any platform extensions available in the native
+@code{printf}.  For more details on the functioning of @code{printf},
+see the C Library Manual, or the @acronym{POSIX} specification (for
+example, @samp{%a} is supported even on platforms that haven't yet
+implemented C99 hexadecimal floating point output natively).
 
-For now, unrecognized specifiers are silently ignored, but it is
-anticipated that a future release of @acronym{GNU} @code{m4} will support more
-specifiers, and give warnings when problems are encountered.  Likewise,
-escape sequences are not yet recognized.
+Unrecognized specifiers result in a warning.  It is anticipated that a
+future release of @acronym{GNU} @code{m4} will support more specifiers,
+and give better warnings when various problems such as overflow are
+encountered.  Likewise, escape sequences are not yet recognized.
+
+@example
+format(`%p', `0')
+@error{}m4:stdin:1: Warning: unrecognized specifier in `%p'
+@result{}
+@end example
 
 @node Arithmetic
 @chapter Macros for doing arithmetic
@@ -4966,6 +5176,12 @@ Here are a few examples of use of @code{eval}.
 @example
 eval(`-3 * 5')
 @result{}-15
+eval(`-99 / 10')
+@result{}-9
+eval(`-99 % 10')
+@result{}-9
+eval(`99 % -10')
+@result{}9
 eval(index(`Hello world', `llo') >= 0)
 @result{}1
 eval(`0r1:0111 + 0b100 + 0r3:12')
@@ -4979,7 +5195,7 @@ square(square(`5')` + 1')
 define(`foo', `666')
 @result{}
 eval(`foo / 6')
-@error{}m4:stdin:8: bad expression in eval: foo / 6
+@error{}m4:stdin:11: bad expression in eval: foo / 6
 @result{}
 eval(foo / 6)
 @result{}111
@@ -5173,20 +5389,14 @@ syscmd(`echo foo')
 Note how the expansion of @code{syscmd} keeps the trailing newline of
 the command, as well as using the newline that appeared after the macro.
 
-As an example of @var{shell-command} using the same standard input as
-@code{m4}, the command line @kbd{echo "m4wrap(\`syscmd(\`cat')')" | m4}
-will tell @code{m4} to read all of its input before executing the
-wrapped text, then hand a valid (albeit emptied) pipe as standard input
-for the @code{cat} subcommand.  Therefore, you should be careful when
-using standard input (either by specifying no files, or by passing
-@samp{-} as a file name on the command line, @pxref{Command line files,
-, Invoking m4}), and
-also invoking subcommands via @code{syscmd} or @code{esyscmd} that
-consume data from standard input.  When standard input is a seekable
-file, the subprocess will pick up with the next character not yet
-processed by @code{m4}; when it is a pipe or other non-seekable file,
-there is no guarantee how much data will already be buffered by
-@code{m4} and thus unavailable to the child.
+The following is an example of @var{shell-command} using the same
+standard input as @code{m4}:
+
+@comment ignore
+@example
+$ @kbd{echo "m4wrap(\`syscmd(\`cat')')" | m4}
+@result{}
+@end example
 
 @ignore
 @comment If the user types the example below with stdin being an
@@ -5203,6 +5413,18 @@ m4wrap(`syscmd(`cat')')
 ^D
 @end example
 @end ignore
+
+It tells @code{m4} to read all of its input before executing the wrapped
+text, then hand a valid (albeit emptied) pipe as standard input for the
+@code{cat} subcommand.  Therefore, you should be careful when using
+standard input (either by specifying no files, or by passing @samp{-} as
+a file name on the command line, @pxref{Command line files, , Invoking
+m4}), and also invoking subcommands via @code{syscmd} or @code{esyscmd}
+that consume data from standard input.  When standard input is a
+seekable file, the subprocess will pick up with the next character not
+yet processed by @code{m4}; when it is a pipe or other non-seekable
+file, there is no guarantee how much data will already be buffered by
+@code{m4} and thus unavailable to the child.
 
 @node Esyscmd
 @section Reading the output of commands
@@ -5370,6 +5592,7 @@ chosen:
 
 @comment ignore
 @example
+$ @kbd{m4}
 maketemp(`/tmp/fooXXXXXX')
 @result{}/tmp/fooa07346
 ifdef(`mkstemp', `define(`maketemp', defn(`mkstemp'))',
@@ -5390,6 +5613,7 @@ recommend that you use the new @code{mkstemp} macro, introduced in
 @acronym{GNU} M4 1.4.8, which is secure even in traditional mode.
 
 @example
+$ @kbd{m4}
 syscmd(`echo foo??????')dnl
 @result{}foo??????
 define(`file1', maketemp(`fooXXXXXX'))dnl
@@ -5490,13 +5714,14 @@ reflected in the file name.  The syncline option (@option{-s},
 @pxref{Preprocessor features, , Invoking m4}), and the
 @samp{f} and @samp{l} flags of @code{debugmode} (@pxref{Debug Levels}),
 also use this notion of current file and line.  Redefining the three
-location macros has no effect on syncline, debug, or warning message
-output.  Assume this example is run in the
-@file{m4-@value{VERSION}/@/checks} directory of the @acronym{GNU} M4
-package, using @samp{--include=../examples} in the command line to find
-the file @file{incl.m4} mentioned earlier:
+location macros has no effect on syncline, debug, warning, or error
+message output.
+
+This example reuses the file @file{incl.m4} mentioned earlier
+(@pxref{Include}):
 
 @example
+$ @kbd{m4 -I examples}
 define(`foo', ``$0' called at __file__:__line__')
 @result{}
 foo
@@ -5645,9 +5870,9 @@ Suppose a user has a library of @code{m4} initializations in
 
 @comment ignore
 @example
-m4 base.m4 input1.m4
-m4 base.m4 input2.m4
-m4 base.m4 input3.m4
+$ @kbd{m4 base.m4 input1.m4}
+$ @kbd{m4 base.m4 input2.m4}
+$ @kbd{m4 base.m4 input3.m4}
 @end example
 
 Rather than spending time parsing the fixed contents of @file{base.m4}
@@ -5655,7 +5880,7 @@ every time, the user might rather execute:
 
 @comment ignore
 @example
-m4 -F base.m4f base.m4
+$ @kbd{m4 -F base.m4f base.m4}
 @end example
 
 @noindent
@@ -5663,9 +5888,9 @@ once, and further execute, as often as needed:
 
 @comment ignore
 @example
-m4 -R base.m4f input1.m4
-m4 -R base.m4f input2.m4
-m4 -R base.m4f input3.m4
+$ @kbd{m4 -R base.m4f input1.m4}
+$ @kbd{m4 -R base.m4f input2.m4}
+$ @kbd{m4 -R base.m4f input3.m4}
 @end example
 
 @noindent
@@ -5692,7 +5917,7 @@ some care is taken, the command:
 
 @comment ignore
 @example
-m4 file1.m4 file2.m4 file3.m4 file4.m4
+$ @kbd{m4 file1.m4 file2.m4 file3.m4 file4.m4}
 @end example
 
 @noindent
@@ -5701,10 +5926,10 @@ output:
 
 @comment ignore
 @example
-m4 -F file1.m4f file1.m4
-m4 -R file1.m4f -F file2.m4f file2.m4
-m4 -R file2.m4f -F file3.m4f file3.m4
-m4 -R file3.m4f file4.m4
+$ @kbd{m4 -F file1.m4f file1.m4}
+$ @kbd{m4 -R file1.m4f -F file2.m4f file2.m4}
+$ @kbd{m4 -R file2.m4f -F file3.m4f file3.m4}
+$ @kbd{m4 -R file3.m4f file4.m4}
 @end example
 
 Some care is necessary because not every effort has been made for
@@ -6127,7 +6352,29 @@ diverted text as being generated at the time it is diverted.
 The sync line option is used mostly when using @code{m4} as
 a front end to a compiler.  If a diverted line causes a compiler error,
 the error messages should most probably refer to the place where the
-diversion were made, and not where it was inserted again.
+diversion was made, and not where it was inserted again.
+
+@comment options: -s
+@example
+divert(2)2
+divert(1)1
+divert`'0
+@result{}#line 3 "stdin"
+@result{}0
+^D
+@result{}#line 2 "stdin"
+@result{}1
+@result{}#line 1 "stdin"
+@result{}2
+@end example
+
+The current @code{m4} implementation has a limitation that the syncline
+output at the start of each diversion occurs no matter what, even if the
+previous diversion did not end with a newline.  This goes contrary to
+the claim that synclines appear on a line by themselves, so this
+limitation may be corrected in a future version of @code{m4}.  In the
+meantime, when using @option{-s}, it is wisest to make sure all
+diversions end with newline.
 
 @item
 @acronym{GNU} @code{m4} makes no attempt at prohibiting self-referential
@@ -6205,6 +6452,7 @@ version also optimizes based on the fact that the starting bound does
 not need to be passed to the helper @code{@w{_forloop}}.
 
 @example
+$ @kbd{m4 -I examples}
 undivert(`forloop2.m4')dnl
 @result{}divert(`-1')
 @result{}# forloop(var, from, to, stmt) - improved version:
@@ -6244,6 +6492,7 @@ presented earlier each have flaws.  First, we will examine and fix the
 quadratic behavior of @code{foreachq}:
 
 @example
+$ @kbd{m4 -I examples}
 include(`foreachq.m4')
 @result{}
 traceon(`shift')debugmode(`aq')
@@ -6284,6 +6533,7 @@ importantly, performs faster.  The fixed version of @code{foreachq} can
 be found in @file{m4-@value{VERSION}/@/examples/@/foreachq2.m4}:
 
 @example
+$ @kbd{m4 -I examples}
 include(`foreachq2.m4')
 @result{}
 undivert(`foreachq2.m4')dnl
@@ -6325,6 +6575,7 @@ overquotes the arguments to @code{@w{_foreach}} to begin with, using
 front:
 
 @example
+$ @kbd{m4 -I examples}
 include(`foreach2.m4')
 @result{}
 undivert(`foreach2.m4')dnl
@@ -6369,6 +6620,7 @@ repeating the side effects of unquoted list elements will have any
 detrimental effects.
 
 @example
+$ @kbd{m4 -I examples}
 include(`foreach2.m4')
 @result{}
 include(`foreachq2.m4')
@@ -6500,9 +6752,28 @@ fatal_error(`inside wrapped text')')
 
 @c ========================================================== Appendices
 
+@node Copying This Package
+@appendix How to make copies of the overall M4 package
+@cindex License, code
+
+This appendix covers the license for copying the source code of the
+overall M4 package.  This manual is under a different set of
+restrictions, covered later (@pxref{Copying This Manual}).
+
+@menu
+* Copying::                     GNU General Public License
+@end menu
+
+@include gpl-3.0.texi
+
 @node Copying This Manual
 @appendix How to make copies of this manual
-@cindex License
+@cindex License, manual
+
+This appendix covers the license for copying this manual.  Note that
+some of the longer examples in this manual are also distributed in the
+directory @file{m4-@value{VERSION}/@/examples/}, where a more
+permissive license is in effect when copying just the examples.
 
 @menu
 * GNU Free Documentation License::  License for copying this manual

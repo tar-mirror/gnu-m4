@@ -5,7 +5,7 @@
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2 of the License, or
+   the Free Software Foundation; either version 3 of the License, or
    (at your option) any later version.
 
    This program is distributed in the hope that it will be useful,
@@ -718,10 +718,10 @@ mult_term (eval_token et, int32_t *v1)
 	  if (v2 == 0)
 	    return DIVIDE_ZERO;
 	  else if (v2 == -1)
-	    /* Avoid the x86 SIGFPE on INT_MIN / -1.  */
+	    /* Avoid overflow, and the x86 SIGFPE on INT_MIN / -1.  */
 	    *v1 = (int32_t) -(uint32_t) *v1;
 	  else
-	    *v1 = (int32_t) ((uint32_t) *v1 / (uint32_t) v2);
+	    *v1 /= v2;
 	  break;
 
 	case MODULO:

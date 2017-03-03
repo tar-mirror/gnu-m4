@@ -1,11 +1,11 @@
 /* GNU m4 -- A simple macro processor
 
-   Copyright (C) 1991, 1992, 1993, 1994, 2004, 2006 Free Software
+   Copyright (C) 1991, 1992, 1993, 1994, 2004, 2006, 2007 Free Software
    Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2 of the License, or
+   the Free Software Foundation; either version 3 of the License, or
    (at your option) any later version.
 
    This program is distributed in the hope that it will be useful,
@@ -179,23 +179,20 @@ debug_flush_files (void)
      opened on a seekable file, that the file pointer be left at the
      next character on exit (but places no restrictions on the file
      pointer location on a non-seekable file).  It also requires that
-     fflush() followed by fseek() on an input file set the underlying
-     file pointer.  However, fflush() on a non-seekable file can lose
-     buffered data, which we might otherwise want to process after
-     syscmd.  Hence, we must check whether stdin is seekable.  We must
-     also be tolerant of operating with stdin closed, so we don't
-     report any failures in this attempt.  The stdio-safer module and
-     friends are essential, so that if stdin was closed, this lseek is
-     not on some other file that we have since opened.  Mingw has bugs
-     when using fseek on text files, so we only strive for POSIX
-     behavior when we detect a UNIX environment.  */
-#if UNIX
+     fflush() followed by fseeko() on an input file set the underlying
+     file pointer, and gnulib guarantees these semantics.  However,
+     fflush() on a non-seekable file can lose buffered data, which we
+     might otherwise want to process after syscmd.  Hence, we must
+     check whether stdin is seekable.  We must also be tolerant of
+     operating with stdin closed, so we don't report any failures in
+     this attempt.  The stdio-safer module and friends are essential,
+     so that if stdin was closed, this lseek is not on some other file
+     that we have since opened.  */
   if (lseek (STDIN_FILENO, 0, SEEK_CUR) >= 0
       && fflush (stdin) == 0)
     {
-      fseek (stdin, 0, SEEK_CUR);
+      fseeko (stdin, 0, SEEK_CUR);
     }
-#endif /* UNIX */
 }
 
 /*-------------------------------------------------------------------------.

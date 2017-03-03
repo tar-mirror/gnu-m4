@@ -27,6 +27,10 @@ AC_DEFUN([M4_EARLY],
   AC_REQUIRE([AC_PROG_RANLIB])
   AC_REQUIRE([AC_GNU_SOURCE])
   AC_REQUIRE([gl_USE_SYSTEM_EXTENSIONS])
+  AC_REQUIRE([AC_FUNC_FSEEKO])
+  AC_REQUIRE([gl_FP_IEEE])
+  AC_REQUIRE([AC_FUNC_FSEEKO])
+  AC_REQUIRE([AC_FUNC_FSEEKO])
   dnl Some compilers (e.g., AIX 5.3 cc) need to be in c99 mode
   dnl for the builtin va_copy to work.  With Autoconf 2.60 or later,
   dnl AC_PROG_CC_STDC arranges for this.  With older Autoconf AC_PROG_CC_STDC
@@ -47,26 +51,50 @@ AC_DEFUN([M4_INIT],
   gl_ltlibdeps=
   gl_source_base='lib'
   gl_FUNC_ALLOCA
-  gl_ALLOCSA
+  gl_ASSERT
   AC_DEFINE([SIGNAL_SAFE_LIST], [1], [Define if lists must be signal-safe.])
   gl_CLOEXEC
   gl_CLOSE_STREAM
   gl_MODULE_INDICATOR([close-stream])
+  gl_CLOSEIN
   gl_CLOSEOUT
   gl_CONFIG_H
   gl_ERROR
   gl_EXITFAIL
   gl_FATAL_SIGNAL
+  gl_FUNC_FFLUSH
+  gl_STDIO_MODULE_INDICATOR([fflush])
+  gl_FLOAT_H
   gl_FOPEN_SAFER
   gl_MODULE_INDICATOR([fopen-safer])
   gl_FUNC_FPENDING
+  gl_FUNC_FPURGE
+  gl_FUNC_FREADING
   gl_FUNC_FREE
+  gl_FUNC_FREXPL_NO_LIBM
+  gl_MATH_MODULE_INDICATOR([frexpl])
+  gl_FUNC_FSEEKO
+  gl_STDIO_MODULE_INDICATOR([fseeko])
+  gl_FUNC_FTELLO
+  gl_STDIO_MODULE_INDICATOR([ftello])
   gl_GETOPT
+  AC_SUBST([LIBINTL])
+  AC_SUBST([LTLIBINTL])
   gl_FUNC_GETTIMEOFDAY
   gl_INLINE
+  gl_FUNC_ISNAN_NO_LIBM
+  gl_DOUBLE_EXPONENT_LOCATION
+  gl_FUNC_ISNANF_NO_LIBM
+  gl_FLOAT_EXPONENT_LOCATION
+  gl_FUNC_ISNANL_NO_LIBM
+  gl_LONG_DOUBLE_EXPONENT_LOCATION
   gl_LIST
   gl_LOCALCHARSET
+  gl_FUNC_LSEEK
+  gl_UNISTD_MODULE_INDICATOR([lseek])
   AC_FUNC_MALLOC
+  gl_MALLOCA
+  gl_MATH_H
   gt_FUNC_MKDTEMP
   gl_STDLIB_MODULE_INDICATOR([mkdtemp])
   gl_FUNC_MKSTEMP
@@ -75,14 +103,27 @@ AC_DEFUN([M4_INIT],
   dnl Note: AC_FUNC_OBSTACK does AC_LIBSOURCES([obstack.h, obstack.c]).
   gl_LIST
   gl_PATHMAX
+  gl_FUNC_PRINTF_FREXP
+  gl_FUNC_PRINTF_FREXPL
+  m4_divert_text([INIT_PREPARE], [gl_printf_safe=yes])
   gl_QUOTEARG
   gl_REGEX
+  gl_SIGNAL_H
+  gl_SIGNBIT
+  gl_MATH_MODULE_INDICATOR([signbit])
+  AC_REQUIRE([gl_FLOAT_EXPONENT_LOCATION])
+  AC_REQUIRE([gl_DOUBLE_EXPONENT_LOCATION])
+  AC_REQUIRE([gl_LONG_DOUBLE_EXPONENT_LOCATION])
   gl_SIGNALBLOCKING
+  gl_SIGNAL_MODULE_INDICATOR([sigprocmask])
   gl_SIZE_MAX
   gt_TYPE_SSIZE_T
   gl_STDARG_H
   AM_STDBOOL_H
   gl_STDINT_H
+  gt_TYPE_WCHAR_T
+  gt_TYPE_WINT_T
+  gl_STDIO_H
   gl_STDLIB_H
   gl_STDLIB_SAFER
   gl_FUNC_STRTOL
@@ -97,6 +138,8 @@ AC_DEFUN([M4_INIT],
   gl_FUNC_GLIBC_UNLOCKED_IO
   gl_FUNC_VASNPRINTF
   gl_FUNC_VASPRINTF
+  gl_STDIO_MODULE_INDICATOR([vasprintf])
+  gl_FUNC_VASPRINTF_POSIX
   gl_WCHAR_H
   gl_WCTYPE_H
   gl_XALLOC
@@ -148,13 +191,11 @@ AC_DEFUN([M4_FILE_LIST], [
   build-aux/link-warning.h
   doc/fdl.texi
   doc/gendocs_template
+  doc/gpl-3.0.texi
   lib/__fpending.c
   lib/__fpending.h
   lib/alloca.c
   lib/alloca_.h
-  lib/allocsa.c
-  lib/allocsa.h
-  lib/allocsa.valgrind
   lib/asnprintf.c
   lib/asprintf.c
   lib/binary-io.h
@@ -164,6 +205,8 @@ AC_DEFUN([M4_FILE_LIST], [
   lib/cloexec.h
   lib/close-stream.c
   lib/close-stream.h
+  lib/closein.c
+  lib/closein.h
   lib/closeout.c
   lib/closeout.h
   lib/config.charset
@@ -175,8 +218,20 @@ AC_DEFUN([M4_FILE_LIST], [
   lib/fatal-signal.c
   lib/fatal-signal.h
   lib/fd-safer.c
+  lib/fflush.c
+  lib/float+.h
+  lib/float_.h
   lib/fopen-safer.c
+  lib/fpucw.h
+  lib/fpurge.c
+  lib/fpurge.h
+  lib/freading.c
+  lib/freading.h
   lib/free.c
+  lib/frexp.c
+  lib/frexpl.c
+  lib/fseeko.c
+  lib/ftello.c
   lib/getopt.c
   lib/getopt1.c
   lib/getopt_.h
@@ -188,6 +243,10 @@ AC_DEFUN([M4_FILE_LIST], [
   lib/gl_anylinked_list1.h
   lib/gl_anylinked_list2.h
   lib/gl_anytree_oset.h
+  lib/gl_array_list.c
+  lib/gl_array_list.h
+  lib/gl_array_oset.c
+  lib/gl_array_oset.h
   lib/gl_avltree_oset.c
   lib/gl_avltree_oset.h
   lib/gl_linkedhash_list.c
@@ -196,9 +255,21 @@ AC_DEFUN([M4_FILE_LIST], [
   lib/gl_list.h
   lib/gl_oset.c
   lib/gl_oset.h
+  lib/intprops.h
+  lib/isnan.c
+  lib/isnan.h
+  lib/isnanf.c
+  lib/isnanf.h
+  lib/isnanl-nolibm.h
+  lib/isnanl.c
   lib/localcharset.c
   lib/localcharset.h
+  lib/lseek.c
   lib/malloc.c
+  lib/malloca.c
+  lib/malloca.h
+  lib/malloca.valgrind
+  lib/math_.h
   lib/mkdtemp.c
   lib/mkstemp-safer.c
   lib/mkstemp.c
@@ -208,8 +279,14 @@ AC_DEFUN([M4_FILE_LIST], [
   lib/pipe-safer.c
   lib/printf-args.c
   lib/printf-args.h
+  lib/printf-frexp.c
+  lib/printf-frexp.h
+  lib/printf-frexpl.c
+  lib/printf-frexpl.h
   lib/printf-parse.c
   lib/printf-parse.h
+  lib/progname.c
+  lib/progname.h
   lib/quotearg.c
   lib/quotearg.h
   lib/ref-add.sin
@@ -220,18 +297,22 @@ AC_DEFUN([M4_FILE_LIST], [
   lib/regex_internal.c
   lib/regex_internal.h
   lib/regexec.c
+  lib/signal_.h
+  lib/signbitd.c
+  lib/signbitf.c
+  lib/signbitl.c
   lib/sigprocmask.c
-  lib/sigprocmask.h
   lib/size_max.h
-  lib/stat_.h
   lib/stdbool_.h
   lib/stdint_.h
   lib/stdio--.h
   lib/stdio-safer.h
+  lib/stdio_.h
   lib/stdlib--.h
   lib/stdlib-safer.h
   lib/stdlib_.h
   lib/strtol.c
+  lib/sys_stat_.h
   lib/sys_time_.h
   lib/tempname.c
   lib/tempname.h
@@ -244,7 +325,6 @@ AC_DEFUN([M4_FILE_LIST], [
   lib/vasnprintf.c
   lib/vasnprintf.h
   lib/vasprintf.c
-  lib/vasprintf.h
   lib/verify.h
   lib/verror.c
   lib/verror.h
@@ -255,18 +335,19 @@ AC_DEFUN([M4_FILE_LIST], [
   lib/wctype_.h
   lib/xalloc-die.c
   lib/xalloc.h
-  lib/xallocsa.c
-  lib/xallocsa.h
   lib/xasprintf.c
   lib/xmalloc.c
+  lib/xmalloca.c
+  lib/xmalloca.h
   lib/xsize.h
   lib/xvasprintf.c
   lib/xvasprintf.h
   m4/absolute-header.m4
   m4/alloca.m4
-  m4/allocsa.m4
+  m4/assert.m4
   m4/cloexec.m4
   m4/close-stream.m4
+  m4/closein.m4
   m4/closeout.m4
   m4/codeset.m4
   m4/config-h.m4
@@ -276,28 +357,49 @@ AC_DEFUN([M4_FILE_LIST], [
   m4/exitfail.m4
   m4/extensions.m4
   m4/fatal-signal.m4
+  m4/fflush.m4
+  m4/float_h.m4
   m4/fpending.m4
+  m4/fpieee.m4
+  m4/fpurge.m4
+  m4/freading.m4
   m4/free.m4
+  m4/frexp.m4
+  m4/frexpl.m4
+  m4/fseeko.m4
+  m4/ftello.m4
   m4/getopt.m4
   m4/gettimeofday.m4
   m4/gl_list.m4
   m4/glibc21.m4
   m4/gnulib-common.m4
+  m4/include_next.m4
   m4/inline.m4
   m4/intmax_t.m4
   m4/inttypes_h.m4
+  m4/isnan.m4
+  m4/isnanf.m4
+  m4/isnanl.m4
+  m4/ldexpl.m4
   m4/localcharset.m4
-  m4/longdouble.m4
   m4/longlong.m4
+  m4/lseek.m4
+  m4/malloca.m4
+  m4/math_h.m4
   m4/mbrtowc.m4
   m4/mbstate_t.m4
   m4/mkdtemp.m4
   m4/mkstemp.m4
   m4/pathmax.m4
+  m4/printf-frexp.m4
+  m4/printf-frexpl.m4
+  m4/printf.m4
   m4/quotearg.m4
   m4/regex.m4
   m4/sig_atomic_t.m4
+  m4/signal_h.m4
   m4/signalblocking.m4
+  m4/signbit.m4
   m4/size_max.m4
   m4/ssize_t.m4
   m4/stdarg.m4
@@ -305,6 +407,7 @@ AC_DEFUN([M4_FILE_LIST], [
   m4/stdint.m4
   m4/stdint_h.m4
   m4/stdio-safer.m4
+  m4/stdio_h.m4
   m4/stdlib-safer.m4
   m4/stdlib_h.m4
   m4/strtol.m4
@@ -317,6 +420,7 @@ AC_DEFUN([M4_FILE_LIST], [
   m4/unistd_h.m4
   m4/unlocked-io.m4
   m4/vasnprintf.m4
+  m4/vasprintf-posix.m4
   m4/vasprintf.m4
   m4/wchar.m4
   m4/wchar_t.m4
@@ -325,4 +429,46 @@ AC_DEFUN([M4_FILE_LIST], [
   m4/xalloc.m4
   m4/xsize.m4
   m4/xvasprintf.m4
+  tests/test-alloca-opt.c
+  tests/test-array_list.c
+  tests/test-array_oset.c
+  tests/test-avltree_oset.c
+  tests/test-binary-io.c
+  tests/test-binary-io.sh
+  tests/test-closein.c
+  tests/test-closein.sh
+  tests/test-fflush.c
+  tests/test-fpurge.c
+  tests/test-freading.c
+  tests/test-frexpl.c
+  tests/test-fseeko.c
+  tests/test-fseeko.sh
+  tests/test-ftello.c
+  tests/test-ftello.sh
+  tests/test-gettimeofday.c
+  tests/test-isnan.c
+  tests/test-isnanf.c
+  tests/test-isnanl-nolibm.c
+  tests/test-isnanl.h
+  tests/test-linkedhash_list.c
+  tests/test-lseek.c
+  tests/test-lseek.sh
+  tests/test-malloca.c
+  tests/test-math.c
+  tests/test-printf-frexp.c
+  tests/test-printf-frexpl.c
+  tests/test-signbit.c
+  tests/test-stdbool.c
+  tests/test-stdint.c
+  tests/test-stdio.c
+  tests/test-stdlib.c
+  tests/test-sys_stat.c
+  tests/test-sys_time.c
+  tests/test-unistd.c
+  tests/test-vasnprintf.c
+  tests/test-vasprintf-posix.c
+  tests/test-vasprintf.c
+  tests/test-wchar.c
+  tests/test-wctype.c
+  tests/test-xvasprintf.c
 ])
