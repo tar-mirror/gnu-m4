@@ -1,5 +1,6 @@
 # Configure template for GNU M4.			-*-Autoconf-*-
-# Copyright (C) 1991, 1993, 1994, 2004, 2005 Free Software Foundation, Inc.
+# Copyright (C) 1991, 1993, 1994, 2004, 2005, 2006 Free Software
+# Foundation, Inc.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,102 +17,131 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 # 02110-1301  USA
 
+AC_PREREQ([2.60])
+AC_INIT([GNU M4], [1.4.5], [bug-m4@gnu.org])
+AM_INIT_AUTOMAKE([1.9.6 dist-bzip2 gnu])
+PACKAGE=$PACKAGE_TARNAME; AC_SUBST([PACKAGE])
+VERSION=$PACKAGE_VERSION; AC_SUBST([VERSION])
 
-AC_INIT([GNU M4], [1.4.4], [bug-m4@gnu.org])
-PACKAGE=$PACKAGE_TARNAME; AC_SUBST(PACKAGE)
-VERSION=$PACKAGE_VERSION; AC_SUBST(VERSION)
+m4_pattern_forbid([^M4_])
+m4_pattern_allow([^M4_cv_])
 
 AC_CONFIG_SRCDIR([src/m4.h])
 AC_CONFIG_HEADERS([config.h:config-h.in])
-AC_ARG_PROGRAM
 
-AC_PROG_AWK
+AC_CANONICAL_BUILD
+AC_CANONICAL_HOST
 AC_PROG_CC
-AC_PROG_INSTALL
-AC_PROG_MAKE_SET
-AC_PROG_RANLIB
+M4_EARLY
 
-AC_AIX
-AC_ISC_POSIX
-AC_MINIX
-fp_C_PROTOTYPES
-AC_C_CONST
+AC_CHECK_HEADERS_ONCE([limits.h siginfo.h sys/wait.h])
+AC_CHECK_TYPES([siginfo_t], [], [],
+[[#include <signal.h>
+#if HAVE_SIGINFO_H
+# include <siginfo.h>
+#endif
+]])
+AC_CHECK_MEMBERS([struct sigaction.sa_sigaction], [], [],
+[[#include <signal.h>
+]])
 
-AC_CHECK_HEADERS([limits.h memory.h siginfo.h string.h unistd.h])
-AC_CHECK_HEADERS([signal.h sys/signal.h], [break])
-AC_HEADER_STDC
 AC_TYPE_SIGNAL
 AC_TYPE_SIZE_T
 
-AC_CHECK_FUNCS([mkstemp sigaction sigaltstack sigstack sigvec strerror tmpfile])
-AC_FUNC_ALLOCA
-AC_FUNC_VPRINTF
-AC_REPLACE_FUNCS([strtol])
+AC_CHECK_FUNCS_ONCE([sigaction sigaltstack sigstack sigvec strerror tmpfile])
 
+M4_INIT
 
-AC_MSG_CHECKING([ecvt declaration])
-AC_EGREP_HEADER([ecvt], [stdlib.h],
-  [AC_MSG_RESULT(yes)
-   AC_DEFINE([HAVE_EFGCVT], [2],
-     [Define to 1 if you have ecvt(3), fcvt(3) and gcvt(3).  Define to 2 if they are declared in stdlib.h])
-  ],
-  [AC_MSG_RESULT(no); AC_CHECK_FUNCS(ecvt)])
-
-
-AC_MSG_CHECKING(if stack overflow is detectable)
 # Code from Jim Avera <jima@netcom.com>.
 # stackovf.c requires:
 #  1. Either sigaction with SA_ONSTACK, or sigvec with SV_ONSTACK
 #  2. Either sigaltstack or sigstack
 #  3. getrlimit, including support for RLIMIT_STACK
-use_stackovf=no
+AC_CACHE_CHECK([if stack overflow is detectable], [M4_cv_use_stackovf],
+[M4_cv_use_stackovf=no
 if test "$ac_cv_func_sigaction" = yes || test "$ac_cv_func_sigvec" = yes; then
   if test "$ac_cv_func_sigaltstack" = yes || test "$ac_cv_func_sigstack" = yes; then
-    AC_TRY_LINK([#include <sys/time.h>
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([[
+#include <sys/time.h>
 #include <sys/resource.h>
-#include <signal.h>],
-      [struct rlimit r; int i; getrlimit (RLIMIT_STACK, &r)
+#include <signal.h>
+]], [[struct rlimit r; getrlimit (RLIMIT_STACK, &r);
 #if (!defined(HAVE_SIGACTION) || !defined(SA_ONSTACK)) \
     && (!defined(HAVE_SIGVEC) || !defined(SV_ONSTACK))
 choke me		/* SA_ONSTACK and/or SV_ONSTACK are not defined */
-#endif],
-      use_stackovf=yes)
+#endif
+]])], [M4_cv_use_stackovf=yes])
   fi
-fi
-AC_MSG_RESULT($use_stackovf)
-if test "$use_stackovf" = yes; then
+fi])
+AM_CONDITIONAL([STACKOVF], [test "$M4_cv_use_stackovf" = yes])
+if test "$M4_cv_use_stackovf" = yes; then
   AC_DEFINE([USE_STACKOVF], [1],
     [Define to 1 if using stack overflow detection])
-  STACKOVF=stackovf.${U}o
-  AC_SUBST(STACKOVF)
-  AC_EGREP_HEADER([rlim_t], [sys/resource.h], [],
+  AC_CHECK_TYPES([rlim_t], [],
     [AC_DEFINE([rlim_t], [int],
-      [Define to int if rlim_t is not defined in sys/resource.h])
-  ])
-  AC_EGREP_HEADER([stack_t], [signal.h], [],
+      [Define to int if rlim_t is not defined in sys/resource.h])],
+    [[#include <sys/resource.h>
+  ]])
+  AC_CHECK_TYPES([stack_t], [],
     [AC_DEFINE([stack_t], [struct sigaltstack],
-      [Define to struct sigaltstack if stack_t is not in sys/signal.h])
-  ])
-  AC_EGREP_HEADER([sigcontext], [signal.h],
-    [AC_DEFINE([HAVE_SIGCONTEXT], [1],
-      [Define to 1 if signal.h declares struct sigcontext])
-  ])
+      [Define to struct sigaltstack if stack_t is not in signal.h])],
+    [[#include <signal.h>
+  ]])
+  AC_CHECK_TYPES([sigcontext], [], [], [[#include <signal.h>
+  ]])
 fi
+
+AC_CACHE_CHECK([if system() agrees with pclose()],
+  [M4_cv_func_system_consistent],
+  [AC_RUN_IFELSE([AC_LANG_PROGRAM([
+#include <stdio.h>
+#include <stdlib.h>
+#include <errno.h>
+], [int i1, i2;
+  FILE *f;
+  i1 = system ("exit 2");
+  if (i1 == -1)
+    return 1;
+  f = popen ("exit 2", "r");
+  if (!f)
+    return 1;
+  i2 = pclose (f);
+  return i1 != i2;])],
+  [M4_cv_func_system_consistent=yes], [M4_cv_func_system_consistent=no],
+  [AC_COMPILE_IFELSE([
+/* EMX on OS/2 defines WEXITSTATUS to be (x>>8)&0xff, and uses that for
+   pclose(), but for system() it uses x&0xff instead.  Otherwise, we assume
+   your system is sane and that pclose() and system() are consistent in their
+   values.  If this heuristic is wrong for your platform, report it as a bug
+   to bug-m4@gnu.org.  */
+#ifdef __EMX__
+choke me
+#endif
+], [M4_cv_func_system_consistent=yes], [M4_cv_func_system_consistent=no])])])
+if test "$M4_cv_func_system_consistent" = no ; then
+  AC_DEFINE([FUNC_SYSTEM_BROKEN], [1],
+    [Define to 1 if the return value of system() disagrees with pclose().])
+fi
+
+dnl Don't let changeword get in our way, if bootstrapping with a version of
+dnl m4 that already turned the feature on.
+m4_ifdef([changeword], [m4_undefine([changeword])])dnl
 
 AC_MSG_CHECKING([[if changeword is wanted]])
 AC_ARG_ENABLE([changeword],
-  [[  --enable-changeword     enable -W and changeword() builtin]],
+  [AS_HELP_STRING([--enable-changeword],
+     [enable -W and changeword() builtin])],
   [if test "$enableval" = yes; then
-    AC_MSG_RESULT(yes)
+    AC_MSG_RESULT([yes])
     AC_DEFINE([ENABLE_CHANGEWORD], [1],
       [Define to 1 if the changeword(REGEXP) functionality is wanted])
   else
-    AC_MSG_RESULT(no)
-  fi], [AC_MSG_RESULT(no)])
+    AC_MSG_RESULT([no])
+  fi], [AC_MSG_RESULT([no])])
 
-fp_WITH_DMALLOC
+M4_WITH_DMALLOC
 
-AC_CONFIG_FILES([stamp-h], [[test -z "$CONFIG_HEADERS" || date > stamp-h]])
+AC_CONFIG_COMMANDS([stamp-h], [[test -z "$CONFIG_HEADERS" || date > stamp-h]])
 
 AC_CONFIG_FILES([Makefile
 		 doc/Makefile

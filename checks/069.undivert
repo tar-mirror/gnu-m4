@@ -1,0 +1,11 @@
+dnl @ ../doc/m4.texinfo:2911: Origin of test
+divert(`1')diverted text
+divert
+dnl @result{}
+undivert()
+dnl @result{}
+undivert(`0')
+dnl @result{}
+undivert
+dnl @result{}diverted text
+dnl @result{}

@@ -1,6 +1,6 @@
 #!/bin/sh
 # Extract all examples from the manual source.
-# Copyright (C) 1992, 2005 Free Software Foundation, Inc.
+# Copyright (C) 1992, 2005, 2006 Free Software Foundation, Inc.
 
 # This script is for use with GNU awk.
 
@@ -23,7 +23,7 @@ BEGIN {
 
   split($0, tmp, ",");
   node = substr(tmp[1], 7);
-  if (length(node) > 11)
+  if (length(node) > 10)
     printf("Node: %s - truncated", node);
   else
     printf("Node: %s ", node);
@@ -45,8 +45,8 @@ BEGIN {
       close (file);
     seq++;
     count++;
-    file = sprintf("%02d.%s", count, node);
-    printf("dnl %s:%d: Origin of test\n", FILENAME, NR) > file;
+    file = sprintf("%03d.%s", count, node);
+    printf("dnl @ %s:%d: Origin of test\n", FILENAME, NR) > file;
     next;
   }
   if ($0 ~ /^@end example$/) {
@@ -60,6 +60,7 @@ BEGIN {
     prefix = "";
   gsub("@@", "@", $0);
   gsub("@comment.*", "", $0);
+  gsub("@tabchar{}", "\t", $0);
   printf("%s%s\n", prefix, $0) >> file;
 }
 

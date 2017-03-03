@@ -1,0 +1,9 @@
+dnl @ ../doc/m4.texinfo:3343: Origin of test
+define(`foo', `The brown fox jumped over the lazy dog')
+dnl @result{}
+format(`The string "%s" uses %d characters', foo, len(foo))
+dnl @result{}The string "The brown fox jumped over the lazy dog" uses 38 characters
+format(`%.0f', `56789.9876')
+dnl @result{}56790
+len(format(`%-*X', `300', `1'))
+dnl @result{}300

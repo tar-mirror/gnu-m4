@@ -1,6 +1,6 @@
 /* GNU m4 -- A simple macro processor
 
-   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2004, 2005 Free
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2004, 2005, 2006 Free
    Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
@@ -22,13 +22,7 @@
 #include "m4.h"
 
 #include <getopt.h>
-
-#if defined(HAVE_SYS_SIGNAL_H)
-#  include <sys/signal.h>
-#endif
-#if defined(HAVE_SIGNAL_H)
-#  include <signal.h>
-#endif
+#include <signal.h>
 
 static void usage _((int));
 
@@ -42,7 +36,7 @@ int sync_output = 0;
 int debug_level = 0;
 
 /* Hash table size (should be a prime) (-Hsize).  */
-int hash_table_size = HASHMAX;
+size_t hash_table_size = HASHMAX;
 
 /* Disable GNU extensions (-G).  */
 int no_gnu_extensions = 0;
@@ -60,11 +54,11 @@ int suppress_warnings = 0;
 int warning_status = 0;
 
 /* Artificial limit for expansion_level in macro.c.  */
-int nesting_limit = 250;
+int nesting_limit = 1024;
 
 #ifdef ENABLE_CHANGEWORD
 /* User provided regexp for describing m4 words.  */
-const char *user_word_regexp = NULL;
+const char *user_word_regexp = "";
 #endif
 
 /* Name of frozen file to digest after initialization.  */
@@ -116,7 +110,7 @@ static void
 stackovf_handler (void)
 {
   M4ERROR ((EXIT_FAILURE, 0,
-	    "ERROR: Stack overflow.  (Infinite define recursion?)"));
+	    "ERROR: stack overflow.  (Infinite define recursion?)"));
 }
 
 #endif /* USE_STACKOV */
@@ -127,8 +121,12 @@ stackovf_handler (void)
 | Failsafe free routine.  |
 `------------------------*/
 
+#ifdef WITH_DMALLOC
+# undef xfree
+#endif
+
 void
-xfree (voidstar p)
+xfree (void *p)
 {
   if (p != NULL)
     free (p);
@@ -154,64 +152,74 @@ for short options too.\n\
 Operation modes:\n\
       --help                   display this help and exit\n\
       --version                output version information and exit\n\
-  -e, --interactive            unbuffer output, ignore interrupts\n\
   -E, --fatal-warnings         stop execution after first warning\n\
+  -e, --interactive            unbuffer output, ignore interrupts\n\
+  -P, --prefix-builtins        force a `m4_' prefix to all builtins\n\
   -Q, --quiet, --silent        suppress some warnings for builtins\n\
-  -P, --prefix-builtins        force a `m4_' prefix to all builtins\n",
-	     stdout);
+", stdout);
 #ifdef ENABLE_CHANGEWORD
       fputs ("\
-  -W, --word-regexp=REGEXP     use REGEXP for macro name syntax\n",
-	     stdout);
+  -W, --word-regexp=REGEXP     use REGEXP for macro name syntax\n\
+", stdout);
 #endif
       fputs ("\
 \n\
 Preprocessor features:\n\
-  -I, --include=DIRECTORY      search this directory second for includes\n\
   -D, --define=NAME[=VALUE]    enter NAME has having VALUE, or empty\n\
+  -I, --include=DIRECTORY      append this directory to include path\n\
+  -s, --synclines              generate `#line NO \"FILE\"' lines\n\
   -U, --undefine=NAME          delete builtin NAME\n\
-  -s, --synclines              generate `#line NO \"FILE\"' lines\n",
-	     stdout);
+", stdout);
       fputs ("\
 \n\
 Limits control:\n\
   -G, --traditional            suppress all GNU extensions\n\
-  -H, --hashsize=PRIME         set symbol lookup hash table size\n\
-  -L, --nesting-limit=NUMBER   change artificial nesting limit\n",
-	     stdout);
+  -H, --hashsize=PRIME         set symbol lookup hash table size [509]\n\
+  -L, --nesting-limit=NUMBER   change artificial nesting limit [1024]\n\
+", stdout);
       fputs ("\
 \n\
 Frozen state files:\n\
   -F, --freeze-state=FILE      produce a frozen state on FILE at end\n\
-  -R, --reload-state=FILE      reload a frozen state from FILE at start\n",
-	     stdout);
+  -R, --reload-state=FILE      reload a frozen state from FILE at start\n\
+", stdout);
       fputs ("\
 \n\
 Debugging:\n\
-  -d, --debug=[FLAGS]          set debug level (no FLAGS implies `aeq')\n\
-  -t, --trace=NAME             trace NAME when it will be defined\n\
+  -d, --debug[=FLAGS]          set debug level (no FLAGS implies `aeq')\n\
   -l, --arglength=NUM          restrict macro tracing size\n\
-  -o, --error-output=FILE      redirect debug and trace output\n",
-	     stdout);
+  -o, --error-output=FILE      redirect debug and trace output\n\
+  -t, --trace=NAME             trace NAME when it will be defined\n\
+", stdout);
       fputs ("\
 \n\
 FLAGS is any of:\n\
-  t   trace for all macro calls, not only traceon'ed\n\
   a   show actual arguments\n\
-  e   show expansion\n\
-  q   quote values as necessary, with a or e flag\n\
   c   show before collect, after collect and after call\n\
-  x   add a unique macro call id, useful with c flag\n\
+  e   show expansion\n\
   f   say current input file name\n\
+  i   show changes in input files\n\
   l   say current input line number\n\
   p   show results of path searches\n\
-  i   show changes in input files\n\
-  V   shorthand for all of the above flags\n",
-	     stdout);
+  q   quote values as necessary, with a or e flag\n\
+  t   trace for all macro calls, not only traceon'ed\n\
+  V   shorthand for all of the other flags\n\
+  x   add a unique macro call id, useful with c flag\n\
+", stdout);
       fputs ("\
 \n\
-If no FILE or if FILE is `-', standard input is read.\n",
-	     stdout);
+If defined, the environment variable `M4PATH' is a colon-separated list\n\
+of directories included after any specified by `-I'.\n\
+", stdout);
+      fputs ("\
+\n\
+If no FILE or if FILE is `-', standard input is read.\n\
+", stdout);
+      fputs ("\
+\n\
+Exit status is 0 for success, 1 for failure, or whatever value was passed\n\
+to the m4exit macro.\n\
+", stdout);
     }
   exit (status);
 }
@@ -281,7 +289,8 @@ main (int argc, char *const *argv, char *const *envp)
 
   head = tail = NULL;
 
-  while (optchar = getopt_long (argc, argv, OPTSTRING, long_options, NULL),
+  while (optchar = getopt_long (argc, (char **) argv, OPTSTRING,
+                                long_options, NULL),
 	 optchar != EOF)
     switch (optchar)
       {
@@ -329,8 +338,8 @@ main (int argc, char *const *argv, char *const *envp)
 	break;
 
       case 'H':
-	hash_table_size = atoi (optarg);
-	if (hash_table_size <= 0)
+	hash_table_size = atol (optarg);
+	if (hash_table_size == 0)
 	  hash_table_size = HASHMAX;
 	break;
 
@@ -394,7 +403,7 @@ main (int argc, char *const *argv, char *const *envp)
       printf ("%s\n", PACKAGE_STRING);
       printf ("Written by Rene' Seindal.\n\
 \n\
-Copyright (C) 2005 Free Software Foundation, Inc.\n\
+Copyright (C) 2006 Free Software Foundation, Inc.\n\
 This is free software; see the source for copying conditions.  There is NO\n\
 warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\
 ");
@@ -450,12 +459,12 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\
 
 	default:
 	  M4ERROR ((warning_status, 0,
-		    "INTERNAL ERROR: Bad code in deferred arguments"));
+		    "INTERNAL ERROR: bad code in deferred arguments"));
 	  abort ();
 	}
 
       next = defines->next;
-      xfree ((voidstar) defines);
+      xfree (defines);
       defines = next;
     }
 

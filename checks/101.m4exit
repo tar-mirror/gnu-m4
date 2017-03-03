@@ -1,0 +1,7 @@
+dnl @ ../doc/m4.texinfo:3941: Origin of test
+m4wrap(`This text is lost to `m4exit'.')
+dnl @result{}
+divert(`1') And so is this.
+divert
+dnl @result{}
+m4exit

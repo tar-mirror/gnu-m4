@@ -1,0 +1,25 @@
+dnl @ ../doc/m4.texinfo:3751: Origin of test
+syscmd(`false')
+dnl @result{}
+ifelse(sysval, `0', `zero', `non-zero')
+dnl @result{}non-zero
+syscmd(`exit 2')
+dnl @result{}
+sysval
+dnl @result{}2
+syscmd(`true')
+dnl @result{}
+sysval
+dnl @result{}0
+esyscmd(`false')
+dnl @result{}
+ifelse(sysval, `0', `zero', `non-zero')
+dnl @result{}non-zero
+esyscmd(`exit 2')
+dnl @result{}
+sysval
+dnl @result{}2
+esyscmd(`true')
+dnl @result{}
+sysval
+dnl @result{}0

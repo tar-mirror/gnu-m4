@@ -1,6 +1,7 @@
 /* GNU m4 -- A simple macro processor
 
-   Copyright (C) 1989, 90, 91, 92, 93, 94 Free Software Foundation, Inc.
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2006 Free Software
+   Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -91,7 +92,7 @@ expand_token (struct obstack *obs, token_type t, token_data *td)
 
     default:
       M4ERROR ((warning_status, 0,
-		"INTERNAL ERROR: Bad token type in expand_token ()"));
+		"INTERNAL ERROR: bad token type in expand_token ()"));
       abort ();
     }
 }
@@ -122,7 +123,7 @@ expand_argument (struct obstack *obs, token_data *argp)
     {
       t = next_token (&td);
     }
-  while (t == TOKEN_SIMPLE && isspace (*TOKEN_DATA_TEXT (&td)));
+  while (t == TOKEN_SIMPLE && isspace (to_uchar (*TOKEN_DATA_TEXT (&td))));
 
   paren_level = 0;
 
@@ -157,7 +158,7 @@ expand_argument (struct obstack *obs, token_data *argp)
 
 	case TOKEN_EOF:
 	  M4ERROR ((EXIT_FAILURE, 0,
-		    "ERROR: EOF in argument list"));
+		    "ERROR: end of file in argument list"));
 	  break;
 
 	case TOKEN_WORD:
@@ -170,13 +171,12 @@ expand_argument (struct obstack *obs, token_data *argp)
 	    {
 	      TOKEN_DATA_TYPE (argp) = TOKEN_FUNC;
 	      TOKEN_DATA_FUNC (argp) = TOKEN_DATA_FUNC (&td);
-	      TOKEN_DATA_FUNC_TRACED (argp) = TOKEN_DATA_FUNC_TRACED (&td);
 	    }
 	  break;
 
 	default:
 	  M4ERROR ((warning_status, 0,
-		    "INTERNAL ERROR: Bad token type in expand_argument ()"));
+		    "INTERNAL ERROR: bad token type in expand_argument ()"));
 	  abort ();
 	}
 
@@ -202,8 +202,8 @@ collect_arguments (symbol *sym, struct obstack *argptr,
 
   TOKEN_DATA_TYPE (&td) = TOKEN_TEXT;
   TOKEN_DATA_TEXT (&td) = SYMBOL_NAME (sym);
-  tdp = (token_data *) obstack_copy (arguments, (voidstar) &td, sizeof (td));
-  obstack_grow (argptr, (voidstar) &tdp, sizeof (tdp));
+  tdp = (token_data *) obstack_copy (arguments, &td, sizeof (td));
+  obstack_grow (argptr, &tdp, sizeof (tdp));
 
   ch = peek_input ();
   if (ch == '(')
@@ -219,8 +219,8 @@ collect_arguments (symbol *sym, struct obstack *argptr,
 	      TOKEN_DATA_TEXT (&td) = "";
 	    }
 	  tdp = (token_data *)
-	    obstack_copy (arguments, (voidstar) &td, sizeof (td));
-	  obstack_grow (argptr, (voidstar) &tdp, sizeof (tdp));
+	    obstack_copy (arguments, &td, sizeof (td));
+	  obstack_grow (argptr, &tdp, sizeof (tdp));
 	}
       while (more_args);
     }
@@ -252,7 +252,7 @@ call_macro (symbol *sym, int argc, token_data **argv,
 
     default:
       M4ERROR ((warning_status, 0,
-		"INTERNAL ERROR: Bad symbol type in call_macro ()"));
+		"INTERNAL ERROR: bad symbol type in call_macro ()"));
       abort ();
     }
 }
@@ -262,7 +262,7 @@ call_macro (symbol *sym, int argc, token_data **argv,
 | arguments, using collect_arguments (), and builds a table of pointers to |
 | the arguments.  The arguments themselves are stored on a local obstack.  |
 | Expand_macro () uses call_macro () to do the call of the macro.	   |
-| 									   |
+|									   |
 | Expand_macro () is potentially recursive, since it calls expand_argument |
 | (), which might call expand_token (), which might call expand_macro ().  |
 `-------------------------------------------------------------------------*/
@@ -279,10 +279,11 @@ expand_macro (symbol *sym)
   boolean traced;
   int my_call_id;
 
+  SYMBOL_PENDING_EXPANSIONS (sym)++;
   expansion_level++;
   if (expansion_level > nesting_limit)
     M4ERROR ((EXIT_FAILURE, 0,
-	      "ERROR: Recursion limit of %d exceeded, use -L<N> to change it",
+	      "ERROR: recursion limit of %d exceeded, use -L<N> to change it",
 	      nesting_limit));
 
   macro_call_id++;
@@ -312,6 +313,10 @@ expand_macro (symbol *sym)
     trace_post (SYMBOL_NAME (sym), my_call_id, argc, argv, expanded);
 
   --expansion_level;
+  --SYMBOL_PENDING_EXPANSIONS (sym);
+
+  if (SYMBOL_DELETED (sym))
+    free_symbol (sym);
 
   obstack_free (&arguments, NULL);
   obstack_free (&argptr, NULL);

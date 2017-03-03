@@ -1,0 +1,10 @@
+dnl @ ../doc/m4.texinfo:3312: Origin of test
+define(`patreg',
+`patsubst($@)
+regexp($@)')dnl
+patreg(`bar foo baz Foo', `foo\|Foo', `FOO')
+dnl @result{}bar FOO baz FOO
+dnl @result{}FOO
+patreg(`aba abb 121', `\(.\)\(.\)\1', `\2\1\2')
+dnl @result{}bab abb 212
+dnl @result{}bab

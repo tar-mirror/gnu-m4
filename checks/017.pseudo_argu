@@ -1,0 +1,15 @@
+dnl @ ../doc/m4.texinfo:1332: Origin of test
+define(`echo1', `$*')
+dnl @result{}
+define(`echo2', `$@')
+dnl @result{}
+define(`foo', `bar')
+dnl @result{}
+echo1(#foo'foo
+foo)
+dnl @result{}#foo'foo
+dnl @result{}bar
+echo2(#foo'foo
+foo)
+dnl @result{}#foobar
+dnl @result{}bar'

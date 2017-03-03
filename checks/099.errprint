@@ -1,0 +1,5 @@
+dnl @ ../doc/m4.texinfo:3898: Origin of test
+errprint(`m4:'__file__:__line__: `input error
+')
+dnl @error{}m4:stdin:1: input error
+dnl @result{}

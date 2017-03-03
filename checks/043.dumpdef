@@ -1,0 +1,9 @@
+dnl @ ../doc/m4.texinfo:2036: Origin of test
+pushdef(`f', ``$0'1')pushdef(`f', ``$0'2')
+dnl @result{}
+f(popdef(`f')dumpdef(`f'))
+dnl @error{}f:	``$0'1'
+dnl @result{}f2
+f(popdef(`f')dumpdef(`f'))
+dnl @error{}stdin:3: m4: undefined macro `f'
+dnl @result{}f1

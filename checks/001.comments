@@ -1,0 +1,5 @@
+dnl @ ../doc/m4.texinfo:772: Origin of test
+`quoted text' # `commented text'
+dnl @result{}quoted text # `commented text'
+`quoting inhibits' `#' `comments'
+dnl @result{}quoting inhibits # comments

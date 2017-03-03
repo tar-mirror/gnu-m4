@@ -1,0 +1,11 @@
+dnl @ ../doc/m4.texinfo:3660: Origin of test
+define(`provided', `0')
+dnl @result{}
+ifdef(`__unix__', `define(`provided', incr(provided))')
+dnl @result{}
+ifdef(`__windows__', `define(`provided', incr(provided))')
+dnl @result{}
+ifdef(`__os2__', `define(`provided', incr(provided))')
+dnl @result{}
+provided
+dnl @result{}1

@@ -22,11 +22,23 @@
    your main control loop, etc. to force garbage collection.  */
 
 #ifdef HAVE_CONFIG_H
-#include <config.h>
+# include <config.h>
 #endif
 
+#include <alloca.h>
+
+#include <string.h>
+#include <stdlib.h>
+
 #ifdef emacs
-#include "blockinput.h"
+# include "lisp.h"
+# include "blockinput.h"
+# ifdef EMACS_FREE
+#  undef free
+#  define free EMACS_FREE
+# endif
+#else
+# define memory_full() abort ()
 #endif
 
 /* If compiling with GCC 2, this file's not needed.  */
@@ -34,54 +46,33 @@
 
 /* If someone has defined alloca as a macro,
    there must be some other way alloca is supposed to work.  */
-#ifndef alloca
+# ifndef alloca
 
-#ifdef emacs
-#ifdef static
+#  ifdef emacs
+#   ifdef static
 /* actually, only want this if static is defined as ""
    -- this is for usg, in which emacs must undefine static
    in order to make unexec workable
    */
-#ifndef STACK_DIRECTION
+#    ifndef STACK_DIRECTION
 you
 lose
 -- must know STACK_DIRECTION at compile-time
-#endif /* STACK_DIRECTION undefined */
-#endif /* static */
-#endif /* emacs */
+/* Using #error here is not wise since this file should work for
+   old and obscure compilers.  */
+#    endif /* STACK_DIRECTION undefined */
+#   endif /* static */
+#  endif /* emacs */
 
 /* If your stack is a linked list of frames, you have to
    provide an "address metric" ADDRESS_FUNCTION macro.  */
 
-#if defined (CRAY) && defined (CRAY_STACKSEG_END)
+#  if defined (CRAY) && defined (CRAY_STACKSEG_END)
 long i00afunc ();
-#define ADDRESS_FUNCTION(arg) (char *) i00afunc (&(arg))
-#else
-#define ADDRESS_FUNCTION(arg) &(arg)
-#endif
-
-#if __STDC__
-typedef void *pointer;
-#else
-typedef char *pointer;
-#endif
-
-#define	NULL	0
-
-/* Different portions of Emacs need to call different versions of
-   malloc.  The Emacs executable needs alloca to call xmalloc, because
-   ordinary malloc isn't protected from input signals.  On the other
-   hand, the utilities in lib-src need alloca to call malloc; some of
-   them are very simple, and don't have an xmalloc routine.
-
-   Non-Emacs programs expect this to call use xmalloc.
-
-   Callers below should use malloc.  */
-
-#ifndef emacs
-#define malloc xmalloc
-#endif
-extern pointer malloc ();
+#   define ADDRESS_FUNCTION(arg) (char *) i00afunc (&(arg))
+#  else
+#   define ADDRESS_FUNCTION(arg) &(arg)
+#  endif
 
 /* Define STACK_DIRECTION if you know the direction of stack
    growth for your system; otherwise it will be automatically
@@ -91,21 +82,21 @@ extern pointer malloc ();
    STACK_DIRECTION < 0 => grows toward lower addresses
    STACK_DIRECTION = 0 => direction of growth unknown  */
 
-#ifndef STACK_DIRECTION
-#define	STACK_DIRECTION	0	/* Direction unknown.  */
-#endif
+#  ifndef STACK_DIRECTION
+#   define STACK_DIRECTION	0	/* Direction unknown.  */
+#  endif
 
-#if STACK_DIRECTION != 0
+#  if STACK_DIRECTION != 0
 
-#define	STACK_DIR	STACK_DIRECTION	/* Known at compile-time.  */
+#   define STACK_DIR	STACK_DIRECTION	/* Known at compile-time.  */
 
-#else /* STACK_DIRECTION == 0; need run-time code.  */
+#  else /* STACK_DIRECTION == 0; need run-time code.  */
 
 static int stack_dir;		/* 1 or -1 once known.  */
-#define	STACK_DIR	stack_dir
+#   define STACK_DIR	stack_dir
 
 static void
-find_stack_direction ()
+find_stack_direction (void)
 {
   static char *addr = NULL;	/* Address of first `dummy', once known.  */
   auto char dummy;		/* To get stack address.  */
@@ -126,7 +117,7 @@ find_stack_direction ()
     }
 }
 
-#endif /* STACK_DIRECTION == 0 */
+#  endif /* STACK_DIRECTION == 0 */
 
 /* An "alloca header" is used to:
    (a) chain together all alloca'ed blocks;
@@ -135,9 +126,9 @@ find_stack_direction ()
    It is very important that sizeof(header) agree with malloc
    alignment chunk size.  The following default should work okay.  */
 
-#ifndef	ALIGN_SIZE
-#define	ALIGN_SIZE	sizeof(double)
-#endif
+#  ifndef	ALIGN_SIZE
+#   define ALIGN_SIZE	sizeof(double)
+#  endif
 
 typedef union hdr
 {
@@ -158,27 +149,26 @@ static header *last_alloca_header = NULL;	/* -> last alloca header.  */
    caller, but that method cannot be made to work for some
    implementations of C, for example under Gould's UTX/32.  */
 
-pointer
-alloca (size)
-     unsigned size;
+void *
+alloca (size_t size)
 {
   auto char probe;		/* Probes stack depth: */
   register char *depth = ADDRESS_FUNCTION (probe);
 
-#if STACK_DIRECTION == 0
+#  if STACK_DIRECTION == 0
   if (STACK_DIR == 0)		/* Unknown growth direction.  */
     find_stack_direction ();
-#endif
+#  endif
 
   /* Reclaim garbage, defined as all alloca'd storage that
-     was allocated from deeper in the stack than currently. */
+     was allocated from deeper in the stack than currently.  */
 
   {
     register header *hp;	/* Traverses linked list.  */
 
-#ifdef emacs
+#  ifdef emacs
     BLOCK_INPUT;
-#endif
+#  endif
 
     for (hp = last_alloca_header; hp != NULL;)
       if ((STACK_DIR > 0 && hp->h.deep > depth)
@@ -186,7 +176,7 @@ alloca (size)
 	{
 	  register header *np = hp->h.next;
 
-	  free ((pointer) hp);	/* Collect garbage.  */
+	  free (hp);		/* Collect garbage.  */
 
 	  hp = np;		/* -> next header.  */
 	}
@@ -195,9 +185,9 @@ alloca (size)
 
     last_alloca_header = hp;	/* -> last valid storage.  */
 
-#ifdef emacs
+#  ifdef emacs
     UNBLOCK_INPUT;
-#endif
+#  endif
   }
 
   if (size == 0)
@@ -206,29 +196,38 @@ alloca (size)
   /* Allocate combined header + user data storage.  */
 
   {
-    register pointer new = malloc (sizeof (header) + size);
     /* Address of header.  */
+    register header *new;
 
-    ((header *) new)->h.next = last_alloca_header;
-    ((header *) new)->h.deep = depth;
+    size_t combined_size = sizeof (header) + size;
+    if (combined_size < sizeof (header))
+      memory_full ();
 
-    last_alloca_header = (header *) new;
+    new = malloc (combined_size);
+
+    if (! new)
+      memory_full ();
+
+    new->h.next = last_alloca_header;
+    new->h.deep = depth;
+
+    last_alloca_header = new;
 
     /* User storage begins just after header.  */
 
-    return (pointer) ((char *) new + sizeof (header));
+    return (void *) (new + 1);
   }
 }
 
-#if defined (CRAY) && defined (CRAY_STACKSEG_END)
+#  if defined (CRAY) && defined (CRAY_STACKSEG_END)
 
-#ifdef DEBUG_I00AFUNC
-#include <stdio.h>
-#endif
+#   ifdef DEBUG_I00AFUNC
+#    include <stdio.h>
+#   endif
 
-#ifndef CRAY_STACK
-#define CRAY_STACK
-#ifndef CRAY2
+#   ifndef CRAY_STACK
+#    define CRAY_STACK
+#    ifndef CRAY2
 /* Stack structures for CRAY-1, CRAY X-MP, and CRAY Y-MP */
 struct stack_control_header
   {
@@ -280,7 +279,7 @@ struct stack_segment_linkage
     long sss7;
   };
 
-#else /* CRAY2 */
+#    else /* CRAY2 */
 /* The following structure defines the vector of words
    returned by the STKSTAT library routine.  */
 struct stk_stat
@@ -333,12 +332,12 @@ struct stk_trailer
     long unknown14;
   };
 
-#endif /* CRAY2 */
-#endif /* not CRAY_STACK */
+#    endif /* CRAY2 */
+#   endif /* not CRAY_STACK */
 
-#ifdef CRAY2
+#   ifdef CRAY2
 /* Determine a "stack measure" for an arbitrary ADDRESS.
-   I doubt that "lint" will like this much. */
+   I doubt that "lint" will like this much.  */
 
 static long
 i00afunc (long *address)
@@ -407,7 +406,7 @@ i00afunc (long *address)
   return (result);
 }
 
-#else /* not CRAY2 */
+#   else /* not CRAY2 */
 /* Stack address function for a CRAY-1, CRAY X-MP, or CRAY Y-MP.
    Determine the number of the cell within the stack,
    given the address of the cell.  The purpose of this
@@ -452,9 +451,9 @@ i00afunc (long address)
 
   while (!(this_segment <= address && address <= stkl))
     {
-#ifdef DEBUG_I00AFUNC
+#    ifdef DEBUG_I00AFUNC
       fprintf (stderr, "%011o %011o %011o\n", this_segment, address, stkl);
-#endif
+#    endif
       if (pseg == 0)
 	break;
       stkl = stkl - pseg;
@@ -473,9 +472,9 @@ i00afunc (long address)
 
   while (pseg != 0)
     {
-#ifdef DEBUG_I00AFUNC
+#    ifdef DEBUG_I00AFUNC
       fprintf (stderr, "%011o %011o\n", pseg, size);
-#endif
+#    endif
       stkl = stkl - pseg;
       ssptr = (struct stack_segment_linkage *) stkl;
       size = ssptr->sssize;
@@ -485,8 +484,8 @@ i00afunc (long address)
   return (result);
 }
 
-#endif /* not CRAY2 */
-#endif /* CRAY */
+#   endif /* not CRAY2 */
+#  endif /* CRAY */
 
-#endif /* no alloca */
+# endif /* no alloca */
 #endif /* not GCC version 2 */

@@ -1,0 +1,11 @@
+dnl @ ../doc/m4.texinfo:3543: Origin of test
+eval(0x80000000 / -1)
+dnl @result{}-2147483648
+eval(0x80000000 % -1)
+dnl @result{}0
+eval(0x7fffffff)
+dnl @result{}2147483647
+incr(eval(0x7fffffff))
+dnl @result{}-2147483648
+eval(-4 >> 33)
+dnl @result{}-2

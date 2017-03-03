@@ -1,0 +1,11 @@
+dnl @ ../doc/m4.texinfo:1814: Origin of test
+ifelse(`foo', `bar', `true')
+dnl @result{}
+ifelse(`foo', `foo', `true')
+dnl @result{}true
+define(`foo', `bar')
+dnl @result{}
+ifelse(foo, `bar', `true', `false')
+dnl @result{}true
+ifelse(foo, `foo', `true', `false')
+dnl @result{}false

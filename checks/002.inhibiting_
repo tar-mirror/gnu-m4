@@ -1,0 +1,7 @@
+dnl @ ../doc/m4.texinfo:953: Origin of test
+define(`x', `substr(ab')
+dnl @result{}
+define(`y', `cde, `3', `2')')
+dnl @result{}
+x`'y
+dnl @result{}de

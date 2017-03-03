@@ -1,0 +1,6 @@
+dnl @ ../doc/m4.texinfo:2336: Origin of test
+dnl(`args are ignored, but side effects occur',
+define(`foo', `like this')) while this text is ignored: undefine(`foo')
+dnl @error{}stdin:2: m4: Warning: excess arguments to builtin `dnl' ignored
+See how `foo' was defined, foo?
+dnl @result{}See how foo was defined, like this?

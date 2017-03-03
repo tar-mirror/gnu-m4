@@ -1,0 +1,12 @@
+dnl @ ../doc/m4.texinfo:1669: Origin of test
+builtin
+dnl @result{}builtin
+builtin()
+dnl @error{}stdin:2: m4: undefined builtin `'
+dnl @result{}
+builtin(`builtin')
+dnl @error{}stdin:3: m4: Warning: too few arguments to builtin `builtin'
+dnl @result{}
+builtin(`builtin',)
+dnl @error{}stdin:4: m4: undefined builtin `'
+dnl @result{}

@@ -1,0 +1,7 @@
+dnl @ ../doc/m4.texinfo:2510: Origin of test
+ifdef(`changeword', `', `m4exit(`77')')
+dnl @result{}
+changeword(`[_a-zA-Z0-9]+')
+dnl @result{}
+define(`1', `0')1
+dnl @result{}0

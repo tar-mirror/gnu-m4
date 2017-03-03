@@ -1,0 +1,9 @@
+dnl @ ../doc/m4.texinfo:2846: Origin of test
+define(`text', `TEXT')
+dnl @result{}
+divert(`1')`diverted text.'
+divert
+dnl @result{}
+m4wrap(`Wrapped text preceeds ')
+dnl @result{}
+dnl @result{}Wrapped TEXT preceeds diverted text.

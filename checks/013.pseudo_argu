@@ -1,0 +1,16 @@
+dnl @ ../doc/m4.texinfo:1268: Origin of test
+define(`nargs', `$#')
+dnl @result{}
+nargs
+dnl @result{}0
+nargs()
+dnl @result{}1
+nargs(`arg1', `arg2', `arg3')
+dnl @result{}3
+nargs(`commas can be quoted, like this')
+dnl @result{}1
+nargs(arg1#inside comments, commas do not separate arguments
+still arg1)
+dnl @result{}1
+nargs((unquoted parentheses, like this, group arguments))
+dnl @result{}1

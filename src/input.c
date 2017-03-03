@@ -1,6 +1,6 @@
 /* GNU m4 -- A simple macro processor
 
-   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2004, 2005
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2004, 2005, 2006
    Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
@@ -28,15 +28,17 @@
    or quoted macro definitions (as returned by the builtin "defn").
    Unread input are organised in a stack, implemented with an obstack.
    Each input source is described by a "struct input_block".  The obstack
-   is "input_stack".  The top of the input stack is "isp".
+   is "current_input".  The top of the input stack is "isp".
 
-   The macro "m4wrap" places the text to be saved on another input stack,
-   on the obstack "wrapup_stack", whose top is "wsp".  When EOF is seen
-   on normal input (eg, when "input_stack" is empty), input is switched
-   over to "wrapup_stack".  To make this easier, all references to the
-   current input stack, whether it be "input_stack" or "wrapup_stack",
-   are done through a pointer "current_input", which points to either
-   "input_stack" or "wrapup_stack".
+   The macro "m4wrap" places the text to be saved on another input
+   stack, on the obstack "wrapup_stack", whose top is "wsp".  When EOF
+   is seen on normal input (eg, when "current_input" is empty), input is
+   switched over to "wrapup_stack", and the original "current_input" is
+   freed.  A new stack is allocated for "wrapup_stack", which will
+   accept any text produced by calls to "m4wrap" from within the
+   wrapped text.  This process of shuffling "wrapup_stack" to
+   "current_input" can continue indefinitely, even generating infinite
+   loops (e.g. "define(`f',`m4wrap(`f')')f"), without memory leaks.
 
    Pushing new input on the input stack is done by push_file (),
    push_string (), push_wrapup () (for wrapup text), and push_macro ()
@@ -87,12 +89,7 @@ struct input_block
 	  boolean advance_line;	/* start_of_input_line from next_char () */
 	}
       u_f;
-      struct
-	{
-	  builtin_func *func;	/* pointer to macros function */
-	  boolean traced;	/* TRUE iff builtin is traced */
-	}
-      u_m;
+      builtin_func *func;	/* pointer to macro's function */
     }
   u;
 };
@@ -109,13 +106,10 @@ int current_line;
 /* Obstack for storing individual tokens.  */
 static struct obstack token_stack;
 
-/* Normal input stack.  */
-static struct obstack input_stack;
-
 /* Wrapup input stack.  */
-static struct obstack wrapup_stack;
+static struct obstack *wrapup_stack;
 
-/* Input or wrapup.  */
+/* Current stack, from input or wrapup.  */
 static struct obstack *current_input;
 
 /* Bottom of token_stack, for obstack_free.  */
@@ -193,14 +187,14 @@ push_file (FILE *fp, const char *title)
   isp = i;
 }
 
-/*-------------------------------------------------------------------------.
-| push_macro () pushes a builtin macros definition on the input stack.  If |
-| next is non-NULL, this push invalidates a call to push_string_init (),   |
-| whose storage are consequentely released.				   |
-`-------------------------------------------------------------------------*/
+/*---------------------------------------------------------------.
+| push_macro () pushes a builtin macro's definition on the input |
+| stack.  If next is non-NULL, this push invalidates a call to   |
+| push_string_init (), whose storage is consequently released.   |
+`---------------------------------------------------------------*/
 
 void
-push_macro (builtin_func *func, boolean traced)
+push_macro (builtin_func *func)
 {
   input_block *i;
 
@@ -214,8 +208,7 @@ push_macro (builtin_func *func, boolean traced)
 				     sizeof (struct input_block));
   i->type = INPUT_MACRO;
 
-  i->u.u_m.func = func;
-  i->u.u_m.traced = traced;
+  i->u.func = func;
   i->prev = isp;
   isp = i;
 }
@@ -231,7 +224,7 @@ push_string_init (void)
   if (next != NULL)
     {
       M4ERROR ((warning_status, 0,
-		"INTERNAL ERROR: Recursive push_string!"));
+		"INTERNAL ERROR: recursive push_string!"));
       abort ();
     }
 
@@ -283,11 +276,11 @@ push_string_finish (void)
 void
 push_wrapup (const char *s)
 {
-  input_block *i = (input_block *) obstack_alloc (&wrapup_stack,
+  input_block *i = (input_block *) obstack_alloc (wrapup_stack,
 						  sizeof (struct input_block));
   i->prev = wsp;
   i->type = INPUT_STRING;
-  i->u.u_s.string = obstack_copy0 (&wrapup_stack, s, strlen (s));
+  i->u.u_s.string = obstack_copy0 (wrapup_stack, s, strlen (s));
   wsp = i;
 }
 
@@ -325,7 +318,7 @@ pop_input (void)
 
     default:
       M4ERROR ((warning_status, 0,
-		"INTERNAL ERROR: Input stack botch in pop_input ()"));
+		"INTERNAL ERROR: input stack botch in pop_input ()"));
       abort ();
     }
   obstack_free (current_input, isp);
@@ -343,20 +336,30 @@ pop_input (void)
 boolean
 pop_wrapup (void)
 {
-  if (wsp == NULL)
-    return FALSE;
+  obstack_free (current_input, NULL);
+  xfree (current_input);
 
-  current_input = &wrapup_stack;
+  if (wsp == NULL)
+    {
+      obstack_free (wrapup_stack, NULL);
+      xfree (wrapup_stack);
+      return FALSE;
+    }
+
+  current_input = wrapup_stack;
+  wrapup_stack = (struct obstack *) xmalloc (sizeof (struct obstack));
+  obstack_init (wrapup_stack);
+
   isp = wsp;
   wsp = NULL;
 
   return TRUE;
 }
 
-/*--------------------------------------------------------------------.
-| When a MACRO token is seen, next_token () uses init_macro_token () to |
-| retrieve the value of the function pointer.			      |
-`--------------------------------------------------------------------*/
+/*-------------------------------------------------------------------.
+| When a MACRO token is seen, next_token () uses init_macro_token () |
+| to retrieve the value of the function pointer.                     |
+`-------------------------------------------------------------------*/
 
 static void
 init_macro_token (token_data *td)
@@ -364,13 +367,12 @@ init_macro_token (token_data *td)
   if (isp->type != INPUT_MACRO)
     {
       M4ERROR ((warning_status, 0,
-		"INTERNAL ERROR: Bad call to init_macro_token ()"));
+		"INTERNAL ERROR: bad call to init_macro_token ()"));
       abort ();
     }
 
   TOKEN_DATA_TYPE (td) = TOKEN_FUNC;
-  TOKEN_DATA_FUNC (td) = isp->u.u_m.func;
-  TOKEN_DATA_FUNC_TRACED (td) = isp->u.u_m.traced;
+  TOKEN_DATA_FUNC (td) = isp->u.func;
 }
 
 
@@ -413,7 +415,7 @@ peek_input (void)
 
 	default:
 	  M4ERROR ((warning_status, 0,
-		    "INTERNAL ERROR: Input stack botch in peek_input ()"));
+		    "INTERNAL ERROR: input stack botch in peek_input ()"));
 	  abort ();
 	}
       /* End of input source --- pop one level.  */
@@ -477,7 +479,7 @@ next_char_1 (void)
 
 	default:
 	  M4ERROR ((warning_status, 0,
-		    "INTERNAL ERROR: Input stack botch in next_char ()"));
+		    "INTERNAL ERROR: input stack botch in next_char ()"));
 	  abort ();
 	}
 
@@ -531,7 +533,12 @@ match_input (const char *s)
     }
 
   /* Failed, push back input.  */
-  obstack_grow (push_string_init (), t, n);
+  {
+    struct obstack *h = push_string_init ();
+
+    /* `obstack_grow' may be macro evaluating its arg 1 several times. */
+    obstack_grow (h, t, n);
+  }
   push_string_finish ();
   return 0;
 }
@@ -561,10 +568,11 @@ input_init (void)
   current_line = 0;
 
   obstack_init (&token_stack);
-  obstack_init (&input_stack);
-  obstack_init (&wrapup_stack);
 
-  current_input = &input_stack;
+  current_input = (struct obstack *) xmalloc (sizeof (struct obstack));
+  obstack_init (current_input);
+  wrapup_stack = (struct obstack *) xmalloc (sizeof (struct obstack));
+  obstack_init (wrapup_stack);
 
   obstack_1grow (&token_stack, '\0');
   token_bottom = obstack_finish (&token_stack);
@@ -585,10 +593,7 @@ input_init (void)
   ecomm.length = strlen (ecomm.string);
 
 #ifdef ENABLE_CHANGEWORD
-  if (user_word_regexp)
-    set_word_regexp (user_word_regexp);
-  else
-    set_word_regexp (DEFAULT_WORD_REGEXP);
+  set_word_regexp (user_word_regexp);
 #endif
 }
 
@@ -641,7 +646,7 @@ set_word_regexp (const char *regexp)
   const char *msg;
   struct re_pattern_buffer new_word_regexp;
 
-  if (!strcmp (regexp, DEFAULT_WORD_REGEXP))
+  if (!*regexp || !strcmp (regexp, DEFAULT_WORD_REGEXP))
     {
       default_word_regexp = TRUE;
       return;
@@ -655,7 +660,7 @@ set_word_regexp (const char *regexp)
   if (msg != NULL)
     {
       M4ERROR ((warning_status, 0,
-		"Bad regular expression `%s': %s", regexp, msg));
+		"bad regular expression `%s': %s", regexp, msg));
       return;
     }
 
@@ -666,7 +671,7 @@ set_word_regexp (const char *regexp)
   if (msg != NULL)
     {
       M4ERROR ((EXIT_FAILURE, 0,
-		"Internal error: Expression recompilation `%s': %s",
+		"INTERNAL ERROR: expression recompilation `%s': %s",
 		regexp, msg));
     }
 
@@ -694,7 +699,7 @@ set_word_regexp (const char *regexp)
 | for a quoted string; TOKEN_WORD for something that is a potential macro  |
 | name; and TOKEN_SIMPLE for any single character that is not a part of	   |
 | any of the previous types.						   |
-| 									   |
+|									   |
 | Next_token () return the token type, and passes back a pointer to the	   |
 | token data through TD.  The token text is collected on the obstack	   |
 | token_stack, which never contains more than one token text at a time.	   |
@@ -720,10 +725,10 @@ next_token (token_data *td)
   ch = peek_input ();
   if (ch == CHAR_EOF)
     {
-      return TOKEN_EOF;
 #ifdef DEBUG_INPUT
       fprintf (stderr, "next_token -> EOF\n");
 #endif
+      return TOKEN_EOF;
     }
   if (ch == CHAR_MACRO)
     {
@@ -808,7 +813,7 @@ next_token (token_data *td)
 	  ch = next_char ();
 	  if (ch == CHAR_EOF)
 	    M4ERROR ((EXIT_FAILURE, 0,
-		      "ERROR: EOF in string"));
+		      "ERROR: end of file in string"));
 
 	  if (MATCH (ch, rquote.string))
 	    {
@@ -864,7 +869,7 @@ print_token (const char *s, token_type t, token_data *td)
       break;
 
     case TOKEN_MACDEF:
-      fprintf (stderr, "macro: 0x%x\n", TOKEN_DATA_FUNC (td));
+      fprintf (stderr, "macro: %p\n", TOKEN_DATA_FUNC (td));
       break;
 
     case TOKEN_EOF:
@@ -874,13 +879,13 @@ print_token (const char *s, token_type t, token_data *td)
   fprintf (stderr, "\t\"%s\"\n", TOKEN_DATA_TEXT (td));
 }
 
-static void
+static void M4_GNUC_UNUSED
 lex_debug (void)
 {
   token_type t;
   token_data td;
 
-  while ((t = next_token (&td)) != NULL)
+  while ((t = next_token (&td)) != TOKEN_EOF)
     print_token ("lex", t, &td);
 }
 #endif

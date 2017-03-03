@@ -1,0 +1,4 @@
+dnl @ ../doc/m4.texinfo:3035: Origin of test
+define(`cleardivert',
+`pushdef(`_n', divnum)divert(`-1')undivert($@)divert(_n)popdef(`_n')')
+dnl @result{}

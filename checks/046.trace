@@ -1,0 +1,13 @@
+dnl @ ../doc/m4.texinfo:2132: Origin of test
+traceon(`eval', `m4_divnum')
+dnl @result{}
+define(`m4_eval', defn(`eval'))
+dnl @result{}
+define(`m4_divnum', defn(`divnum'))
+dnl @result{}
+eval(divnum)
+dnl @error{}m4trace: -1- eval(`0') -> `0'
+dnl @result{}0
+m4_eval(m4_divnum)
+dnl @error{}m4trace: -2- m4_divnum -> `0'
+dnl @result{}0

@@ -1,0 +1,11 @@
+dnl @ ../doc/m4.texinfo:2706: Origin of test
+include(`none')
+dnl @result{}
+dnl @error{}stdin:1: m4: cannot open `none': No such file or directory
+include()
+dnl @result{}
+dnl @error{}stdin:2: m4: cannot open `': No such file or directory
+sinclude(`none')
+dnl @result{}
+sinclude()
+dnl @result{}

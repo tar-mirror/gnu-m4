@@ -1,0 +1,23 @@
+dnl @ ../doc/m4.texinfo:4449: Origin of test
+define(`cleardivert',
+  `pushdef(`_n', divnum)divert(`-1')undivert($@)divert(_n)popdef(`_n')')
+dnl @result{}
+divert(`1')one
+divert
+dnl @result{}
+cleardivert
+dnl @result{}
+undivert
+dnl @result{}one
+dnl @result{}
+define(`cleardivert',
+  `pushdef(`_num', divnum)divert(`-1')ifelse(`$#', `0',
+    `undivert`'', `undivert($@)')divert(_num)popdef(`_num')')
+dnl @result{}
+divert(`2')two
+divert
+dnl @result{}
+cleardivert
+dnl @result{}
+undivert
+dnl @result{}

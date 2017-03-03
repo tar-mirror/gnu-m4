@@ -1,0 +1,17 @@
+dnl @ ../doc/m4.texinfo:3567: Origin of test
+eval(`666', `10')
+dnl @result{}666
+eval(`666', `11')
+dnl @result{}556
+eval(`666', `6')
+dnl @result{}3030
+eval(`666', `6', `10')
+dnl @result{}0000003030
+eval(`-666', `6', `10')
+dnl @result{}-0000003030
+eval(`10', `', `0')
+dnl @result{}10
+`0r1:'eval(`10', `1', `11')
+dnl @result{}0r1:01111111111
+eval(`10', `16')
+dnl @result{}a

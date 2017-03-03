@@ -1,0 +1,7 @@
+dnl @ ../doc/m4.texinfo:1031: Origin of test
+define(`f', `1')
+dnl @result{}
+f(define(`f', `2'))
+dnl @result{}1
+f
+dnl @result{}2

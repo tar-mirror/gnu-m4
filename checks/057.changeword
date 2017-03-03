@@ -1,0 +1,12 @@
+dnl @ ../doc/m4.texinfo:2523: Origin of test
+ifdef(`changeword', `', `m4exit(`77')')
+dnl @result{}
+define(`_indir', defn(`indir'))
+dnl @result{}
+changeword(`_[_a-zA-Z0-9]*')
+dnl @result{}
+esyscmd(`foo')
+dnl @result{}esyscmd(foo)
+_indir(`esyscmd', `echo hi')
+dnl @result{}hi
+dnl @result{}

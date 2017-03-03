@@ -1,0 +1,10 @@
+dnl @ ../doc/m4.texinfo:1759: Origin of test
+ifdef(`foo', ``foo' is defined', ``foo' is not defined')
+dnl @result{}foo is not defined
+define(`foo', `')
+dnl @result{}
+ifdef(`foo', ``foo' is defined', ``foo' is not defined')
+dnl @result{}foo is defined
+ifdef(`no_such_macro', `yes', `no', `extra argument')
+dnl @error{}stdin:4: m4: Warning: excess arguments to builtin `ifdef' ignored
+dnl @result{}no

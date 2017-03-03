@@ -1,0 +1,6 @@
+dnl @ ../doc/m4.texinfo:1804: Origin of test
+ifelse(`some comments')
+dnl @result{}
+ifelse(`foo', `bar')
+dnl @error{}stdin:2: m4: Warning: too few arguments to builtin `ifelse'
+dnl @result{}

@@ -1,0 +1,11 @@
+dnl @ ../doc/m4.texinfo:3420: Origin of test
+incr(`4')
+dnl @result{}5
+decr(`7')
+dnl @result{}6
+incr()
+dnl @error{}stdin:3: m4: empty string treated as 0 in builtin `incr'
+dnl @result{}1
+decr()
+dnl @error{}stdin:4: m4: empty string treated as 0 in builtin `decr'
+dnl @result{}-1

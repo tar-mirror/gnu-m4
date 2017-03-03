@@ -1,0 +1,9 @@
+dnl @ ../doc/m4.texinfo:1832: Origin of test
+define(`foo', `ifelse(`$#', `0', ``$0'', `arguments:$#')')
+dnl @result{}
+foo
+dnl @result{}foo
+foo()
+dnl @result{}arguments:1
+foo(`a', `b', `c')
+dnl @result{}arguments:3

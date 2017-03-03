@@ -1,0 +1,10 @@
+dnl @ ../doc/m4.texinfo:2546: Origin of test
+ifdef(`changeword', `', `m4exit(`77')')
+dnl @result{}
+changecom(`/*', `*/')dnl
+define(`foo', `bar')dnl
+changeword(`#\([_a-zA-Z0-9]*\)')
+dnl @result{}
+#esyscmd(`echo foo \#foo')
+dnl @result{}foo bar
+dnl @result{}

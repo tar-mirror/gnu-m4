@@ -1,0 +1,6 @@
+dnl @ ../doc/m4.texinfo:3724: Origin of test
+define(`foo', `FOO')
+dnl @result{}
+esyscmd(`echo foo')
+dnl @result{}FOO
+dnl @result{}

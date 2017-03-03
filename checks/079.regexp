@@ -1,0 +1,7 @@
+dnl @ ../doc/m4.texinfo:3153: Origin of test
+regexp(`abc', `\(b\)', `\\\10\a')
+dnl @result{}\b0a
+regexp(`abc', `b', `\1\')
+dnl @error{}stdin:2: m4: Warning: sub-expression 1 not present
+dnl @error{}stdin:2: m4: Warning: trailing \ ignored in replacement
+dnl @result{}

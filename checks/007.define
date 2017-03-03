@@ -1,0 +1,7 @@
+dnl @ ../doc/m4.texinfo:1156: Origin of test
+define(foo, one)
+dnl @result{}
+define(foo, two)
+dnl @result{}
+one
+dnl @result{}two

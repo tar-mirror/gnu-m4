@@ -1,0 +1,8 @@
+dnl @ ../doc/m4.texinfo:2660: Origin of test
+define(`f', `ifelse(`$1', `0', `Answer: 0!=1
+', eval(`$1>1'), `0', `Answer: $2$1=eval(`$2$1')
+', `m4wrap(`f(decr(`$1'), `$2$1*')')')')
+dnl @result{}
+f(`10')
+dnl @result{}
+dnl @result{}Answer: 10*9*8*7*6*5*4*3*2*1=3628800

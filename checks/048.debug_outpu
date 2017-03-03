@@ -1,0 +1,17 @@
+dnl @ ../doc/m4.texinfo:2269: Origin of test
+traceon(`divnum')
+dnl @result{}
+divnum(`extra')
+dnl @error{}stdin:2: m4: Warning: excess arguments to builtin `divnum' ignored
+dnl @error{}m4trace: -1- divnum(`extra') -> `0'
+dnl @result{}0
+debugfile()
+dnl @result{}
+divnum(`extra')
+dnl @error{}stdin:4: m4: Warning: excess arguments to builtin `divnum' ignored
+dnl @result{}0
+debugfile
+dnl @result{}
+divnum
+dnl @error{}m4trace: -1- divnum -> `0'
+dnl @result{}0

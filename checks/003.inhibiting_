@@ -1,0 +1,7 @@
+dnl @ ../doc/m4.texinfo:966: Origin of test
+define(`macro', `m')
+dnl @result{}
+macro(`m')macro
+dnl @result{}mmacro
+macro(`m')`'macro
+dnl @result{}mm

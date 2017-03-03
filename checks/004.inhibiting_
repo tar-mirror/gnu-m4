@@ -1,0 +1,7 @@
+dnl @ ../doc/m4.texinfo:978: Origin of test
+define(`macro', `di$1')
+dnl @result{}
+macro(`v')`ert'
+dnl @result{}divert
+macro(`v')ert
+dnl @result{}

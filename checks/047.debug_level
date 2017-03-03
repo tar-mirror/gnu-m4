@@ -1,0 +1,20 @@
+dnl @ ../doc/m4.texinfo:2226: Origin of test
+define(`foo', `FOO')
+dnl @result{}
+traceon(`foo')
+dnl @result{}
+debugmode()
+dnl @result{}
+foo
+dnl @error{}m4trace: -1- foo -> `FOO'
+dnl @result{}FOO
+debugmode
+dnl @result{}
+foo
+dnl @error{}m4trace: -1- foo
+dnl @result{}FOO
+debugmode(`+l')
+dnl @result{}
+foo
+dnl @error{}m4trace:8: -1- foo
+dnl @result{}FOO

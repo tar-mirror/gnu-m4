@@ -1,0 +1,12 @@
+dnl @ ../doc/m4.texinfo:3835: Origin of test
+dnl This test assumes /tmp is a valid directory name, which is not true
+dnl for native Windows.
+ifdef(`__unix__', , `m4exit(`77')')dnl
+define(`file1', maketemp(`/tmp/fooXXXXXX'))dnl
+define(`file2', maketemp(`/tmp/fooXXXXXX'))dnl
+ifelse(file1, file2, `same', `different')
+dnl @result{}different
+syscmd(`rm 'file1 file2)
+dnl @result{}
+sysval
+dnl @result{}0
