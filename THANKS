@@ -8,6 +8,7 @@ these people.  Help me keep it complete and exempt of errors.
 Akiko Matsushita	matusita@sra.co.jp
 Akim Demaille		akim@epita.fr
 Alan Magnuson		awm@osc.edu
+Albert Chin		m4-discuss@mlists.thewrittenword.com
 Alexander Lehmann	alex@hal.rhein-main.de
 Amos Shapira		amoss@cs.huji.ac.il
 Andreas Büning		andreas.buening@nexgo.de
@@ -22,6 +23,7 @@ Bjorn R. Bjornsson	brb@falcon.is
 Bob Badour		bob@badour.net
 Brendan Kehoe		brendan@cygnus.com
 Bruno Haible		bruno@clisp.org
+Chris McGuire		chris@wso.net
 Damian Menscher		menscher@uiuc.edu
 Dan Jacobson		jidanni@jidanni.org
 David J. MacKenzie	djm@uunet.uu.net
@@ -59,6 +61,7 @@ Marion Hakanson		hakanson@cse.ogi.edu
 Mark Seiden		mis@seiden.com
 Martin Koeppe		mkoeppe@gmx.de
 Matt Kraai		kraai@debian.org
+Matthew Woehlke		mw_triad@users.sourceforge.net
 Matthias Rabe		rabe@mathematik.uni-bielefeld.de
 Michael Fetterman	mafetter@ichips.intel.com
 Michael L. Welcome	welcome@bigbird.llnl.gov
@@ -83,6 +86,7 @@ Robert Bernstein	rocky@panix.com
 Robert Bihlmeyer	robbe@orcus.priv.at
 Roland H. Pesch		roland@wrs.com
 Roland McGrath		roland@gnu.ai.mit.edu
+Sami Liedes		sliedes@cc.hut.fi
 Santiago Vila		sanvila@debian.org
 Scott Bartram		deneb!scottb
 Simon Leinen		simon@lia.di.epfl.ch
@@ -107,7 +111,7 @@ Local Variables:
 coding: utf-8
 End:
 
-Copyright (C) 2000, 2006 Free Software Foundation, Inc.
+Copyright (C) 2000, 2006, 2007 Free Software Foundation, Inc.
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.2 or

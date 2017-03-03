@@ -1,7 +1,7 @@
 /* GNU m4 -- A simple macro processor
 
-   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2004, 2005, 2006 Free
-   Software Foundation, Inc.
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2004, 2005, 2006, 2007
+   Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -24,6 +24,10 @@
 #include <getopt.h>
 #include <limits.h>
 #include <signal.h>
+
+#include "version-etc.h"
+
+#define AUTHORS "Rene' Seindal"
 
 static void usage (int);
 
@@ -48,6 +52,9 @@ int max_debug_argument_length = 0;
 /* Suppress warnings about missing arguments.  */
 int suppress_warnings = 0;
 
+/* If true, then warnings affect exit status.  */
+static bool fatal_warnings = false;
+
 /* If not zero, then value of exit status for warning diagnostics.  */
 int warning_status = 0;
 
@@ -61,6 +68,10 @@ const char *user_word_regexp = "";
 
 /* The name this program was run with. */
 const char *program_name;
+
+/* Global catchall for any errors that should affect final error status, but
+   where we try to continue execution in the meantime.  */
+int retcode;
 
 struct macro_definition
 {
@@ -83,6 +94,8 @@ m4_error (int status, int errnum, const char *format, ...)
   va_start (args, format);
   verror_at_line (status, errnum, current_line ? current_file : NULL,
 		  current_line, format, args);
+  if (fatal_warnings && ! retcode)
+    retcode = EXIT_FAILURE;
 }
 
 /*-------------------------------.
@@ -96,6 +109,8 @@ m4_error_at_line (int status, int errnum, const char *file, int line,
   va_list args;
   va_start (args, format);
   verror_at_line (status, errnum, line ? file : NULL, line, format, args);
+  if (fatal_warnings && ! retcode)
+    retcode = EXIT_FAILURE;
 }
 
 #ifdef USE_STACKOVF
@@ -138,11 +153,17 @@ for short options too.\n\
 Operation modes:\n\
       --help                   display this help and exit\n\
       --version                output version information and exit\n\
-  -E, --fatal-warnings         stop execution after first warning\n\
+", stdout);
+      printf ("\
+  -E, --fatal-warnings         once: warnings become errors, twice: stop\n\
+                               execution at first error\n\
   -i, --interactive            unbuffer output, ignore interrupts\n\
   -P, --prefix-builtins        force a `m4_' prefix to all builtins\n\
   -Q, --quiet, --silent        suppress some warnings for builtins\n\
-", stdout);
+      --warn-macro-sequence[=REGEXP]\n\
+                               warn if macro definition matches REGEXP,\n\
+                               default %s\n\
+", DEFAULT_MACRO_SEQUENCE);
 #ifdef ENABLE_CHANGEWORD
       fputs ("\
   -W, --word-regexp=REGEXP     use REGEXP for macro name syntax\n\
@@ -217,6 +238,7 @@ enum
 {
   DEBUGFILE_OPTION = CHAR_MAX + 1,	/* no short opt */
   DIVERSIONS_OPTION,			/* not quite -N, because of message */
+  WARN_MACRO_SEQUENCE_OPTION,		/* no short opt */
 
   HELP_OPTION,				/* no short opt */
   VERSION_OPTION			/* no short opt */
@@ -246,16 +268,13 @@ static const struct option long_options[] =
 
   {"debugfile", required_argument, NULL, DEBUGFILE_OPTION},
   {"diversions", required_argument, NULL, DIVERSIONS_OPTION},
+  {"warn-macro-sequence", optional_argument, NULL, WARN_MACRO_SEQUENCE_OPTION},
 
   {"help", no_argument, NULL, HELP_OPTION},
   {"version", no_argument, NULL, VERSION_OPTION},
 
   { NULL, 0, NULL, 0 },
 };
-
-/* Global catchall for any errors that should affect final error status, but
-   where we try to continue execution in the meantime.  */
-int retcode;
 
 /* Process a command line file NAME, and return true only if it was
    stdin.  */
@@ -317,6 +336,7 @@ main (int argc, char *const *argv, char *const *envp)
   const char *debugfile = NULL;
   const char *frozen_file_to_read = NULL;
   const char *frozen_file_to_write = NULL;
+  const char *macro_sequence = "";
 
   program_name = argv[0];
   retcode = EXIT_SUCCESS;
@@ -376,7 +396,10 @@ main (int argc, char *const *argv, char *const *envp)
 	break;
 
       case 'E':
-	warning_status = EXIT_FAILURE;
+	if (! fatal_warnings)
+	  fatal_warnings = true;
+	else
+	  warning_status = EXIT_FAILURE;
 	break;
 
       case 'F':
@@ -451,15 +474,16 @@ main (int argc, char *const *argv, char *const *envp)
 	debugfile = optarg;
 	break;
 
+      case WARN_MACRO_SEQUENCE_OPTION:
+         /* Don't call set_macro_sequence here, as it can exit.
+            --warn-macro-sequence sets optarg to NULL (which uses the
+            default regexp); --warn-macro-sequence= sets optarg to ""
+            (which disables these warnings).  */
+        macro_sequence = optarg;
+	break;
+
       case VERSION_OPTION:
-	printf ("%s\n", PACKAGE_STRING);
-	fputs ("\
-Copyright (C) 2006 Free Software Foundation, Inc.\n\
-This is free software; see the source for copying conditions.  There is NO\n\
-warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\
-\n\
-Written by Rene' Seindal.\n\
-", stdout);
+	version_etc (stdout, PACKAGE, PACKAGE_NAME, VERSION, AUTHORS, NULL);
 	exit (EXIT_SUCCESS);
 	break;
 
@@ -477,6 +501,7 @@ Written by Rene' Seindal.\n\
   input_init ();
   output_init ();
   symtab_init ();
+  set_macro_sequence (macro_sequence);
   include_env_init ();
 
   if (frozen_file_to_read)
@@ -534,8 +559,7 @@ Written by Rene' Seindal.\n\
 	  break;
 
 	default:
-	  M4ERROR ((warning_status, 0,
-		    "INTERNAL ERROR: bad code in deferred arguments"));
+	  M4ERROR ((0, 0, "INTERNAL ERROR: bad code in deferred arguments"));
 	  abort ();
 	}
 
@@ -551,8 +575,7 @@ Written by Rene' Seindal.\n\
     read_stdin = process_file ("-");
   else
     for (; optind < argc; optind++)
-      if (process_file (defines->arg))
-	read_stdin = true;
+      read_stdin |= process_file (argv[optind]);
 
   /* Now handle wrapup text.  */
 
@@ -563,9 +586,9 @@ Written by Rene' Seindal.\n\
      stream and detect any errors it might have encountered.  Close
      stdin if we read from it, to detect any errors.  */
   debug_set_output (NULL);
-  if (read_stdin && fclose (stdin) == EOF)
+  if (read_stdin && close_stream (stdin) == EOF)
     {
-      M4ERROR ((warning_status, errno, "error reading file"));
+      M4ERROR ((warning_status, errno, "error reading stdin"));
       retcode = EXIT_FAILURE;
     }
 
@@ -577,5 +600,6 @@ Written by Rene' Seindal.\n\
       undivert_all ();
     }
   output_exit ();
+  free_macro_sequence ();
   exit (retcode);
 }

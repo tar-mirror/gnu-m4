@@ -1,6 +1,42 @@
 GNU M4 NEWS - User visible changes.
-Copyright (C) 1992, 1993, 1994, 2004, 2005, 2006 Free Software
+Copyright (C) 1992, 1993, 1994, 2004, 2005, 2006, 2007 Free Software
 Foundation, Inc.
+
+Version 1.4.9 - 23 Mar 2007, by Eric Blake  (CVS version 1.4.8c)
+
+* Minor documentation and portability cleanups.
+
+Version 1.4.8b - 24 Feb 2007, by Eric Blake  (CVS version 1.4.8a)
+
+* Fix a regression introduced in 1.4.8 that made m4 unable to process
+  files larger than 2GiB on some platforms.
+* Fix a regression introduced in 1.4.8 that made m4 dump core when
+  invoked as 'm4 -- file'.
+* The `eval' builtin now follows C precedence rules.  Additionally, the
+  short-circuit operators correctly short-circuit division by zero.  The
+  previously undocumented alias of '=' meaning '==' in eval now triggers a
+  deprecation warning, so that a future version of M4 can implement a form
+  of variable assignment as an extension.
+* The `include' builtin now affects exit status on failure, as required by
+  POSIX.  Use `sinclude' if you need a successful exit status.
+* The `-E'/`--fatal-warnings' command-line option now has two levels.  When
+  specified only once, warnings affect exit status, but execution
+  continues, so that you can see all warnings instead of fixing them one
+  at a time.  To acheive 1.4.8 behavior, where the first warning
+  immediately exits, specify -E twice on the command line.
+* A new `--warn-macro-sequence' command-line option allows detection of
+  sequences in `define' and `pushdef' definitions that match an optional
+  regular expression.  The default regular expression is
+  `\$\({[^}]*}\|[0-9][0-9]+\)', corresponding to the sequences that might
+  not behave correctly when upgrading to the eventual M4 2.0.  By default,
+  M4 2.0 will follow the POSIX requirement that a macro definition
+  containing `$11' must expand to the first argument concatenated with 1,
+  rather than the eleventh argument; and will take advantage of the POSIX
+  wording that allows implementations to treat `${11}' as the eleventh
+  argument instead of literal text.  Be aware that Autoconf 2.61 will not
+  work with this option enabled with the default regular expression; but
+  Autoconf 2.62 will be compatible with this option.
+* Improved portability to platforms such as BSD/OS and AIX.
 
 Version 1.4.8 - 20 November 2006, by Eric Blake  (CVS version 1.4.7a)
 

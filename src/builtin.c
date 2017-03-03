@@ -1,6 +1,6 @@
 /* GNU m4 -- A simple macro processor
 
-   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2000, 2004, 2006
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2000, 2004, 2006, 2007
    Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
@@ -27,7 +27,6 @@
 extern FILE *popen ();
 
 #include "regex.h"
-#include "strstr.h"
 
 #if HAVE_SYS_WAIT_H
 # include <sys/wait.h>
@@ -222,6 +221,68 @@ define_builtin (const char *name, const builtin *bp, symbol_lookup mode)
   SYMBOL_FUNC (sym) = bp->func;
 }
 
+/* Storage for the compiled regular expression of
+   --warn-macro-sequence.  */
+static struct re_pattern_buffer macro_sequence_buf;
+
+/* Storage for the matches of --warn-macro-sequence.  */
+static struct re_registers macro_sequence_regs;
+
+/* True if --warn-macro-sequence is in effect.  */
+static bool macro_sequence_inuse;
+
+/*----------------------------------------.
+| Clean up regular expression variables.  |
+`----------------------------------------*/
+
+static void
+free_pattern_buffer (struct re_pattern_buffer *buf, struct re_registers *regs)
+{
+  regfree (buf);
+  free (regs->start);
+  free (regs->end);
+}
+
+/*-----------------------------------------------------------------.
+| Set the regular expression of --warn-macro-sequence that will be |
+| checked during define and pushdef.  Exit on failure.             |
+`-----------------------------------------------------------------*/
+void
+set_macro_sequence (const char *regexp)
+{
+  const char *msg;
+
+  if (! regexp)
+    regexp = DEFAULT_MACRO_SEQUENCE;
+  else if (regexp[0] == '\0')
+    {
+      macro_sequence_inuse = false;
+      return;
+    }
+
+  msg = re_compile_pattern (regexp, strlen (regexp), &macro_sequence_buf);
+  if (msg != NULL)
+    {
+      M4ERROR ((EXIT_FAILURE, 0,
+		"--warn-macro-sequence: bad regular expression `%s': %s",
+		regexp, msg));
+    }
+  re_set_registers (&macro_sequence_buf, &macro_sequence_regs,
+		    macro_sequence_regs.num_regs,
+		    macro_sequence_regs.start, macro_sequence_regs.end);
+  macro_sequence_inuse = true;
+}
+
+/*------------------------------------------------------------.
+| Free dynamic memory utilized by the define sequence regular |
+| expression.						      |
+`------------------------------------------------------------*/
+void
+free_macro_sequence (void)
+{
+  free_pattern_buffer (&macro_sequence_buf, &macro_sequence_regs);
+}
+
 /*-------------------------------------------------------------------------.
 | Define a predefined or user-defined macro, with name NAME, and expansion |
 | TEXT.  MODE destinguishes between the "define" and the "pushdef" case.   |
@@ -232,13 +293,44 @@ void
 define_user_macro (const char *name, const char *text, symbol_lookup mode)
 {
   symbol *s;
+  char *defn = xstrdup (text ? text : "");
 
   s = lookup_symbol (name, mode);
   if (SYMBOL_TYPE (s) == TOKEN_TEXT)
     free (SYMBOL_TEXT (s));
 
   SYMBOL_TYPE (s) = TOKEN_TEXT;
-  SYMBOL_TEXT (s) = xstrdup (text ? text : "");
+  SYMBOL_TEXT (s) = defn;
+
+  /* Implement --warn-macro-sequence.  */
+  if (macro_sequence_inuse && text)
+    {
+      regoff_t offset = 0;
+      size_t len = strlen (defn);
+
+      while ((offset = re_search (&macro_sequence_buf, defn, len, offset,
+				  len - offset, &macro_sequence_regs)) >= 0)
+	{
+	  /* Skip empty matches.  */
+	  if (macro_sequence_regs.start[0] == macro_sequence_regs.end[0])
+	    offset++;
+	  else
+	    {
+	      char tmp;
+	      offset = macro_sequence_regs.end[0];
+	      tmp = defn[offset];
+	      defn[offset] = '\0';
+	      M4ERROR ((warning_status, 0,
+			"Warning: definition of `%s' contains sequence `%s'",
+			name, defn + macro_sequence_regs.start[0]));
+	      defn[offset] = tmp;
+	    }
+	}
+      if (offset == -2)
+	M4ERROR ((warning_status, 0,
+		  "error checking --warn-macro-sequence for macro `%s'",
+		  name));
+    }
 }
 
 /*-----------------------------------------------.
@@ -359,10 +451,10 @@ numeric_arg (token_data *macro, const char *arg, int *valuep)
 static char const digits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
 
 static const char *
-ntoa (eval_t value, int radix)
+ntoa (int32_t value, int radix)
 {
   bool negative;
-  unsigned_eval_t uvalue;
+  uint32_t uvalue;
   static char str[256];
   char *s = &str[sizeof str];
 
@@ -371,12 +463,12 @@ ntoa (eval_t value, int radix)
   if (value < 0)
     {
       negative = true;
-      uvalue = (unsigned_eval_t) -value;
+      uvalue = -(uint32_t) value;
     }
   else
     {
       negative = false;
-      uvalue = (unsigned_eval_t) value;
+      uvalue = (uint32_t) value;
     }
 
   do
@@ -401,7 +493,7 @@ shipout_int (struct obstack *obs, int val)
 {
   const char *s;
 
-  s = ntoa ((eval_t) val, 10);
+  s = ntoa ((int32_t) val, 10);
   obstack_grow (obs, s, strlen (s));
 }
 
@@ -940,7 +1032,7 @@ m4_sysval (struct obstack *obs, int argc, token_data **argv)
 static void
 m4_eval (struct obstack *obs, int argc, token_data **argv)
 {
-  eval_t value = 0;
+  int32_t value = 0;
   int radix = 10;
   int min = 1;
   const char *s;
@@ -954,8 +1046,8 @@ m4_eval (struct obstack *obs, int argc, token_data **argv)
   if (radix < 1 || radix > (int) strlen (digits))
     {
       M4ERROR ((warning_status, 0,
-		"radix in builtin `%s' out of range (radix = %d)",
-		ARG (0), radix));
+		"radix %d in builtin `%s' out of range",
+		radix, ARG (0)));
       return;
     }
 
@@ -1209,8 +1301,10 @@ include (int argc, token_data **argv, bool silent)
   if (fp == NULL)
     {
       if (!silent)
-	M4ERROR ((warning_status, errno,
-		  "cannot open `%s'", ARG (1)));
+	{
+	  M4ERROR ((warning_status, errno, "cannot open `%s'", ARG (1)));
+	  retcode = EXIT_FAILURE;
+	}
       return;
     }
 
@@ -1304,7 +1398,7 @@ m4_maketemp (struct obstack *obs, int argc, token_data **argv)
 	if (str[i - 1] != 'X')
 	  break;
       obstack_grow (obs, str, i);
-      str = ntoa ((eval_t) getpid (), 10);
+      str = ntoa ((int32_t) getpid (), 10);
       len2 = strlen (str);
       if (len2 > len - i)
 	obstack_grow0 (obs, str + len2 - (len - i), len - i);
@@ -1827,27 +1921,18 @@ Warning: trailing \\ ignored in replacement"));
 | Initialize regular expression variables.  |
 `------------------------------------------*/
 
-static void
+void
 init_pattern_buffer (struct re_pattern_buffer *buf, struct re_registers *regs)
 {
   buf->translate = NULL;
   buf->fastmap = NULL;
   buf->buffer = NULL;
   buf->allocated = 0;
-  regs->start = NULL;
-  regs->end = NULL;
-}
-
-/*----------------------------------------.
-| Clean up regular expression variables.  |
-`----------------------------------------*/
-
-static void
-free_pattern_buffer (struct re_pattern_buffer *buf, struct re_registers *regs)
-{
-  regfree (buf);
-  free (regs->start);
-  free (regs->end);
+  if (regs)
+    {
+      regs->start = NULL;
+      regs->end = NULL;
+    }
 }
 
 /*--------------------------------------------------------------------------.

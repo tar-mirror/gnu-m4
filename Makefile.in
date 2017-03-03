@@ -47,12 +47,13 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/absolute-header.m4 \
 	$(top_srcdir)/m4/exitfail.m4 $(top_srcdir)/m4/extensions.m4 \
 	$(top_srcdir)/m4/fatal-signal.m4 $(top_srcdir)/m4/fpending.m4 \
 	$(top_srcdir)/m4/free.m4 $(top_srcdir)/m4/getopt.m4 \
-	$(top_srcdir)/m4/gl_list.m4 $(top_srcdir)/m4/gnulib-comp.m4 \
-	$(top_srcdir)/m4/inline.m4 $(top_srcdir)/m4/intmax_t.m4 \
-	$(top_srcdir)/m4/inttypes_h.m4 $(top_srcdir)/m4/longdouble.m4 \
-	$(top_srcdir)/m4/longlong.m4 $(top_srcdir)/m4/mbchar.m4 \
-	$(top_srcdir)/m4/mbiter.m4 $(top_srcdir)/m4/mbrtowc.m4 \
-	$(top_srcdir)/m4/mbstate_t.m4 $(top_srcdir)/m4/memchr.m4 \
+	$(top_srcdir)/m4/gettimeofday.m4 $(top_srcdir)/m4/gl_list.m4 \
+	$(top_srcdir)/m4/glibc21.m4 $(top_srcdir)/m4/gnulib-common.m4 \
+	$(top_srcdir)/m4/gnulib-comp.m4 $(top_srcdir)/m4/inline.m4 \
+	$(top_srcdir)/m4/intmax_t.m4 $(top_srcdir)/m4/inttypes_h.m4 \
+	$(top_srcdir)/m4/localcharset.m4 \
+	$(top_srcdir)/m4/longdouble.m4 $(top_srcdir)/m4/longlong.m4 \
+	$(top_srcdir)/m4/mbrtowc.m4 $(top_srcdir)/m4/mbstate_t.m4 \
 	$(top_srcdir)/m4/mkdtemp.m4 $(top_srcdir)/m4/mkstemp.m4 \
 	$(top_srcdir)/m4/pathmax.m4 $(top_srcdir)/m4/quotearg.m4 \
 	$(top_srcdir)/m4/regex.m4 $(top_srcdir)/m4/sig_atomic_t.m4 \
@@ -61,17 +62,17 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/absolute-header.m4 \
 	$(top_srcdir)/m4/stdarg.m4 $(top_srcdir)/m4/stdbool.m4 \
 	$(top_srcdir)/m4/stdint.m4 $(top_srcdir)/m4/stdint_h.m4 \
 	$(top_srcdir)/m4/stdio-safer.m4 \
-	$(top_srcdir)/m4/stdlib-safer.m4 $(top_srcdir)/m4/strcase.m4 \
-	$(top_srcdir)/m4/strstr.m4 $(top_srcdir)/m4/strtol.m4 \
-	$(top_srcdir)/m4/sys_stat_h.m4 $(top_srcdir)/m4/tempname.m4 \
+	$(top_srcdir)/m4/stdlib-safer.m4 $(top_srcdir)/m4/stdlib_h.m4 \
+	$(top_srcdir)/m4/strtol.m4 $(top_srcdir)/m4/sys_stat_h.m4 \
+	$(top_srcdir)/m4/sys_time_h.m4 $(top_srcdir)/m4/tempname.m4 \
 	$(top_srcdir)/m4/tmpdir.m4 $(top_srcdir)/m4/ulonglong.m4 \
 	$(top_srcdir)/m4/unistd-safer.m4 $(top_srcdir)/m4/unistd_h.m4 \
 	$(top_srcdir)/m4/unlocked-io.m4 $(top_srcdir)/m4/vasnprintf.m4 \
-	$(top_srcdir)/m4/vasprintf.m4 $(top_srcdir)/m4/wchar_t.m4 \
-	$(top_srcdir)/m4/wcwidth.m4 $(top_srcdir)/m4/wint_t.m4 \
-	$(top_srcdir)/m4/xalloc.m4 $(top_srcdir)/m4/xsize.m4 \
-	$(top_srcdir)/m4/xvasprintf.m4 $(top_srcdir)/acinclude.m4 \
-	$(top_srcdir)/configure.ac
+	$(top_srcdir)/m4/vasprintf.m4 $(top_srcdir)/m4/wchar.m4 \
+	$(top_srcdir)/m4/wchar_t.m4 $(top_srcdir)/m4/wctype.m4 \
+	$(top_srcdir)/m4/wint_t.m4 $(top_srcdir)/m4/xalloc.m4 \
+	$(top_srcdir)/m4/xsize.m4 $(top_srcdir)/m4/xvasprintf.m4 \
+	$(top_srcdir)/acinclude.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
@@ -105,7 +106,12 @@ GZIP_ENV = --best
 distuninstallcheck_listfiles = find . -type f -print
 distcleancheck_listfiles = find . -type f -print
 ABSOLUTE_STDINT_H = @ABSOLUTE_STDINT_H@
+ABSOLUTE_STDLIB_H = @ABSOLUTE_STDLIB_H@
 ABSOLUTE_SYS_STAT_H = @ABSOLUTE_SYS_STAT_H@
+ABSOLUTE_SYS_TIME_H = @ABSOLUTE_SYS_TIME_H@
+ABSOLUTE_UNISTD_H = @ABSOLUTE_UNISTD_H@
+ABSOLUTE_WCHAR_H = @ABSOLUTE_WCHAR_H@
+ABSOLUTE_WCTYPE_H = @ABSOLUTE_WCTYPE_H@
 ACLOCAL = @ACLOCAL@
 ALLOCA = @ALLOCA@
 ALLOCA_H = @ALLOCA_H@
@@ -134,18 +140,39 @@ EGREP = @EGREP@
 EOVERFLOW = @EOVERFLOW@
 EXEEXT = @EXEEXT@
 GETOPT_H = @GETOPT_H@
+GLIBC21 = @GLIBC21@
+GNULIB_CHOWN = @GNULIB_CHOWN@
+GNULIB_DUP2 = @GNULIB_DUP2@
+GNULIB_FCHDIR = @GNULIB_FCHDIR@
+GNULIB_FTRUNCATE = @GNULIB_FTRUNCATE@
+GNULIB_GETCWD = @GNULIB_GETCWD@
+GNULIB_GETLOGIN_R = @GNULIB_GETLOGIN_R@
+GNULIB_GETSUBOPT = @GNULIB_GETSUBOPT@
+GNULIB_MKDTEMP = @GNULIB_MKDTEMP@
+GNULIB_MKSTEMP = @GNULIB_MKSTEMP@
+GNULIB_READLINK = @GNULIB_READLINK@
 GREP = @GREP@
+HAVE_DECL_GETLOGIN_R = @HAVE_DECL_GETLOGIN_R@
+HAVE_DUP2 = @HAVE_DUP2@
+HAVE_FTRUNCATE = @HAVE_FTRUNCATE@
+HAVE_GETSUBOPT = @HAVE_GETSUBOPT@
 HAVE_INTTYPES_H = @HAVE_INTTYPES_H@
 HAVE_LONG_LONG_INT = @HAVE_LONG_LONG_INT@
+HAVE_MKDTEMP = @HAVE_MKDTEMP@
+HAVE_READLINK = @HAVE_READLINK@
 HAVE_SIGNED_SIG_ATOMIC_T = @HAVE_SIGNED_SIG_ATOMIC_T@
 HAVE_SIGNED_WCHAR_T = @HAVE_SIGNED_WCHAR_T@
 HAVE_SIGNED_WINT_T = @HAVE_SIGNED_WINT_T@
 HAVE_STDINT_H = @HAVE_STDINT_H@
+HAVE_STRUCT_TIMEVAL = @HAVE_STRUCT_TIMEVAL@
 HAVE_SYS_BITYPES_H = @HAVE_SYS_BITYPES_H@
 HAVE_SYS_INTTYPES_H = @HAVE_SYS_INTTYPES_H@
+HAVE_SYS_TIME_H = @HAVE_SYS_TIME_H@
 HAVE_SYS_TYPES_H = @HAVE_SYS_TYPES_H@
+HAVE_UNISTD_H = @HAVE_UNISTD_H@
 HAVE_UNSIGNED_LONG_LONG_INT = @HAVE_UNSIGNED_LONG_LONG_INT@
-HAVE_WCHAR_H = @HAVE_WCHAR_H@
+HAVE_WCTYPE_H = @HAVE_WCTYPE_H@
+HAVE_WINT_T = @HAVE_WINT_T@
 HAVE__BOOL = @HAVE__BOOL@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
@@ -172,6 +199,11 @@ PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 PTRDIFF_T_SUFFIX = @PTRDIFF_T_SUFFIX@
 RANLIB = @RANLIB@
+REPLACE_CHOWN = @REPLACE_CHOWN@
+REPLACE_FCHDIR = @REPLACE_FCHDIR@
+REPLACE_GETCWD = @REPLACE_GETCWD@
+REPLACE_GETTIMEOFDAY = @REPLACE_GETTIMEOFDAY@
+REPLACE_MKSTEMP = @REPLACE_MKSTEMP@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 SIG_ATOMIC_T_SUFFIX = @SIG_ATOMIC_T_SUFFIX@
@@ -180,9 +212,11 @@ STDBOOL_H = @STDBOOL_H@
 STDINT_H = @STDINT_H@
 STRIP = @STRIP@
 SYS_STAT_H = @SYS_STAT_H@
-UNISTD_H = @UNISTD_H@
+SYS_TIME_H = @SYS_TIME_H@
 VERSION = @VERSION@
+WCHAR_H = @WCHAR_H@
 WCHAR_T_SUFFIX = @WCHAR_T_SUFFIX@
+WCTYPE_H = @WCTYPE_H@
 WINT_T_SUFFIX = @WINT_T_SUFFIX@
 abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@

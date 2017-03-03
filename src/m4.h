@@ -1,7 +1,7 @@
 /* GNU m4 -- A simple macro processor
 
-   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2004, 2005, 2006 Free
-   Software Foundation, Inc.
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2004, 2005, 2006, 2007
+   Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -28,6 +28,7 @@
 #include <ctype.h>
 #include <errno.h>
 #include <stdbool.h>
+#include <stdint.h>
 #include <string.h>
 #include <sys/types.h>
 
@@ -37,7 +38,6 @@
 #include "close-stream.h"
 #include "closeout.h"
 #include "error.h"
-#include "exit.h"
 #include "exitfail.h"
 #include "obstack.h"
 #include "stdio--.h"
@@ -84,6 +84,15 @@ typedef struct string STRING;
 /* Those must come first.  */
 typedef struct token_data token_data;
 typedef void builtin_func (struct obstack *, int, token_data **);
+
+/* Gnulib's stdbool doesn't work with bool bitfields.  For nicer
+   debugging, use bool when we know it works, but use the more
+   portable unsigned int elsewhere.  */
+#if __GNUC__ > 2
+typedef bool bool_bitfield;
+#else
+typedef unsigned int bool_bitfield;
+#endif /* ! __GNUC__ */
 
 /* Take advantage of GNU C compiler source level optimization hints,
    using portable macros.  */
@@ -334,11 +343,11 @@ enum symbol_lookup
 struct symbol
 {
   struct symbol *next;
-  bool traced : 1;
-  bool shadowed : 1;
-  bool macro_args : 1;
-  bool blind_no_args : 1;
-  bool deleted : 1;
+  bool_bitfield traced : 1;
+  bool_bitfield shadowed : 1;
+  bool_bitfield macro_args : 1;
+  bool_bitfield blind_no_args : 1;
+  bool_bitfield deleted : 1;
   int pending_expansions;
 
   char *name;
@@ -380,9 +389,9 @@ void call_macro (symbol *, int, token_data **, struct obstack *);
 struct builtin
 {
   const char *name;
-  bool gnu_extension : 1;
-  bool groks_macro_args : 1;
-  bool blind_if_no_args : 1;
+  bool_bitfield gnu_extension : 1;
+  bool_bitfield groks_macro_args : 1;
+  bool_bitfield blind_if_no_args : 1;
   builtin_func *func;
 };
 
@@ -395,13 +404,23 @@ struct predefined
 
 typedef struct builtin builtin;
 typedef struct predefined predefined;
+struct re_pattern_buffer;
+struct re_registers;
+
+/* The default sequence detects multi-digit parameters (obsolete after
+   1.4.x), and any use of extended arguments with the default ${}
+   syntax (new in 2.0).  */
+#define DEFAULT_MACRO_SEQUENCE "\\$\\({[^}]*}\\|[0-9][0-9]+\\)"
 
 void builtin_init (void);
 void define_builtin (const char *, const builtin *, symbol_lookup);
+void set_macro_sequence (const char *);
+void free_macro_sequence (void);
 void define_user_macro (const char *, const char *, symbol_lookup);
 void undivert_all (void);
 void expand_user_macro (struct obstack *, symbol *, int, token_data **);
 void m4_placeholder (struct obstack *, int, token_data **);
+void init_pattern_buffer (struct re_pattern_buffer *, struct re_registers *);
 
 const builtin *find_builtin_by_addr (builtin_func *);
 const builtin *find_builtin_by_name (const char *);
@@ -415,11 +434,7 @@ FILE *m4_path_search (const char *, char **);
 
 /* File: eval.c  --- expression evaluation.  */
 
-/* eval_t and unsigned_eval_t should be at least 32 bits.  */
-typedef int eval_t;
-typedef unsigned int unsigned_eval_t;
-
-bool evaluate (const char *, eval_t *);
+bool evaluate (const char *, int32_t *);
 
 /* File: format.c  --- printf like formatting.  */
 

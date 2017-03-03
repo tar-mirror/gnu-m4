@@ -3,8 +3,23 @@
 /* Define this to an absolute name of <stdint.h>. */
 #undef ABSOLUTE_STDINT_H
 
+/* Define this to an absolute name of <stdlib.h>. */
+#undef ABSOLUTE_STDLIB_H
+
 /* Define this to an absolute name of <sys/stat.h>. */
 #undef ABSOLUTE_SYS_STAT_H
+
+/* Define this to an absolute name of <sys/time.h>. */
+#undef ABSOLUTE_SYS_TIME_H
+
+/* Define this to an absolute name of <unistd.h>. */
+#undef ABSOLUTE_UNISTD_H
+
+/* Define this to an absolute name of <wchar.h>. */
+#undef ABSOLUTE_WCHAR_H
+
+/* Define this to an absolute name of <wctype.h>. */
+#undef ABSOLUTE_WCTYPE_H
 
 /* Define to the number of bits in type 'ptrdiff_t'. */
 #undef BITSIZEOF_PTRDIFF_T
@@ -38,10 +53,13 @@
 /* Define to 1 if the return value of system() disagrees with pclose(). */
 #undef FUNC_SYSTEM_BROKEN
 
-/* Define to 1 when using the gnulib close-stream module. */
+/* Define if gettimeofday clobbers the localtime buffer. */
+#undef GETTIMEOFDAY_CLOBBERS_LOCALTIME
+
+/* Define to 1 when using the gnulib module close-stream. */
 #undef GNULIB_CLOSE_STREAM
 
-/* Define to 1 when using the gnulib fopen-safer module. */
+/* Define to 1 when using the gnulib module fopen-safer. */
 #undef GNULIB_FOPEN_SAFER
 
 /* Define to 1 if you have 'alloca' after including <alloca.h>, a header that
@@ -51,9 +69,6 @@
 /* Define HAVE_ALLOCA_H for backward compatibility with older code that
    includes <alloca.h> only if HAVE_ALLOCA_H is defined. */
 #undef HAVE_ALLOCA_H
-
-/* Define to 1 if you have the <bp-sym.h> header file. */
-#undef HAVE_BP_SYM_H
 
 /* Define to 1 if you have the declaration of `clearerr_unlocked', and to 0 if
    you don't. */
@@ -123,14 +138,6 @@
    don't. */
 #undef HAVE_DECL_STRERROR_R
 
-/* Define to 1 if you have the declaration of `strncasecmp', and to 0 if you
-   don't. */
-#undef HAVE_DECL_STRNCASECMP
-
-/* Define to 1 if you have the declaration of `wcwidth', and to 0 if you
-   don't. */
-#undef HAVE_DECL_WCWIDTH
-
 /* Define to 1 if you have the declaration of `__fpending', and to 0 if you
    don't. */
 #undef HAVE_DECL___FPENDING
@@ -165,8 +172,8 @@
 /* Define to 1 if you have the `iswcntrl' function. */
 #undef HAVE_ISWCNTRL
 
-/* Define to 1 if you have the `iswprint' function. */
-#undef HAVE_ISWPRINT
+/* Define to 1 if you have the `iswctype' function. */
+#undef HAVE_ISWCTYPE
 
 /* Define if you have <langinfo.h> and nl_langinfo(CODESET). */
 #undef HAVE_LANGINFO_CODESET
@@ -202,14 +209,8 @@
 /* Define to 1 if <wchar.h> declares mbstate_t. */
 #undef HAVE_MBSTATE_T
 
-/* Define to 1 if you have the `memchr' function. */
-#undef HAVE_MEMCHR
-
 /* Define to 1 if you have the <memory.h> header file. */
 #undef HAVE_MEMORY_H
-
-/* Define to 1 if you have the `mempcpy' function. */
-#undef HAVE_MEMPCPY
 
 /* Define to 1 if you have the `mkdtemp' function. */
 #undef HAVE_MKDTEMP
@@ -275,6 +276,9 @@
 /* Define to 1 if the system has the type `stack_t'. */
 #undef HAVE_STACK_T
 
+/* Define to 1 if `ss_sp' is member of `stack_t'. */
+#undef HAVE_STACK_T_SS_SP
+
 /* Define to 1 if stdbool.h conforms to C99. */
 #undef HAVE_STDBOOL_H
 
@@ -303,9 +307,6 @@
 /* Define to 1 if you have the <string.h> header file. */
 #undef HAVE_STRING_H
 
-/* Define to 1 if you have the `strncasecmp' function. */
-#undef HAVE_STRNCASECMP
-
 /* Define to 1 if you have the `strtol' function. */
 #undef HAVE_STRTOL
 
@@ -323,6 +324,9 @@
 
 /* Define to 1 if you have the <sys/stat.h> header file. */
 #undef HAVE_SYS_STAT_H
+
+/* Define to 1 if you have the <sys/timeb.h> header file. */
+#undef HAVE_SYS_TIMEB_H
 
 /* Define to 1 if you have the <sys/time.h> header file. */
 #undef HAVE_SYS_TIME_H
@@ -363,14 +367,14 @@
 /* Define to 1 if you have the <wctype.h> header file. */
 #undef HAVE_WCTYPE_H
 
-/* Define to 1 if you have the `wcwidth' function. */
-#undef HAVE_WCWIDTH
-
 /* Define if you have the 'wint_t' type. */
 #undef HAVE_WINT_T
 
 /* Define to 1 if the system has the type `_Bool'. */
 #undef HAVE__BOOL
+
+/* Define to 1 if you have the `_ftime' function. */
+#undef HAVE__FTIME
 
 /* Define to 1 if you have the `__fpending' function. */
 #undef HAVE___FPENDING
@@ -405,6 +409,12 @@
 /* Define to l, ll, u, ul, ull, etc., as suitable for constants of type
    'ptrdiff_t'. */
 #undef PTRDIFF_T_SUFFIX
+
+/* Define if vasnprintf exists but is overridden by gnulib. */
+#undef REPLACE_VASNPRINTF
+
+/* Define if vasprintf exists but is overridden by gnulib. */
+#undef REPLACE_VASPRINTF
 
 /* Define as the return type of signal handlers (`int' or `void'). */
 #undef RETSIGTYPE
@@ -509,14 +519,14 @@
    used. */
 #undef __GETOPT_PREFIX
 
-/* Define to rpl_ if the mkstemp replacement function should be used. */
-#undef __MKSTEMP_PREFIX
-
 /* Define to rpl_free if the replacement function should be used. */
 #undef free
 
 /* A replacement for va_copy, if needed.  */
 #define gl_va_copy(a,b) ((a) = (b))
+
+/* Define to rpl_gmtime if the replacement function should be used. */
+#undef gmtime
 
 /* Define to `__inline__' or `__inline' if that's what the C compiler
    calls it, or to nothing if 'inline' is not supported under any name.  */
@@ -526,6 +536,9 @@
 
 /* Define to long or long long if <stdint.h> and <inttypes.h> don't define. */
 #undef intmax_t
+
+/* Define to rpl_localtime if the replacement function should be used. */
+#undef localtime
 
 /* Define to rpl_malloc if the replacement function should be used. */
 #undef malloc

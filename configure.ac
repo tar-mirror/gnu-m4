@@ -1,5 +1,5 @@
 # Configure template for GNU M4.			-*-Autoconf-*-
-# Copyright (C) 1991, 1993, 1994, 2004, 2005, 2006 Free Software
+# Copyright (C) 1991, 1993, 1994, 2004, 2005, 2006, 2007 Free Software
 # Foundation, Inc.
 #
 # This program is free software; you can redistribute it and/or modify
@@ -18,7 +18,7 @@
 # 02110-1301  USA
 
 AC_PREREQ([2.60])
-AC_INIT([GNU M4], [1.4.8], [bug-m4@gnu.org])
+AC_INIT([GNU M4], [1.4.9], [bug-m4@gnu.org])
 AM_INIT_AUTOMAKE([1.9.6 dist-bzip2 gnu])
 PACKAGE=$PACKAGE_TARNAME; AC_SUBST([PACKAGE])
 VERSION=$PACKAGE_VERSION; AC_SUBST([VERSION])
@@ -33,6 +33,7 @@ AC_CANONICAL_HOST
 AC_PROG_CC
 M4_EARLY
 
+AC_SYS_LARGEFILE
 AC_CHECK_HEADERS_ONCE([limits.h siginfo.h sys/wait.h])
 AC_CHECK_TYPES([siginfo_t], [], [],
 [[#include <signal.h>
@@ -43,11 +44,29 @@ AC_CHECK_TYPES([siginfo_t], [], [],
 AC_CHECK_MEMBERS([struct sigaction.sa_sigaction], [], [],
 [[#include <signal.h>
 ]])
+AC_CHECK_MEMBERS([stack_t.ss_sp], [], [],
+[[#include <signal.h>
+#if HAVE_SIGINFO_H
+# include <siginfo.h>
+#endif
+]])
 
 AC_TYPE_SIGNAL
 AC_TYPE_SIZE_T
 
 AC_CHECK_FUNCS_ONCE([sigaction sigaltstack sigstack sigvec strerror])
+
+# Tandem/NSK is broken - it has 'long long int' but not
+# 'unsigned long long int', which confuses assumptions made by gnulib.
+# Simply pretend that neither type exists if both do not work.
+AC_TYPE_LONG_LONG_INT
+AC_TYPE_UNSIGNED_LONG_LONG_INT
+if test $ac_cv_type_long_long_int:$ac_cv_type_unsigned_long_long_int = yes:no
+then
+  ac_cv_type_long_long_int=no
+  AC_DEFINE([HAVE_LONG_LONG_INT], 0,
+    [Define to 1 if the system has the type `long long int'.])
+fi
 
 M4_INIT
 

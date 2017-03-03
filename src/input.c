@@ -1,6 +1,6 @@
 /* GNU m4 -- A simple macro processor
 
-   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2004, 2005, 2006
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2004, 2005, 2006, 2007
    Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
@@ -86,10 +86,10 @@ struct input_block
 	u_s;	/* INPUT_STRING */
       struct
 	{
-	  FILE *fp;		/* input file handle */
-	  bool end : 1;		/* true if peek has seen EOF */
-	  bool close : 1;	/* true if we should close file on pop */
-	  bool advance_line : 1; /* track previous start_of_input_line */
+	  FILE *fp;		     /* input file handle */
+	  bool_bitfield end : 1;     /* true if peek has seen EOF */
+	  bool_bitfield close : 1;   /* true if we should close file on pop */
+	  bool_bitfield advance : 1; /* track previous start_of_input_line */
 	}
 	u_f;	/* INPUT_FILE */
       builtin_func *func;	/* pointer to macro's function */
@@ -197,7 +197,7 @@ push_file (FILE *fp, const char *title, bool close)
   i->u.u_f.fp = fp;
   i->u.u_f.end = false;
   i->u.u_f.close = close;
-  i->u.u_f.advance_line = start_of_input_line;
+  i->u.u_f.advance = start_of_input_line;
   output_current_line = -1;
 
   i->prev = isp;
@@ -352,7 +352,7 @@ pop_input (void)
 	  M4ERROR ((warning_status, errno, "error reading file"));
 	  retcode = EXIT_FAILURE;
 	}
-      start_of_input_line = isp->u.u_f.advance_line;
+      start_of_input_line = isp->u.u_f.advance;
       output_current_line = -1;
       break;
 
@@ -752,15 +752,6 @@ set_comment (const char *bc, const char *ec)
 
 #ifdef ENABLE_CHANGEWORD
 
-static void
-init_pattern_buffer (struct re_pattern_buffer *buf)
-{
-  buf->translate = NULL;
-  buf->fastmap = NULL;
-  buf->buffer = NULL;
-  buf->allocated = 0;
-}
-
 void
 set_word_regexp (const char *regexp)
 {
@@ -776,7 +767,7 @@ set_word_regexp (const char *regexp)
     }
 
   /* Dry run to see whether the new expression is compilable.  */
-  init_pattern_buffer (&new_word_regexp);
+  init_pattern_buffer (&new_word_regexp, NULL);
   msg = re_compile_pattern (regexp, strlen (regexp), &new_word_regexp);
   regfree (&new_word_regexp);
 

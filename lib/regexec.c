@@ -221,10 +221,10 @@ static reg_errcode_t extend_buffers (re_match_context_t *mctx)
 
 int
 regexec (preg, string, nmatch, pmatch, eflags)
-    const regex_t *__restrict preg;
-    const char *__restrict string;
+    const regex_t *_Restrict_ preg;
+    const char *_Restrict_ string;
     size_t nmatch;
-    regmatch_t pmatch[];
+    regmatch_t pmatch[_Restrict_arr_];
     int eflags;
 {
   reg_errcode_t err;
@@ -267,8 +267,8 @@ __typeof__ (__regexec) __compat_regexec;
 
 int
 attribute_compat_text_section
-__compat_regexec (const regex_t *__restrict preg,
-		  const char *__restrict string, size_t nmatch,
+__compat_regexec (const regex_t *_Restrict_ preg,
+		  const char *_Restrict_ string, size_t nmatch,
 		  regmatch_t pmatch[], int eflags)
 {
   return regexec (preg, string, nmatch, pmatch,
@@ -3966,7 +3966,7 @@ check_node_accept_bytes (const re_dfa_t *dfa, Idx node_idx,
 # endif /* _LIBC */
 	{
 	  /* match with range expression?  */
-#if __GNUC__ >= 2
+#if __GNUC__ >= 2 && ! (__STDC_VERSION__ < 199901L && __STRICT_ANSI__)
 	  wchar_t cmp_buf[] = {L'\0', L'\0', wc, L'\0', L'\0', L'\0'};
 #else
 	  wchar_t cmp_buf[] = {L'\0', L'\0', L'\0', L'\0', L'\0', L'\0'};

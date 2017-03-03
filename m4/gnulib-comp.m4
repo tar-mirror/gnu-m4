@@ -1,5 +1,5 @@
 # DO NOT EDIT! GENERATED AUTOMATICALLY!
-# Copyright (C) 2004-2006 Free Software Foundation, Inc.
+# Copyright (C) 2004-2007 Free Software Foundation, Inc.
 #
 # This file is free software, distributed under the terms of the GNU
 # General Public License.  As a special exception to the GNU General
@@ -27,6 +27,11 @@ AC_DEFUN([M4_EARLY],
   AC_REQUIRE([AC_PROG_RANLIB])
   AC_REQUIRE([AC_GNU_SOURCE])
   AC_REQUIRE([gl_USE_SYSTEM_EXTENSIONS])
+  dnl Some compilers (e.g., AIX 5.3 cc) need to be in c99 mode
+  dnl for the builtin va_copy to work.  With Autoconf 2.60 or later,
+  dnl AC_PROG_CC_STDC arranges for this.  With older Autoconf AC_PROG_CC_STDC
+  dnl shouldn't hurt, though installers are on their own to set c99 mode.
+  AC_REQUIRE([AC_PROG_CC_STDC])
 ])
 
 # This macro should be invoked from ./configure.ac, in the section
@@ -46,24 +51,26 @@ AC_DEFUN([M4_INIT],
   AC_DEFINE([SIGNAL_SAFE_LIST], [1], [Define if lists must be signal-safe.])
   gl_CLOEXEC
   gl_CLOSE_STREAM
+  gl_MODULE_INDICATOR([close-stream])
   gl_CLOSEOUT
   gl_CONFIG_H
   gl_ERROR
   gl_EXITFAIL
-  dnl gl_USE_SYSTEM_EXTENSIONS must be added quite early to configure.ac.
   gl_FATAL_SIGNAL
   gl_FOPEN_SAFER
+  gl_MODULE_INDICATOR([fopen-safer])
   gl_FUNC_FPENDING
   gl_FUNC_FREE
   gl_GETOPT
+  gl_FUNC_GETTIMEOFDAY
   gl_INLINE
   gl_LIST
+  gl_LOCALCHARSET
   AC_FUNC_MALLOC
-  gl_MBCHAR
-  gl_MBITER
-  gl_FUNC_MEMCHR
   gt_FUNC_MKDTEMP
+  gl_STDLIB_MODULE_INDICATOR([mkdtemp])
   gl_FUNC_MKSTEMP
+  gl_STDLIB_MODULE_INDICATOR([mkstemp])
   AC_FUNC_OBSTACK
   dnl Note: AC_FUNC_OBSTACK does AC_LIBSOURCES([obstack.h, obstack.c]).
   gl_LIST
@@ -76,19 +83,22 @@ AC_DEFUN([M4_INIT],
   gl_STDARG_H
   AM_STDBOOL_H
   gl_STDINT_H
+  gl_STDLIB_H
   gl_STDLIB_SAFER
-  gl_STRCASE
-  gl_FUNC_STRSTR
   gl_FUNC_STRTOL
   gl_HEADER_SYS_STAT_H
+  AC_PROG_MKDIR_P
+  gl_HEADER_SYS_TIME_H
+  AC_PROG_MKDIR_P
   gl_FUNC_GEN_TEMPNAME
   gt_TMPDIR
-  gl_HEADER_UNISTD
+  gl_UNISTD_H
   gl_UNISTD_SAFER
   gl_FUNC_GLIBC_UNLOCKED_IO
   gl_FUNC_VASNPRINTF
   gl_FUNC_VASPRINTF
-  gl_FUNC_WCWIDTH
+  gl_WCHAR_H
+  gl_WCTYPE_H
   gl_XALLOC
   gl_XSIZE
   gl_XVASPRINTF
@@ -135,6 +145,7 @@ AC_DEFUN([M4_LIBSOURCES],
 AC_DEFUN([M4_FILE_LIST], [
   build-aux/gendocs.sh
   build-aux/gnupload
+  build-aux/link-warning.h
   doc/fdl.texi
   doc/gendocs_template
   lib/__fpending.c
@@ -155,10 +166,10 @@ AC_DEFUN([M4_FILE_LIST], [
   lib/close-stream.h
   lib/closeout.c
   lib/closeout.h
+  lib/config.charset
   lib/dup-safer.c
   lib/error.c
   lib/error.h
-  lib/exit.h
   lib/exitfail.c
   lib/exitfail.h
   lib/fatal-signal.c
@@ -171,6 +182,7 @@ AC_DEFUN([M4_FILE_LIST], [
   lib/getopt_.h
   lib/getopt_int.h
   lib/gettext.h
+  lib/gettimeofday.c
   lib/gl_anyhash_list1.h
   lib/gl_anyhash_list2.h
   lib/gl_anylinked_list1.h
@@ -184,16 +196,12 @@ AC_DEFUN([M4_FILE_LIST], [
   lib/gl_list.h
   lib/gl_oset.c
   lib/gl_oset.h
+  lib/localcharset.c
+  lib/localcharset.h
   lib/malloc.c
-  lib/mbchar.c
-  lib/mbchar.h
-  lib/mbuiter.h
-  lib/memchr.c
   lib/mkdtemp.c
-  lib/mkdtemp.h
   lib/mkstemp-safer.c
   lib/mkstemp.c
-  lib/mkstemp.h
   lib/obstack.c
   lib/obstack.h
   lib/pathmax.h
@@ -204,6 +212,8 @@ AC_DEFUN([M4_FILE_LIST], [
   lib/printf-parse.h
   lib/quotearg.c
   lib/quotearg.h
+  lib/ref-add.sin
+  lib/ref-del.sin
   lib/regcomp.c
   lib/regex.c
   lib/regex.h
@@ -220,20 +230,16 @@ AC_DEFUN([M4_FILE_LIST], [
   lib/stdio-safer.h
   lib/stdlib--.h
   lib/stdlib-safer.h
-  lib/strcase.h
-  lib/strcasecmp.c
-  lib/strncasecmp.c
-  lib/strnlen1.c
-  lib/strnlen1.h
-  lib/strstr.c
-  lib/strstr.h
+  lib/stdlib_.h
   lib/strtol.c
+  lib/sys_time_.h
   lib/tempname.c
   lib/tempname.h
   lib/tmpdir.c
   lib/tmpdir.h
   lib/unistd--.h
   lib/unistd-safer.h
+  lib/unistd_.h
   lib/unlocked-io.h
   lib/vasnprintf.c
   lib/vasnprintf.h
@@ -242,7 +248,11 @@ AC_DEFUN([M4_FILE_LIST], [
   lib/verify.h
   lib/verror.c
   lib/verror.h
-  lib/wcwidth.h
+  lib/version-etc-fsf.c
+  lib/version-etc.c
+  lib/version-etc.h
+  lib/wchar_.h
+  lib/wctype_.h
   lib/xalloc-die.c
   lib/xalloc.h
   lib/xallocsa.c
@@ -269,17 +279,18 @@ AC_DEFUN([M4_FILE_LIST], [
   m4/fpending.m4
   m4/free.m4
   m4/getopt.m4
+  m4/gettimeofday.m4
   m4/gl_list.m4
+  m4/glibc21.m4
+  m4/gnulib-common.m4
   m4/inline.m4
   m4/intmax_t.m4
   m4/inttypes_h.m4
+  m4/localcharset.m4
   m4/longdouble.m4
   m4/longlong.m4
-  m4/mbchar.m4
-  m4/mbiter.m4
   m4/mbrtowc.m4
   m4/mbstate_t.m4
-  m4/memchr.m4
   m4/mkdtemp.m4
   m4/mkstemp.m4
   m4/pathmax.m4
@@ -295,10 +306,10 @@ AC_DEFUN([M4_FILE_LIST], [
   m4/stdint_h.m4
   m4/stdio-safer.m4
   m4/stdlib-safer.m4
-  m4/strcase.m4
-  m4/strstr.m4
+  m4/stdlib_h.m4
   m4/strtol.m4
   m4/sys_stat_h.m4
+  m4/sys_time_h.m4
   m4/tempname.m4
   m4/tmpdir.m4
   m4/ulonglong.m4
@@ -307,8 +318,9 @@ AC_DEFUN([M4_FILE_LIST], [
   m4/unlocked-io.m4
   m4/vasnprintf.m4
   m4/vasprintf.m4
+  m4/wchar.m4
   m4/wchar_t.m4
-  m4/wcwidth.m4
+  m4/wctype.m4
   m4/wint_t.m4
   m4/xalloc.m4
   m4/xsize.m4
