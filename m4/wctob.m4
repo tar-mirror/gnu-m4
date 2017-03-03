@@ -1,4 +1,4 @@
-# wctob.m4 serial 4
+# wctob.m4 serial 6
 dnl Copyright (C) 2008-2010 Free Software Foundation, Inc.
 dnl This file is free software; the Free Software Foundation
 dnl gives unlimited permission to copy and/or distribute it,
@@ -17,6 +17,8 @@ AC_DEFUN([gl_FUNC_WCTOB],
   else
 
     dnl Solaris 9 has the wctob() function but it does not work.
+    dnl Cygwin 1.7.2 has the wctob() function but it clobbers caller-owned
+    dnl registers, see <http://cygwin.com/ml/cygwin/2010-05/msg00015.html>.
     AC_REQUIRE([AC_PROG_CC])
     AC_REQUIRE([gt_LOCALE_FR])
     AC_REQUIRE([AC_CANONICAL_HOST]) dnl for cross-compiles
@@ -27,15 +29,41 @@ AC_DEFUN([gl_FUNC_WCTOB],
         dnl is present.
 changequote(,)dnl
         case "$host_os" in
-            # Guess no on Solaris <= 9.
-          solaris2.[1-9] | solaris2.[1-9].*)
+            # Guess no on Solaris <= 9 and Cygwin.
+          solaris2.[1-9] | solaris2.[1-9].* | cygwin*)
             gl_cv_func_wctob_works="guessing no" ;;
             # Guess yes otherwise.
           *) gl_cv_func_wctob_works="guessing yes" ;;
         esac
 changequote([,])dnl
-        if test $LOCALE_FR != none; then
-          AC_TRY_RUN([
+        case "$host_os" in
+          cygwin*)
+            AC_RUN_IFELSE(
+              [AC_LANG_SOURCE([[
+#include <locale.h>
+#include <wchar.h>
+
+register long global __asm__ ("%ebx");
+
+int main ()
+{
+  setlocale (LC_ALL, "en_US.UTF-8");
+
+  global = 0x12345678;
+  if (wctob (0x00FC) != -1)
+    return 1;
+  if (global != 0x12345678)
+    return 2;
+  return 0;
+}]])],
+              [:],
+              [gl_cv_func_wctob_works=no],
+              [:])
+            ;;
+        esac
+        if test "$gl_cv_func_wctob_works" != no && test $LOCALE_FR != none; then
+          AC_RUN_IFELSE(
+            [AC_LANG_SOURCE([[
 #include <locale.h>
 #include <string.h>
 #include <wchar.h>
@@ -50,7 +78,7 @@ int main ()
           return 1;
     }
   return 0;
-}],
+}]])],
             [gl_cv_func_wctob_works=yes],
             [gl_cv_func_wctob_works=no],
             [:])

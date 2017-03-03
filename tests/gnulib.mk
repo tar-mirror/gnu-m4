@@ -12,7 +12,7 @@
 
 AUTOMAKE_OPTIONS = 1.5 foreign
 
-SUBDIRS =
+SUBDIRS = .
 TESTS =
 XFAIL_TESTS =
 TESTS_ENVIRONMENT =
@@ -31,6 +31,7 @@ DISTCLEANFILES =
 MAINTAINERCLEANFILES =
 
 AM_CPPFLAGS = \
+  -D@M4tests_WITNESS@=1 \
   -I. -I$(srcdir) \
   -I.. -I$(srcdir)/.. \
   -I../lib -I$(srcdir)/../lib
@@ -136,6 +137,30 @@ EXTRA_DIST += test-btowc1.sh test-btowc2.sh test-btowc.c signature.h macros.h
 
 ## end   gnulib module btowc-tests
 
+## begin gnulib module c++defs
+
+# The BUILT_SOURCES created by this Makefile snippet are not used via #include
+# statements but through direct file reference. Therefore this snippet must be
+# present in all Makefile.am that need it. This is ensured by the applicability
+# 'all' defined above.
+
+BUILT_SOURCES += c++defs.h
+# The c++defs.h that gets inserted into generated .h files is the same as
+# build-aux/c++defs.h, except that it has the copyright header cut off.
+c++defs.h: $(top_srcdir)/build-aux/c++defs.h
+	$(AM_V_GEN)rm -f $@-t $@ && \
+	sed -n -e '/_GL_CXXDEFS/,$$p' \
+	  < $(top_srcdir)/build-aux/c++defs.h \
+	  > $@-t && \
+	mv $@-t $@
+MOSTLYCLEANFILES += c++defs.h c++defs.h-t
+
+CXXDEFS_H=c++defs.h
+
+EXTRA_DIST += $(top_srcdir)/build-aux/c++defs.h
+
+## end   gnulib module c++defs
+
 ## begin gnulib module c-ctype-tests
 
 TESTS += test-c-ctype
@@ -222,6 +247,18 @@ check_PROGRAMS += test-errno
 EXTRA_DIST += test-errno.c
 
 ## end   gnulib module errno-tests
+
+## begin gnulib module fcntl-h-c++-tests
+
+if ANSICXX
+TESTS += test-fcntl-h-c++
+check_PROGRAMS += test-fcntl-h-c++
+test_fcntl_h_c___SOURCES = test-fcntl-h-c++.cc
+test_fcntl_h_c___LDADD = $(LDADD) $(LIBINTL) $(LIB_CLOCK_GETTIME) $(LIBSOCKET)
+endif
+EXTRA_DIST += test-fcntl-h-c++.cc signature.h
+
+## end   gnulib module fcntl-h-c++-tests
 
 ## begin gnulib module fcntl-h-tests
 
@@ -335,11 +372,30 @@ EXTRA_DIST += test-fseeko.c test-fseeko.sh test-fseeko2.sh signature.h macros.h
 
 ## end   gnulib module fseeko-tests
 
+## begin gnulib module ftell
+
+
+EXTRA_DIST += ftell.c
+
+EXTRA_libtests_a_SOURCES += ftell.c
+
+## end   gnulib module ftell
+
+## begin gnulib module ftell-tests
+
+TESTS += test-ftell.sh test-ftell2.sh test-ftell3
+check_PROGRAMS += test-ftell test-ftell3
+MOSTLYCLEANFILES += t-ftell3.tmp
+EXTRA_DIST += test-ftell.c test-ftell.sh test-ftell2.sh test-ftell3.c signature.h macros.h
+
+## end   gnulib module ftell-tests
+
 ## begin gnulib module ftello-tests
 
-TESTS += test-ftello.sh test-ftello2.sh
-check_PROGRAMS += test-ftello
-EXTRA_DIST += test-ftello.c test-ftello.sh test-ftello2.sh signature.h macros.h
+TESTS += test-ftello.sh test-ftello2.sh test-ftello3
+check_PROGRAMS += test-ftello test-ftello3
+MOSTLYCLEANFILES += t-ftello3.tmp
+EXTRA_DIST += test-ftello.c test-ftello.sh test-ftello2.sh test-ftello3.c signature.h macros.h
 
 ## end   gnulib module ftello-tests
 
@@ -368,22 +424,6 @@ EXTRA_DIST += getpagesize.c
 EXTRA_libtests_a_SOURCES += getpagesize.c
 
 ## end   gnulib module getpagesize
-
-## begin gnulib module gettext
-
-# This is for those projects which use "gettextize --intl" to put a source-code
-# copy of libintl into their package. In such projects, every Makefile.am needs
-# -I$(top_builddir)/intl, so that <libintl.h> can be found in this directory.
-# For the Makefile.ams in other directories it is the maintainer's
-# responsibility; for the one from gnulib we do it here.
-# This option has no effect when the user disables NLS (because then the intl
-# directory contains no libintl.h file) or when the project does not use
-# "gettextize --intl".
-AM_CPPFLAGS += -I$(top_builddir)/intl
-
-EXTRA_DIST += $(top_srcdir)/build-aux/config.rpath
-
-## end   gnulib module gettext
 
 ## begin gnulib module gettimeofday-tests
 
@@ -421,6 +461,17 @@ EXTRA_DIST += test-isnanl-nolibm.c test-isnanl.h nan.h macros.h
 
 ## end   gnulib module isnanl-nolibm-tests
 
+## begin gnulib module langinfo-c++-tests
+
+if ANSICXX
+TESTS += test-langinfo-c++
+check_PROGRAMS += test-langinfo-c++
+test_langinfo_c___SOURCES = test-langinfo-c++.cc
+endif
+EXTRA_DIST += test-langinfo-c++.cc signature.h
+
+## end   gnulib module langinfo-c++-tests
+
 ## begin gnulib module langinfo-tests
 
 TESTS += test-langinfo
@@ -453,6 +504,14 @@ EXTRA_DIST += test-lstat.h test-lstat.c signature.h macros.h
 
 ## end   gnulib module lstat-tests
 
+## begin gnulib module malloc-gnu-tests
+
+TESTS += test-malloc-gnu
+check_PROGRAMS += test-malloc-gnu
+EXTRA_DIST += test-malloc-gnu.c
+
+## end   gnulib module malloc-gnu-tests
+
 ## begin gnulib module malloca-tests
 
 TESTS += test-malloca
@@ -461,6 +520,17 @@ check_PROGRAMS += test-malloca
 EXTRA_DIST += test-malloca.c
 
 ## end   gnulib module malloca-tests
+
+## begin gnulib module math-c++-tests
+
+if ANSICXX
+TESTS += test-math-c++
+check_PROGRAMS += test-math-c++
+test_math_c___SOURCES = test-math-c++.cc test-math-c++2.cc
+endif
+EXTRA_DIST += test-math-c++.cc test-math-c++2.cc signature.h
+
+## end   gnulib module math-c++-tests
 
 ## begin gnulib module math-tests
 
@@ -593,15 +663,14 @@ EXTRA_libtests_a_SOURCES += putenv.c
 
 ## end   gnulib module putenv
 
-## begin gnulib module quotearg-tests
+## begin gnulib module quotearg-simple-tests
 
-TESTS += test-quotearg.sh
-TESTS_ENVIRONMENT += LOCALE_FR='@LOCALE_FR@' LOCALE_FR_UTF8='@LOCALE_FR_UTF8@'
-check_PROGRAMS += test-quotearg
-test_quotearg_LDADD = $(LDADD) @LIBINTL@
-EXTRA_DIST += test-quotearg.sh test-quotearg.c macros.h locale/fr/LC_MESSAGES/test-quotearg.po locale/fr/LC_MESSAGES/test-quotearg.mo
+TESTS += test-quotearg-simple
+check_PROGRAMS += test-quotearg-simple
+test_quotearg_simple_LDADD = $(LDADD) @LIBINTL@
+EXTRA_DIST += test-quotearg-simple.c test-quotearg.h macros.h
 
-## end   gnulib module quotearg-tests
+## end   gnulib module quotearg-simple-tests
 
 ## begin gnulib module rawmemchr-tests
 
@@ -659,6 +728,18 @@ EXTRA_DIST += test-sigaction.c signature.h macros.h
 
 ## end   gnulib module sigaction-tests
 
+## begin gnulib module signal-c++-tests
+
+if ANSICXX
+TESTS += test-signal-c++
+check_PROGRAMS += test-signal-c++
+test_signal_c___SOURCES = test-signal-c++.cc test-signal-c++2.cc
+test_signal_c___LDADD = $(LDADD) $(LIBINTL) $(LIB_NANOSLEEP)
+endif
+EXTRA_DIST += test-signal-c++.cc test-signal-c++2.cc signature.h
+
+## end   gnulib module signal-c++-tests
+
 ## begin gnulib module signal-tests
 
 TESTS += test-signal
@@ -684,6 +765,18 @@ check_PROGRAMS += test-snprintf
 EXTRA_DIST += test-snprintf.c signature.h macros.h
 
 ## end   gnulib module snprintf-tests
+
+## begin gnulib module spawn-c++-tests
+
+if ANSICXX
+TESTS += test-spawn-c++
+check_PROGRAMS += test-spawn-c++
+test_spawn_c___SOURCES = test-spawn-c++.cc
+test_spawn_c___LDADD = $(LDADD) $(LIBINTL) $(LIB_NANOSLEEP)
+endif
+EXTRA_DIST += test-spawn-c++.cc signature.h
+
+## end   gnulib module spawn-c++-tests
 
 ## begin gnulib module spawn-tests
 
@@ -725,6 +818,18 @@ EXTRA_DIST += test-stdint.c
 
 ## end   gnulib module stdint-tests
 
+## begin gnulib module stdio-c++-tests
+
+if ANSICXX
+TESTS += test-stdio-c++
+check_PROGRAMS += test-stdio-c++
+test_stdio_c___SOURCES = test-stdio-c++.cc test-stdio-c++2.cc
+test_stdio_c___LDADD = $(LDADD) $(LIBINTL) $(LIB_NANOSLEEP)
+endif
+EXTRA_DIST += test-stdio-c++.cc test-stdio-c++2.cc signature.h
+
+## end   gnulib module stdio-c++-tests
+
 ## begin gnulib module stdio-tests
 
 TESTS += test-stdio
@@ -732,6 +837,18 @@ check_PROGRAMS += test-stdio
 EXTRA_DIST += test-stdio.c
 
 ## end   gnulib module stdio-tests
+
+## begin gnulib module stdlib-c++-tests
+
+if ANSICXX
+TESTS += test-stdlib-c++
+check_PROGRAMS += test-stdlib-c++
+test_stdlib_c___SOURCES = test-stdlib-c++.cc test-stdlib-c++2.cc
+test_stdlib_c___LDADD = $(LDADD) $(LIBINTL) $(LIB_CLOCK_GETTIME)
+endif
+EXTRA_DIST += test-stdlib-c++.cc test-stdlib-c++2.cc signature.h
+
+## end   gnulib module stdlib-c++-tests
 
 ## begin gnulib module stdlib-tests
 
@@ -756,6 +873,18 @@ check_PROGRAMS += test-strerror
 EXTRA_DIST += test-strerror.c signature.h macros.h
 
 ## end   gnulib module strerror-tests
+
+## begin gnulib module string-c++-tests
+
+if ANSICXX
+TESTS += test-string-c++
+check_PROGRAMS += test-string-c++
+test_string_c___SOURCES = test-string-c++.cc test-string-c++2.cc
+test_string_c___LDADD = $(LDADD) $(LIBINTL)
+endif
+EXTRA_DIST += test-string-c++.cc test-string-c++2.cc signature.h
+
+## end   gnulib module string-c++-tests
 
 ## begin gnulib module string-tests
 
@@ -784,7 +913,6 @@ EXTRA_DIST += test-strstr.c zerosize-ptr.h signature.h macros.h
 
 ## begin gnulib module strtod-tests
 
-LIBS += $(POW_LIB)
 TESTS += test-strtod
 check_PROGRAMS += test-strtod
 EXTRA_DIST += test-strtod.c signature.h macros.h
@@ -808,6 +936,18 @@ EXTRA_DIST += test-symlink.h test-symlink.c signature.h macros.h
 
 ## end   gnulib module symlink-tests
 
+## begin gnulib module sys_stat-c++-tests
+
+if ANSICXX
+TESTS += test-sys_stat-c++
+check_PROGRAMS += test-sys_stat-c++
+test_sys_stat_c___SOURCES = test-sys_stat-c++.cc
+test_sys_stat_c___LDADD = $(LDADD) $(LIBINTL) $(LIB_CLOCK_GETTIME)
+endif
+EXTRA_DIST += test-sys_stat-c++.cc signature.h
+
+## end   gnulib module sys_stat-c++-tests
+
 ## begin gnulib module sys_stat-tests
 
 TESTS += test-sys_stat
@@ -815,6 +955,18 @@ check_PROGRAMS += test-sys_stat
 EXTRA_DIST += test-sys_stat.c
 
 ## end   gnulib module sys_stat-tests
+
+## begin gnulib module sys_time-c++-tests
+
+if ANSICXX
+TESTS += test-sys_time-c++
+check_PROGRAMS += test-sys_time-c++
+test_sys_time_c___SOURCES = test-sys_time-c++.cc
+test_sys_time_c___LDADD = $(LDADD) $(LIBINTL) $(LIB_NANOSLEEP)
+endif
+EXTRA_DIST += test-sys_time-c++.cc signature.h
+
+## end   gnulib module sys_time-c++-tests
 
 ## begin gnulib module sys_time-tests
 
@@ -832,6 +984,18 @@ EXTRA_DIST += test-sys_wait.c
 
 ## end   gnulib module sys_wait-tests
 
+## begin gnulib module time-c++-tests
+
+if ANSICXX
+TESTS += test-time-c++
+check_PROGRAMS += test-time-c++
+test_time_c___SOURCES = test-time-c++.cc test-time-c++2.cc
+test_time_c___LDADD = $(LDADD) $(LIBINTL) $(LIB_NANOSLEEP)
+endif
+EXTRA_DIST += test-time-c++.cc test-time-c++2.cc signature.h
+
+## end   gnulib module time-c++-tests
+
 ## begin gnulib module time-tests
 
 TESTS += test-time
@@ -839,6 +1003,18 @@ check_PROGRAMS += test-time
 EXTRA_DIST += test-time.c
 
 ## end   gnulib module time-tests
+
+## begin gnulib module unistd-c++-tests
+
+if ANSICXX
+TESTS += test-unistd-c++
+check_PROGRAMS += test-unistd-c++
+test_unistd_c___SOURCES = test-unistd-c++.cc
+test_unistd_c___LDADD = $(LDADD) $(LIBINTL) $(LIB_CLOCK_GETTIME) $(LIBSOCKET)
+endif
+EXTRA_DIST += test-unistd-c++.cc signature.h
+
+## end   gnulib module unistd-c++-tests
 
 ## begin gnulib module unistd-safer-tests
 
@@ -913,9 +1089,18 @@ EXTRA_DIST += test-vasprintf.c signature.h macros.h
 TESTS += test-vc-list-files-git.sh
 TESTS += test-vc-list-files-cvs.sh
 TESTS_ENVIRONMENT += PATH='$(abs_aux_dir)'$(PATH_SEPARATOR)"$$PATH"
-EXTRA_DIST += test-vc-list-files-git.sh test-vc-list-files-cvs.sh
+EXTRA_DIST += test-vc-list-files-git.sh test-vc-list-files-cvs.sh init.sh
 
 ## end   gnulib module vc-list-files-tests
+
+## begin gnulib module verify-tests
+
+TESTS_ENVIRONMENT += MAKE='$(MAKE)'
+TESTS += test-verify test-verify.sh
+check_PROGRAMS += test-verify
+EXTRA_DIST += test-verify.c test-verify.sh init.sh
+
+## end   gnulib module verify-tests
 
 ## begin gnulib module version-etc-tests
 
@@ -944,6 +1129,18 @@ WARN_ON_USE_H=warn-on-use.h
 EXTRA_DIST += $(top_srcdir)/build-aux/warn-on-use.h
 
 ## end   gnulib module warn-on-use
+
+## begin gnulib module wchar-c++-tests
+
+if ANSICXX
+TESTS += test-wchar-c++
+check_PROGRAMS += test-wchar-c++
+test_wchar_c___SOURCES = test-wchar-c++.cc
+test_wchar_c___LDADD = $(LDADD) $(LIBINTL) $(LIB_NANOSLEEP)
+endif
+EXTRA_DIST += test-wchar-c++.cc signature.h
+
+## end   gnulib module wchar-c++-tests
 
 ## begin gnulib module wchar-tests
 
@@ -975,6 +1172,18 @@ EXTRA_DIST += wctob.c
 EXTRA_libtests_a_SOURCES += wctob.c
 
 ## end   gnulib module wctob
+
+## begin gnulib module wctype-c++-tests
+
+if ANSICXX
+TESTS += test-wctype-c++
+check_PROGRAMS += test-wctype-c++
+test_wctype_c___SOURCES = test-wctype-c++.cc
+test_wctype_c___LDADD = $(LDADD) $(LIBINTL) $(LIB_NANOSLEEP)
+endif
+EXTRA_DIST += test-wctype-c++.cc signature.h
+
+## end   gnulib module wctype-c++-tests
 
 ## begin gnulib module wctype-tests
 

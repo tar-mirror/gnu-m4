@@ -1,3 +1,70 @@
+2010-08-31  Eric Blake  <eblake@redhat.com>
+
+	Release Version 1.4.15.
+	* gnulib: Update to latest.
+	* NEWS: Mention the release.
+
+2010-08-30  Eric Blake  <eblake@redhat.com>
+
+	Clean up compiler warnings.
+	* src/builtin.c (m4_patsubst): Drop dead store.
+	* src/eval.c (unary_term): Likewise.
+	* src/input.c (match_input): Likewise.  Also drop useless casts to
+	void.
+	* src/symtab.c (symtab_debug): Drop useless casts.
+
+	Test previous commit.
+	* doc/m4.texinfo (Format): Add a test.
+	* NEWS: Document the fix.
+	* THANKS: Update.
+
+2010-08-30  Carlo Teubner  <carlo.teubner@gmail.com>  (tiny change)
+
+	Avoid a crash with bad format string.
+	* src/format.c (expand_format): Fix off-by-one error.
+
+2010-08-30  Eric Blake  <eblake@redhat.com>
+
+	Document recent bug fixes.
+	* NEWS: Add some entries.
+	* gnulib: Update to latest, for more AIX fixes.
+
+2010-07-30  Eric Blake  <eblake@redhat.com>
+
+	Update to newer gnulib.
+	* gnulib: Update to latest, for strtod fix.
+	* src/Makefile.am (m4_LDADD): Update link libraries accordingly.
+	* cfg.mk (local-checks-to-skip): Skip broken check.
+	* doc/m4.texinfo: Drop all use of @acronym{}.
+	* THANKS: Update.
+	Reported by Rainer Tammer.
+
+2010-06-04  Eric Blake  <eblake@redhat.com>
+
+	Reflect recent copyright assignment.
+	* AUTHORS: Add David Warme.
+
+	Update to newer gnulib.
+	* gnulib: Update to latest, and include C++ tests.
+	* configure.ac (gl_CXX_CHOICE_DEFAULT_NO): Make default for C++
+	tests be disabled...
+	* Makefile.am (DISTCHECK_CONFIGURE_FLAGS): ...but run them when
+	building package.
+	* m4/gnulib-cache.m4: Regenerate.
+	* build-aux/.cvsignore: Likewise.
+	* build-aux/.gitignore: Likewise.
+
+	Fix build on newer glibc.
+	* src/m4.h (includes): Add <sys/stat.h>.
+	* THANKS: Update.
+	Reported by Todd Rinaldo.
+
+2010-03-02  Giuseppe Scrivano  <gscrivano@gnu.org>  (tiny change)
+
+	Support bootstrap --gnulib-srcdir=DIR.
+	* bootstrap: Add --gnulib-srcdir option, which overrides
+	GNULIB_SRCDIR, for consistency with gnulib bootstrap.
+
 2010-02-24  Eric Blake  <eblake@redhat.com>
 
 	Release Version 1.4.14.

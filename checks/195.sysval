@@ -1,4 +1,4 @@
-dnl @ ../doc/m4.texinfo:6697: Origin of test
+dnl @ ../doc/m4.texinfo:6659: Origin of test
 dnl @ expected status: 0
 dnl @ extra options: 
 dnl @ Copyright (C) 2006, 2007, 2008, 2009 Free Software
@@ -7,20 +7,29 @@ dnl @ This file is free software; the Free Software Foundation
 dnl @ gives unlimited permission to copy and/or distribute it
 dnl @ with or without modifications, as long as this notice
 dnl @ is preserved.
-dnl This test assumes kill is a shell builtin, and that signals are
-dnl recognizable.
-ifdef(`__unix__', ,
-      `errprint(` skipping: syscmd does not have unix semantics
-')m4exit(`77')')dnl
-syscmd(`kill -9 $$')
+sysval
+dnl @result{}0
+syscmd(`false')
+dnl @result{}
+ifelse(sysval, `0', `zero', `non-zero')
+dnl @result{}non-zero
+syscmd(`exit 2')
 dnl @result{}
 sysval
-dnl @result{}2304
-syscmd()
+dnl @result{}2
+syscmd(`true')
 dnl @result{}
 sysval
 dnl @result{}0
-esyscmd(`kill -9 $$')
+esyscmd(`false')
+dnl @result{}
+ifelse(sysval, `0', `zero', `non-zero')
+dnl @result{}non-zero
+esyscmd(`echo dnl && exit 127')
 dnl @result{}
 sysval
-dnl @result{}2304
+dnl @result{}127
+esyscmd(`true')
+dnl @result{}
+sysval
+dnl @result{}0

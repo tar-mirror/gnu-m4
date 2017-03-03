@@ -1,5 +1,5 @@
-dnl @ ../doc/m4.texinfo:7036: Origin of test
-dnl @ expected status: 1
+dnl @ ../doc/m4.texinfo:7030: Origin of test
+dnl @ expected status: 0
 dnl @ extra options: 
 dnl @ Copyright (C) 2006, 2007, 2008, 2009 Free Software
 dnl @ Foundation, Inc.
@@ -7,9 +7,9 @@ dnl @ This file is free software; the Free Software Foundation
 dnl @ gives unlimited permission to copy and/or distribute it
 dnl @ with or without modifications, as long as this notice
 dnl @ is preserved.
-define(`fatal_error',
-       `errprint(__program__:__file__:__line__`: fatal error: $*
-')m4exit(`1')')
+m4wrap(`This text is lost due to `m4exit'.')
 dnl @result{}
-fatal_error(`this is a BAD one, buster')
-dnl @error{}m4:stdin:4: fatal error: this is a BAD one, buster
+divert(`1') So is this.
+divert
+dnl @result{}
+m4exit And this is never read.

@@ -24,14 +24,17 @@ update-copyright-env = \
   UPDATE_COPYRIGHT_MAX_LINE_LENGTH=72
 
 # Tests not to run as part of "make syntax-check".
+local-checks-to-skip =
 # M4 intentionally uses a coding style that compiles under C++.
 local-checks-to-skip = sc_cast_of_x_alloc_return_value
+# sc_copyright_check is currently broken for multi-line copyrights.
+local-checks-to-skip += sc_copyright_check
 
 # Our files include "m4.h", which in turn includes <config.h> first.
 config_h_header = "m4\.h"
 
 # Hash of NEWS contents, to ensure we don't add entries to wrong section.
-old_NEWS_hash = cc336e70015e3f8faf575099f18e4129
+old_NEWS_hash = eb4dc25baafabb69ad319dd6b981f37c
 
 # Indent only with spaces.
 sc_prohibit_tab_based_indentation:
