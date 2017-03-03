@@ -93,103 +93,103 @@ typedef unsigned int unsigned_eval_t;unsigned_eval_t450,11123
 # define DEBUG_INCL476,11676
 
 m4.c,846
-static int interactive 27,926
-int sync_output 30,1000
-int debug_level 33,1048
-int hash_table_size 36,1123
-int no_gnu_extensions 39,1191
-int prefix_all_builtins 42,1265
-int max_debug_argument_length 45,1352
-int suppress_warnings 48,1438
-int warning_status 51,1537
-int nesting_limit 54,1618
-const char *user_word_regexp 58,1722
-const char *frozen_file_to_read 62,1826
-const char *frozen_file_to_write 65,1922
-const char *program_name;68,2006
-static int show_help 71,2089
-static int show_version 74,2183
-struct macro_definitionmacro_definition76,2213
-typedef struct macro_definition macro_definition;macro_definition82,2326
-reference_error 92,2699
-stackovf_handler 105,2968
-xfree 120,3233
-usage 132,3450
-static const struct option long_options[212,6250
-#define OPTSTRING 244,7386
-#define OPTSTRING 246,7452
-main 250,7522
+static int interactive 29,946
+int sync_output 32,1020
+int debug_level 35,1068
+int hash_table_size 38,1143
+int no_gnu_extensions 41,1211
+int prefix_all_builtins 44,1285
+int max_debug_argument_length 47,1372
+int suppress_warnings 50,1458
+int warning_status 53,1557
+int nesting_limit 56,1638
+const char *user_word_regexp 60,1742
+const char *frozen_file_to_read 64,1846
+const char *frozen_file_to_write 67,1942
+const char *program_name;70,2026
+static int show_help 73,2109
+static int show_version 76,2203
+struct macro_definitionmacro_definition78,2233
+typedef struct macro_definition macro_definition;macro_definition84,2346
+reference_error 94,2719
+stackovf_handler 109,3018
+xfree 124,3283
+usage 136,3500
+static const struct option long_options[216,6300
+#define OPTSTRING 248,7436
+#define OPTSTRING 250,7502
+main 254,7572
 
 builtin.c,1637
-#define ARG(ARG30,991
-#define DECLARE(DECLARE36,1204
-builtin_tab[88,2283
-predefined_tab[143,4561
-find_builtin_by_addr 156,4819
-find_builtin_by_name 171,5133
-define_builtin 188,5673
-define_user_macro 208,6378
-builtin_init 225,6800
-bad_argc 266,8076
-numeric_arg 293,8936
-static char const digits[313,9542
-ntoa 316,9632
-shipout_int 354,10398
-dump_args 368,10837
-define_macro 408,12278
-m4_define 447,13059
-m4_undefine 453,13181
-m4_pushdef 461,13353
-m4_popdef 467,13478
-m4_ifdef 479,13725
-m4_ifelse 500,14116
-struct dump_symbol_datadump_symbol_data551,15169
-dump_symbol 559,15331
-dumpdef_cmp 574,15857
-m4_dumpdef 586,16310
-m4_builtin 662,18324
-m4_indir 686,19110
-m4_defn 709,19823
-static int sysval;748,20851
-m4_syscmd 751,20883
-m4_esyscmd 761,21065
-m4_sysval 786,21540
-m4_eval 797,21971
-m4_incr 844,22851
-m4_decr 858,23084
-m4_divert 880,23733
-m4_divnum 898,24139
-m4_undivert 913,24694
-m4_dnl 953,25727
-m4_shift 967,26161
-m4_changequote 977,26523
-m4_changecom 992,27024
-m4_changeword 1012,27633
-include 1032,28364
-m4_include 1056,28844
-m4_sinclude 1066,29069
-m4_maketemp 1079,29516
-m4_errprint 1098,29992
-m4___file__ 1107,30220
-m4___line__ 1117,30513
-m4_m4exit 1134,31123
-m4_m4wrap 1153,31719
-set_trace 1174,32509
-m4_traceon 1180,32618
-m4_traceoff 1204,33273
-m4_debugmode 1230,34041
-m4_debugfile 1282,35170
-m4_len 1303,35788
-m4_index 1316,36208
-m4_substr 1347,37083
-expand_ranges 1380,38253
-m4_translit 1423,39349
-m4_format 1476,40388
-static int substitute_warned 1490,41066
-substitute 1493,41113
-m4_regexp 1546,42456
-m4_patsubst 1607,44274
-expand_user_macro 1695,46910
+#define ARG(ARG30,997
+#define DECLARE(DECLARE36,1210
+builtin_tab[88,2289
+predefined_tab[143,4567
+find_builtin_by_addr 156,4825
+find_builtin_by_name 171,5139
+define_builtin 188,5679
+define_user_macro 208,6384
+builtin_init 225,6806
+bad_argc 266,8082
+numeric_arg 293,8942
+static char const digits[313,9548
+ntoa 316,9638
+shipout_int 354,10404
+dump_args 368,10843
+define_macro 408,12284
+m4_define 447,13065
+m4_undefine 453,13187
+m4_pushdef 461,13359
+m4_popdef 467,13484
+m4_ifdef 479,13731
+m4_ifelse 500,14122
+struct dump_symbol_datadump_symbol_data551,15175
+dump_symbol 559,15337
+dumpdef_cmp 574,15863
+m4_dumpdef 586,16316
+m4_builtin 662,18330
+m4_indir 686,19116
+m4_defn 709,19829
+static int sysval;748,20857
+m4_syscmd 751,20889
+m4_esyscmd 761,21071
+m4_sysval 787,21559
+m4_eval 798,21990
+m4_incr 845,22870
+m4_decr 859,23103
+m4_divert 881,23752
+m4_divnum 899,24158
+m4_undivert 914,24713
+m4_dnl 954,25746
+m4_shift 968,26180
+m4_changequote 978,26542
+m4_changecom 993,27043
+m4_changeword 1013,27652
+include 1033,28383
+m4_include 1057,28863
+m4_sinclude 1067,29088
+m4_maketemp 1080,29535
+m4_errprint 1100,30024
+m4___file__ 1109,30252
+m4___line__ 1119,30545
+m4_m4exit 1136,31155
+m4_m4wrap 1155,31751
+set_trace 1176,32541
+m4_traceon 1182,32650
+m4_traceoff 1206,33305
+m4_debugmode 1232,34073
+m4_debugfile 1284,35202
+m4_len 1305,35820
+m4_index 1318,36240
+m4_substr 1349,37115
+expand_ranges 1382,38285
+m4_translit 1425,39381
+m4_format 1478,40420
+static int substitute_warned 1492,41098
+substitute 1495,41145
+m4_regexp 1548,42488
+m4_patsubst 1609,44306
+expand_user_macro 1697,46942
 
 debug.c,342
 FILE *debug 30,949
@@ -362,44 +362,44 @@ call_macro 238,7105
 expand_macro 269,8166
 
 output.c,821
-#define INITIAL_BUFFER_SIZE 25,944
-#define MAXIMUM_TOTAL_SIZE 29,1061
-#define COPY_BUFFER_SIZE 32,1157
-struct diversiondiversion49,1664
-static struct diversion *diversion_table;58,1920
-static int diversions;61,2008
-static int total_buffer_size;64,2081
-int current_diversion;68,2232
-static struct diversion *output_diversion;71,2334
-static FILE *output_file;74,2447
-static char *output_cursor;75,2503
-static int output_unused;76,2570
-int output_current_line;79,2692
-output_init 86,2809
-mkstemp 113,3382
-tmpfile 124,3582
-make_room_for 150,4367
-#define OUTPUT_CHARACTER(OUTPUT_CHARACTER253,7558
-output_character_helper 262,7818
-output_text 281,8320
-shipout_text 315,9518
-make_diversion 409,12041
-insert_file 458,13424
-insert_diversion 485,14216
-undivert_all 537,15448
-freeze_diversions 550,15770
+#define INITIAL_BUFFER_SIZE 27,964
+#define MAXIMUM_TOTAL_SIZE 31,1081
+#define COPY_BUFFER_SIZE 34,1177
+struct diversiondiversion51,1684
+static struct diversion *diversion_table;60,1940
+static int diversions;63,2028
+static int total_buffer_size;66,2101
+int current_diversion;70,2252
+static struct diversion *output_diversion;73,2354
+static FILE *output_file;76,2467
+static char *output_cursor;77,2523
+static int output_unused;78,2590
+int output_current_line;81,2712
+output_init 88,2829
+mkstemp 115,3402
+tmpfile 126,3602
+make_room_for 152,4387
+#define OUTPUT_CHARACTER(OUTPUT_CHARACTER255,7578
+output_character_helper 264,7838
+output_text 283,8340
+shipout_text 317,9538
+make_diversion 411,12061
+insert_file 460,13444
+insert_diversion 490,14270
+undivert_all 542,15502
+freeze_diversions 555,15824
 
 path.c,316
-struct includesincludes23,910
-typedef struct includes includes;includes30,1035
-static includes *dir_list;32,1070
-static includes *dir_list_end;33,1133
-static int dir_max_length;34,1187
-include_init 38,1262
-include_env_init 46,1356
-add_include_directory 70,1698
-path_search 100,2281
-include_dump 142,3205
+struct includesincludes25,928
+typedef struct includes includes;includes32,1053
+static includes *dir_list;34,1088
+static includes *dir_list_end;35,1151
+static int dir_max_length;36,1205
+include_init 40,1280
+include_env_init 48,1374
+add_include_directory 72,1716
+path_search 102,2299
+include_dump 147,3258
 
 stackovf.c,494
 #define DEBUG_STACKOVF77,3690
