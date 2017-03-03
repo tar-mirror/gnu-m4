@@ -1,10 +1,10 @@
-This is m4.info, produced by makeinfo version 4.8 from m4.texinfo.
+This is m4.info, produced by makeinfo version 4.13 from m4.texinfo.
 
-   This manual (25 September 2008) is for GNU M4 (version 1.4.12), a
-package containing an implementation of the m4 macro language.
+This manual (5 March 2009) is for GNU M4 (version 1.4.13), a package
+containing an implementation of the m4 macro language.
 
    Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2004, 2005, 2006,
-2007, 2008 Free Software Foundation, Inc.
+2007, 2008, 2009 Free Software Foundation, Inc.
 
      Permission is granted to copy, distribute and/or modify this
      document under the terms of the GNU Free Documentation License,
@@ -24,11 +24,11 @@ File: m4.info,  Node: Top,  Next: Preliminaries,  Up: (dir)
 GNU M4
 ******
 
-This manual (25 September 2008) is for GNU M4 (version 1.4.12), a
-package containing an implementation of the m4 macro language.
+This manual (5 March 2009) is for GNU M4 (version 1.4.13), a package
+containing an implementation of the m4 macro language.
 
    Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2004, 2005, 2006,
-2007, 2008 Free Software Foundation, Inc.
+2007, 2008, 2009 Free Software Foundation, Inc.
 
      Permission is granted to copy, distribute and/or modify this
      document under the terms of the GNU Free Documentation License,
@@ -46,10 +46,10 @@ generating `configure' scripts, but not for running them.
 
    GNU `m4' was originally written by Rene' Seindal, with subsequent
 changes by Franc,ois Pinard and other volunteers on the Internet.  All
-names and email addresses can be found in the files `m4-1.4.12/AUTHORS'
-and `m4-1.4.12/THANKS' from the GNU M4 distribution.
+names and email addresses can be found in the files `m4-1.4.13/AUTHORS'
+and `m4-1.4.13/THANKS' from the GNU M4 distribution.
 
-   This is release 1.4.12.  It is now considered stable:  future
+   This is release 1.4.13.  It is now considered stable:  future
 releases in the 1.4.x series are only meant to fix bugs, increase speed,
 or improve documentation.  However...
 
@@ -144,6 +144,8 @@ Conditionals, loops, and recursion
 * Shift::                       Recursion in `m4'
 * Forloop::                     Iteration by counting
 * Foreach::                     Iteration by list contents
+* Stacks::                      Working with definition stacks
+* Composition::                 Building macros with macros
 
 How to debug macros and input
 
@@ -217,6 +219,7 @@ Correct version of some examples
 * Improved exch::               Solution for `exch'
 * Improved forloop::            Solution for `forloop'
 * Improved foreach::            Solution for `foreach'
+* Improved copy::               Solution for `copy'
 * Improved m4wrap::             Solution for `m4wrap'
 * Improved cleardivert::        Solution for `cleardivert'
 * Improved capitalize::         Solution for `capitalize'
@@ -340,8 +343,9 @@ addressed some long standing bugs in the venerable 1.4 release.  Then in
 1.4 that were floating around the net and released 1.4.3 and 1.4.4.
 And in 2006, Eric Blake joined the team and prepared patches for the
 release of 1.4.5, 1.4.6, 1.4.7, and 1.4.8.  More bug fixes were
-incorporated in 2007, with releases 1.4.9 and 1.4.10, closing the
-series with 1.4.11 and 1.4.12 in 2008.
+incorporated in 2007, with releases 1.4.9 and 1.4.10.  Eric continued
+with some portability fixes for 1.4.11 and 1.4.12 in 2008, and 1.4.13
+in 2009.
 
    Meanwhile, development has continued on new features for `m4', such
 as dynamic module loading and additional builtins.  When complete, GNU
@@ -408,7 +412,7 @@ the examples assume that your current directory is located where you
 unpacked the installation, so if you plan on following along, you may
 find it helpful to do this now:
 
-     $ cd m4-1.4.12
+     $ cd m4-1.4.13
 
    As each of the predefined macros in `m4' is described, a prototype
 call of the macro will be shown, giving descriptive names to the
@@ -768,18 +772,21 @@ Finally, there are several options for aiding in debugging `m4' scripts.
      the format and meaning of FLAGS.  If omitted, FLAGS defaults to
      `aeq'.
 
-`--debugfile=FILE'
+`--debugfile[=FILE]'
 `-o FILE'
 `--error-output=FILE'
      Redirect `dumpdef' output, debug messages, and trace output to the
      named FILE.  Warnings, error messages, and `errprint' output are
-     still printed to standard error.  If unspecified, debug output goes
-     to standard error; if empty, debug output is discarded.  *Note
-     Debug Output::, for more details.  The spellings `-o' and
+     still printed to standard error.  If these options are not used, or
+     if FILE is unspecified (only possible for `--debugfile'), debug
+     output goes to standard error; if FILE is the empty string, debug
+     output is discarded.  *Note Debug Output::, for more details.  The
+     option `--debugfile' may be given more than once, and order is
+     significant with respect to file names.  The spellings `-o' and
      `--error-output' are misleading and inconsistent with other GNU
      tools; for now they are silently accepted as synonyms of
-     `--debugfile', but in a future version of M4, using them will
-     cause a warning to be issued.
+     `--debugfile' and only recognized once, but in a future version of
+     M4, using them will cause a warning to be issued.
 
 `-l NUM'
 `--arglength=NUM'
@@ -2199,6 +2206,8 @@ true.
 * Shift::                       Recursion in `m4'
 * Forloop::                     Iteration by counting
 * Foreach::                     Iteration by list contents
+* Stacks::                      Working with definition stacks
+* Composition::                 Building macros with macros
 
 
 File: m4.info,  Node: Ifdef,  Next: Ifelse,  Up: Conditionals
@@ -2292,60 +2301,10 @@ recognized only with arguments.
      foo(`a', `b', `c')
      =>arguments:3
 
-   Since m4 is a macro language, it is even possible to write a macro
-that makes defining blind macros easier:
+   For an example of a way to make defining blind macros easier, see
+*note Composition::.
 
- -- Composite: define_blind (NAME, [VALUE])
-     Defines NAME as a blind macro, such that NAME will expand to VALUE
-     only when given explicit arguments.  VALUE should not be the
-     result of `defn' (*note Defn::).  This macro is only recognized
-     with parameters, and results in an empty string.
-
-   Defining a macro to define another macro can be a bit tricky.  We
-want to use a literal `$#' in the argument to the nested `define'.
-However, if `$' and `#' are adjacent in the definition of
-`define_blind', then it would be expanded as the number of arguments to
-`define_blind' rather than the intended number of arguments to NAME.
-The solution is to pass the difficult characters through extra
-arguments to a helper macro `_define_blind'.
-
-   As for the limitation against using `defn', there are two reasons.
-If a macro was previously defined with `define_blind', then it can
-safely be renamed to a new blind macro using plain `define'; using
-`define_blind' to rename it just adds another layer of `ifelse',
-occupying memory and slowing down execution.  And if a macro is a
-builtin, then it would result in an attempt to define a macro
-consisting of both text and a builtin token; this is not supported, and
-the builtin token is flattened to an empty string.
-
-   With that explanation, here's the definition, and some sample usage.
-Notice that `define_blind' is itself a blind macro.
-
-     $ m4 -d
-     define(`define_blind', `ifelse(`$#', `0', ``$0'',
-     `_$0(`$1', `$2', `$'`#', `$'`0')')')
-     =>
-     define(`_define_blind', `define(`$1',
-     `ifelse(`$3', `0', ``$4'', `$2')')')
-     =>
-     define_blind
-     =>define_blind
-     define_blind(`foo', `arguments were $*')
-     =>
-     foo
-     =>foo
-     foo(`bar')
-     =>arguments were bar
-     define(`blah', defn(`foo'))
-     =>
-     blah
-     =>blah
-     blah(`a', `b')
-     =>arguments were a,b
-     defn(`blah')
-     =>ifelse(`$#', `0', ``$0'', `arguments were $*')
-
-   However, `ifelse' can take more than four arguments.  If given more
+   The macro `ifelse' can take more than four arguments.  If given more
 than four arguments, `ifelse' works like a `case' or `switch' statement
 in traditional programming languages.  If STRING-1 and STRING-2 are
 equal, `ifelse' expands into EQUAL-1, otherwise the procedure is
@@ -2477,7 +2436,7 @@ arguments into a single string.
      arguments, `join' avoids the SEPARATOR for an empty ARG.
 
    Here are some examples of its usage, based on the implementation
-`m4-1.4.12/examples/join.m4' distributed in this package:
+`m4-1.4.13/examples/join.m4' distributed in this package:
 
      $ m4 -I examples
      include(`join.m4')
@@ -2572,7 +2531,7 @@ element, or treating multiple arguments as a single element:
      levels of quoting are added around each element.
 
    An actual implementation of these three macros is distributed as
-`m4-1.4.12/examples/quote.m4' in this package.  First, let's examine
+`m4-1.4.13/examples/quote.m4' in this package.  First, let's examine
 their usage:
 
      $ m4 -I examples
@@ -2688,7 +2647,7 @@ finished, it increments the iterator (using the predefined macro
 `incr', *note Incr::), and recurses.
 
    Here is an actual implementation of `forloop', distributed as
-`m4-1.4.12/examples/forloop.m4' in this package:
+`m4-1.4.13/examples/forloop.m4' in this package:
 
      $ m4 -I examples
      undivert(`forloop.m4')dnl
@@ -2709,7 +2668,7 @@ See if you can improve these macros; or *note Answers: Improved
 forloop.).
 
 
-File: m4.info,  Node: Foreach,  Prev: Forloop,  Up: Conditionals
+File: m4.info,  Node: Foreach,  Next: Stacks,  Prev: Forloop,  Up: Conditionals
 
 6.5 Iteration by list contents
 ==============================
@@ -2729,8 +2688,8 @@ Here is an example of a loop macro that implements list iteration.
 
    As an example, this displays each word in a list inside of a
 sentence, using an implementation of `foreach' distributed as
-`m4-1.4.12/examples/foreach.m4', and `foreachq' in
-`m4-1.4.12/examples/foreachq.m4'.
+`m4-1.4.13/examples/foreach.m4', and `foreachq' in
+`m4-1.4.13/examples/foreachq.m4'.
 
      $ m4 -I examples
      include(`foreach.m4')
@@ -2857,6 +2816,233 @@ not expand `defn(`ITERATOR')' very well, when compared with `foreach'.
 ITERATOR contents for either list style.  See if you can learn from the
 best elements of both of these implementations to create robust macros
 (or *note Answers: Improved foreach.).
+
+
+File: m4.info,  Node: Stacks,  Next: Composition,  Prev: Foreach,  Up: Conditionals
+
+6.6 Working with definition stacks
+==================================
+
+Thanks to `pushdef', manipulation of a stack is an intrinsic operation
+in `m4'.  Normally, only the topmost definition in a stack is
+important, but sometimes, it is desirable to manipulate the entire
+definition stack.
+
+ -- Composite: stack_foreach (MACRO, ACTION)
+ -- Composite: stack_foreach_lifo (MACRO, ACTION)
+     For each of the `pushdef' definitions associated with MACRO,
+     invoke the macro ACTION with a single argument of that definition.
+     `stack_foreach' visits the oldest definition first, while
+     `stack_foreach_lifo' visits the current definition first.  ACTION
+     should not modify or dereference MACRO.  There are a few special
+     macros, such as `defn', which cannot be used as the MACRO
+     parameter.
+
+   A sample implementation of these macros is distributed in the file
+`m4-1.4.13/examples/stack.m4'.
+
+     $ m4 -I examples
+     include(`stack.m4')
+     =>
+     pushdef(`a', `1')pushdef(`a', `2')pushdef(`a', `3')
+     =>
+     define(`show', ``$1'
+     ')
+     =>
+     stack_foreach(`a', `show')dnl
+     =>1
+     =>2
+     =>3
+     stack_foreach_lifo(`a', `show')dnl
+     =>3
+     =>2
+     =>1
+
+   Now for the implementation.  Note the definition of a helper macro,
+`_stack_reverse', which destructively swaps the contents of one stack
+of definitions into the reverse order in the temporary macro `tmp-$1'.
+By calling the helper twice, the original order is restored back into
+the macro `$1'; since the operation is destructive, this explains why
+`$1' must not be modified or dereferenced during the traversal.  The
+caller can then inject additional code to pass the definition currently
+being visited to `$2'.  The choice of helper names is intentional;
+since `-' is not valid as part of a macro name, there is no risk of
+conflict with a valid macro name, and the code is guaranteed to use
+`defn' where necessary.  Finally, note that any macro used in the
+traversal of a `pushdef' stack, such as `pushdef' or `defn', cannot be
+handled by `stack_foreach', since the macro would temporarily be
+undefined during the algorithm.
+
+     $ m4 -I examples
+     undivert(`stack.m4')dnl
+     =>divert(`-1')
+     =># stack_foreach(macro, action)
+     =># Invoke ACTION with a single argument of each definition
+     =># from the definition stack of MACRO, starting with the oldest.
+     =>define(`stack_foreach',
+     =>`_stack_reverse(`$1', `tmp-$1')'dnl
+     =>`_stack_reverse(`tmp-$1', `$1', `$2(defn(`$1'))')')
+     =># stack_foreach_lifo(macro, action)
+     =># Invoke ACTION with a single argument of each definition
+     =># from the definition stack of MACRO, starting with the newest.
+     =>define(`stack_foreach_lifo',
+     =>`_stack_reverse(`$1', `tmp-$1', `$2(defn(`$1'))')'dnl
+     =>`_stack_reverse(`tmp-$1', `$1')')
+     =>define(`_stack_reverse',
+     =>`ifdef(`$1', `pushdef(`$2', defn(`$1'))$3`'popdef(`$1')$0($@)')')
+     =>divert`'dnl
+
+
+File: m4.info,  Node: Composition,  Prev: Stacks,  Up: Conditionals
+
+6.7 Building macros with macros
+===============================
+
+Since m4 is a macro language, it is possible to write macros that can
+build other macros.  First on the list is a way to automate the
+creation of blind macros.
+
+ -- Composite: define_blind (NAME, [VALUE])
+     Defines NAME as a blind macro, such that NAME will expand to VALUE
+     only when given explicit arguments.  VALUE should not be the
+     result of `defn' (*note Defn::).  This macro is only recognized
+     with parameters, and results in an empty string.
+
+   Defining a macro to define another macro can be a bit tricky.  We
+want to use a literal `$#' in the argument to the nested `define'.
+However, if `$' and `#' are adjacent in the definition of
+`define_blind', then it would be expanded as the number of arguments to
+`define_blind' rather than the intended number of arguments to NAME.
+The solution is to pass the difficult characters through extra
+arguments to a helper macro `_define_blind'.  When composing macros, it
+is a common idiom to need a helper macro to concatenate text that forms
+parameters in the composed macro, rather than interpreting the text as
+a parameter of the composing macro.
+
+   As for the limitation against using `defn', there are two reasons.
+If a macro was previously defined with `define_blind', then it can
+safely be renamed to a new blind macro using plain `define'; using
+`define_blind' to rename it just adds another layer of `ifelse',
+occupying memory and slowing down execution.  And if a macro is a
+builtin, then it would result in an attempt to define a macro
+consisting of both text and a builtin token; this is not supported, and
+the builtin token is flattened to an empty string.
+
+   With that explanation, here's the definition, and some sample usage.
+Notice that `define_blind' is itself a blind macro.
+
+     $ m4 -d
+     define(`define_blind', `ifelse(`$#', `0', ``$0'',
+     `_$0(`$1', `$2', `$'`#', `$'`0')')')
+     =>
+     define(`_define_blind', `define(`$1',
+     `ifelse(`$3', `0', ``$4'', `$2')')')
+     =>
+     define_blind
+     =>define_blind
+     define_blind(`foo', `arguments were $*')
+     =>
+     foo
+     =>foo
+     foo(`bar')
+     =>arguments were bar
+     define(`blah', defn(`foo'))
+     =>
+     blah
+     =>blah
+     blah(`a', `b')
+     =>arguments were a,b
+     defn(`blah')
+     =>ifelse(`$#', `0', ``$0'', `arguments were $*')
+
+   Another interesting composition tactic is argument "currying", or
+factoring a macro that takes multiple arguments for use in a context
+that provides exactly one argument.
+
+ -- Composite: curry (MACRO, ...)
+     Expand to a macro call that takes exactly one argument, then
+     appends that argument to the original arguments and invokes MACRO
+     with the resulting list of arguments.
+
+   A demonstration of currying makes the intent of this macro a little
+more obvious.  The macro `stack_foreach' mentioned earlier is an example
+of a context that provides exactly one argument to a macro name.  But
+coupled with currying, we can invoke `reverse' with two arguments for
+each definition of a macro stack.  This example uses the file
+`m4-1.4.13/examples/curry.m4' included in the distribution.
+
+     $ m4 -I examples
+     include(`curry.m4')include(`stack.m4')
+     =>
+     define(`reverse', `ifelse(`$#', `0', , `$#', `1', ``$1'',
+                               `reverse(shift($@)), `$1'')')
+     =>
+     pushdef(`a', `1')pushdef(`a', `2')pushdef(`a', `3')
+     =>
+     stack_foreach(`a', `:curry(`reverse', `4')')
+     =>:1, 4:2, 4:3, 4
+     curry(`curry', `reverse', `1')(`2')(`3')
+     =>3, 2, 1
+
+   Now for the implementation.  Notice how `curry' leaves off with a
+macro name but no open parenthesis, while still in the middle of
+collecting arguments for `$1'.  The macro `_curry' is the helper macro
+that takes one argument, then adds it to the list and finally supplies
+the closing parenthesis.  The use of a comma inside the `shift' call
+allows currying to also work for a macro that takes one argument,
+although it often makes more sense to invoke that macro directly rather
+than going through `curry'.
+
+     $ m4 -I examples
+     undivert(`curry.m4')dnl
+     =>divert(`-1')
+     =># curry(macro, args)
+     =># Expand to a macro call that takes one argument, then invoke
+     =># macro(args, extra).
+     =>define(`curry', `$1(shift($@,)_$0')
+     =>define(`_curry', ``$1')')
+     =>divert`'dnl
+
+   Unfortunately, with M4 1.4.x, `curry' is unable to handle builtin
+tokens, which are silently flattened to the empty string when passed
+through another text macro.  This limitation will be lifted in a future
+release of M4.
+
+   Putting the last few concepts together, it is possible to copy or
+rename an entire stack of macro definitions.
+
+ -- Composite: copy (SOURCE, DEST)
+ -- Composite: rename (SOURCE, DEST)
+     Ensure that DEST is undefined, then define it to the same stack of
+     definitions currently in SOURCE.  `copy' leaves SOURCE unchanged,
+     while `rename' undefines SOURCE.  There are only a few macros,
+     such as `copy' or `defn', which cannot be copied via this macro.
+
+   The implementation is relatively straightforward (although since it
+uses `curry', it is unable to copy builtin macros, such as the second
+definition of `a' as a synonym for `divnum'.  See if you can design a
+version that works around this limitation, or *note Answers: Improved
+copy.).
+
+     $ m4 -I examples
+     include(`curry.m4')include(`stack.m4')
+     =>
+     define(`rename', `copy($@)undefine(`$1')')dnl
+     define(`copy', `ifdef(`$2', `errprint(`$2 already defined
+     ')m4exit(`1')',
+        `stack_foreach(`$1', `curry(`pushdef', `$2')')')')dnl
+     pushdef(`a', `1')pushdef(`a', defn(`divnum'))pushdef(`a', `2')
+     =>
+     copy(`a', `b')
+     =>
+     rename(`b', `c')
+     =>
+     a b c
+     =>2 b 2
+     popdef(`a', `c')c a
+     => 0
+     popdef(`a', `c')a c
+     =>1 1
 
 
 File: m4.info,  Node: Debugging,  Next: Input Control,  Prev: Conditionals,  Up: Top
@@ -3811,7 +3997,7 @@ behavior is likely to change in a future release, to match POSIX, so
 you should not depend on this order.
 
    It is possible to emulate POSIX behavior even with older versions of
-GNU M4 by including the file `m4-1.4.12/examples/wrapfifo.m4' from the
+GNU M4 by including the file `m4-1.4.13/examples/wrapfifo.m4' from the
 distribution:
 
      $ m4 -I examples
@@ -3836,7 +4022,7 @@ distribution:
 
    It is likewise possible to emulate LIFO behavior without resorting to
 the GNU M4 extension of `builtin', by including the file
-`m4-1.4.12/examples/wraplifo.m4' from the distribution.
+`m4-1.4.13/examples/wraplifo.m4' from the distribution.
 (Unfortunately, both examples shown here share some subtle bugs.  See
 if you can find and correct them; or *note Answers: Improved m4wrap.).
 
@@ -3942,8 +4128,8 @@ There are two builtin macros in `m4' for including files:
 
    The rest of this section assumes that `m4' is invoked with the `-I'
 option (*note Invoking m4: Preprocessor features.)  pointing to the
-`m4-1.4.12/examples' directory shipped as part of the GNU `m4' package.
-The file `m4-1.4.12/examples/incl.m4' in the distribution contains the
+`m4-1.4.13/examples' directory shipped as part of the GNU `m4' package.
+The file `m4-1.4.13/examples/incl.m4' in the distribution contains the
 lines:
 
      $ cat examples/incl.m4
@@ -4181,6 +4367,14 @@ since the output has already been flushed.
      undivert
      =>diverted text
      =>
+     divert(`1')more
+     divert(`2')undivert(`1')diverted text`'divert
+     =>
+     undivert(`1')
+     =>
+     undivert(`2')
+     =>more
+     =>diverted text
 
    When a diversion has been undiverted, the diverted text is discarded,
 and it is not possible to bring back diverted text more than once.
@@ -4593,7 +4787,7 @@ individual words or whole sentences, by substituting calls of the macros
      upper case and the remaining characters to lower case.
 
    First, an example of their usage, using implementations distributed
-in `m4-1.4.12/examples/capitalize.m4'.
+in `m4-1.4.13/examples/capitalize.m4'.
 
      $ m4 -I examples
      include(`capitalize.m4')
@@ -5143,6 +5337,14 @@ Any shell command can be executed, using `syscmd':
      default standard input, output and error of SHELL-COMMAND are the
      same as those of `m4'.
 
+     By default, the SHELL-COMMAND will be used as the argument to the
+     `-c' option of the `/bin/sh' shell (or the version of `sh'
+     specified by `command -p getconf PATH', if your system supports
+     that).  If you prefer a different shell, the `configure' script
+     can be given the option `--with-syscmd-shell=LOCATION' to set the
+     location of an alternative shell at GNU `m4' installation; the
+     alternative shell must still support `-c'.
+
      The macro `syscmd' is recognized only with parameters.
 
      define(`foo', `FOO')
@@ -5187,6 +5389,14 @@ If you want `m4' to read the output of a shell command, use `esyscmd':
      same as those of `m4'.  The error output of SHELL-COMMAND is not a
      part of the expansion: it will appear along with the error output
      of `m4'.
+
+     By default, the SHELL-COMMAND will be used as the argument to the
+     `-c' option of the `/bin/sh' shell (or the version of `sh'
+     specified by `command -p getconf PATH', if your system supports
+     that).  If you prefer a different shell, the `configure' script
+     can be given the option `--with-syscmd-shell=LOCATION' to set the
+     location of an alternative shell at GNU `m4' installation; the
+     alternative shell must still support `-c'.
 
      The macro `esyscmd' is recognized only with parameters.
 
@@ -5716,7 +5926,7 @@ characters.  The directives are:
      the same name, and its order, along with `F', is important.
 
 `V NUMBER <NL>'
-     Confirms the format of the file.  `m4' 1.4.12 only creates and
+     Confirms the format of the file.  `m4' 1.4.13 only creates and
      understands frozen files where NUMBER is 1.  This directive must
      be the first non-comment in the file, and may not appear more than
      once.
@@ -6080,6 +6290,7 @@ presented here.
 * Improved exch::               Solution for `exch'
 * Improved forloop::            Solution for `forloop'
 * Improved foreach::            Solution for `foreach'
+* Improved copy::               Solution for `copy'
 * Improved m4wrap::             Solution for `m4wrap'
 * Improved cleardivert::        Solution for `cleardivert'
 * Improved capitalize::         Solution for `capitalize'
@@ -6114,7 +6325,7 @@ The `forloop' macro (*note Forloop::) as presented earlier can go into
 an infinite loop if given an iterator that is not parsed as a macro
 name.  It does not do any sanity checking on its numeric bounds, and
 only permits decimal numbers for bounds.  Here is an improved version,
-shipped as `m4-1.4.12/examples/forloop2.m4'; this version also
+shipped as `m4-1.4.13/examples/forloop2.m4'; this version also
 optimizes overhead by calling four macros instead of six per iteration
 (excluding those in TEXT), by not dereferencing the ITERATOR in the
 helper `_forloop'.
@@ -6182,13 +6393,62 @@ this example.
      forloop2(i, 1, 5, ``ifelse('')forloop2(i, 1, 5, ``)'')
      error-->m4:stdin:12: recursion limit of 9 exceeded, use -L<N> to change it
 
+   One more optimization is still possible.  Instead of repeatedly
+assigning a variable then invoking or dereferencing it, it is possible
+to pass the current iterator value as a single argument.  Coupled with
+`curry' if other arguments are needed (*note Composition::), or with
+helper macros if the argument is needed in more than one place in the
+expansion, the output can be generated with three, rather than four,
+macros of overhead per iteration.  Notice how the file
+`m4-1.4.13/examples/forloop3.m4' rearranges the arguments of the helper
+`_forloop' to take two arguments that are placed around the current
+value.  By splitting a balanced set of parantheses across multiple
+arguments, the helper macro can now be shared by `forloop' and the new
+`forloop_arg'.
+
+     $ m4 -I examples
+     include(`forloop3.m4')
+     =>
+     undivert(`forloop3.m4')dnl
+     =>divert(`-1')
+     =># forloop_arg(from, to, macro) - invoke MACRO(value) for
+     =>#   each value between FROM and TO, without define overhead
+     =>define(`forloop_arg', `ifelse(eval(`($1) <= ($2)'), `1',
+     =>  `_forloop(`$1', eval(`$2'), `$3(', `)')')')
+     =># forloop(var, from, to, stmt) - refactored to share code
+     =>define(`forloop', `ifelse(eval(`($2) <= ($3)'), `1',
+     =>  `pushdef(`$1')_forloop(eval(`$2'), eval(`$3'),
+     =>    `define(`$1',', `)$4')popdef(`$1')')')
+     =>define(`_forloop',
+     =>  `$3`$1'$4`'ifelse(`$1', `$2', `',
+     =>    `$0(incr(`$1'), `$2', `$3', `$4')')')
+     =>divert`'dnl
+     forloop(`i', `1', `3', ` i')
+     => 1 2 3
+     define(`echo', `$@')
+     =>
+     forloop_arg(`1', `3', ` echo')
+     => 1 2 3
+     include(`curry.m4')
+     =>
+     forloop_arg(`1', `3', `curry(`pushdef', `a')')
+     =>
+     a
+     =>3
+     popdef(`a')a
+     =>2
+     popdef(`a')a
+     =>1
+     popdef(`a')a
+     =>a
+
    Of course, it is possible to make even more improvements, such as
 adding an optional step argument, or allowing iteration through
 descending sequences.  GNU Autoconf provides some of these additional
 bells and whistles in its `m4_for' macro.
 
 
-File: m4.info,  Node: Improved foreach,  Next: Improved m4wrap,  Prev: Improved forloop,  Up: Answers
+File: m4.info,  Node: Improved foreach,  Next: Improved copy,  Prev: Improved forloop,  Up: Answers
 
 17.3 Solution for `foreach'
 ===========================
@@ -6232,7 +6492,7 @@ recursion use fewer arguments, rather than adding additional quoted
 uses of `shift'.  By doing so, `m4' uses less memory, invokes fewer
 macros, is less likely to run into machine limits, and most
 importantly, performs faster.  The fixed version of `foreachq' can be
-found in `m4-1.4.12/examples/foreachq2.m4':
+found in `m4-1.4.13/examples/foreachq2.m4':
 
      $ m4 -I examples
      include(`foreachq2.m4')
@@ -6281,7 +6541,7 @@ operate on an unboxed list in the first place, and by using the
 fixed-length `$#' instead of an arbitrary length list as the key to end
 recursion.  The result is an overhead of six macro invocations per loop
 (excluding any macros in TEXT), instead of eight.  This alternative
-approach is available as `m4-1.4.12/examples/foreach3.m4':
+approach is available as `m4-1.4.13/examples/foreach3.m4':
 
      $ m4 -I examples
      include(`foreachq3.m4')
@@ -6390,7 +6650,7 @@ supported.
      =>4
 
    For yet another approach, the improved version of `foreach',
-available in `m4-1.4.12/examples/foreach2.m4', simply overquotes the
+available in `m4-1.4.13/examples/foreach2.m4', simply overquotes the
 arguments to `_foreach' to begin with, using `dquote_elt'.  Then
 `_foreach' can just use `_arg1' to remove the extra layer of quoting
 that was added up front:
@@ -6515,9 +6775,95 @@ will have any detrimental effects.
      =><active>
 
 
-File: m4.info,  Node: Improved m4wrap,  Next: Improved cleardivert,  Prev: Improved foreach,  Up: Answers
+File: m4.info,  Node: Improved copy,  Next: Improved m4wrap,  Prev: Improved foreach,  Up: Answers
 
-17.4 Solution for `m4wrap'
+17.4 Solution for `copy'
+========================
+
+The macro `copy' presented above is unable to handle builtin tokens
+with M4 1.4.x, because it tries to pass the builtin token through the
+macro `curry', where it is silently flattened to an empty string (*note
+Composition::).  Rather than using the problematic `curry' to work
+around the limitation that `stack_foreach' expects to invoke a macro
+that takes exactly one argument, we can write a new macro that lets us
+form the exact two-argument `pushdef' call sequence needed, so that we
+are no longer passing a builtin token through a text macro.
+
+ -- Composite: stack_foreach_sep (MACRO, PRE, POST, SEP)
+ -- Composite: stack_foreach_sep_lifo (MACRO, PRE, POST, SEP)
+     For each of the `pushdef' definitions associated with MACRO,
+     expand the sequence `PRE`'definition`'POST'.  Additionally, expand
+     SEP between definitions.  `stack_foreach_sep' visits the oldest
+     definition first, while `stack_foreach_sep_lifo' visits the
+     current definition first.  The expansion may dereference MACRO,
+     but should not modify it.  There are a few special macros, such as
+     `defn', which cannot be used as the MACRO parameter.
+
+   Note that `stack_foreach(`MACRO', `ACTION')' is equivalent to
+`stack_foreach_sep(`MACRO', `ACTION(', `)')'.  By supplying explicit
+parentheses, split among the PRE and POST arguments to
+`stack_foreach_sep', it is now possible to construct macro calls with
+more than one argument, without passing builtin tokens through a macro
+call.  It is likewise possible to directly reference the stack
+definitions without a macro call, by leaving PRE and POST empty.  Thus,
+in addition to fixing `copy' on builtin tokens, it also executes with
+fewer macro invocations.
+
+   The new macro also adds a separator that is only output after the
+first iteration of the helper `_stack_reverse_sep', implemented by
+prepending the original SEP to PRE and omitting a SEP argument in
+subsequent iterations.  Note that the empty string that separates SEP
+from PRE is provided as part of the fourth argument when originally
+calling `_stack_reverse_sep', and not by writing `$4`'$3' as the third
+argument in the recursive call; while the other approach would give the
+same output, it does so at the expense of increasing the argument size
+on each iteration of `_stack_reverse_sep', which results in quadratic
+instead of linear execution time.  The improved stack walking macros
+are available in `m4-1.4.13/examples/stack_sep.m4':
+
+     $ m4 -I examples
+     include(`stack_sep.m4')
+     =>
+     define(`copy', `ifdef(`$2', `errprint(`$2 already defined
+     ')m4exit(`1')',
+        `stack_foreach_sep(`$1', `pushdef(`$2',', `)')')')dnl
+     pushdef(`a', `1')pushdef(`a', defn(`divnum'))
+     =>
+     copy(`a', `b')
+     =>
+     b
+     =>0
+     popdef(`b')
+     =>
+     b
+     =>1
+     pushdef(`c', `1')pushdef(`c', `2')
+     =>
+     stack_foreach_sep_lifo(`c', `', `', `, ')
+     =>2, 1
+     undivert(`stack_sep.m4')dnl
+     =>divert(`-1')
+     =># stack_foreach_sep(macro, pre, post, sep)
+     =># Invoke PRE`'defn`'POST with a single argument of each definition
+     =># from the definition stack of MACRO, starting with the oldest, and
+     =># separated by SEP between definitions.
+     =>define(`stack_foreach_sep',
+     =>`_stack_reverse_sep(`$1', `tmp-$1')'dnl
+     =>`_stack_reverse_sep(`tmp-$1', `$1', `$2`'defn(`$1')$3', `$4`'')')
+     =># stack_foreach_sep_lifo(macro, pre, post, sep)
+     =># Like stack_foreach_sep, but starting with the newest definition.
+     =>define(`stack_foreach_sep_lifo',
+     =>`_stack_reverse_sep(`$1', `tmp-$1', `$2`'defn(`$1')$3', `$4`'')'dnl
+     =>`_stack_reverse_sep(`tmp-$1', `$1')')
+     =>define(`_stack_reverse_sep',
+     =>`ifdef(`$1', `pushdef(`$2', defn(`$1'))$3`'popdef(`$1')$0(
+     =>  `$1', `$2', `$4$3')')')
+     =>divert`'dnl
+
+
+File: m4.info,  Node: Improved m4wrap,  Next: Improved cleardivert,  Prev: Improved copy,  Up: Answers
+
+17.5 Solution for `m4wrap'
 ==========================
 
 The replacement `m4wrap' versions presented above, designed to
@@ -6553,7 +6899,7 @@ in an undefined state.
 arguments to `m4wrap', separated by a space, rather than saving just
 the first argument.  This is done with the `join' macro documented
 previously (*note Shift::).  The improved LIFO example is shipped as
-`m4-1.4.12/examples/wraplifo2.m4', and can easily be converted to a
+`m4-1.4.13/examples/wraplifo2.m4', and can easily be converted to a
 FIFO solution by swapping the adjacent invocations of `joinall' and
 `defn'.
 
@@ -6585,7 +6931,7 @@ FIFO solution by swapping the adjacent invocations of `joinall' and
 
 File: m4.info,  Node: Improved cleardivert,  Next: Improved capitalize,  Prev: Improved m4wrap,  Up: Answers
 
-17.5 Solution for `cleardivert'
+17.6 Solution for `cleardivert'
 ===============================
 
 The `cleardivert' macro (*note Cleardivert::) cannot, as it stands, be
@@ -6620,7 +6966,7 @@ with one that takes the number of arguments into account:
 
 File: m4.info,  Node: Improved capitalize,  Next: Improved fatal_error,  Prev: Improved cleardivert,  Up: Answers
 
-17.6 Solution for `capitalize'
+17.7 Solution for `capitalize'
 ==============================
 
 The `capitalize' macro (*note Patsubst::) as presented earlier does not
@@ -6689,7 +7035,7 @@ string.  In turn, that means the replacement text has unbalanced quotes,
 necessitating another round of `changequote'.
 
    In the fixed version below, (also shipped as
-`m4-1.4.12/examples/capitalize.m4'), `capitalize' uses the alternate
+`m4-1.4.13/examples/capitalize.m4'), `capitalize' uses the alternate
 quotes of `<<[' and `]>>' (the longer strings are chosen so as to be
 less likely to appear in the text being converted).  The helpers
 `_to_alt' and `_from_alt' merely reduce the number of characters
@@ -6733,7 +7079,7 @@ are invoked with the alternate quoting scheme in effect.
 
 File: m4.info,  Node: Improved fatal_error,  Prev: Improved capitalize,  Up: Answers
 
-17.7 Solution for `fatal_error'
+17.8 Solution for `fatal_error'
 ===============================
 
 The `fatal_error' macro (*note M4exit::) is not robust to versions of
@@ -7503,7 +7849,7 @@ Appendix B How to make copies of this manual
 
 This appendix covers the license for copying this manual.  Note that
 some of the longer examples in this manual are also distributed in the
-directory `m4-1.4.12/examples/', where a more permissive license is in
+directory `m4-1.4.13/examples/', where a more permissive license is in
 effect when copying just the examples.
 
 * Menu:

@@ -1,7 +1,7 @@
 /* GNU m4 -- A simple macro processor
 
    Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2000, 2004, 2006,
-   2007, 2008 Free Software Foundation, Inc.
+   2007, 2008, 2009 Free Software Foundation, Inc.
 
    This file is part of GNU M4.
 
@@ -24,13 +24,11 @@
 
 #include "m4.h"
 
-extern FILE *popen ();
-
+#include "execute.h"
+#include "memchr2.h"
+#include "pipe.h"
 #include "regex.h"
-
-#if HAVE_SYS_WAIT_H
-# include <sys/wait.h>
-#endif
+#include "wait-process.h"
 
 #define ARG(i)	(argc > (i) ? TOKEN_DATA_TEXT (argv[i]) : "")
 
@@ -939,42 +937,17 @@ builtin `%s' requested by frozen file is not supported", ARG (i)));
 | and "sysval".  "esyscmd" is GNU specific.				  |
 `------------------------------------------------------------------------*/
 
-/* Helper macros for readability.  */
-#if UNIX || defined WEXITSTATUS
-# define M4SYSVAL_EXITBITS(status)                       \
-   (WIFEXITED (status) ? WEXITSTATUS (status) : 0)
-# define M4SYSVAL_TERMSIGBITS(status)                    \
-   (WIFSIGNALED (status) ? WTERMSIG (status) << 8 : 0)
-
-#else /* ! UNIX && ! defined WEXITSTATUS */
-/* Platforms such as mingw do not support the notion of reporting
-   which signal terminated a process.  Furthermore if WEXITSTATUS was
-   not provided, then the exit value is in the low eight bits.  */
-# define M4SYSVAL_EXITBITS(status) status
-# define M4SYSVAL_TERMSIGBITS(status) 0
-#endif /* ! UNIX && ! defined WEXITSTATUS */
-
-/* Fallback definitions if <stdlib.h> or <sys/wait.h> are inadequate.  */
-#ifndef WEXITSTATUS
-# define WEXITSTATUS(status) (((status) >> 8) & 0xff)
-#endif
-#ifndef WTERMSIG
-# define WTERMSIG(status) ((status) & 0x7f)
-#endif
-#ifndef WIFSIGNALED
-# define WIFSIGNALED(status) (WTERMSIG (status) != 0)
-#endif
-#ifndef WIFEXITED
-# define WIFEXITED(status) (WTERMSIG (status) == 0)
-#endif
-
 /* Exit code from last "syscmd" command.  */
 static int sysval;
 
 static void
 m4_syscmd (struct obstack *obs, int argc, token_data **argv)
 {
-  if (bad_argc (argv[0], argc, 2, 2))
+  const char *cmd = ARG (1);
+  int status;
+  int sig_status;
+  const char *prog_args[4] = { "sh", "-c" };
+  if (bad_argc (argv[0], argc, 2, 2) || !*cmd)
     {
       /* The empty command is successful.  */
       sysval = 0;
@@ -982,26 +955,42 @@ m4_syscmd (struct obstack *obs, int argc, token_data **argv)
     }
 
   debug_flush_files ();
-  sysval = system (ARG (1));
-#if FUNC_SYSTEM_BROKEN
-  /* OS/2 has a buggy system() that returns exit status in the lowest eight
-     bits, although pclose() and WEXITSTATUS are defined to return exit
-     status in the next eight bits.  This approach can't detect signals, but
-     at least syscmd(`ls') still works when stdout is a terminal.  An
-     alternate approach is popen/insert_file/pclose, but that makes stdout
-     a pipe, which can change how some child processes behave.  */
-  if (sysval != -1)
-    sysval <<= 8;
-#endif /* FUNC_SYSTEM_BROKEN */
+#if W32_NATIVE
+  if (strstr (SYSCMD_SHELL, "cmd"))
+    {
+      prog_args[0] = "cmd";
+      prog_args[1] = "/c";
+    }
+#endif
+  prog_args[2] = cmd;
+  errno = 0;
+  status = execute (ARG (0), SYSCMD_SHELL, (char **) prog_args, false,
+		    false, false, false, true, false, &sig_status);
+  if (sig_status)
+    {
+      assert (status == 127);
+      sysval = sig_status << 8;
+    }
+  else
+    {
+      if (status == 127 && errno)
+	M4ERROR ((warning_status, errno, "cannot run command `%s'", cmd));
+      sysval = status;
+    }
 }
 
 static void
 m4_esyscmd (struct obstack *obs, int argc, token_data **argv)
 {
+  const char *cmd = ARG (1);
+  const char *prog_args[4] = { "sh", "-c" };
+  pid_t child;
+  int fd;
   FILE *pin;
-  int ch;
+  int status;
+  int sig_status;
 
-  if (bad_argc (argv[0], argc, 2, 2))
+  if (bad_argc (argv[0], argc, 2, 2) || !*cmd)
     {
       /* The empty command is successful.  */
       sysval = 0;
@@ -1009,28 +998,69 @@ m4_esyscmd (struct obstack *obs, int argc, token_data **argv)
     }
 
   debug_flush_files ();
+#if W32_NATIVE
+  if (strstr (SYSCMD_SHELL, "cmd"))
+    {
+      prog_args[0] = "cmd";
+      prog_args[1] = "/c";
+    }
+#endif
+  prog_args[2] = cmd;
   errno = 0;
-  pin = popen (ARG (1), "r");
+  child = create_pipe_in (ARG (0), SYSCMD_SHELL, (char **) prog_args,
+			  NULL, false, true, false, &fd);
+  if (child == -1)
+    {
+      M4ERROR ((warning_status, errno, "cannot run command `%s'", cmd));
+      sysval = 127;
+      return;
+    }
+  pin = fdopen (fd, "r");
   if (pin == NULL)
     {
-      M4ERROR ((warning_status, errno,
-		"cannot open pipe to command `%s'", ARG (1)));
-      sysval = -1;
+      M4ERROR ((warning_status, errno, "cannot run command `%s'", cmd));
+      sysval = 127;
+      close (fd);
+      return;
+    }
+  while (1)
+    {
+      size_t avail = obstack_room (obs);
+      size_t len;
+      if (!avail)
+	{
+	  int ch = getc (pin);
+	  if (ch == EOF)
+	    break;
+	  obstack_1grow (obs, ch);
+	  continue;
+	}
+      len = fread (obstack_next_free (obs), 1, avail, pin);
+      if (len <= 0)
+	break;
+      obstack_blank_fast (obs, len);
+    }
+  if (ferror (pin) || fclose (pin))
+    M4ERROR ((EXIT_FAILURE, errno, "cannot read pipe"));
+  status = wait_subprocess (child, ARG (0), false, false, true, false,
+			    &sig_status);
+  if (sig_status)
+    {
+      assert (status == 127);
+      sysval = sig_status << 8;
     }
   else
     {
-      while ((ch = getc (pin)) != EOF)
-	obstack_1grow (obs, (char) ch);
-      sysval = pclose (pin);
+      if (status == 127 && errno)
+	M4ERROR ((warning_status, errno, "cannot run command `%s'", cmd));
+      sysval = status;
     }
 }
 
 static void
 m4_sysval (struct obstack *obs, int argc, token_data **argv)
 {
-  shipout_int (obs, (sysval == -1 ? 127
-		     : (M4SYSVAL_EXITBITS (sysval)
-			| M4SYSVAL_TERMSIGBITS (sysval))));
+  shipout_int (obs, sysval);
 }
 
 /*-------------------------------------------------------------------------.
@@ -1662,7 +1692,7 @@ m4_debugfile (struct obstack *obs, int argc, token_data **argv)
     debug_set_output (NULL);
   else if (!debug_set_output (ARG (1)))
     M4ERROR ((warning_status, errno,
-	      "cannot set error file: `%s'", ARG (1)));
+	      "cannot set debug file `%s'", ARG (1)));
 }
 
 /* This section contains text processing macros: "len", "index",
@@ -1800,35 +1830,56 @@ expand_ranges (const char *s, struct obstack *obs)
 static void
 m4_translit (struct obstack *obs, int argc, token_data **argv)
 {
-  const char *data;
-  const char *from;
+  const char *data = ARG (1);
+  const char *from = ARG (2);
   const char *to;
-  char map[256] = {0};
-  char found[256] = {0};
+  char map[UCHAR_MAX + 1];
+  char found[UCHAR_MAX + 1];
   unsigned char ch;
 
-  if (bad_argc (argv[0], argc, 3, 4))
+  if (bad_argc (argv[0], argc, 3, 4) || !*data || !*from)
     {
       /* builtin(`translit') is blank, but translit(`abc') is abc.  */
-      if (argc == 2)
-	obstack_grow (obs, ARG (1), strlen (ARG (1)));
+      if (2 <= argc)
+	obstack_grow (obs, data, strlen (data));
       return;
-    }
-
-  from = ARG (2);
-  if (strchr (from, '-') != NULL)
-    {
-      from = expand_ranges (from, obs);
-      if (from == NULL)
-	return;
     }
 
   to = ARG (3);
   if (strchr (to, '-') != NULL)
     {
       to = expand_ranges (to, obs);
-      if (to == NULL)
-	return;
+      assert (to && *to);
+    }
+
+  /* If there are only one or two bytes to replace, it is faster to
+     use memchr2.  Using expand_ranges does nothing unless there are
+     at least three bytes.  */
+  if (!from[1] || !from[2])
+    {
+      const char *p;
+      size_t len = strlen (data);
+      while ((p = (char *) memchr2 (data, from[0], from[1], len)))
+	{
+	  obstack_grow (obs, data, p - data);
+	  len -= p - data;
+	  if (!len)
+	    return;
+	  data = p + 1;
+	  len--;
+	  if (*p == from[0] && to[0])
+	    obstack_1grow (obs, to[0]);
+	  else if (*p == from[1] && to[0] && to[1])
+	    obstack_1grow (obs, to[1]);
+	}
+      obstack_grow (obs, data, len);
+      return;
+    }
+
+  if (strchr (from, '-') != NULL)
+    {
+      from = expand_ranges (from, obs);
+      assert (from && *from);
     }
 
   /* Calling strchr(from) for each character in data is quadratic,
@@ -1837,6 +1888,8 @@ m4_translit (struct obstack *obs, int argc, token_data **argv)
      pass of data, for linear behavior.  Traditional behavior is that
      only the first instance of a character in from is consulted,
      hence the found map.  */
+  memset (map, 0, sizeof map);
+  memset (found, 0, sizeof found);
   for ( ; (ch = *from) != '\0'; from++)
     {
       if (! found[ch])
@@ -1886,17 +1939,18 @@ substitute (struct obstack *obs, const char *victim, const char *repl,
 	    struct re_registers *regs)
 {
   int ch;
-
-  for (;;)
+  while (1)
     {
-      while ((ch = *repl++) != '\\')
+      const char *backslash = strchr (repl, '\\');
+      if (!backslash)
 	{
-	  if (ch == '\0')
-	    return;
-	  obstack_1grow (obs, ch);
+	  obstack_grow (obs, repl, strlen (repl));
+	  return;
 	}
-
-      switch ((ch = *repl++))
+      obstack_grow (obs, repl, backslash - repl);
+      repl = backslash;
+      ch = *++repl;
+      switch (ch)
 	{
 	case '0':
 	  if (!substitute_warned)
@@ -1910,6 +1964,7 @@ Warning: \\0 will disappear, use \\& instead in replacements"));
 	case '&':
 	  obstack_grow (obs, victim + regs->start[0],
 			regs->end[0] - regs->start[0]);
+	  repl++;
 	  break;
 
 	case '1': case '2': case '3': case '4': case '5': case '6':
@@ -1921,6 +1976,7 @@ Warning: \\0 will disappear, use \\& instead in replacements"));
 	  else if (regs->end[ch] > 0)
 	    obstack_grow (obs, victim + regs->start[ch],
 			  regs->end[ch] - regs->start[ch]);
+	  repl++;
 	  break;
 
 	case '\0':
@@ -1930,6 +1986,7 @@ Warning: \\0 will disappear, use \\& instead in replacements"));
 
 	default:
 	  obstack_1grow (obs, ch);
+	  repl++;
 	  break;
 	}
     }
@@ -2135,19 +2192,19 @@ void
 expand_user_macro (struct obstack *obs, symbol *sym,
 		   int argc, token_data **argv)
 {
-  const char *text;
+  const char *text = SYMBOL_TEXT (sym);
   int i;
-
-  for (text = SYMBOL_TEXT (sym); *text != '\0';)
+  while (1)
     {
-      if (*text != '$')
+      const char *dollar = strchr (text, '$');
+      if (!dollar)
 	{
-	  obstack_1grow (obs, *text);
-	  text++;
-	  continue;
+	  obstack_grow (obs, text, strlen (text));
+	  return;
 	}
-      text++;
-      switch (*text)
+      obstack_grow (obs, text, dollar - text);
+      text = dollar;
+      switch (*++text)
 	{
 	case '0': case '1': case '2': case '3': case '4':
 	case '5': case '6': case '7': case '8': case '9':

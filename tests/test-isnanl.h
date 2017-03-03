@@ -1,5 +1,5 @@
 /* Test of isnanl() substitute.
-   Copyright (C) 2007-2008 Free Software Foundation, Inc.
+   Copyright (C) 2007-2009 Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -21,6 +21,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "nan.h"
+
 #define ASSERT(expr) \
   do									     \
     {									     \
@@ -34,8 +36,20 @@
   while (0)
 
 /* On HP-UX 10.20, negating 0.0L does not yield -0.0L.
-   So we use minus_zero instead.  */
-long double minus_zero = -LDBL_MIN * LDBL_MIN;
+   So we use minus_zero instead.
+   IRIX cc can't put -0.0L into .data, but can compute at runtime.
+   Note that the expression -LDBL_MIN * LDBL_MIN does not work on other
+   platforms, such as when cross-compiling to PowerPC on MacOS X 10.5.  */
+#if defined __hpux || defined __sgi
+static long double
+compute_minus_zero (void)
+{
+  return -LDBL_MIN * LDBL_MIN;
+}
+# define minus_zero compute_minus_zero ()
+#else
+long double minus_zero = -0.0L;
+#endif
 
 int
 main ()
@@ -58,14 +72,14 @@ main ()
   ASSERT (!isnanl (1.0L / 0.0L));
   ASSERT (!isnanl (-1.0L / 0.0L));
   /* Quiet NaN.  */
-  ASSERT (isnanl (0.0L / 0.0L));
+  ASSERT (isnanl (NaNl ()));
 
 #if defined LDBL_EXPBIT0_WORD && defined LDBL_EXPBIT0_BIT
   /* A bit pattern that is different from a Quiet NaN.  With a bit of luck,
      it's a Signalling NaN.  */
   {
     memory_long_double m;
-    m.value = 0.0L / 0.0L;
+    m.value = NaNl ();
 # if LDBL_EXPBIT0_BIT > 0
     m.word[LDBL_EXPBIT0_WORD] ^= (unsigned int) 1 << (LDBL_EXPBIT0_BIT - 1);
 # else

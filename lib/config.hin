@@ -1,5 +1,9 @@
 /* lib/config.hin.  Generated from configure.ac by autoheader.  */
 
+/* Define if the compiler is building for multiple architectures of Apple
+   platforms at once. */
+#undef AA_APPLE_UNIVERSAL_BUILD
+
 /* Define if building universal (internal helper macro) */
 #undef AC_APPLE_UNIVERSAL_BUILD
 
@@ -49,6 +53,9 @@
 /* Define to 1 if the changeword(REGEXP) functionality is wanted */
 #undef ENABLE_CHANGEWORD
 
+/* Define to 1 if an invalid memory address access may yield a SIGBUS. */
+#undef FAULT_YIELDS_SIGBUS
+
 /* Define on systems for which file names may have a so-called `drive letter'
    prefix, define this to compute the length of that prefix, including the
    colon. */
@@ -78,8 +85,8 @@
 /* Define to 1 if fopen() fails to recognize a trailing slash. */
 #undef FOPEN_TRAILING_SLASH_BUG
 
-/* Define to 1 if the return value of system() disagrees with pclose(). */
-#undef FUNC_SYSTEM_BROKEN
+/* Define to 1 if ungetc is broken when used on arbitrary bytes. */
+#undef FUNC_UNGETC_BROKEN
 
 /* Define if gettimeofday clobbers the localtime buffer. */
 #undef GETTIMEOFDAY_CLOBBERS_LOCALTIME
@@ -104,8 +111,11 @@
    */
 #undef HAVE_ALLOCA_H
 
-/* Define to 1 if you have the <bp-sym.h> header file. */
-#undef HAVE_BP_SYM_H
+/* Define to 1 if you have the `btowc' function. */
+#undef HAVE_BTOWC
+
+/* Define to 1 if you have the `confstr' function. */
+#undef HAVE_CONFSTR
 
 /* Define if the copysignf function is declared in <math.h> and available in
    libc. */
@@ -207,10 +217,6 @@
    don't. */
 #undef HAVE_DECL_SNPRINTF
 
-/* Define to 1 if you have the declaration of `strdup', and to 0 if you don't.
-   */
-#undef HAVE_DECL_STRDUP
-
 /* Define to 1 if you have the declaration of `strerror', and to 0 if you
    don't. */
 #undef HAVE_DECL_STRERROR
@@ -235,6 +241,10 @@
    don't. */
 #undef HAVE_DECL_SYS_SIGLIST
 
+/* Define to 1 if you have the declaration of `wctob', and to 0 if you don't.
+   */
+#undef HAVE_DECL_WCTOB
+
 /* Define to 1 if you have the declaration of `_snprintf', and to 0 if you
    don't. */
 #undef HAVE_DECL__SNPRINTF
@@ -246,6 +256,9 @@
 /* Define to 1 if you have the declaration of `__fpending', and to 0 if you
    don't. */
 #undef HAVE_DECL___FPENDING
+
+/* Define if you have the declaration of environ. */
+#undef HAVE_ENVIRON_DECL
 
 /* Define to 1 if you have the <errno.h> header file. */
 #undef HAVE_ERRNO_H
@@ -267,6 +280,9 @@
 
 /* Define to 1 if fseeko (and presumably ftello) exists and is declared. */
 #undef HAVE_FSEEKO
+
+/* Define to 1 if you have the `getdtablesize' function. */
+#undef HAVE_GETDTABLESIZE
 
 /* Define to 1 if you have the <getopt.h> header file. */
 #undef HAVE_GETOPT_H
@@ -353,17 +369,11 @@
 /* Define to 1 if <wchar.h> declares mbstate_t. */
 #undef HAVE_MBSTATE_T
 
-/* Define to 1 if you have the `memchr' function. */
-#undef HAVE_MEMCHR
-
 /* Define to 1 if you have the <memory.h> header file. */
 #undef HAVE_MEMORY_H
 
 /* Define to 1 if you have the `mempcpy' function. */
 #undef HAVE_MEMPCPY
-
-/* Define to 1 if you have the `memset' function. */
-#undef HAVE_MEMSET
 
 /* Define to 1 if you have the `mkdtemp' function. */
 #undef HAVE_MKDTEMP
@@ -374,11 +384,17 @@
 /* Define to 1 if libc includes obstacks. */
 #undef HAVE_OBSTACK
 
+/* Define to 1 if you have the `pathconf' function. */
+#undef HAVE_PATHCONF
+
+/* Define to 1 if you have the <paths.h> header file. */
+#undef HAVE_PATHS_H
+
 /* Define to 1 if you have the `pipe' function. */
 #undef HAVE_PIPE
 
-/* Define to 1 if you have the `pthread_atfork' function. */
-#undef HAVE_PTHREAD_ATFORK
+/* Define to 1 if you have the `posix_spawn' function. */
+#undef HAVE_POSIX_SPAWN
 
 /* Define if the <pthread.h> defines PTHREAD_MUTEX_RECURSIVE. */
 #undef HAVE_PTHREAD_MUTEX_RECURSIVE
@@ -386,8 +402,32 @@
 /* Define if the POSIX multithreading library has read/write locks. */
 #undef HAVE_PTHREAD_RWLOCK
 
-/* Define to 1 if you have the `raise' function. */
-#undef HAVE_RAISE
+/* Define to 1 if you have the <random.h> header file. */
+#undef HAVE_RANDOM_H
+
+/* Define to 1 if you have the `rawmemchr' function. */
+#undef HAVE_RAWMEMCHR
+
+/* Define to 1 if you have the <sched.h> header file. */
+#undef HAVE_SCHED_H
+
+/* Define to 1 if you have the `sched_setparam' function. */
+#undef HAVE_SCHED_SETPARAM
+
+/* Define to 1 if you have the `sched_setscheduler' function. */
+#undef HAVE_SCHED_SETSCHEDULER
+
+/* Define to 1 if you have the <search.h> header file. */
+#undef HAVE_SEARCH_H
+
+/* Define to 1 if you have the `setegid' function. */
+#undef HAVE_SETEGID
+
+/* Define to 1 if you have the `setenv' function. */
+#undef HAVE_SETENV
+
+/* Define to 1 if you have the `seteuid' function. */
+#undef HAVE_SETEUID
 
 /* Define to 1 if you have the `setrlimit' function. */
 #undef HAVE_SETRLIMIT
@@ -425,6 +465,9 @@
 /* Define to 1 if you have the `snprintf' function. */
 #undef HAVE_SNPRINTF
 
+/* Define to 1 if you have the <spawn.h> header file. */
+#undef HAVE_SPAWN_H
+
 /* Define to 1 if extending the stack slightly past the limit causes a SIGSEGV
    which can be handled on an alternate stack established with sigaltstack. */
 #undef HAVE_STACK_OVERFLOW_HANDLING
@@ -454,8 +497,8 @@
 /* Define to 1 if you have the <stdlib.h> header file. */
 #undef HAVE_STDLIB_H
 
-/* Define to 1 if you have the `strdup' function. */
-#undef HAVE_STRDUP
+/* Define to 1 if you have the `strchrnul' function. */
+#undef HAVE_STRCHRNUL
 
 /* Define to 1 if you have the `strerror_r' function. */
 #undef HAVE_STRERROR_R
@@ -469,13 +512,19 @@
 /* Define if you have the strndup() function and it works. */
 #undef HAVE_STRNDUP
 
+/* Define to 1 if you have the `strnlen' function. */
+#undef HAVE_STRNLEN
+
 /* Define to 1 if you have the `strsignal' function. */
 #undef HAVE_STRSIGNAL
 
 /* Define to 1 if you have the `strtol' function. */
 #undef HAVE_STRTOL
 
-/* Define to 1 if `sa_sigaction' is member of `struct sigaction'. */
+/* Define to 1 if the system has the type `struct random_data'. */
+#undef HAVE_STRUCT_RANDOM_DATA
+
+/* Define to 1 if `struct sigaction' is a member of `sa_sigaction'. */
 #undef HAVE_STRUCT_SIGACTION_SA_SIGACTION
 
 /* Define to 1 if you have the <sys/bitypes.h> header file. */
@@ -502,11 +551,20 @@
 /* Define to 1 if you have the <sys/types.h> header file. */
 #undef HAVE_SYS_TYPES_H
 
+/* Define to 1 if you have the <sys/wait.h> header file. */
+#undef HAVE_SYS_WAIT_H
+
+/* Define to 1 if you have the `tsearch' function. */
+#undef HAVE_TSEARCH
+
 /* Define to 1 if you have the <ucontext.h> header file. */
 #undef HAVE_UCONTEXT_H
 
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
+
+/* Define to 1 if you have the `unsetenv' function. */
+#undef HAVE_UNSETENV
 
 /* Define to 1 if the system has the type `unsigned long long int'. */
 #undef HAVE_UNSIGNED_LONG_LONG_INT
@@ -516,6 +574,12 @@
 
 /* Define to 1 if you have the `vasprintf' function. */
 #undef HAVE_VASPRINTF
+
+/* Define to 1 if you have the `vfork' function. */
+#undef HAVE_VFORK
+
+/* Define to 1 if you have the `waitid' function. */
+#undef HAVE_WAITID
 
 /* Define to 1 if you have the <wchar.h> header file. */
 #undef HAVE_WCHAR_H
@@ -531,6 +595,12 @@
 
 /* Define to 1 if you have the `wcslen' function. */
 #undef HAVE_WCSLEN
+
+/* Define to 1 if you have the `wcsnlen' function. */
+#undef HAVE_WCSNLEN
+
+/* Define to 1 if you have the `wctob' function. */
+#undef HAVE_WCTOB
 
 /* Define to 1 if you have the <wctype.h> header file. */
 #undef HAVE_WCTYPE_H
@@ -596,8 +666,21 @@
 /* Define to 1 if lseek does not detect pipes. */
 #undef LSEEK_PIPE_BROKEN
 
+/* Define to 1 if `lstat' dereferences a symlink specified with a trailing
+   slash. */
+#undef LSTAT_FOLLOWS_SLASHED_SYMLINK
+
 /* If malloc(0) is != NULL, define this to 1. Otherwise define this to 0. */
 #undef MALLOC_0_IS_NONNULL
+
+/* Define if the mbrtowc function has the NULL string argument bug. */
+#undef MBRTOWC_NULL_ARG_BUG
+
+/* Define if the mbrtowc function does not return 0 for a NUL character. */
+#undef MBRTOWC_NUL_RETVAL_BUG
+
+/* Define if the mbrtowc function returns a wrong return value. */
+#undef MBRTOWC_RETVAL_BUG
 
 /* Define to 1 if assertions should be disabled. */
 #undef NDEBUG
@@ -609,6 +692,10 @@
 /* Define if the vasnprintf implementation needs special code for the 'F'
    directive. */
 #undef NEED_PRINTF_DIRECTIVE_F
+
+/* Define if the vasnprintf implementation needs special code for the 'ls'
+   directive. */
+#undef NEED_PRINTF_DIRECTIVE_LS
 
 /* Define if the vasnprintf implementation needs special code for 'double'
    arguments. */
@@ -667,6 +754,9 @@
 /* Define to the one symbol short name of this package. */
 #undef PACKAGE_TARNAME
 
+/* Define to the home page for this package. */
+#undef PACKAGE_URL
+
 /* Define to the version of this package. */
 #undef PACKAGE_VERSION
 
@@ -679,6 +769,9 @@
 /* Define to l, ll, u, ul, ull, etc., as suitable for constants of type
    'ptrdiff_t'. */
 #undef PTRDIFF_T_SUFFIX
+
+/* Define to 1 if a file can be renamed while open, or to 0 if not. */
+#undef RENAME_OPEN_FILE_WORKS
 
 /* Define this to 1 if strerror is broken. */
 #undef REPLACE_STRERROR
@@ -722,6 +815,9 @@
 
 /* Define to 1 if strerror_r returns char *. */
 #undef STRERROR_R_CHAR_P
+
+/* Shell used by syscmd and esyscmd, must accept -c argument. */
+#undef SYSCMD_SHELL
 
 /* Define if the POSIX multithreading library can be used. */
 #undef USE_POSIX_THREADS
@@ -800,6 +896,9 @@
 /* Define if you want regoff_t to be at least as wide POSIX requires. */
 #undef _REGEX_LARGE_OFFSETS
 
+/* Define to 500 only on HP-UX. */
+#undef _XOPEN_SOURCE
+
 /* Enable extensions on AIX 3, Interix.  */
 #ifndef _ALL_SOURCE
 # undef _ALL_SOURCE
@@ -863,8 +962,8 @@
 /* Define to a type if <wchar.h> does not define. */
 #undef mbstate_t
 
-/* Define to rpl_memcmp if the replacement function should be used. */
-#undef memcmp
+/* Define to `int' if <sys/types.h> does not define. */
+#undef mode_t
 
 /* Define to the type of st_nlink in struct stat, or a supertype. */
 #undef nlink_t
@@ -946,6 +1045,16 @@
 
 /* Define to `int' if <sys/types.h> doesn't define. */
 #undef uid_t
+
+/* Define as a marker that can be attached to function parameter declarations
+   for parameters that are not used.  This helps to reduce warnings, such as
+   from GCC -Wunused-parameter.  */
+#if __GNUC__ >= 3 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 7)
+# define _UNUSED_PARAMETER_ __attribute__ ((__unused__))
+#else
+# define _UNUSED_PARAMETER_
+#endif
+
 
 /* Define as a macro for copying va_list variables. */
 #undef va_copy

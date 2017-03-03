@@ -1,10 +1,10 @@
-This is m4.info, produced by makeinfo version 4.8 from m4.texinfo.
+This is m4.info, produced by makeinfo version 4.13 from m4.texinfo.
 
-   This manual (25 September 2008) is for GNU M4 (version 1.4.12), a
-package containing an implementation of the m4 macro language.
+This manual (5 March 2009) is for GNU M4 (version 1.4.13), a package
+containing an implementation of the m4 macro language.
 
    Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2004, 2005, 2006,
-2007, 2008 Free Software Foundation, Inc.
+2007, 2008, 2009 Free Software Foundation, Inc.
 
      Permission is granted to copy, distribute and/or modify this
      document under the terms of the GNU Free Documentation License,
@@ -24,10 +24,10 @@ File: m4.info,  Node: GNU Free Documentation License,  Up: Copying This Manual
 B.1 License for copying this manual
 ===================================
 
-                      Version 1.2, November 2002
+                     Version 1.3, 3 November 2008
 
-     Copyright (C) 2000,2001,2002 Free Software Foundation, Inc.
-     51 Franklin St, Fifth Floor, Boston, MA  02110-1301, USA
+     Copyright (C) 2000, 2001, 2002, 2007, 2008 Free Software Foundation, Inc.
+     `http://fsf.org/'
 
      Everyone is permitted to copy and distribute verbatim copies
      of this license document, but changing it is not allowed.
@@ -128,6 +128,9 @@ B.1 License for copying this manual
      works in formats which do not have any title page as such, "Title
      Page" means the text near the most prominent appearance of the
      work's title, preceding the beginning of the body of the text.
+
+     The "publisher" means any person or entity that distributes copies
+     of the Document to the public.
 
      A section "Entitled XYZ" means a named subunit of the Document
      whose title either is precisely XYZ or contains XYZ in parentheses
@@ -394,12 +397,29 @@ B.1 License for copying this manual
   9. TERMINATION
 
      You may not copy, modify, sublicense, or distribute the Document
-     except as expressly provided for under this License.  Any other
-     attempt to copy, modify, sublicense or distribute the Document is
-     void, and will automatically terminate your rights under this
-     License.  However, parties who have received copies, or rights,
-     from you under this License will not have their licenses
-     terminated so long as such parties remain in full compliance.
+     except as expressly provided under this License.  Any attempt
+     otherwise to copy, modify, sublicense, or distribute it is void,
+     and will automatically terminate your rights under this License.
+
+     However, if you cease all violation of this License, then your
+     license from a particular copyright holder is reinstated (a)
+     provisionally, unless and until the copyright holder explicitly
+     and finally terminates your license, and (b) permanently, if the
+     copyright holder fails to notify you of the violation by some
+     reasonable means prior to 60 days after the cessation.
+
+     Moreover, your license from a particular copyright holder is
+     reinstated permanently if the copyright holder notifies you of the
+     violation by some reasonable means, this is the first time you have
+     received notice of violation of this License (for any work) from
+     that copyright holder, and you cure the violation prior to 30 days
+     after your receipt of the notice.
+
+     Termination of your rights under this section does not terminate
+     the licenses of parties who have received copies or rights from
+     you under this License.  If your rights have been terminated and
+     not permanently reinstated, receipt of a copy of some or all of
+     the same material does not give you any rights to use it.
 
  10. FUTURE REVISIONS OF THIS LICENSE
 
@@ -417,7 +437,41 @@ B.1 License for copying this manual
      published (not as a draft) by the Free Software Foundation.  If
      the Document does not specify a version number of this License,
      you may choose any version ever published (not as a draft) by the
-     Free Software Foundation.
+     Free Software Foundation.  If the Document specifies that a proxy
+     can decide which future versions of this License can be used, that
+     proxy's public statement of acceptance of a version permanently
+     authorizes you to choose that version for the Document.
+
+ 11. RELICENSING
+
+     "Massive Multiauthor Collaboration Site" (or "MMC Site") means any
+     World Wide Web server that publishes copyrightable works and also
+     provides prominent facilities for anybody to edit those works.  A
+     public wiki that anybody can edit is an example of such a server.
+     A "Massive Multiauthor Collaboration" (or "MMC") contained in the
+     site means any set of copyrightable works thus published on the MMC
+     site.
+
+     "CC-BY-SA" means the Creative Commons Attribution-Share Alike 3.0
+     license published by Creative Commons Corporation, a not-for-profit
+     corporation with a principal place of business in San Francisco,
+     California, as well as future copyleft versions of that license
+     published by that same organization.
+
+     "Incorporate" means to publish or republish a Document, in whole or
+     in part, as part of another Document.
+
+     An MMC is "eligible for relicensing" if it is licensed under this
+     License, and if all works that were first published under this
+     License somewhere other than this MMC, and subsequently
+     incorporated in whole or in part into the MMC, (1) had no cover
+     texts or invariant sections, and (2) were thus incorporated prior
+     to November 1, 2008.
+
+     The operator of an MMC Site may republish an MMC contained in the
+     site under CC-BY-SA on the same site at any time before August 1,
+     2009, provided the MMC is eligible for relicensing.
+
 
 ADDENDUM: How to use this License for your documents
 ====================================================
@@ -428,7 +482,7 @@ notices just after the title page:
 
        Copyright (C)  YEAR  YOUR NAME.
        Permission is granted to copy, distribute and/or modify this document
-       under the terms of the GNU Free Documentation License, Version 1.2
+       under the terms of the GNU Free Documentation License, Version 1.3
        or any later version published by the Free Software Foundation;
        with no Invariant Sections, no Front-Cover Texts, and no Back-Cover
        Texts.  A copy of the license is included in the section entitled ``GNU
@@ -491,11 +545,13 @@ macro is introduced the first time.
 * changeword:                            Changeword.          (line  23)
 * cleardivert:                           Cleardivert.         (line  26)
 * cond:                                  Shift.               (line  53)
+* copy:                                  Composition.         (line 120)
+* curry:                                 Composition.         (line  68)
 * debugfile:                             Debug Output.        (line  11)
 * debugmode:                             Debug Levels.        (line  78)
 * decr:                                  Incr.                (line  11)
 * define:                                Define.              (line  10)
-* define_blind:                          Ifelse.              (line  70)
+* define_blind:                          Composition.         (line  11)
 * defn:                                  Defn.                (line  10)
 * divert:                                Divert.              (line   9)
 * divnum:                                Divnum.              (line   9)
@@ -515,7 +571,7 @@ macro is introduced the first time.
 * forloop:                               Forloop.             (line   9)
 * format:                                Format.              (line   9)
 * ifdef:                                 Ifdef.               (line  10)
-* ifelse:                                Ifelse.              (line  14)
+* ifelse:                                Ifelse.              (line  11)
 * include:                               Include.             (line   9)
 * incr:                                  Incr.                (line  10)
 * index:                                 Index macro.         (line   9)
@@ -534,9 +590,14 @@ macro is introduced the first time.
 * pushdef:                               Pushdef.             (line  11)
 * quote:                                 Shift.               (line 195)
 * regexp:                                Regexp.              (line   9)
+* rename:                                Composition.         (line 121)
 * reverse:                               Shift.               (line  32)
 * shift:                                 Shift.               (line  17)
 * sinclude:                              Include.             (line  10)
+* stack_foreach:                         Stacks.              (line  12)
+* stack_foreach_lifo:                    Stacks.              (line  13)
+* stack_foreach_sep:                     Improved copy.       (line  16)
+* stack_foreach_sep_lifo:                Improved copy.       (line  17)
 * substr:                                Substr.              (line   9)
 * syscmd:                                Syscmd.              (line   9)
 * sysval:                                Sysval.              (line   9)
@@ -558,13 +619,14 @@ C.2 Index for many concepts
  [index ]
 * Menu:
 
+* argument currying:                     Composition.         (line  63)
 * arguments to macros <1>:               Arguments.           (line   6)
 * arguments to macros:                   Macro Arguments.     (line   6)
 * arguments to macros, special:          Pseudo Arguments.    (line   6)
 * arguments, joining:                    Shift.               (line 100)
-* arguments, more than nine <1>:         Arguments.           (line  54)
-* arguments, more than nine <2>:         Shift.               (line 252)
-* arguments, more than nine:             Improved foreach.    (line 155)
+* arguments, more than nine <1>:         Shift.               (line 252)
+* arguments, more than nine <2>:         Improved foreach.    (line 155)
+* arguments, more than nine:             Arguments.           (line  54)
 * arguments, quoted macro:               Quoting Arguments.   (line   6)
 * arguments, reversing:                  Shift.               (line  31)
 * arithmetic:                            Arithmetic.          (line   6)
@@ -573,6 +635,7 @@ C.2 Index for many concepts
 * basic regular expressions <1>:         Regexp.              (line   6)
 * basic regular expressions:             Patsubst.            (line   6)
 * blind macro <1>:                       Ifelse.              (line  52)
+* blind macro <2>:                       Composition.         (line  10)
 * blind macro:                           Inhibiting Invocation.
                                                               (line  14)
 * bug reports:                           Bugs.                (line   6)
@@ -580,7 +643,7 @@ C.2 Index for many concepts
 * builtins, special tokens:              Defn.                (line 101)
 * call of builtins, indirect:            Builtin.             (line   6)
 * call of macros, indirect:              Indir.               (line   6)
-* case statement:                        Ifelse.              (line 119)
+* case statement:                        Ifelse.              (line  69)
 * changing comment delimiters:           Changecom.           (line   6)
 * changing quote delimiters:             Changequote.         (line   6)
 * changing syntax:                       Changeword.          (line   6)
@@ -597,11 +660,14 @@ C.2 Index for many concepts
 * comments, copied to output:            Changecom.           (line  29)
 * comparing strings:                     Ifelse.              (line   6)
 * compatibility:                         Compatibility.       (line   6)
+* composing macros:                      Composition.         (line   6)
 * concatenating arguments:               Shift.               (line 100)
 * conditional, short-circuiting:         Shift.               (line  51)
 * conditionals:                          Ifdef.               (line   6)
 * controlling debugging output:          Debug Levels.        (line   6)
+* copying macros:                        Composition.         (line 116)
 * counting loops:                        Forloop.             (line   6)
+* currying arguments:                    Composition.         (line  63)
 * debugging macros:                      Debugging.           (line   6)
 * debugging output, controlling:         Debug Levels.        (line   6)
 * debugging output, saving:              Debug Output.        (line   6)
@@ -609,9 +675,10 @@ C.2 Index for many concepts
 * deferring expansion:                   M4wrap.              (line   6)
 * deferring output:                      Diversions.          (line   6)
 * defining new macros:                   Definitions.         (line   6)
-* definition stack:                      Pushdef.             (line   6)
-* definitions, displaying macro <1>:     Defn.                (line   6)
-* definitions, displaying macro:         Dumpdef.             (line   6)
+* definition stack <1>:                  Pushdef.             (line   6)
+* definition stack:                      Stacks.              (line   6)
+* definitions, displaying macro <1>:     Dumpdef.             (line   6)
+* definitions, displaying macro:         Defn.                (line   6)
 * deleting macros:                       Undefine.            (line   6)
 * deleting whitespace in input:          Dnl.                 (line   6)
 * delimiters, changing <1>:              Changecom.           (line   6)
@@ -636,16 +703,17 @@ C.2 Index for many concepts
 * expansion, deferring:                  M4wrap.              (line   6)
 * expansion, tracing macro:              Trace.               (line   6)
 * expressions, evaluation of integer:    Eval.                (line   6)
-* expressions, regular <1>:              Patsubst.            (line   6)
-* expressions, regular:                  Regexp.              (line   6)
+* expressions, regular <1>:              Regexp.              (line   6)
+* expressions, regular:                  Patsubst.            (line   6)
 * extracting substrings:                 Substr.              (line   6)
 * fast loading of frozen files:          Using frozen files.  (line   6)
 * fatal errors:                          Operation modes.     (line  20)
 * FDL, GNU Free Documentation License:   GNU Free Documentation License.
                                                               (line   6)
 * file format, frozen file:              Frozen file format.  (line   6)
-* file inclusion <1>:                    File Inclusion.      (line   6)
-* file inclusion:                        Undivert.            (line  13)
+* file inclusion <1>:                    Undivert.            (line  13)
+* file inclusion <2>:                    File Inclusion.      (line   6)
+* file inclusion:                        Undivert.            (line  89)
 * file names, on the command line:       Command line files.  (line   6)
 * files, diverting output to:            Divert.              (line   6)
 * files, names of temporary:             Mkstemp.             (line   6)
@@ -658,26 +726,25 @@ C.2 Index for many concepts
 * frozen files for fast loading:         Using frozen files.  (line   6)
 * General Public License (GPL), GNU:     GNU General Public License.
                                                               (line   6)
-* GNU extensions <1>:                    Arguments.           (line  54)
+* GNU extensions <1>:                    Divert.              (line  54)
 * GNU extensions <2>:                    Undivert.            (line  13)
-* GNU extensions <3>:                    Esyscmd.             (line   6)
-* GNU extensions <4>:                    Search Path.         (line   6)
-* GNU extensions <5>:                    Divert.              (line  54)
-* GNU extensions <6>:                    Undivert.            (line  81)
-* GNU extensions <7>:                    Define.              (line  41)
-* GNU extensions <8>:                    Inhibiting Invocation.
-                                                              (line  14)
+* GNU extensions <3>:                    Eval.                (line 125)
+* GNU extensions <4>:                    Define.              (line  41)
+* GNU extensions <5>:                    Mkstemp.             (line  59)
+* GNU extensions <6>:                    Search Path.         (line   6)
+* GNU extensions <7>:                    Regexp.              (line   6)
+* GNU extensions <8>:                    Builtin.             (line   6)
 * GNU extensions <9>:                    Using frozen files.  (line   6)
-* GNU extensions <10>:                   Regexp.              (line   6)
-* GNU extensions <11>:                   Debug Output.        (line   6)
-* GNU extensions <12>:                   Debug Levels.        (line  74)
+* GNU extensions <10>:                   Arguments.           (line  54)
+* GNU extensions <11>:                   Extensions.          (line   6)
+* GNU extensions <12>:                   Inhibiting Invocation.
+                                                              (line  14)
 * GNU extensions <13>:                   Patsubst.            (line   6)
-* GNU extensions <14>:                   Format.              (line   6)
-* GNU extensions <15>:                   Indir.               (line   6)
-* GNU extensions <16>:                   Eval.                (line 125)
-* GNU extensions <17>:                   Mkstemp.             (line  59)
-* GNU extensions <18>:                   Builtin.             (line   6)
-* GNU extensions:                        Extensions.          (line   6)
+* GNU extensions <14>:                   Debug Output.        (line   6)
+* GNU extensions <15>:                   Esyscmd.             (line   6)
+* GNU extensions <16>:                   Format.              (line   6)
+* GNU extensions <17>:                   Debug Levels.        (line  74)
+* GNU extensions:                        Indir.               (line   6)
 * GNU Free Documentation License:        GNU Free Documentation License.
                                                               (line   6)
 * GNU General Public License:            GNU General Public License.
@@ -688,17 +755,17 @@ C.2 Index for many concepts
 * history of m4:                         History.             (line   6)
 * included files, search path for:       Search Path.         (line   6)
 * inclusion, of files <1>:               File Inclusion.      (line   6)
-* inclusion, of files:                   Undivert.            (line  81)
+* inclusion, of files:                   Undivert.            (line  89)
 * increment operator:                    Incr.                (line   6)
 * indirect call of builtins:             Builtin.             (line   6)
 * indirect call of macros:               Indir.               (line   6)
 * initialization, frozen state:          Using frozen files.  (line   6)
-* input location <1>:                    Location.            (line   6)
-* input location:                        Preprocessor features.
+* input location <1>:                    Preprocessor features.
                                                               (line  28)
+* input location:                        Location.            (line   6)
 * input tokens:                          Syntax.              (line   6)
-* input, discarding <1>:                 Divert.              (line  42)
-* input, discarding <2>:                 Dnl.                 (line   6)
+* input, discarding <1>:                 Dnl.                 (line   6)
+* input, discarding <2>:                 Divert.              (line  42)
 * input, discarding:                     Ifelse.              (line   6)
 * input, saving:                         M4wrap.              (line   6)
 * integer arithmetic:                    Arithmetic.          (line   6)
@@ -722,15 +789,18 @@ C.2 Index for many concepts
 * loops, counting:                       Forloop.             (line   6)
 * loops, list iteration:                 Foreach.             (line   6)
 * M4PATH:                                Search Path.         (line   9)
+* macro composition:                     Composition.         (line   6)
 * macro definitions, on the command line: Preprocessor features.
                                                               (line   6)
 * macro expansion, tracing:              Trace.               (line   6)
 * macro invocation:                      Invocation.          (line   6)
 * macro, blind <1>:                      Inhibiting Invocation.
                                                               (line  14)
-* macro, blind:                          Ifelse.              (line  52)
-* macros, arguments to <1>:              Arguments.           (line   6)
-* macros, arguments to:                  Macro Arguments.     (line   6)
+* macro, blind <2>:                      Ifelse.              (line  52)
+* macro, blind:                          Composition.         (line  10)
+* macros, arguments to <1>:              Macro Arguments.     (line   6)
+* macros, arguments to:                  Arguments.           (line   6)
+* macros, copying:                       Composition.         (line 116)
 * macros, debugging:                     Debugging.           (line   6)
 * macros, displaying definitions <1>:    Defn.                (line   6)
 * macros, displaying definitions:        Dumpdef.             (line   6)
@@ -745,15 +815,15 @@ C.2 Index for many concepts
 * macros, temporary redefinition of:     Pushdef.             (line   6)
 * manipulating quotes:                   Shift.               (line 191)
 * messages, printing error:              Errprint.            (line   6)
-* more than nine arguments <1>:          Improved foreach.    (line 155)
-* more than nine arguments <2>:          Arguments.           (line  54)
-* more than nine arguments:              Shift.               (line 252)
-* multibranches:                         Ifelse.              (line 119)
+* more than nine arguments <1>:          Arguments.           (line  54)
+* more than nine arguments <2>:          Shift.               (line 252)
+* more than nine arguments:              Improved foreach.    (line 155)
+* multibranches:                         Ifelse.              (line  69)
 * names:                                 Names.               (line   6)
 * nesting limit:                         Limits control.      (line  43)
 * nine arguments, more than <1>:         Improved foreach.    (line 155)
-* nine arguments, more than <2>:         Shift.               (line 252)
-* nine arguments, more than:             Arguments.           (line  54)
+* nine arguments, more than <2>:         Arguments.           (line  54)
+* nine arguments, more than:             Shift.               (line 252)
 * numbers:                               Manual.              (line  57)
 * options, command line:                 Invoking m4.         (line  10)
 * output, diverting to files:            Divert.              (line   6)
@@ -770,6 +840,8 @@ C.2 Index for many concepts
 * preprocessor features:                 Preprocessor features.
                                                               (line   6)
 * printing error messages:               Errprint.            (line   6)
+* pushdef stack <1>:                     Stacks.              (line   6)
+* pushdef stack:                         Pushdef.             (line   6)
 * quadratic behavior, avoiding:          Improved foreach.    (line  38)
 * quote delimiters, changing:            Changequote.         (line   6)
 * quote manipulation:                    Shift.               (line 191)
@@ -779,18 +851,19 @@ C.2 Index for many concepts
 * recursive macros:                      Shift.               (line   6)
 * redefinition of macros, temporary:     Pushdef.             (line   6)
 * regular expressions <1>:               Changeword.          (line   6)
-* regular expressions <2>:               Regexp.              (line   6)
-* regular expressions:                   Patsubst.            (line   6)
+* regular expressions <2>:               Patsubst.            (line   6)
+* regular expressions:                   Regexp.              (line   6)
 * reloading a frozen file:               Using frozen files.  (line   6)
+* renaming macros <1>:                   Composition.         (line 116)
 * renaming macros:                       Defn.                (line   6)
 * reporting bugs:                        Bugs.                (line   6)
-* rescanning <1>:                        Other Incompatibilities.
-                                                              (line  52)
-* rescanning <2>:                        Limits control.      (line  56)
-* rescanning <3>:                        Pseudo Arguments.    (line 106)
-* rescanning <4>:                        Defn.                (line  61)
-* rescanning:                            Inhibiting Invocation.
+* rescanning <1>:                        Defn.                (line  61)
+* rescanning <2>:                        Inhibiting Invocation.
                                                               (line  87)
+* rescanning <3>:                        Pseudo Arguments.    (line 106)
+* rescanning <4>:                        Other Incompatibilities.
+                                                              (line  52)
+* rescanning:                            Limits control.      (line  56)
 * reversing arguments:                   Shift.               (line  31)
 * rule of thumb, quoting:                Quoting Arguments.   (line  22)
 * running shell commands:                Shell commands.      (line   6)
@@ -801,10 +874,11 @@ C.2 Index for many concepts
 * shell commands, running:               Shell commands.      (line   6)
 * short-circuiting conditional:          Shift.               (line  51)
 * special arguments to macros:           Pseudo Arguments.    (line   6)
-* stack, macro definition:               Pushdef.             (line   6)
+* stack, macro definition <1>:           Pushdef.             (line   6)
+* stack, macro definition:               Stacks.              (line   6)
 * standard error, output to <1>:         Dumpdef.             (line   6)
-* standard error, output to <2>:         Errprint.            (line   6)
-* standard error, output to:             Trace.               (line   6)
+* standard error, output to <2>:         Trace.               (line   6)
+* standard error, output to:             Errprint.            (line   6)
 * status of shell commands:              Sysval.              (line   6)
 * status, setting m4 exit:               M4exit.              (line   6)
 * string, quoted:                        Quoted strings.      (line   6)
@@ -814,7 +888,7 @@ C.2 Index for many concepts
 * substrings, locating:                  Index macro.         (line   6)
 * suggestions, reporting:                Bugs.                (line   6)
 * suppressing warnings:                  Macro Arguments.     (line  38)
-* switch statement:                      Ifelse.              (line 119)
+* switch statement:                      Ifelse.              (line  69)
 * synchronization lines:                 Preprocessor features.
                                                               (line  28)
 * syntax, changing:                      Changeword.          (line   6)

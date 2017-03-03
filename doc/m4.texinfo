@@ -44,7 +44,7 @@ This manual (@value{UPDATED}) is for @acronym{GNU} M4 (version
 language.
 
 Copyright @copyright{} 1989, 1990, 1991, 1992, 1993, 1994, 2004, 2005,
-2006, 2007, 2008 Free Software Foundation, Inc.
+2006, 2007, 2008, 2009 Free Software Foundation, Inc.
 
 @quotation
 Permission is granted to copy, distribute and/or modify this document
@@ -197,6 +197,8 @@ Conditionals, loops, and recursion
 * Shift::                       Recursion in @code{m4}
 * Forloop::                     Iteration by counting
 * Foreach::                     Iteration by list contents
+* Stacks::                      Working with definition stacks
+* Composition::                 Building macros with macros
 
 How to debug macros and input
 
@@ -270,6 +272,7 @@ Correct version of some examples
 * Improved exch::               Solution for @code{exch}
 * Improved forloop::            Solution for @code{forloop}
 * Improved foreach::            Solution for @code{foreach}
+* Improved copy::               Solution for @code{copy}
 * Improved m4wrap::             Solution for @code{m4wrap}
 * Improved cleardivert::        Solution for @code{cleardivert}
 * Improved capitalize::         Solution for @code{capitalize}
@@ -395,7 +398,8 @@ addressed some long standing bugs in the venerable 1.4 release.  Then in
 released 1.4.3 and 1.4.4.  And in 2006, Eric Blake joined the team and
 prepared patches for the release of 1.4.5, 1.4.6, 1.4.7, and 1.4.8.
 More bug fixes were incorporated in 2007, with releases 1.4.9 and
-1.4.10, closing the series with 1.4.11 and 1.4.12 in 2008.
+1.4.10.  Eric continued with some portability fixes for 1.4.11 and
+1.4.12 in 2008, and 1.4.13 in 2009.
 
 Meanwhile, development has continued on new features for @code{m4}, such
 as dynamic module loading and additional builtins.  When complete,
@@ -617,12 +621,12 @@ is also specified.
 Suppress warnings, such as missing or superfluous arguments in macro
 calls, or treating the empty string as zero.
 
-@item --warn-macro-sequence@r{[}=@var{REGEXP}@r{]}
-Issue a warning if the regular expression @var{REGEXP} has a non-empty
+@item --warn-macro-sequence@r{[}=@var{regexp}@r{]}
+Issue a warning if the regular expression @var{regexp} has a non-empty
 match in any macro definition (either by @code{define} or
 @code{pushdef}).  Empty matches are ignored; therefore, supplying the
-empty string as @var{REGEXP} disables any warning.  If the optional
-@var{REGEXP} is not supplied, then the default regular expression is
+empty string as @var{regexp} disables any warning.  If the optional
+@var{regexp} is not supplied, then the default regular expression is
 @samp{\$\(@{[^@}]*@}\|[0-9][0-9]+\)} (a literal @samp{$} followed by
 multiple digits or by an open brace), since these sequences will
 change semantics in the default operation of @acronym{GNU} M4 2.0 (due
@@ -631,9 +635,9 @@ handled, @pxref{Arguments}).  Providing an alternate regular
 expression can provide a useful reverse lookup feature of finding
 where a macro is defined to have a given definition.
 
-@item -W @var{REGEXP}
-@itemx --word-regexp=@var{REGEXP}
-Use @var{REGEXP} as an alternative syntax for macro names.  This
+@item -W @var{regexp}
+@itemx --word-regexp=@var{regexp}
+Use @var{regexp} as an alternative syntax for macro names.  This
 experimental option will not be present in all @acronym{GNU} @code{m4}
 implementations (@pxref{Changeword}).
 @end table
@@ -650,18 +654,18 @@ search path can be altered, and the output file can track where the
 input came from.  These features occur with the following options:
 
 @table @code
-@item -D @var{NAME}@r{[}=@var{VALUE}@r{]}
-@itemx --define=@var{NAME}@r{[}=@var{VALUE}@r{]}
-This enters @var{NAME} into the symbol table.  If @samp{=@var{VALUE}} is
-missing, the value is taken to be the empty string.  The @var{VALUE} can
+@item -D @var{name}@r{[}=@var{value}@r{]}
+@itemx --define=@var{name}@r{[}=@var{value}@r{]}
+This enters @var{name} into the symbol table.  If @samp{=@var{value}} is
+missing, the value is taken to be the empty string.  The @var{value} can
 be any string, and the macro can be defined to take arguments, just as
 if it was defined from within the input.  This option may be given more
 than once; order with respect to file names is significant, and
-redefining the same @var{NAME} loses the previous value.
+redefining the same @var{name} loses the previous value.
 
-@item -I @var{DIRECTORY}
-@itemx --include=@var{DIRECTORY}
-Make @code{m4} search @var{DIRECTORY} for included files that are not
+@item -I @var{directory}
+@itemx --include=@var{directory}
+Make @code{m4} search @var{directory} for included files that are not
 found in the current working directory.  @xref{Search Path}, for more
 details.  This option may be given more than once.
 
@@ -721,11 +725,11 @@ goodbye
 @result{}goodbye
 @end example
 
-@item -U @var{NAME}
-@itemx --undefine=@var{NAME}
-This deletes any predefined meaning @var{NAME} might have.  Obviously,
+@item -U @var{name}
+@itemx --undefine=@var{name}
+This deletes any predefined meaning @var{name} might have.  Obviously,
 only predefined macros can be deleted in this way.  This option may be
-given more than once; undefining a @var{NAME} that does not have a
+given more than once; undefining a @var{name} that does not have a
 definition is silently ignored.  Order is significant with respect to
 file names.
 @end table
@@ -762,18 +766,18 @@ environment.
 Suppress all the extensions made in this implementation, compared to the
 System V version.  @xref{Compatibility}, for a list of these.
 
-@item -H @var{NUM}
-@itemx --hashsize=@var{NUM}
-Make the internal hash table for symbol lookup be @var{NUM} entries big.
+@item -H @var{num}
+@itemx --hashsize=@var{num}
+Make the internal hash table for symbol lookup be @var{num} entries big.
 For better performance, the number should be prime, but this is not
 checked.  The default is 509 entries.  It should not be necessary to
 increase this value, unless you define an excessive number of macros.
 
-@item -L @var{NUM}
-@itemx --nesting-limit=@var{NUM}
+@item -L @var{num}
+@itemx --nesting-limit=@var{num}
 @cindex nesting limit
 @cindex limit, nesting
-Artificially limit the nesting of macro calls to @var{NUM} levels,
+Artificially limit the nesting of macro calls to @var{num} levels,
 stopping program execution if this limit is ever exceeded.  When not
 specified, nesting defaults to unlimited on platforms that can detect
 stack overflow, and to 1024 levels otherwise.  A value of zero means
@@ -798,15 +802,15 @@ only the simplest example (but @pxref{Compatibility}).  Expecting @acronym{GNU}
 system to detect and diagnose endless loops: it is a quite @emph{hard}
 problem in general, if not undecidable!
 
-@item -B @var{NUM}
-@itemx -S @var{NUM}
-@itemx -T @var{NUM}
+@item -B @var{num}
+@itemx -S @var{num}
+@itemx -T @var{num}
 These options are present for compatibility with System V @code{m4}, but
 do nothing in this implementation.  They may disappear in future
 releases, and issue a warning to that effect.
 
-@item -N @var{NUM}
-@itemx --diversions=@var{NUM}
+@item -N @var{num}
+@itemx --diversions=@var{num}
 These options are present only for compatibility with previous
 versions of @acronym{GNU} @code{m4}, and were controlling the number of
 possible diversions which could be used at the same time.  They do nothing,
@@ -822,16 +826,16 @@ releases, and issue a warning to that effect.
 execution when reusing a common initialization script.
 
 @table @code
-@item -F @var{FILE}
-@itemx --freeze-state=@var{FILE}
+@item -F @var{file}
+@itemx --freeze-state=@var{file}
 Once execution is finished, write out the frozen state on the specified
-@var{FILE}.  It is conventional, but not required, for @var{FILE} to end
+@var{file}.  It is conventional, but not required, for @var{file} to end
 in @samp{.m4f}.
 
-@item -R @var{FILE}
-@itemx --reload-state=@var{FILE}
+@item -R @var{file}
+@itemx --reload-state=@var{file}
 Before execution starts, recover the internal state from the specified
-frozen @var{FILE}.  The options @option{-D}, @option{-U}, and
+frozen @var{file}.  The options @option{-D}, @option{-U}, and
 @option{-t} take effect after state is reloaded, but before the input
 files are read.
 @end table
@@ -843,36 +847,56 @@ Finally, there are several options for aiding in debugging @code{m4}
 scripts.
 
 @table @code
-@item -d@r{[}@var{FLAGS}@r{]}
-@itemx --debug@r{[}=@var{FLAGS}@r{]}
-Set the debug-level according to the flags @var{FLAGS}.  The debug-level
+@item -d@r{[}@var{flags}@r{]}
+@itemx --debug@r{[}=@var{flags}@r{]}
+Set the debug-level according to the flags @var{flags}.  The debug-level
 controls the format and amount of information presented by the debugging
 functions.  @xref{Debug Levels}, for more details on the format and
-meaning of @var{FLAGS}.  If omitted, @var{FLAGS} defaults to @samp{aeq}.
+meaning of @var{flags}.  If omitted, @var{flags} defaults to @samp{aeq}.
 
-@item --debugfile=@var{FILE}
-@itemx -o @var{FILE}
-@itemx --error-output=@var{FILE}
+@item --debugfile@r{[}=@var{file}@r{]}
+@itemx -o @var{file}
+@itemx --error-output=@var{file}
 Redirect @code{dumpdef} output, debug messages, and trace output to the
-named @var{FILE}.  Warnings, error messages, and @code{errprint} output
-are still printed to standard error.  If unspecified, debug output goes
-to standard error; if empty, debug output is discarded.  @xref{Debug
-Output}, for more details.  The spellings @option{-o} and
+named @var{file}.  Warnings, error messages, and @code{errprint} output
+are still printed to standard error.  If these options are not used, or
+if @var{file} is unspecified (only possible for @option{--debugfile}),
+debug output goes to standard error; if @var{file} is the empty string,
+debug output is discarded.  @xref{Debug Output}, for more details.  The
+option @option{--debugfile} may be given more than once, and order is
+significant with respect to file names.  The spellings @option{-o} and
 @option{--error-output} are misleading and inconsistent with other
 @acronym{GNU} tools; for now they are silently accepted as synonyms of
-@option{--debugfile}, but in a future version of M4, using them will
-cause a warning to be issued.
+@option{--debugfile} and only recognized once, but in a future version
+of M4, using them will cause a warning to be issued.
 
-@item -l @var{NUM}
-@itemx --arglength=@var{NUM}
-Restrict the size of the output generated by macro tracing to @var{NUM}
+@ignore
+@comment not worth including in the manual, but provides a good test
+
+@comment examples
+@comment options: -Dbar=hello -tbar --debugfile= foo --debugfile -
+@example
+$ @kbd{m4 -d -Iexamples -Dbar=hello -tbar --debugfile= foo --debugfile -
+@result{}hello
+errprint(`hi
+')dnl
+@error{}hi
+bar
+@error{}m4trace: -1- bar -> `hello'
+@result{}hello
+@end example
+@end ignore
+
+@item -l @var{num}
+@itemx --arglength=@var{num}
+Restrict the size of the output generated by macro tracing to @var{num}
 characters per trace line.  If unspecified or zero, output is
 unlimited.  @xref{Debug Levels}, for more details.
 
-@item -t @var{NAME}
-@itemx --trace=@var{NAME}
-This enables tracing for the macro @var{NAME}, at any point where it is
-defined.  @var{NAME} need not be defined when this option is given.
+@item -t @var{name}
+@itemx --trace=@var{name}
+This enables tracing for the macro @var{name}, at any point where it is
+defined.  @var{name} need not be defined when this option is given.
 This option may be given more than once, and order is significant with
 respect to file names.  @xref{Trace}, for more details.
 @end table
@@ -2295,6 +2319,7 @@ traceoff(`defn', `define')
 @cindex temporary redefinition of macros
 @cindex redefinition of macros, temporary
 @cindex definition stack
+@cindex pushdef stack
 @cindex stack, macro definition
 It is possible to redefine a macro temporarily, reverting to the
 previous definition at a later time.  This is done with the builtins
@@ -2597,6 +2622,8 @@ something a number of times, or while some condition is true.
 * Shift::                       Recursion in @code{m4}
 * Forloop::                     Iteration by counting
 * Foreach::                     Iteration by list contents
+* Stacks::                      Working with definition stacks
+* Composition::                 Building macros with macros
 @end menu
 
 @node Ifdef
@@ -2704,67 +2731,13 @@ foo(`a', `b', `c')
 @result{}arguments:3
 @end example
 
-Since m4 is a macro language, it is even possible to write a macro that
-makes defining blind macros easier:
-
-@deffn Composite define_blind (@var{name}, @ovar{value})
-Defines @var{name} as a blind macro, such that @var{name} will expand to
-@var{value} only when given explicit arguments.  @var{value} should not
-be the result of @code{defn} (@pxref{Defn}).  This macro is only
-recognized with parameters, and results in an empty string.
-@end deffn
-
-Defining a macro to define another macro can be a bit tricky.  We want
-to use a literal @samp{$#} in the argument to the nested @code{define}.
-However, if @samp{$} and @samp{#} are adjacent in the definition of
-@code{define_blind}, then it would be expanded as the number of
-arguments to @code{define_blind} rather than the intended number of
-arguments to @var{name}.  The solution is to pass the difficult
-characters through extra arguments to a helper macro
-@code{_define_blind}.
-
-As for the limitation against using @code{defn}, there are two reasons.
-If a macro was previously defined with @code{define_blind}, then it can
-safely be renamed to a new blind macro using plain @code{define}; using
-@code{define_blind} to rename it just adds another layer of
-@code{ifelse}, occupying memory and slowing down execution.  And if a
-macro is a builtin, then it would result in an attempt to define a macro
-consisting of both text and a builtin token; this is not supported, and
-the builtin token is flattened to an empty string.
-
-With that explanation, here's the definition, and some sample usage.
-Notice that @code{define_blind} is itself a blind macro.
-
-@example
-$ @kbd{m4 -d}
-define(`define_blind', `ifelse(`$#', `0', ``$0'',
-`_$0(`$1', `$2', `$'`#', `$'`0')')')
-@result{}
-define(`_define_blind', `define(`$1',
-`ifelse(`$3', `0', ``$4'', `$2')')')
-@result{}
-define_blind
-@result{}define_blind
-define_blind(`foo', `arguments were $*')
-@result{}
-foo
-@result{}foo
-foo(`bar')
-@result{}arguments were bar
-define(`blah', defn(`foo'))
-@result{}
-blah
-@result{}blah
-blah(`a', `b')
-@result{}arguments were a,b
-defn(`blah')
-@result{}ifelse(`$#', `0', ``$0'', `arguments were $*')
-@end example
+For an example of a way to make defining blind macros easier, see
+@ref{Composition}.
 
 @cindex multibranches
 @cindex switch statement
 @cindex case statement
-However, @code{ifelse} can take more than four arguments.  If given more
+The macro @code{ifelse} can take more than four arguments.  If given more
 than four arguments, @code{ifelse} works like a @code{case} or @code{switch}
 statement in traditional programming languages.  If @var{string-1} and
 @var{string-2} are equal, @code{ifelse} expands into @var{equal-1}, otherwise
@@ -3416,6 +3389,264 @@ It is possible to have robust iteration with linear behavior and sane
 @var{iterator} contents for either list style.  See if you can learn
 from the best elements of both of these implementations to create robust
 macros (or @pxref{Improved foreach, , Answers}).
+
+@node Stacks
+@section Working with definition stacks
+
+@cindex definition stack
+@cindex pushdef stack
+@cindex stack, macro definition
+Thanks to @code{pushdef}, manipulation of a stack is an intrinsic
+operation in @code{m4}.  Normally, only the topmost definition in a
+stack is important, but sometimes, it is desirable to manipulate the
+entire definition stack.
+
+@deffn Composite stack_foreach (@var{macro}, @var{action})
+@deffnx Composite stack_foreach_lifo (@var{macro}, @var{action})
+For each of the @code{pushdef} definitions associated with @var{macro},
+invoke the macro @var{action} with a single argument of that definition.
+@code{stack_foreach} visits the oldest definition first, while
+@code{stack_foreach_lifo} visits the current definition first.
+@var{action} should not modify or dereference @var{macro}.  There are a
+few special macros, such as @code{defn}, which cannot be used as the
+@var{macro} parameter.
+@end deffn
+
+A sample implementation of these macros is distributed in the file
+@file{m4-@value{VERSION}/@/examples/@/stack.m4}.
+
+@comment examples
+@example
+$ @kbd{m4 -I examples}
+include(`stack.m4')
+@result{}
+pushdef(`a', `1')pushdef(`a', `2')pushdef(`a', `3')
+@result{}
+define(`show', ``$1'
+')
+@result{}
+stack_foreach(`a', `show')dnl
+@result{}1
+@result{}2
+@result{}3
+stack_foreach_lifo(`a', `show')dnl
+@result{}3
+@result{}2
+@result{}1
+@end example
+
+Now for the implementation.  Note the definition of a helper macro,
+@code{_stack_reverse}, which destructively swaps the contents of one
+stack of definitions into the reverse order in the temporary macro
+@samp{tmp-$1}.  By calling the helper twice, the original order is
+restored back into the macro @samp{$1}; since the operation is
+destructive, this explains why @samp{$1} must not be modified or
+dereferenced during the traversal.  The caller can then inject
+additional code to pass the definition currently being visited to
+@samp{$2}.  The choice of helper names is intentional; since @samp{-} is
+not valid as part of a macro name, there is no risk of conflict with a
+valid macro name, and the code is guaranteed to use @code{defn} where
+necessary.  Finally, note that any macro used in the traversal of a
+@code{pushdef} stack, such as @code{pushdef} or @code{defn}, cannot be
+handled by @code{stack_foreach}, since the macro would temporarily be
+undefined during the algorithm.
+
+@comment examples
+@example
+$ @kbd{m4 -I examples}
+undivert(`stack.m4')dnl
+@result{}divert(`-1')
+@result{}# stack_foreach(macro, action)
+@result{}# Invoke ACTION with a single argument of each definition
+@result{}# from the definition stack of MACRO, starting with the oldest.
+@result{}define(`stack_foreach',
+@result{}`_stack_reverse(`$1', `tmp-$1')'dnl
+@result{}`_stack_reverse(`tmp-$1', `$1', `$2(defn(`$1'))')')
+@result{}# stack_foreach_lifo(macro, action)
+@result{}# Invoke ACTION with a single argument of each definition
+@result{}# from the definition stack of MACRO, starting with the newest.
+@result{}define(`stack_foreach_lifo',
+@result{}`_stack_reverse(`$1', `tmp-$1', `$2(defn(`$1'))')'dnl
+@result{}`_stack_reverse(`tmp-$1', `$1')')
+@result{}define(`_stack_reverse',
+@result{}`ifdef(`$1', `pushdef(`$2', defn(`$1'))$3`'popdef(`$1')$0($@@)')')
+@result{}divert`'dnl
+@end example
+
+@node Composition
+@section Building macros with macros
+
+@cindex macro composition
+@cindex composing macros
+Since m4 is a macro language, it is possible to write macros that
+can build other macros.  First on the list is a way to automate the
+creation of blind macros.
+
+@cindex macro, blind
+@cindex blind macro
+@deffn Composite define_blind (@var{name}, @ovar{value})
+Defines @var{name} as a blind macro, such that @var{name} will expand to
+@var{value} only when given explicit arguments.  @var{value} should not
+be the result of @code{defn} (@pxref{Defn}).  This macro is only
+recognized with parameters, and results in an empty string.
+@end deffn
+
+Defining a macro to define another macro can be a bit tricky.  We want
+to use a literal @samp{$#} in the argument to the nested @code{define}.
+However, if @samp{$} and @samp{#} are adjacent in the definition of
+@code{define_blind}, then it would be expanded as the number of
+arguments to @code{define_blind} rather than the intended number of
+arguments to @var{name}.  The solution is to pass the difficult
+characters through extra arguments to a helper macro
+@code{_define_blind}.  When composing macros, it is a common idiom to
+need a helper macro to concatenate text that forms parameters in the
+composed macro, rather than interpreting the text as a parameter of the
+composing macro.
+
+As for the limitation against using @code{defn}, there are two reasons.
+If a macro was previously defined with @code{define_blind}, then it can
+safely be renamed to a new blind macro using plain @code{define}; using
+@code{define_blind} to rename it just adds another layer of
+@code{ifelse}, occupying memory and slowing down execution.  And if a
+macro is a builtin, then it would result in an attempt to define a macro
+consisting of both text and a builtin token; this is not supported, and
+the builtin token is flattened to an empty string.
+
+With that explanation, here's the definition, and some sample usage.
+Notice that @code{define_blind} is itself a blind macro.
+
+@example
+$ @kbd{m4 -d}
+define(`define_blind', `ifelse(`$#', `0', ``$0'',
+`_$0(`$1', `$2', `$'`#', `$'`0')')')
+@result{}
+define(`_define_blind', `define(`$1',
+`ifelse(`$3', `0', ``$4'', `$2')')')
+@result{}
+define_blind
+@result{}define_blind
+define_blind(`foo', `arguments were $*')
+@result{}
+foo
+@result{}foo
+foo(`bar')
+@result{}arguments were bar
+define(`blah', defn(`foo'))
+@result{}
+blah
+@result{}blah
+blah(`a', `b')
+@result{}arguments were a,b
+defn(`blah')
+@result{}ifelse(`$#', `0', ``$0'', `arguments were $*')
+@end example
+
+@cindex currying arguments
+@cindex argument currying
+Another interesting composition tactic is argument @dfn{currying}, or
+factoring a macro that takes multiple arguments for use in a context
+that provides exactly one argument.
+
+@deffn Composite curry (@var{macro}, @dots{})
+Expand to a macro call that takes exactly one argument, then appends
+that argument to the original arguments and invokes @var{macro} with the
+resulting list of arguments.
+@end deffn
+
+A demonstration of currying makes the intent of this macro a little more
+obvious.  The macro @code{stack_foreach} mentioned earlier is an example
+of a context that provides exactly one argument to a macro name.  But
+coupled with currying, we can invoke @code{reverse} with two arguments
+for each definition of a macro stack.  This example uses the file
+@file{m4-@value{VERSION}/@/examples/@/curry.m4} included in the
+distribution.
+
+@comment examples
+@example
+$ @kbd{m4 -I examples}
+include(`curry.m4')include(`stack.m4')
+@result{}
+define(`reverse', `ifelse(`$#', `0', , `$#', `1', ``$1'',
+                          `reverse(shift($@@)), `$1'')')
+@result{}
+pushdef(`a', `1')pushdef(`a', `2')pushdef(`a', `3')
+@result{}
+stack_foreach(`a', `:curry(`reverse', `4')')
+@result{}:1, 4:2, 4:3, 4
+curry(`curry', `reverse', `1')(`2')(`3')
+@result{}3, 2, 1
+@end example
+
+Now for the implementation.  Notice how @code{curry} leaves off with a
+macro name but no open parenthesis, while still in the middle of
+collecting arguments for @samp{$1}.  The macro @code{_curry} is the
+helper macro that takes one argument, then adds it to the list and
+finally supplies the closing parenthesis.  The use of a comma inside the
+@code{shift} call allows currying to also work for a macro that takes
+one argument, although it often makes more sense to invoke that macro
+directly rather than going through @code{curry}.
+
+@comment examples
+@example
+$ @kbd{m4 -I examples}
+undivert(`curry.m4')dnl
+@result{}divert(`-1')
+@result{}# curry(macro, args)
+@result{}# Expand to a macro call that takes one argument, then invoke
+@result{}# macro(args, extra).
+@result{}define(`curry', `$1(shift($@@,)_$0')
+@result{}define(`_curry', ``$1')')
+@result{}divert`'dnl
+@end example
+
+Unfortunately, with M4 1.4.x, @code{curry} is unable to handle builtin
+tokens, which are silently flattened to the empty string when passed
+through another text macro.  This limitation will be lifted in a future
+release of M4.
+
+@cindex renaming macros
+@cindex copying macros
+@cindex macros, copying
+Putting the last few concepts together, it is possible to copy or rename
+an entire stack of macro definitions.
+
+@deffn Composite copy (@var{source}, @var{dest})
+@deffnx Composite rename (@var{source}, @var{dest})
+Ensure that @var{dest} is undefined, then define it to the same stack of
+definitions currently in @var{source}.  @code{copy} leaves @var{source}
+unchanged, while @code{rename} undefines @var{source}.  There are only a
+few macros, such as @code{copy} or @code{defn}, which cannot be copied
+via this macro.
+@end deffn
+
+The implementation is relatively straightforward (although since it uses
+@code{curry}, it is unable to copy builtin macros, such as the second
+definition of @code{a} as a synonym for @code{divnum}.  See if you can
+design a version that works around this limitation, or @pxref{Improved
+copy, , Answers}).
+
+@comment examples
+@example
+$ @kbd{m4 -I examples}
+include(`curry.m4')include(`stack.m4')
+@result{}
+define(`rename', `copy($@@)undefine(`$1')')dnl
+define(`copy', `ifdef(`$2', `errprint(`$2 already defined
+')m4exit(`1')',
+   `stack_foreach(`$1', `curry(`pushdef', `$2')')')')dnl
+pushdef(`a', `1')pushdef(`a', defn(`divnum'))pushdef(`a', `2')
+@result{}
+copy(`a', `b')
+@result{}
+rename(`b', `c')
+@result{}
+a b c
+@result{}2 b 2
+popdef(`a', `c')c a
+@result{} 0
+popdef(`a', `c')a c
+@result{}1 1
+@end example
 
 @node Debugging
 @chapter How to debug macros and input
@@ -4321,7 +4552,8 @@ changecom(`/*', `*/')
 @quotation
 The macro @code{changeword} and all associated functionality is
 experimental.  It is only available if the @option{--enable-changeword}
-option was given to @code{configure}, at @acronym{GNU} @code{m4} installation
+option was given to @command{configure}, at @acronym{GNU} @code{m4}
+installation
 time.  The functionality will go away in the future, to be replaced by
 other new features that are more efficient at providing the same
 capabilities.  @emph{Do not rely on it}.  Please direct your comments
@@ -4901,7 +5133,12 @@ len(f)
 @result{}1048576
 divert(`1')
 f
+divert(`2')
+f
 divert(`-1')undivert
+divert(`1')bye
+^D
+@result{}bye
 @end example
 
 @comment Another test of spilled diversions.
@@ -4944,10 +5181,26 @@ ifdef(`__unix__', ,
 ')m4exit(`77')')dnl
 changequote(`[', `]')dnl
 syscmd([echo 'divert(1)hi
-format(%1000000d, 1)' | ]__program__[ | sed -n 1p])dnl
+format(%1000000d, 1)' | ']__program__[' | sed -n 1p])dnl
 @result{}hi
 sysval
 @result{}0
+@end example
+
+@comment Avoid quadratic copying time when transferring diversions;
+@comment test both in-memory and spilled to file.
+
+@comment examples
+@example
+$ @kbd{m4 -I examples}
+include(`forloop2.m4')dnl
+divert(`1')format(`%10000s', `')dnl
+forloop(`i', `1', `10000',
+  `divert(incr(i))undivert(i)')dnl
+divert(`9001')format(`%1000000s', `')dnl
+forloop(`i', `9001', `10000',
+  `divert(incr(i))undivert(i)')dnl
+divert(`-1')undivert
 @end example
 @end ignore
 
@@ -5117,6 +5370,14 @@ undivert(`0')
 undivert
 @result{}diverted text
 @result{}
+divert(`1')more
+divert(`2')undivert(`1')diverted text`'divert
+@result{}
+undivert(`1')
+@result{}
+undivert(`2')
+@result{}more
+@result{}diverted text
 @end example
 
 When a diversion has been undiverted, the diverted text is discarded,
@@ -5519,6 +5780,33 @@ resulting @samp{b} is not further remapped to @samp{g}; the @samp{d} and
 @example
 translit(`«abc~', `~-»')
 @result{}abc
+@end example
+
+@comment Stress test short arguments, since they use a different code
+@comment path.
+@example
+translit(`abcdeabcde', `a')
+@result{}bcdebcde
+translit(`abcdeabcde', `ab')
+@result{}cdecde
+translit(`abcdeabcde', `a', `f')
+@result{}fbcdefbcde
+translit(`abcdeabcde', `a', `f')
+@result{}fbcdefbcde
+translit(`abcdeabcde', `a', `fg')
+@result{}fbcdefbcde
+translit(`abcdeabcde', `ab', `f')
+@result{}fcdefcde
+translit(`abcdeabcde', `ab', `fg')
+@result{}fgcdefgcde
+translit(`abcdeabcde', `ab', `ba')
+@result{}bacdebacde
+translit(`abcdeabcde', `e', `f')
+@result{}abcdfabcdf
+translit(`abc', `', `cde')
+@result{}abc
+translit(`', `a', `bc')
+@result{}
 @end example
 @end ignore
 
@@ -6190,6 +6478,15 @@ Prior to executing the command, @code{m4} flushes its buffers.
 The default standard input, output and error of @var{shell-command} are
 the same as those of @code{m4}.
 
+By default, the @var{shell-command} will be used as the argument to the
+@option{-c} option of the @command{/bin/sh} shell (or the version of
+@command{sh} specified by @samp{command -p getconf PATH}, if your system
+supports that).  If you prefer a different shell, the
+@command{configure} script can be given the option
+@option{--with-syscmd-shell=@var{location}} to set the location of an
+alternative shell at @acronym{GNU} @code{m4} installation; the
+alternative shell must still support @option{-c}.
+
 The macro @code{syscmd} is recognized only with parameters.
 @end deffn
 
@@ -6257,6 +6554,15 @@ The default standard input and standard error of @var{shell-command} are
 the same as those of @code{m4}.  The error output of @var{shell-command}
 is not a part of the expansion: it will appear along with the error
 output of @code{m4}.
+
+By default, the @var{shell-command} will be used as the argument to the
+@option{-c} option of the @command{/bin/sh} shell (or the version of
+@command{sh} specified by @samp{command -p getconf PATH}, if your system
+supports that).  If you prefer a different shell, the
+@command{configure} script can be given the option
+@option{--with-syscmd-shell=@var{location}} to set the location of an
+alternative shell at @acronym{GNU} @code{m4} installation; the
+alternative shell must still support @option{-c}.
 
 The macro @code{esyscmd} is recognized only with parameters.
 @end deffn
@@ -6828,17 +7134,19 @@ ifdef(`__unix__', ,
 ')m4exit(`77')')dnl
 changequote(`[', `]')dnl
 syscmd([echo 'changequote([,])pushdef([divnum],[hi])dnl' \
-       | ]__program__[ -F in.m4f \
+       | ']__program__[' -F in.m4f \
      && echo 'divnum popdef([divnum])divnum' \
-       | ]__program__[ -R in.m4f \
+       | ']__program__[' -R in.m4f \
      && rm in.m4f])status sysval
 @result{}hi 0
 @result{}status 0
 @end example
 
 @c Detect inability to freeze.
+@c Some systems harden /, and fail with EACCES rather than ENOENT.
 
 @comment options: -F /none/such
+@comment xerr: ignore
 @comment status: 1
 @example
 $ @kbd{m4 -F /none/such}
@@ -7333,6 +7641,7 @@ presented here.
 * Improved exch::               Solution for @code{exch}
 * Improved forloop::            Solution for @code{forloop}
 * Improved foreach::            Solution for @code{foreach}
+* Improved copy::               Solution for @code{copy}
 * Improved m4wrap::             Solution for @code{m4wrap}
 * Improved cleardivert::        Solution for @code{cleardivert}
 * Improved capitalize::         Solution for @code{capitalize}
@@ -7438,6 +7747,58 @@ changequote(`[', `]')changequote([``], [''])
 @result{}
 forloop2(i, 1, 5, ``ifelse('')forloop2(i, 1, 5, ``)'')
 @error{}m4:stdin:12: recursion limit of 9 exceeded, use -L<N> to change it
+@end example
+
+One more optimization is still possible.  Instead of repeatedly
+assigning a variable then invoking or dereferencing it, it is possible
+to pass the current iterator value as a single argument.  Coupled with
+@code{curry} if other arguments are needed (@pxref{Composition}), or
+with helper macros if the argument is needed in more than one place in
+the expansion, the output can be generated with three, rather than four,
+macros of overhead per iteration.  Notice how the file
+@file{m4-@value{VERSION}/@/examples/@/forloop3.m4} rearranges the
+arguments of the helper @code{_forloop} to take two arguments that are
+placed around the current value.  By splitting a balanced set of
+parantheses across multiple arguments, the helper macro can now be
+shared by @code{forloop} and the new @code{forloop_arg}.
+
+@comment examples
+@example
+$ @kbd{m4 -I examples}
+include(`forloop3.m4')
+@result{}
+undivert(`forloop3.m4')dnl
+@result{}divert(`-1')
+@result{}# forloop_arg(from, to, macro) - invoke MACRO(value) for
+@result{}#   each value between FROM and TO, without define overhead
+@result{}define(`forloop_arg', `ifelse(eval(`($1) <= ($2)'), `1',
+@result{}  `_forloop(`$1', eval(`$2'), `$3(', `)')')')
+@result{}# forloop(var, from, to, stmt) - refactored to share code
+@result{}define(`forloop', `ifelse(eval(`($2) <= ($3)'), `1',
+@result{}  `pushdef(`$1')_forloop(eval(`$2'), eval(`$3'),
+@result{}    `define(`$1',', `)$4')popdef(`$1')')')
+@result{}define(`_forloop',
+@result{}  `$3`$1'$4`'ifelse(`$1', `$2', `',
+@result{}    `$0(incr(`$1'), `$2', `$3', `$4')')')
+@result{}divert`'dnl
+forloop(`i', `1', `3', ` i')
+@result{} 1 2 3
+define(`echo', `$@@')
+@result{}
+forloop_arg(`1', `3', ` echo')
+@result{} 1 2 3
+include(`curry.m4')
+@result{}
+forloop_arg(`1', `3', `curry(`pushdef', `a')')
+@result{}
+a
+@result{}3
+popdef(`a')a
+@result{}2
+popdef(`a')a
+@result{}1
+popdef(`a')a
+@result{}a
 @end example
 
 Of course, it is possible to make even more improvements, such as
@@ -7852,6 +8213,116 @@ include(`loop.m4')dnl
 
 @end ignore
 
+@node Improved copy
+@section Solution for @code{copy}
+
+The macro @code{copy} presented above
+is unable to handle builtin tokens with M4 1.4.x, because it tries to
+pass the builtin token through the macro @code{curry}, where it is
+silently flattened to an empty string (@pxref{Composition}).  Rather
+than using the problematic @code{curry} to work around the limitation
+that @code{stack_foreach} expects to invoke a macro that takes exactly
+one argument, we can write a new macro that lets us form the exact
+two-argument @code{pushdef} call sequence needed, so that we are no
+longer passing a builtin token through a text macro.
+
+@deffn Composite stack_foreach_sep (@var{macro}, @var{pre}, @var{post}, @
+  @var{sep})
+@deffnx Composite stack_foreach_sep_lifo (@var{macro}, @var{pre}, @
+  @var{post}, @var{sep})
+For each of the @code{pushdef} definitions associated with @var{macro},
+expand the sequence @samp{@var{pre}`'definition`'@var{post}}.
+Additionally, expand @var{sep} between definitions.
+@code{stack_foreach_sep} visits the oldest definition first, while
+@code{stack_foreach_sep_lifo} visits the current definition first.  The
+expansion may dereference @var{macro}, but should not modify it.  There
+are a few special macros, such as @code{defn}, which cannot be used as
+the @var{macro} parameter.
+@end deffn
+
+Note that @code{stack_foreach(`@var{macro}', `@var{action}')} is
+equivalent to @code{stack_foreach_sep(`@var{macro}', `@var{action}(',
+`)')}.  By supplying explicit parentheses, split among the @var{pre} and
+@var{post} arguments to @code{stack_foreach_sep}, it is now possible to
+construct macro calls with more than one argument, without passing
+builtin tokens through a macro call.  It is likewise possible to
+directly reference the stack definitions without a macro call, by
+leaving @var{pre} and @var{post} empty.  Thus, in addition to fixing
+@code{copy} on builtin tokens, it also executes with fewer macro
+invocations.
+
+The new macro also adds a separator that is only output after the first
+iteration of the helper @code{_stack_reverse_sep}, implemented by
+prepending the original @var{sep} to @var{pre} and omitting a @var{sep}
+argument in subsequent iterations.  Note that the empty string that
+separates @var{sep} from @var{pre} is provided as part of the fourth
+argument when originally calling @code{_stack_reverse_sep}, and not by
+writing @code{$4`'$3} as the third argument in the recursive call; while
+the other approach would give the same output, it does so at the expense
+of increasing the argument size on each iteration of
+@code{_stack_reverse_sep}, which results in quadratic instead of linear
+execution time.  The improved stack walking macros are available in
+@file{m4-@value{VERSION}/@/examples/@/stack_sep.m4}:
+
+@comment examples
+@example
+$ @kbd{m4 -I examples}
+include(`stack_sep.m4')
+@result{}
+define(`copy', `ifdef(`$2', `errprint(`$2 already defined
+')m4exit(`1')',
+   `stack_foreach_sep(`$1', `pushdef(`$2',', `)')')')dnl
+pushdef(`a', `1')pushdef(`a', defn(`divnum'))
+@result{}
+copy(`a', `b')
+@result{}
+b
+@result{}0
+popdef(`b')
+@result{}
+b
+@result{}1
+pushdef(`c', `1')pushdef(`c', `2')
+@result{}
+stack_foreach_sep_lifo(`c', `', `', `, ')
+@result{}2, 1
+undivert(`stack_sep.m4')dnl
+@result{}divert(`-1')
+@result{}# stack_foreach_sep(macro, pre, post, sep)
+@result{}# Invoke PRE`'defn`'POST with a single argument of each definition
+@result{}# from the definition stack of MACRO, starting with the oldest, and
+@result{}# separated by SEP between definitions.
+@result{}define(`stack_foreach_sep',
+@result{}`_stack_reverse_sep(`$1', `tmp-$1')'dnl
+@result{}`_stack_reverse_sep(`tmp-$1', `$1', `$2`'defn(`$1')$3', `$4`'')')
+@result{}# stack_foreach_sep_lifo(macro, pre, post, sep)
+@result{}# Like stack_foreach_sep, but starting with the newest definition.
+@result{}define(`stack_foreach_sep_lifo',
+@result{}`_stack_reverse_sep(`$1', `tmp-$1', `$2`'defn(`$1')$3', `$4`'')'dnl
+@result{}`_stack_reverse_sep(`tmp-$1', `$1')')
+@result{}define(`_stack_reverse_sep',
+@result{}`ifdef(`$1', `pushdef(`$2', defn(`$1'))$3`'popdef(`$1')$0(
+@result{}  `$1', `$2', `$4$3')')')
+@result{}divert`'dnl
+@end example
+
+@ignore
+@comment Not worth putting in the manual, but make sure that
+@comment stack_foreach_sep has linear performance.
+
+@comment examples
+@example
+$ @kbd {m4 -I examples}
+include(`forloop3.m4')include(`stack_sep.m4')dnl
+forloop(`i', `1', `10000', `pushdef(`s', i)')
+@result{}
+define(`colon', `:')define(`dash', `-')
+@result{}
+len(stack_foreach_sep(`s', `dash', `', `colon'))
+@result{}58893
+@end example
+@end ignore
+
 @node Improved m4wrap
 @section Solution for @code{m4wrap}
 
@@ -8144,7 +8615,7 @@ permissive license is in effect when copying just the examples.
 @cindex FDL, GNU Free Documentation License
 @cindex GNU Free Documentation License
 @cindex Free Documentation License (FDL), GNU
-@include fdl.texi
+@include fdl-1.3.texi
 
 @node Indices
 @appendix Indices of concepts and macros

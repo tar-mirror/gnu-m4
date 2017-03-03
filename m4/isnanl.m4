@@ -1,11 +1,12 @@
-# isnanl.m4 serial 8
-dnl Copyright (C) 2007-2008 Free Software Foundation, Inc.
+# isnanl.m4 serial 12
+dnl Copyright (C) 2007-2009 Free Software Foundation, Inc.
 dnl This file is free software; the Free Software Foundation
 dnl gives unlimited permission to copy and/or distribute it,
 dnl with or without modifications, as long as this notice is preserved.
 
 AC_DEFUN([gl_FUNC_ISNANL],
 [
+  AC_REQUIRE([gl_MATH_H_DEFAULTS])
   ISNANL_LIBM=
   gl_HAVE_ISNANL_NO_LIBM
   if test $gl_cv_func_isnanl_no_libm = no; then
@@ -27,10 +28,8 @@ AC_DEFUN([gl_FUNC_ISNANL],
   else
     gl_func_isnanl=no
   fi
-  if test $gl_func_isnanl = yes; then
-    AC_DEFINE([HAVE_ISNANL], 1,
-      [Define if the isnan(long double) function is available.])
-  else
+  if test $gl_func_isnanl != yes; then
+    HAVE_ISNANL=0
     gl_BUILD_ISNANL
   fi
   AC_SUBST([ISNANL_LIBM])
@@ -48,7 +47,7 @@ AC_DEFUN([gl_FUNC_ISNANL_NO_LIBM],
     esac
   fi
   if test $gl_func_isnanl_no_libm = yes; then
-    AC_DEFINE([HAVE_ISNANL_IN_LIBC], 1,
+    AC_DEFINE([HAVE_ISNANL_IN_LIBC], [1],
       [Define if the isnan(long double) function is available in libc.])
   else
     gl_BUILD_ISNANL
@@ -115,7 +114,7 @@ dnl - for pseudo-zeroes, unnormalized numbers, and pseudo-denormals on ia64.
 AC_DEFUN([gl_FUNC_ISNANL_WORKS],
 [
   AC_REQUIRE([AC_PROG_CC])
-  AC_REQUIRE([AC_C_BIGENDIAN])
+  AC_REQUIRE([gl_BIGENDIAN])
   AC_REQUIRE([AC_CANONICAL_HOST]) dnl for cross-compiles
   AC_CACHE_CHECK([whether isnanl works], [gl_cv_func_isnanl_works],
     [
@@ -134,20 +133,30 @@ AC_DEFUN([gl_FUNC_ISNANL_WORKS],
   ((sizeof (long double) + sizeof (unsigned int) - 1) / sizeof (unsigned int))
 typedef union { unsigned int word[NWORDS]; long double value; }
         memory_long_double;
+/* On Irix 6.5, gcc 3.4.3 can't compute compile-time NaN, and needs the
+   runtime type conversion.  */
+#ifdef __sgi
+static long double NaNl ()
+{
+  double zero = 0.0;
+  return zero / zero;
+}
+#else
+# define NaNl() (0.0L / 0.0L)
+#endif
 int main ()
 {
   memory_long_double m;
   unsigned int i;
 
-  /* gcc-3.4.3 on IRIX 6.5 appears to have a problem with this.  */
-  if (!isnanl (0.0L / 0.0L))
+  if (!isnanl (NaNl ()))
     return 1;
 
   /* The isnanl function should be immune against changes in the sign bit and
      in the mantissa bits.  The xor operation twiddles a bit that can only be
      a sign bit or a mantissa bit (since the exponent never extends to
      bit 31).  */
-  m.value = 0.0L / 0.0L;
+  m.value = NaNl ();
   m.word[NWORDS / 2] ^= (unsigned int) 1 << (sizeof (unsigned int) * CHAR_BIT - 1);
   for (i = 0; i < NWORDS; i++)
     m.word[i] |= 1;

@@ -1,19 +1,38 @@
 # Check prerequisites for compiling lib/c-stack.c.
 
-# Copyright (C) 2002, 2003, 2004, 2008 Free Software Foundation, Inc.
+# Copyright (C) 2002, 2003, 2004, 2008, 2009 Free Software Foundation, Inc.
 # This file is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
 # with or without modifications, as long as this notice is preserved.
 
 # Written by Paul Eggert.
 
-# serial 7
+# serial 9
 
 AC_DEFUN([AC_SYS_XSI_STACK_OVERFLOW_HEURISTIC],
   [# for STACK_DIRECTION
    AC_REQUIRE([AC_FUNC_ALLOCA])
+   AC_REQUIRE([AC_CANONICAL_HOST])
    AC_CHECK_FUNCS_ONCE([setrlimit])
    AC_CHECK_HEADERS_ONCE([ucontext.h])
+
+   dnl List of signals that are sent when an invalid virtual memory address
+   dnl is accessed, or when the stack overflows.
+   dnl Either { SIGSEGV } or { SIGSEGV, SIGBUS }.
+   case "$host_os" in
+     sunos4* | freebsd* | dragonfly* | openbsd* | netbsd* | kfreebsd* | knetbsd*) # BSD systems
+       FAULT_YIELDS_SIGBUS=1 ;;
+     hpux*) # HP-UX
+       FAULT_YIELDS_SIGBUS=1 ;;
+     macos* | darwin*) # MacOS X
+       FAULT_YIELDS_SIGBUS=1 ;;
+     gnu*) # Hurd
+       FAULT_YIELDS_SIGBUS=1 ;;
+     *)
+       FAULT_YIELDS_SIGBUS=0 ;;
+   esac
+   AC_DEFINE_UNQUOTED([FAULT_YIELDS_SIGBUS], [$FAULT_YIELDS_SIGBUS],
+     [Define to 1 if an invalid memory address access may yield a SIGBUS.])
 
    AC_CACHE_CHECK([for working C stack overflow detection],
      [ac_cv_sys_stack_overflow_works],
@@ -62,6 +81,10 @@ AC_DEFUN([AC_SYS_XSI_STACK_OVERFLOW_HEURISTIC],
 	   sigemptyset (&act.sa_mask);
 	   act.sa_flags = SA_NODEFER | SA_ONSTACK | SA_RESETHAND;
 	   act.sa_handler = segv_handler;
+	   #if FAULT_YIELDS_SIGBUS
+	   if (sigaction (SIGBUS, &act, 0) < 0)
+	     return -1;
+	   #endif
 	   return sigaction (SIGSEGV, &act, 0);
 	 }
 	 static volatile int *
@@ -244,6 +267,10 @@ int main ()
 	   sigemptyset (&act.sa_mask);
 	   act.sa_flags = SA_NODEFER | SA_ONSTACK | SA_RESETHAND | SA_SIGINFO;
 	   act.sa_sigaction = segv_handler;
+	   #if FAULT_YIELDS_SIGBUS
+	   if (sigaction (SIGBUS, &act, 0) < 0)
+	     return -1;
+	   #endif
 	   return sigaction (SIGSEGV, &act, 0);
 	 }
 	 static volatile int *
@@ -280,7 +307,7 @@ int main ()
 	[ac_cv_sys_xsi_stack_overflow_heuristic=cross-compiling])])
 
    if test $ac_cv_sys_xsi_stack_overflow_heuristic = yes; then
-     AC_DEFINE(HAVE_XSI_STACK_OVERFLOW_HEURISTIC, 1,
+     AC_DEFINE([HAVE_XSI_STACK_OVERFLOW_HEURISTIC], [1],
        [Define to 1 if extending the stack slightly past the limit causes
 	a SIGSEGV, and an alternate stack can be established with sigaltstack,
 	and the signal handler is passed a context that specifies the

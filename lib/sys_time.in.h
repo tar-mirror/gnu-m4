@@ -18,7 +18,9 @@
 
 /* Written by Paul Eggert.  */
 
+#if __GNUC__ >= 3
 @PRAGMA_SYSTEM_HEADER@
+#endif
 
 #if defined _GL_SYS_TIME_H
 
@@ -37,6 +39,10 @@
 #  include <time.h>
 # endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 # if ! @HAVE_STRUCT_TIMEVAL@
 struct timeval
 {
@@ -50,5 +56,9 @@ struct timeval
 #  define gettimeofday rpl_gettimeofday
 int gettimeofday (struct timeval *restrict, void *restrict);
 # endif
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* _GL_SYS_TIME_H */

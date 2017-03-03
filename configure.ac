@@ -1,6 +1,6 @@
 # Configure template for GNU M4.			-*-Autoconf-*-
-# Copyright (C) 1991, 1993, 1994, 2004, 2005, 2006, 2007, 2008 Free
-# Software Foundation, Inc.
+# Copyright (C) 1991, 1993, 1994, 2004, 2005, 2006, 2007, 2008, 2009
+# Free Software Foundation, Inc.
 #
 # This file is part of GNU M4.
 #
@@ -22,7 +22,7 @@ AC_INIT([GNU M4], m4_esyscmd([build-aux/git-version-gen .tarball-version]),
   [bug-m4@gnu.org])
 AC_CONFIG_AUX_DIR([build-aux])
 
-AM_INIT_AUTOMAKE([1.10.1 dist-bzip2 dist-lzma gnu])
+AM_INIT_AUTOMAKE([1.10.1 dist-bzip2 gnu])
 
 m4_pattern_forbid([^M4_[A-Z]])
 
@@ -49,37 +49,23 @@ fi
 
 M4_INIT
 
-AC_CACHE_CHECK([if system() agrees with pclose()],
-  [M4_cv_func_system_consistent],
-  [AC_RUN_IFELSE([AC_LANG_PROGRAM([
-#include <stdio.h>
-#include <stdlib.h>
-#include <errno.h>
-], [int i1, i2;
-  FILE *f;
-  i1 = system ("exit 2");
-  if (i1 == -1)
-    return 1;
-  f = popen ("exit 2", "r");
-  if (!f)
-    return 1;
-  i2 = pclose (f);
-  return i1 != i2;])],
-  [M4_cv_func_system_consistent=yes], [M4_cv_func_system_consistent=no],
-  [AC_COMPILE_IFELSE([
-/* EMX on OS/2 defines WEXITSTATUS to be (x>>8)&0xff, and uses that for
-   pclose(), but for system() it uses x&0xff instead.  Otherwise, we assume
-   your system is sane and that pclose() and system() are consistent in their
-   values.  If this heuristic is wrong for your platform, report it as a bug
-   to bug-m4@gnu.org.  */
-#ifdef __EMX__
-choke me
-#endif
-], [M4_cv_func_system_consistent=yes], [M4_cv_func_system_consistent=no])])])
-if test "$M4_cv_func_system_consistent" = no ; then
-  AC_DEFINE([FUNC_SYSTEM_BROKEN], [1],
-    [Define to 1 if the return value of system() disagrees with pclose().])
+AC_CACHE_CHECK([whether an open file can be renamed],
+  [M4_cv_func_rename_open_file_works],
+  [AC_RUN_IFELSE([AC_LANG_PROGRAM([AC_INCLUDES_DEFAULT],
+      [FILE *f = fopen ("conftest.1", "w+");
+       int result = rename ("conftest.1", "conftest.2");
+       fclose (f); remove ("conftest.1"); remove ("conftest.2");
+       return result;])],
+    [M4_cv_func_rename_open_file_works=yes],
+    [M4_cv_func_rename_open_file_works=no],
+    [M4_cv_func_rename_open_file_works='guessing no'])])
+if test "$M4_cv_func_rename_open_file_works" = yes ; then
+  M4_rename_open_works=1
+else
+  M4_rename_open_works=0
 fi
+AC_DEFINE_UNQUOTED([RENAME_OPEN_FILE_WORKS], [$M4_rename_open_works],
+  [Define to 1 if a file can be renamed while open, or to 0 if not.])
 
 dnl Don't let changeword get in our way, if bootstrapping with a version of
 dnl m4 that already turned the feature on.
@@ -96,6 +82,38 @@ AC_ARG_ENABLE([changeword],
   else
     AC_MSG_RESULT([no])
   fi], [AC_MSG_RESULT([no])])
+
+AC_MSG_CHECKING([[which shell to use for syscmd]])
+AC_ARG_WITH([syscmd-shell],
+  [AS_HELP_STRING([--with-syscmd-shell], [shell used by syscmd [/bin/sh]])],
+  [case $withval in
+    yes[)] with_syscmd_shell=no;;
+   esac], [with_syscmd_shell=no])
+if test "$with_syscmd_shell" = no ; then
+  with_syscmd_shell=/bin/sh
+  if test "$cross_compiling" != yes ; then
+dnl Give mingw a default that is more likely to be available.
+    AS_IF([AS_EXECUTABLE_P([/bin/sh])], [],
+      [if (cmd /c) 2>/dev/null; then with_syscmd_shell=cmd; fi])
+dnl Too bad _AS_PATH_WALK is not public.
+    M4_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+    for M4_dir in `if (command -p getconf PATH) 2>/dev/null ; then
+	command -p getconf PATH
+      else
+	echo "/bin$PATH_SEPARATOR$PATH"
+      fi`
+    do
+      IFS=$M4_save_IFS
+      test -z "$M4_dir" && continue
+      AS_EXECUTABLE_P(["$M4_dir/sh"]) \
+	&& { with_syscmd_shell=$M4_dir/sh; break; }
+    done
+    IFS=$M4_save_IFS
+  fi
+fi
+AC_MSG_RESULT([$with_syscmd_shell])
+AC_DEFINE_UNQUOTED([SYSCMD_SHELL], ["$with_syscmd_shell"],
+  [Shell used by syscmd and esyscmd, must accept -c argument.])
 
 M4_WITH_DMALLOC
 

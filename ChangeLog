@@ -1,3 +1,298 @@
+2009-04-01  Eric Blake  <ebb9@byu.net>
+
+	Release Version 1.4.13.
+	* NEWS: Mention the release.
+
+2009-03-31  Eric Blake  <ebb9@byu.net>
+
+	Tweak submodule instructions.
+	* HACKING: Improve directions.
+	* gnulib: Update to latest version.
+
+2009-03-23  Eric Blake  <ebb9@byu.net>
+
+	Don't force file overwrites during bootstrap.
+	* bootstrap: Ensure that rerunning bootstrap doesn't alter tree.
+
+	Drop dist-lzma, now that xz replaces lzma.
+	* configure.ac (AM_INIT_AUTOMAKE): Drop dist-lzma.  Until a stable
+	automake release includes dist-xz, the release process will just
+	manually create a .xz tarball.
+	* gnulib: Update to latest gnulib.
+
+2009-03-19  Eric Blake  <ebb9@byu.net>
+
+	Exploit git submodule by adding appropriate symlinks.
+	* bootstrap: No longer copy files from gnulib.
+	* COPYING: Change to symlink pointing into gnulib.
+	* INSTALL: Likewise.
+	* build-aux/compile: Likewise.
+	* build-aux/config.guess: Likewise.
+	* build-aux/config.sub: Likewise.
+	* build-aux/depcomp: Likewise.
+	* build-aux/install-sh: Likewise.
+	* build-aux/mdate-sh: Likewise.
+	* build-aux/missing: Likewise.
+	* build-aux/texinfo.tex: Likewise.
+	* .cvsignore: Reflect these changes.
+	* .gitignore: Likewise.
+	* build-aux/.cvsignore: New file.
+	* build-aux/.gitignore: Likewise.
+
+2009-03-18  Eric Blake  <ebb9@byu.net>
+
+	Make gnulib a git submodule.
+	* .gitmodules: New file.
+	* gnulib: Record which version of gnulib has been tested.
+	* bootstrap: Aid in submodule usage.
+	* cfg.mk (gnulib_dir): Alter default location of gnulib.
+	* HACKING: Mention how to use submodule.
+
+	Use latest compile script, even with stable automake.
+	* bootstrap: Also sync build-aux/compile.
+
+2009-03-12  Eric Blake  <ebb9@byu.net>
+
+	Fix awk script portability.
+	* checks/get-them: In gsub, properly escape {.  Close all files
+	before exiting.
+	Reported by Gary V. Vaughan.
+
+2009-03-05  Eric Blake  <ebb9@byu.net>
+
+	Allow configuration choice in syscmd shell.
+	* configure.ac (SYSCMD_SHELL): New test.
+	* src/builtin.c (m4_syscmd, m4_esyscmd): Use it to avoid
+	hard-coding the shell location.
+	* doc/m4.texinfo (Syscmd, Esyscmd): Document this.
+	* README: Document new configure option.
+	* NEWS: Likewise.
+
+	Remove cruft now that gnulib modules do the work.
+	* configure.ac (M4_cv_func_system_consistent): Delete.
+	* src/builtin.c (M4SYSVAL_EXITBITS, M4SYSVAL_TERMSIGBITS):
+	Delete.
+
+	Use gnulib pipe module instead of popen(3).
+	* m4/gnulib-cache.m4: Import pipe and wait-process modules.
+	* src/builtin.c (m4_esyscmd): Rewrite with pipe module.
+	Resolves a failure on AIX, reported by Gary V. Vaughan.
+
+	Use gnulib execute module instead of system(3).
+	* m4/gnulib-cache.m4: Import execute module.
+	* src/builtin.c (m4_sysval): Move computation...
+	(m4_esyscmd): ...into caller.
+	(m4_syscmd): Rewrite with execute module.
+	Resolves a failure on AIX, reported by Gary V. Vaughan.
+
+2009-03-03  Eric Blake  <ebb9@byu.net>
+
+	Try to tolerate spaces in directory names in testsuite.
+	* doc/m4.texinfo (Diversions, Using frozen files): Provide shell
+	quoting, in case __program__ contains spaces.
+
+	Improve web-manual maintainer rule.
+	* maint.mk (web-manual): Work with VPATH builds.  Factor
+	package-specific detail...
+	* cfg.mk (manual_title): ...to new variable.
+
+2009-02-26  Eric Blake  <ebb9@byu.net>
+
+	Make bootstrap easier on Solaris.
+	* bootstrap: Add GNULIB_SRCDIR.  Useful when a wrapper script
+	gnulib-tool exists earlier on the path to work around /bin/sh
+	failure in parsing $GNULIB_SRCDIR/gnulib-tool.
+
+2009-02-19  Eric Blake  <ebb9@byu.net>
+
+	Fix regression in translit.
+	* src/builtin.c (m4_translit): Use correct comparison.
+	* doc/m4.texinfo (Translit): Enhance test.
+
+	Speed up input engine, by searching for quotes by buffer.
+	* src/input.c (struct input_block): Add end pointer to string.
+	(push_string_finish, push_wrapup): Populate it.
+	(next_token): For quotes, attempt a buffer search.
+	* NEWS: Document this.
+
+2009-02-18  Eric Blake  <ebb9@byu.net>
+
+	Speed up translit when from argument is short.
+	* m4/gnulib-cache.m4: Import memchr2 module.
+	* src/builtin.c (m4_translit): Use memchr2 when possible.
+	* doc/m4.texinfo (Translit): Add tests.
+	* NEWS: Document this.
+
+	Update copyright year.
+	* THANKS: Mention 2009 in copyright year.
+
+	Prefer buffer over byte operations.
+	* src/format.c (expand_format): Use strchr for speed.
+	* src/builtin.c (substitute, expand_user_macro): Likewise.
+
+	Speed up esyscmd with buffer reads.
+	* src/builtin.c (m4_esyscmd): Read blocks directly into obstack,
+	rather than repeatedly reading bytes.  Detect read errors.
+
+	Avoid risk of stack overflow.
+	* src/output.c (insert_file): Avoid stack allocation of large
+	buffer.
+	(freeze_diversions): Avoid spurious semicolon.
+
+2009-02-16  Eric Blake  <ebb9@byu.net>
+
+	Avoid test failure due to different errno.
+	* doc/m4.texinfo (Using frozen files): Ignore stdout, since
+	hardened systems can prevent attempts to read /.
+	* THANKS: Update.
+	Reported by Ronny Peine, in Gentoo bug 259184.
+
+	Avoid tests that make no sense, because m4 is single-threaded.
+	* m4/gnulib-cache.m4: Avoid lock-tests and tls-tests.
+
+2009-02-12  Eric Blake  <ebb9@byu.net>
+
+	Avoid quadratic code when walking definition stack.
+	* examples/stack_sep.m4: Use linear, not quadratic
+	implementation.
+	* doc/m4.texinfo (Improved copy): Fix documentation and add test,
+	based on recent autoconf bug fix.
+
+2009-01-24  Eric Blake  <ebb9@byu.net>
+
+	Add URLs to --help output.
+	* src/m4.c (usage): Use enhanced version-etc features.
+
+2009-01-02  Eric Blake  <ebb9@byu.net>
+
+	Use nicer email address in web manual.
+	* maint.mk (web-manual): Use new option in gendocs.sh.
+
+	Nuke xdelta diffs at release time; no one reported using them.
+	* maint.mk (got-xdelta, delta-xdelta): Delete.
+	* HACKING: Likewise.
+
+2009-01-01  Eric Blake  <ebb9@byu.net>
+
+	Update copyright year.
+	* NEWS: M4 1.4.13 will occur in 2009.
+	* doc/m4.texinfo (History): Likewise.
+
+2008-12-24  Eric Blake  <ebb9@byu.net>
+
+	Prepare for eventual release.
+	* doc/m4.texinfo (History): Mention 1.4.13.
+
+2008-12-22  Eric Blake  <ebb9@byu.net>
+
+	Make --debugfile argument optional.
+	* src/builtin.c (m4_debugfile): Make error message consistent.
+	* src/m4.c (long_options): Make the argument optional, to allow
+	setting debug file back to stderr.
+	(main): Make --debugfile order-dependent.
+	(usage): Document this.
+	* doc/m4.texinfo (Debugging options): Likewise.
+	* NEWS: Likewise.
+
+	Use @var correctly.
+	* doc/m4.texinfo (Operation modes, Preprocessor features)
+	(Limits control, Frozen state, Debugging options): Use lower case
+	names in @var.
+	(Improved copy): Use @code, not @var, as appropriate.
+
+2008-12-18  Eric Blake  <ebb9@byu.net>
+
+	Document optimized forloop.
+	* doc/m4.texinfo (Improved forloop): Mention alternate style that
+	avoids define overhead.
+	* examples/forloop3.m4: New file.
+	* examples/Makefile.am (EXTRA_DIST): Distribute it.
+
+	Deal with M4 1.4.x limitation on builtin tokens.
+	* doc/m4.texinfo (Composition): Mention limitation on curry.
+	(Improved copy): New node.
+	* examples/stack_sep.m4: New file.
+	* examples/Makefile.am (EXTRA_DIST): Distribute it.
+
+	Document copy composite using stack_foreach and curry.
+	* doc/m4.texinfo (Stacks): New node, to document pushdef stack
+	manipulation.
+	(Ifelse): Move define_blind...
+	(Composition): ...to this new node.  Document currying, then use
+	it to implement copy and rename.
+	* examples/curry.m4: New file.
+	* examples/stack.m4: Likewise.
+	* examples/Makefile.am (EXTRA_DIST): Distribute them.
+
+2008-12-17  Eric Blake  <ebb9@byu.net>
+
+	Don't override signal handlers installed by c-stack.
+	* src/m4.c (main): Reorder installation of signal handlers, so we
+	don't trash a SIGBUS handler installed by c-stack.  Also provide a
+	SIGSEGV fallback, for platforms where c-stack combined with
+	libsigsegv uses something lower level than SIGSEGV.
+
+2008-12-12  Eric Blake  <ebb9@byu.net>
+
+	Double size of temp file cache.
+	* src/output.c (tmp_file, tmp_file_owner): Split...
+	(tmp_file1, tmp_file2, tmp_file1_owner, tmp_file2_owner): ...into
+	two variables.
+	(tmp_file2_recent): New variable.
+	(m4_tmpopen, m4_tmpclose, m4_tmpremove, m4_tmprename)
+	(output_exit): Adjust callers.
+
+	Use fewer seeks on cached files.
+	* src/output.c (m4_tmpfile): Use write, not append mode.
+	(m4_tmpopen): Add parameter to decide when to skip seeks.
+	(m4_tmprename, make_diversion, insert_diversion_helper)
+	(freeze_diversions): Adjust callers.
+
+	Cache most recently spilled diversion.
+	* src/output.c (tmp_file, tmp_file_owner): New variables, for
+	1-deep cache of spilled diversions.
+	(m4_tmpfile): Open in append mode, since we might revisit
+	diversion without closing it now.
+	(m4_tmpopen): Check cache first.
+	(m4_tmpclose): Update cache, rather than closing.  Add parameter.
+	(m4_tmpremove): Close cache before removing.
+	(m4_tmprename): Deal with open files when renaming.
+	(output_exit): Close cache before exiting.
+	(make_room_for, make_diversion, insert_diversion_helper): Adjust
+	callers.
+	* configure.ac (RENAME_OPEN_FILE_WORKS): New configure test.
+
+	Correctly track size of in-memory diversions.
+	* src/output.c (insert_diversion_helper): Correctly track total
+	in-memory diversion size after undivert.
+
+	Avoid quadratic behavior for some cases of divert/undivert.
+	* src/output.c (struct m4_diversion): Improve comments.
+	(m4_tmpname, make_diversion): Strengthen preconditions.
+	(m4_tmprename): New function.
+	(output_init, output_exit): Move after internal functions.
+	(make_room_for): Don't bother copying uninitialized bytes.
+	(insert_diversion_helper): Transfer metadata, rather than copying
+	contents, when undiverting into a previously unused diversion.
+	* src/m4.h (includes): Add assert.h.
+	* doc/m4.texinfo (Diversions): Add test.
+	(Undivert): Enhance test.
+	* NEWS: Document the speedup.
+
+2008-12-12  Eric Blake  <ebb9@byu.net>
+
+	Upgrade to FDL 1.3, keep COPYING in repository.
+	* Makefile.am (MAINTAINERCLEANFILES): Don't remove COPYING.
+	* .cvsignore: Don't ignore it.
+	* .gitignore: Likewise.
+	* COPYING: Store in repository, per automake 1.10.2
+	recommendation.
+	* m4/gnulib-cache.m4: Replace fdl module with fdl-1.3.
+	* doc/m4.texinfo (GNU Free Documentation License): Upgrade
+	license.
+	* doc/Makefile.am (m4_TEXINFOS): Likewise.
+	* NEWS: Mention the documentation license change.
+
 2008-10-10  Eric Blake  <ebb9@byu.net>
 
 	Release Version 1.4.12.
@@ -4520,7 +4815,7 @@ Mon Jan 22 21:08:52 1990  Rene' Seindal (seindal at diku.dk)
 	End:
 
 	Copyright (C) 1990, 1991, 1992, 1993, 1994, 2000, 2001, 2003,
-	2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+	2005, 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
 
 	Copying and distribution of this file, with or without
 	modification, are permitted provided the copyright notice

@@ -1,5 +1,5 @@
 /* Retrieve information about a FILE stream.
-   Copyright (C) 2007-2008 Free Software Foundation, Inc.
+   Copyright (C) 2007-2009 Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@ freading (FILE *fp)
   /* Most systems provide FILE as a struct and the necessary bitmask in
      <stdio.h>, because they need it for implementing getc() and putc() as
      fast macros.  */
-#if defined _IO_ferror_unlocked || __GNU_LIBRARY__ == 1 /* GNU libc, BeOS, Linux libc5 */
+#if defined _IO_ftrylockfile || __GNU_LIBRARY__ == 1 /* GNU libc, BeOS, Haiku, Linux libc5 */
   return ((fp->_flags & _IO_NO_WRITES) != 0
 	  || ((fp->_flags & (_IO_NO_READS | _IO_CURRENTLY_PUTTING)) == 0
 	      && fp->_IO_read_base != NULL));
@@ -46,6 +46,16 @@ freading (FILE *fp)
 #elif defined __QNX__               /* QNX */
   return ((fp->_Mode & 0x2 /* _MOPENW */) == 0
 	  || (fp->_Mode & 0x1000 /* _MREAD */) != 0);
+#elif defined __MINT__              /* Atari FreeMiNT */
+  if (!fp->__mode.__write)
+    return 1;
+  if (!fp->__mode.__read)
+    return 0;
+# ifdef _IO_CURRENTLY_GETTING /* Flag added on 2009-02-28 */
+  return (fp->__flags & _IO_CURRENTLY_GETTING) != 0;
+# else
+  return (fp->__buffer < fp->__get_limit /*|| fp->__bufp == fp->__put_limit ??*/);
+# endif
 #else
  #error "Please port gnulib freading.c to your platform!"
 #endif

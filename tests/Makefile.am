@@ -1,6 +1,6 @@
 ## DO NOT EDIT! GENERATED AUTOMATICALLY!
 ## Process this file with automake to produce Makefile.in.
-# Copyright (C) 2002-2008 Free Software Foundation, Inc.
+# Copyright (C) 2002-2009 Free Software Foundation, Inc.
 #
 # This file is free software, distributed under the terms of the GNU
 # General Public License.  As a special exception to the GNU General
@@ -102,6 +102,16 @@ EXTRA_DIST += test-binary-io.sh test-binary-io.c
 
 ## end   gnulib module binary-io-tests
 
+## begin gnulib module btowc-tests
+
+TESTS += test-btowc1.sh test-btowc2.sh
+TESTS_ENVIRONMENT += EXEEXT='@EXEEXT@' LOCALE_FR='@LOCALE_FR@' LOCALE_FR_UTF8='@LOCALE_FR_UTF8@'
+check_PROGRAMS += test-btowc
+
+EXTRA_DIST += test-btowc1.sh test-btowc2.sh test-btowc.c
+
+## end   gnulib module btowc-tests
+
 ## begin gnulib module c-ctype-tests
 
 TESTS += test-c-ctype
@@ -140,6 +150,15 @@ test_dirname_LDADD = $(LDADD) @LIBINTL@
 EXTRA_DIST += test-dirname.c
 
 ## end   gnulib module dirname-tests
+
+## begin gnulib module environ-tests
+
+TESTS += test-environ
+check_PROGRAMS += test-environ
+
+EXTRA_DIST += test-environ.c
+
+## end   gnulib module environ-tests
 
 ## begin gnulib module errno-tests
 
@@ -226,8 +245,9 @@ EXTRA_DIST += test-freading.c
 
 ## begin gnulib module frexp-nolibm-tests
 
-TESTS += test-frexp
-check_PROGRAMS += test-frexp
+TESTS += test-frexp-nolibm
+check_PROGRAMS += test-frexp-nolibm
+test_frexp_nolibm_SOURCES = test-frexp.c
 
 EXTRA_DIST += test-frexp.c
 
@@ -235,8 +255,9 @@ EXTRA_DIST += test-frexp.c
 
 ## begin gnulib module frexpl-nolibm-tests
 
-TESTS += test-frexpl
-check_PROGRAMS += test-frexpl
+TESTS += test-frexpl-nolibm
+check_PROGRAMS += test-frexpl-nolibm
+test_frexpl_nolibm_SOURCES = test-frexpl.c
 
 EXTRA_DIST += test-frexpl.c
 
@@ -244,21 +265,45 @@ EXTRA_DIST += test-frexpl.c
 
 ## begin gnulib module fseeko-tests
 
-TESTS += test-fseeko.sh
+TESTS += test-fseeko.sh test-fseeko2.sh
 TESTS_ENVIRONMENT += EXEEXT='@EXEEXT@' srcdir='$(srcdir)'
 check_PROGRAMS += test-fseeko
-EXTRA_DIST += test-fseeko.c test-fseeko.sh
+EXTRA_DIST += test-fseeko.c test-fseeko.sh test-fseeko2.sh
 
 ## end   gnulib module fseeko-tests
 
 ## begin gnulib module ftello-tests
 
-TESTS += test-ftello.sh
+TESTS += test-ftello.sh test-ftello2.sh
 TESTS_ENVIRONMENT += EXEEXT='@EXEEXT@' srcdir='$(srcdir)'
 check_PROGRAMS += test-ftello
-EXTRA_DIST += test-ftello.c test-ftello.sh
+EXTRA_DIST += test-ftello.c test-ftello.sh test-ftello2.sh
 
 ## end   gnulib module ftello-tests
+
+## begin gnulib module getdtablesize-tests
+
+TESTS += test-getdtablesize
+check_PROGRAMS += test-getdtablesize
+EXTRA_DIST += test-getdtablesize.c
+
+## end   gnulib module getdtablesize-tests
+
+## begin gnulib module gettext
+
+# This is for those projects which use "gettextize --intl" to put a source-code
+# copy of libintl into their package. In such projects, every Makefile.am needs
+# -I$(top_builddir)/intl, so that <libintl.h> can be found in this directory.
+# For the Makefile.ams in other directories it is the maintainer's
+# responsibility; for the one from gnulib we do it here.
+# This option has no effect when the user disables NLS (because then the intl
+# directory contains no libintl.h file) or when the project does not use
+# "gettextize --intl".
+AM_CPPFLAGS += -I$(top_builddir)/intl
+
+EXTRA_DIST += $(top_srcdir)/build-aux/config.rpath
+
+## end   gnulib module gettext
 
 ## begin gnulib module gettimeofday-tests
 
@@ -292,7 +337,7 @@ EXTRA_DIST += test-isnanf-nolibm.c test-isnanf.h nan.h
 TESTS += test-isnanl-nolibm
 check_PROGRAMS += test-isnanl-nolibm
 
-EXTRA_DIST += test-isnanl-nolibm.c test-isnanl.h
+EXTRA_DIST += test-isnanl-nolibm.c test-isnanl.h nan.h
 
 ## end   gnulib module isnanl-nolibm-tests
 
@@ -305,15 +350,6 @@ EXTRA_DIST += test-linkedhash_list.c
 
 ## end   gnulib module linkedhash-list-tests
 
-## begin gnulib module lock-tests
-
-TESTS += test-lock
-check_PROGRAMS += test-lock
-test_lock_LDADD = $(LDADD) @LIBMULTITHREAD@ @YIELD_LIB@
-EXTRA_DIST += test-lock.c
-
-## end   gnulib module lock-tests
-
 ## begin gnulib module lseek-tests
 
 TESTS += test-lseek.sh
@@ -322,6 +358,14 @@ check_PROGRAMS += test-lseek
 EXTRA_DIST += test-lseek.c test-lseek.sh
 
 ## end   gnulib module lseek-tests
+
+## begin gnulib module lstat-tests
+
+TESTS += test-lstat
+check_PROGRAMS += test-lstat
+EXTRA_DIST += test-lstat.c
+
+## end   gnulib module lstat-tests
 
 ## begin gnulib module malloca-tests
 
@@ -341,21 +385,38 @@ EXTRA_DIST += test-math.c
 
 ## end   gnulib module math-tests
 
-## begin gnulib module memchr-tests
+## begin gnulib module mbrtowc-tests
 
-TESTS += test-memchr
-check_PROGRAMS += test-memchr
-EXTRA_DIST += test-memchr.c
+TESTS += test-mbrtowc1.sh test-mbrtowc2.sh test-mbrtowc3.sh test-mbrtowc4.sh
+TESTS_ENVIRONMENT += \
+  EXEEXT='@EXEEXT@' \
+  LOCALE_FR='@LOCALE_FR@' \
+  LOCALE_FR_UTF8='@LOCALE_FR_UTF8@' \
+  LOCALE_JA='@LOCALE_JA@' \
+  LOCALE_ZH_CN='@LOCALE_ZH_CN@'
+check_PROGRAMS += test-mbrtowc
 
-## end   gnulib module memchr-tests
+EXTRA_DIST += test-mbrtowc1.sh test-mbrtowc2.sh test-mbrtowc3.sh test-mbrtowc4.sh test-mbrtowc.c
 
-## begin gnulib module memcmp-tests
+## end   gnulib module mbrtowc-tests
 
-TESTS += test-memcmp
-check_PROGRAMS += test-memcmp
-EXTRA_DIST += test-memcmp.c
+## begin gnulib module mbsinit-tests
 
-## end   gnulib module memcmp-tests
+TESTS += test-mbsinit.sh
+TESTS_ENVIRONMENT += EXEEXT='@EXEEXT@' LOCALE_FR_UTF8='@LOCALE_FR_UTF8@'
+check_PROGRAMS += test-mbsinit
+
+EXTRA_DIST += test-mbsinit.sh test-mbsinit.c
+
+## end   gnulib module mbsinit-tests
+
+## begin gnulib module memchr2-tests
+
+TESTS += test-memchr2
+check_PROGRAMS += test-memchr2
+EXTRA_DIST += test-memchr2.c
+
+## end   gnulib module memchr2-tests
 
 ## begin gnulib module open-tests
 
@@ -365,6 +426,28 @@ check_PROGRAMS += test-open
 EXTRA_DIST += test-open.c
 
 ## end   gnulib module open-tests
+
+## begin gnulib module posix_spawnp-tests
+
+if POSIX_SPAWN_PORTED
+TESTS += test-posix_spawn1 test-posix_spawn2
+check_PROGRAMS += test-posix_spawn1 test-posix_spawn2
+
+BUILT_SOURCES += test-posix_spawn1.sh
+test-posix_spawn1.sh: test-posix_spawn1.in.sh
+	cp $(srcdir)/test-posix_spawn1.in.sh $@-t
+	mv $@-t $@
+MOSTLYCLEANFILES += test-posix_spawn1.sh test-posix_spawn1.sh-t
+
+BUILT_SOURCES += test-posix_spawn2.sh
+test-posix_spawn2.sh: test-posix_spawn2.in.sh
+	cp $(srcdir)/test-posix_spawn2.in.sh $@-t
+	mv $@-t $@
+MOSTLYCLEANFILES += test-posix_spawn2.sh test-posix_spawn2.sh-t
+endif
+EXTRA_DIST += test-posix_spawn1.c test-posix_spawn1.in.sh test-posix_spawn2.c test-posix_spawn2.in.sh
+
+## end   gnulib module posix_spawnp-tests
 
 ## begin gnulib module printf-frexp-tests
 
@@ -386,12 +469,38 @@ EXTRA_DIST += test-printf-frexpl.c
 
 ## begin gnulib module quotearg-tests
 
-TESTS += test-quotearg
+TESTS += test-quotearg.sh
+TESTS_ENVIRONMENT += EXEEXT='@EXEEXT@' srcdir='$(srcdir)' LOCALE_FR='@LOCALE_FR@' LOCALE_FR_UTF8='@LOCALE_FR_UTF8@'
 check_PROGRAMS += test-quotearg
 test_quotearg_LDADD = $(LDADD) @LIBINTL@
-EXTRA_DIST += test-quotearg.c
+EXTRA_DIST += test-quotearg.sh test-quotearg.c locale/fr/LC_MESSAGES/test-quotearg.po locale/fr/LC_MESSAGES/test-quotearg.mo
 
 ## end   gnulib module quotearg-tests
+
+## begin gnulib module rawmemchr-tests
+
+TESTS += test-rawmemchr
+check_PROGRAMS += test-rawmemchr
+EXTRA_DIST += test-rawmemchr.c
+
+## end   gnulib module rawmemchr-tests
+
+## begin gnulib module sched-tests
+
+TESTS += test-sched
+check_PROGRAMS += test-sched
+EXTRA_DIST += test-sched.c
+
+## end   gnulib module sched-tests
+
+## begin gnulib module setenv
+
+
+EXTRA_DIST += setenv.c
+
+EXTRA_libtests_a_SOURCES += setenv.c
+
+## end   gnulib module setenv
 
 ## begin gnulib module sigaction-tests
 
@@ -400,6 +509,15 @@ check_PROGRAMS += test-sigaction
 EXTRA_DIST += test-sigaction.c
 
 ## end   gnulib module sigaction-tests
+
+## begin gnulib module signal-tests
+
+TESTS += test-signal
+check_PROGRAMS += test-signal
+
+EXTRA_DIST += test-signal.c
+
+## end   gnulib module signal-tests
 
 ## begin gnulib module signbit-tests
 
@@ -455,14 +573,13 @@ EXTRA_DIST += test-stdlib.c
 
 ## end   gnulib module stdlib-tests
 
-## begin gnulib module strdup
+## begin gnulib module strchrnul-tests
 
+TESTS += test-strchrnul
+check_PROGRAMS += test-strchrnul
+EXTRA_DIST += test-strchrnul.c
 
-EXTRA_DIST += strdup.c
-
-EXTRA_libtests_a_SOURCES += strdup.c
-
-## end   gnulib module strdup
+## end   gnulib module strchrnul-tests
 
 ## begin gnulib module strerror-tests
 
@@ -526,22 +643,6 @@ EXTRA_DIST += test-sys_time.c
 
 ## end   gnulib module sys_time-tests
 
-## begin gnulib module thread
-
-libtests_a_SOURCES += glthread/thread.h glthread/thread.c
-
-## end   gnulib module thread
-
-## begin gnulib module tls-tests
-
-TESTS += test-tls
-check_PROGRAMS += test-tls
-test_tls_LDADD = $(LDADD) @LIBMULTITHREAD@ @YIELD_LIB@
-
-EXTRA_DIST += test-tls.c
-
-## end   gnulib module tls-tests
-
 ## begin gnulib module unistd-tests
 
 TESTS += test-unistd
@@ -550,6 +651,15 @@ check_PROGRAMS += test-unistd
 EXTRA_DIST += test-unistd.c
 
 ## end   gnulib module unistd-tests
+
+## begin gnulib module unsetenv
+
+
+EXTRA_DIST += unsetenv.c
+
+EXTRA_libtests_a_SOURCES += unsetenv.c
+
+## end   gnulib module unsetenv
 
 ## begin gnulib module vasnprintf-tests
 
@@ -578,12 +688,6 @@ EXTRA_DIST += test-vasprintf.c
 
 ## end   gnulib module vasprintf-tests
 
-## begin gnulib module verify
-
-libtests_a_SOURCES += verify.h
-
-## end   gnulib module verify
-
 ## begin gnulib module wchar-tests
 
 TESTS += test-wchar
@@ -592,6 +696,30 @@ check_PROGRAMS += test-wchar
 EXTRA_DIST += test-wchar.c
 
 ## end   gnulib module wchar-tests
+
+## begin gnulib module wcrtomb-tests
+
+TESTS += test-wcrtomb.sh
+TESTS_ENVIRONMENT += \
+  EXEEXT='@EXEEXT@' \
+  LOCALE_FR='@LOCALE_FR@' \
+  LOCALE_FR_UTF8='@LOCALE_FR_UTF8@' \
+  LOCALE_JA='@LOCALE_JA@' \
+  LOCALE_ZH_CN='@LOCALE_ZH_CN@'
+check_PROGRAMS += test-wcrtomb
+
+EXTRA_DIST += test-wcrtomb.sh test-wcrtomb.c
+
+## end   gnulib module wcrtomb-tests
+
+## begin gnulib module wctob
+
+
+EXTRA_DIST += wctob.c
+
+EXTRA_libtests_a_SOURCES += wctob.c
+
+## end   gnulib module wctob
 
 ## begin gnulib module wctype-tests
 
@@ -611,12 +739,6 @@ test_xvasprintf_LDADD = $(LDADD) @LIBINTL@
 EXTRA_DIST += test-xvasprintf.c
 
 ## end   gnulib module xvasprintf-tests
-
-## begin gnulib module yield
-
-libtests_a_SOURCES += glthread/yield.h
-
-## end   gnulib module yield
 
 # Clean up after Solaris cc.
 clean-local:

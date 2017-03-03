@@ -1,5 +1,5 @@
-# ldexpl.m4 serial 2
-dnl Copyright (C) 2007 Free Software Foundation, Inc.
+# ldexpl.m4 serial 4
+dnl Copyright (C) 2007-2009 Free Software Foundation, Inc.
 dnl This file is free software; the Free Software Foundation
 dnl gives unlimited permission to copy and/or distribute it,
 dnl with or without modifications, as long as this notice is preserved.
@@ -48,7 +48,7 @@ AC_DEFUN([gl_FUNC_LDEXPL],
     gl_func_ldexpl=no
   fi
   if test $gl_func_ldexpl = yes; then
-    AC_DEFINE([HAVE_LDEXPL], 1,
+    AC_DEFINE([HAVE_LDEXPL], [1],
       [Define if the ldexpl() function is available.])
     dnl Also check whether it's declared.
     dnl MacOS X 10.3 has ldexpl() in libc but doesn't declare it in <math.h>.
@@ -60,7 +60,8 @@ AC_DEFUN([gl_FUNC_LDEXPL],
   AC_SUBST([LDEXPL_LIBM])
 ])
 
-dnl Test whether ldexpl() works on finite numbers (this fails on AIX 5.1).
+dnl Test whether ldexpl() works on finite numbers (this fails on AIX 5.1
+dnl and MacOS X 10.4/PowerPC).
 AC_DEFUN([gl_FUNC_LDEXPL_WORKS],
 [
   AC_REQUIRE([AC_PROG_CC])
@@ -72,9 +73,11 @@ AC_DEFUN([gl_FUNC_LDEXPL_WORKS],
 extern long double ldexpl (long double, int);
 int main()
 {
-  volatile long double x = 1.0;
-  volatile long double y = ldexpl (x, -1);
-  return (y != 0.5L);
+  volatile long double x1 = 1.0;
+  volatile long double y1 = ldexpl (x1, -1);
+  volatile long double x2 = 1.73205L;
+  volatile long double y2 = ldexpl (x2, 0);
+  return (y1 != 0.5L) || (y2 != x2);
 }], [gl_cv_func_ldexpl_works=yes], [gl_cv_func_ldexpl_works=no],
       [case "$host_os" in
          aix*) gl_cv_func_ldexpl_works="guessing no";;

@@ -1,5 +1,5 @@
 /* fflush.c -- allow flushing input streams
-   Copyright (C) 2007-2008 Free Software Foundation, Inc.
+   Copyright (C) 2007-2009 Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -31,17 +31,44 @@
 
 #undef fflush
 
+
+#if defined _IO_ftrylockfile || __GNU_LIBRARY__ == 1 /* GNU libc, BeOS, Haiku, Linux libc5 */
+
+/* Clear the stream's ungetc buffer, preserving the value of ftello (fp).  */
+static inline void
+clear_ungetc_buffer_preserving_position (FILE *fp)
+{
+  if (fp->_flags & _IO_IN_BACKUP)
+    /* _IO_free_backup_area is a bit complicated.  Simply call fseek.  */
+    fseek (fp, 0, SEEK_CUR);
+}
+
+#else
+
+/* Clear the stream's ungetc buffer.  May modify the value of ftello (fp).  */
 static inline void
 clear_ungetc_buffer (FILE *fp)
 {
-#if defined __sferror || defined __DragonFly__ /* FreeBSD, NetBSD, OpenBSD, DragonFly, MacOS X, Cygwin */
+# if defined __sferror || defined __DragonFly__ /* FreeBSD, NetBSD, OpenBSD, DragonFly, MacOS X, Cygwin */
   if (HASUB (fp))
     {
       fp_->_p += fp_->_r;
       fp_->_r = 0;
     }
-#endif
+# elif defined __EMX__              /* emx+gcc */
+  if (fp->_ungetc_count > 0)
+    {
+      fp->_ungetc_count = 0;
+      fp->_rcount = - fp->_rcount;
+    }
+# elif defined _IOERR               /* AIX, HP-UX, IRIX, OSF/1, Solaris, OpenServer, mingw */
+  /* Nothing to do.  */
+# else                              /* other implementations */
+  fseek (fp, 0, SEEK_CUR);
+# endif
 }
+
+#endif
 
 #if (defined __sferror || defined __DragonFly__) && defined __SNPT /* FreeBSD, NetBSD, OpenBSD, DragonFly, MacOS X, Cygwin */
 
@@ -75,9 +102,6 @@ update_fpos_cache (FILE *fp, off_t pos)
 int
 rpl_fflush (FILE *stream)
 {
-  int result;
-  off_t pos;
-
   /* When stream is NULL, POSIX and C99 only require flushing of "output
      streams and update streams in which the most recent operation was not
      input", and all implementations do this.
@@ -100,70 +124,81 @@ rpl_fflush (FILE *stream)
   if (stream == NULL || ! freading (stream))
     return fflush (stream);
 
-  /* Clear the ungetc buffer.
+#if defined _IO_ftrylockfile || __GNU_LIBRARY__ == 1 /* GNU libc, BeOS, Haiku, Linux libc5 */
 
-     This is needed before fetching the file-position indicator, because
-     1) The file position indicator is incremented by fgetc() and decremented
-        by ungetc():
-        <http://www.opengroup.org/susv3/functions/fgetc.html>
-          "... the fgetc() function shall ... advance the associated file
-           position indicator for the stream ..."
-        <http://www.opengroup.org/susv3/functions/ungetc.html>
-          "The file-position indicator is decremented by each successful
-           call to ungetc()..."
-     2) <http://www.opengroup.org/susv3/functions/ungetc.html> says:
-          "The value of the file-position indicator for the stream after
-           reading or discarding all pushed-back bytes shall be the same
-           as it was before the bytes were pushed back."
-     3) Here we are discarding all pushed-back bytes.
+  clear_ungetc_buffer_preserving_position (stream);
 
-     Unfortunately it is impossible to implement this on platforms with
-     _IOERR, because an ungetc() on this platform prepends the pushed-back
-     bytes to the buffer without an indication of the limit between the
-     pushed-back bytes and the read-ahead bytes.  */
-  clear_ungetc_buffer (stream);
-
-  /* POSIX does not specify fflush behavior for non-seekable input
-     streams.  Some implementations purge unread data, some return
-     EBADF, some do nothing.  */
-  pos = ftello (stream);
-  if (pos == -1)
-    {
-      errno = EBADF;
-      return EOF;
-    }
-
-  /* To get here, we must be flushing a seekable input stream, so the
-     semantics of fpurge are now appropriate to clear the buffer.  To
-     avoid losing data, the lseek is also necessary.  */
-  result = fpurge (stream);
-  if (result != 0)
-    return result;
-
-#if (defined __sferror || defined __DragonFly__) && defined __SNPT /* FreeBSD, NetBSD, OpenBSD, DragonFly, MacOS X, Cygwin */
-
-  {
-    /* Disable seek optimization for the next fseeko call.  This tells the
-       following fseeko call to seek to the desired position directly, rather
-       than to seek to a block-aligned boundary.  */
-    int saved_flags = disable_seek_optimization (stream);
-
-    result = fseeko (stream, pos, SEEK_SET);
-
-    restore_seek_optimization (stream, saved_flags);
-  }
-  return result;
+  return fflush (stream);
 
 #else
+  {
+    /* Notes about the file-position indicator:
+       1) The file position indicator is incremented by fgetc() and decremented
+          by ungetc():
+          <http://www.opengroup.org/susv3/functions/fgetc.html>
+            "... the fgetc() function shall ... advance the associated file
+             position indicator for the stream ..."
+          <http://www.opengroup.org/susv3/functions/ungetc.html>
+            "The file-position indicator is decremented by each successful
+             call to ungetc()..."
+       2) <http://www.opengroup.org/susv3/functions/ungetc.html> says:
+            "The value of the file-position indicator for the stream after
+             reading or discarding all pushed-back bytes shall be the same
+             as it was before the bytes were pushed back."
+          Here we are discarding all pushed-back bytes.  But more specifically,
+       3) <http://www.opengroup.org/austin/aardvark/latest/xshbug3.txt> says:
+            "[After fflush(),] the file offset of the underlying open file
+             description shall be set to the file position of the stream, and
+             any characters pushed back onto the stream by ungetc() ... shall
+             be discarded."  */
 
-  pos = lseek (fileno (stream), pos, SEEK_SET);
-  if (pos == -1)
-    return EOF;
-  /* After a successful lseek, update the file descriptor's position cache
-     in the stream.  */
-  update_fpos_cache (stream, pos);
+    /* POSIX does not specify fflush behavior for non-seekable input
+       streams.  Some implementations purge unread data, some return
+       EBADF, some do nothing.  */
+    off_t pos = ftello (stream);
+    if (pos == -1)
+      {
+        errno = EBADF;
+        return EOF;
+      }
 
-  return 0;
+    /* Clear the ungetc buffer.  */
+    clear_ungetc_buffer (stream);
 
+    /* To get here, we must be flushing a seekable input stream, so the
+       semantics of fpurge are now appropriate to clear the buffer.  To
+       avoid losing data, the lseek is also necessary.  */
+    {
+      int result = fpurge (stream);
+      if (result != 0)
+        return result;
+    }
+
+# if (defined __sferror || defined __DragonFly__) && defined __SNPT /* FreeBSD, NetBSD, OpenBSD, DragonFly, MacOS X, Cygwin */
+
+    {
+      /* Disable seek optimization for the next fseeko call.  This tells the
+         following fseeko call to seek to the desired position directly, rather
+         than to seek to a block-aligned boundary.  */
+      int saved_flags = disable_seek_optimization (stream);
+      int result = fseeko (stream, pos, SEEK_SET);
+
+      restore_seek_optimization (stream, saved_flags);
+      return result;
+    }
+
+# else
+
+    pos = lseek (fileno (stream), pos, SEEK_SET);
+    if (pos == -1)
+      return EOF;
+    /* After a successful lseek, update the file descriptor's position cache
+       in the stream.  */
+    update_fpos_cache (stream, pos);
+
+    return 0;
+
+# endif
+  }
 #endif
 }

@@ -1,5 +1,5 @@
 /* Test of POSIX compatible vasprintf() and asprintf() functions.
-   Copyright (C) 2007-2008 Free Software Foundation, Inc.
+   Copyright (C) 2007-2009 Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -23,7 +23,6 @@
 #include <float.h>
 #include <stdarg.h>
 #include <stddef.h>
-#include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
@@ -57,8 +56,20 @@ have_minus_zero ()
 double zerod = 0.0;
 
 /* On HP-UX 10.20, negating 0.0L does not yield -0.0L.
-   So we use minus_zerol instead.  */
-long double minus_zerol = -LDBL_MIN * LDBL_MIN;
+   So we use minus_zerol instead.
+   IRIX cc can't put -0.0L into .data, but can compute at runtime.
+   Note that the expression -LDBL_MIN * LDBL_MIN does not work on other
+   platforms, such as when cross-compiling to PowerPC on MacOS X 10.5.  */
+#if defined __hpux || defined __sgi
+static long double
+compute_minus_zerol (void)
+{
+  return -LDBL_MIN * LDBL_MIN;
+}
+# define minus_zerol compute_minus_zerol ()
+#else
+long double minus_zerol = -0.0L;
+#endif
 
 /* Representation of an 80-bit 'long double' as an initializer for a sequence
    of 'unsigned int' words.  */
@@ -3568,6 +3579,56 @@ test_function (int (*my_asprintf) (char **, const char *, ...))
     ASSERT (retval == strlen (result));
     free (result);
   }
+
+  /* Test the support of the %s format directive.  */
+
+  /* To verify that these tests succeed, it is necessary to run them under
+     a tool that checks against invalid memory accesses, such as ElectricFence
+     or "valgrind --tool=memcheck".  */
+  {
+    size_t i;
+
+    for (i = 1; i <= 8; i++)
+      {
+	char *block;
+	char *result;
+	int retval;
+
+	block = (char *) malloc (i);
+	memcpy (block, "abcdefgh", i);
+	retval = my_asprintf (&result, "%.*s", (int) i, block);
+	ASSERT (result != NULL);
+	ASSERT (memcmp (result, block, i) == 0);
+	ASSERT (result[i] == '\0');
+	ASSERT (retval == strlen (result));
+	free (result);
+	free (block);
+      }
+  }
+#if HAVE_WCHAR_T
+  {
+    size_t i;
+
+    for (i = 1; i <= 8; i++)
+      {
+	wchar_t *block;
+	size_t j;
+	char *result;
+	int retval;
+
+	block = (wchar_t *) malloc (i * sizeof (wchar_t));
+	for (j = 0; j < i; j++)
+	  block[j] = "abcdefgh"[j];
+	retval = my_asprintf (&result, "%.*ls", (int) i, block);
+	ASSERT (result != NULL);
+	ASSERT (memcmp (result, "abcdefgh", i) == 0);
+	ASSERT (result[i] == '\0');
+	ASSERT (retval == strlen (result));
+	free (result);
+	free (block);
+      }
+  }
+#endif
 }
 
 static int
