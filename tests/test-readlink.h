@@ -1,5 +1,5 @@
 /* Tests of readlink.
-   Copyright (C) 2009-2011 Free Software Foundation, Inc.
+   Copyright (C) 2009-2013 Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -38,7 +38,7 @@ test_readlink (ssize_t (*func) (char const *, char *, size_t), bool print)
   ASSERT (errno == ENOENT);
   errno = 0;
   ASSERT (func ("", buf, sizeof buf) == -1);
-  ASSERT (errno == ENOENT);
+  ASSERT (errno == ENOENT || errno == EINVAL);
   errno = 0;
   ASSERT (func (".", buf, sizeof buf) == -1);
   ASSERT (errno == EINVAL);

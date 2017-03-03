@@ -1,6 +1,6 @@
 /* ignore a function return without a compiler warning
 
-   Copyright (C) 2008-2011 Free Software Foundation, Inc.
+   Copyright (C) 2008-2013 Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -33,30 +33,16 @@
    declared with attribute warn_unused_result".  */
 
 #ifndef _GL_IGNORE_VALUE_H
-# define _GL_IGNORE_VALUE_H
-
-# ifndef _GL_ATTRIBUTE_DEPRECATED
-/* The __attribute__((__deprecated__)) feature
-   is available in gcc versions 3.1 and newer.  */
-#  if __GNUC__ < 3 || (__GNUC__ == 3 && __GNUC_MINOR__ < 1)
-#   define _GL_ATTRIBUTE_DEPRECATED /* empty */
-#  else
-#   define _GL_ATTRIBUTE_DEPRECATED __attribute__ ((__deprecated__))
-#  endif
-# endif
+#define _GL_IGNORE_VALUE_H
 
 /* The __attribute__((__warn_unused_result__)) feature
    is available in gcc versions 3.4 and newer,
    while the typeof feature has been available since 2.7 at least.  */
-# if __GNUC__ < 3 || (__GNUC__ == 3 && __GNUC_MINOR__ < 4)
-#  define ignore_value(x) ((void) (x))
-# else
-#  define ignore_value(x) (({ __typeof__ (x) __x = (x); (void) __x; }))
-# endif
-
-/* ignore_value works for scalars, pointers and aggregates;
-   deprecate ignore_ptr.  */
-static inline void _GL_ATTRIBUTE_DEPRECATED
-ignore_ptr (void *p) { (void) p; } /* deprecated: use ignore_value */
+#if 3 < __GNUC__ + (4 <= __GNUC_MINOR__)
+# define ignore_value(x) \
+    (__extension__ ({ __typeof__ (x) __x = (x); (void) __x; }))
+#else
+# define ignore_value(x) ((void) (x))
+#endif
 
 #endif

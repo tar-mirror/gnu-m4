@@ -1,5 +1,5 @@
 /* A POSIX-like <sys/wait.h>.
-   Copyright (C) 2001-2003, 2005-2011 Free Software Foundation, Inc.
+   Copyright (C) 2001-2003, 2005-2013 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -12,11 +12,10 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software Foundation,
-   Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.  */
+   along with this program; if not, see <http://www.gnu.org/licenses/>.  */
 
 
-#ifndef _GL_SYS_WAIT_H
+#ifndef _@GUARD_PREFIX@_SYS_WAIT_H
 
 #if __GNUC__ >= 3
 @PRAGMA_SYSTEM_HEADER@
@@ -28,8 +27,8 @@
 # @INCLUDE_NEXT@ @NEXT_SYS_WAIT_H@
 #endif
 
-#ifndef _GL_SYS_WAIT_H
-#define _GL_SYS_WAIT_H
+#ifndef _@GUARD_PREFIX@_SYS_WAIT_H
+#define _@GUARD_PREFIX@_SYS_WAIT_H
 
 /* Get pid_t.  */
 #include <sys/types.h>
@@ -126,5 +125,5 @@ _GL_WARN_ON_USE (waitpid, "waitpid is unportable - "
 #endif
 
 
-#endif /* _GL_SYS_WAIT_H */
-#endif /* _GL_SYS_WAIT_H */
+#endif /* _@GUARD_PREFIX@_SYS_WAIT_H */
+#endif /* _@GUARD_PREFIX@_SYS_WAIT_H */

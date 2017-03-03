@@ -1,6 +1,6 @@
 /* Emulate link on platforms that lack it, namely native Windows platforms.
 
-   Copyright (C) 2009-2011 Free Software Foundation, Inc.
+   Copyright (C) 2009-2013 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -13,8 +13,7 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software Foundation,
-   Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.  */
+   along with this program; if not, see <http://www.gnu.org/licenses/>.  */
 
 #include <config.h>
 
@@ -155,9 +154,20 @@ link (const char *file1, const char *file2)
 int
 rpl_link (char const *file1, char const *file2)
 {
+  size_t len1;
+  size_t len2;
+  struct stat st;
+
+  /* Don't allow IRIX to dereference dangling file2 symlink.  */
+  if (!lstat (file2, &st))
+    {
+      errno = EEXIST;
+      return -1;
+    }
+
   /* Reject trailing slashes on non-directories.  */
-  size_t len1 = strlen (file1);
-  size_t len2 = strlen (file2);
+  len1 = strlen (file1);
+  len2 = strlen (file2);
   if ((len1 && file1[len1 - 1] == '/')
       || (len2 && file2[len2 - 1] == '/'))
     {
@@ -165,7 +175,6 @@ rpl_link (char const *file1, char const *file2)
          If stat() fails, then link() should fail for the same reason
          (although on Solaris 9, link("file/","oops") mistakenly
          succeeds); if stat() succeeds, require a directory.  */
-      struct stat st;
       if (stat (file1, &st))
         return -1;
       if (!S_ISDIR (st.st_mode))
@@ -178,7 +187,6 @@ rpl_link (char const *file1, char const *file2)
     {
       /* Fix Cygwin 1.5.x bug where link("a","b/.") creates file "b".  */
       char *dir = strdup (file2);
-      struct stat st;
       char *p;
       if (!dir)
         return -1;

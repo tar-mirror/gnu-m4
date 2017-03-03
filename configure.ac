@@ -1,5 +1,5 @@
 # Configure template for GNU M4.           -*-Autoconf-*-
-# Copyright (C) 1991, 1993-1994, 2004-2011 Free Software Foundation,
+# Copyright (C) 1991, 1993-1994, 2004-2013 Free Software Foundation,
 # Inc.
 #
 # This file is part of GNU M4.
@@ -22,8 +22,8 @@ AC_INIT([GNU M4], m4_esyscmd([build-aux/git-version-gen .tarball-version]),
   [bug-m4@gnu.org])
 AC_CONFIG_AUX_DIR([build-aux])
 
-AM_INIT_AUTOMAKE([1.11.1 dist-bzip2 dist-xz color-tests parallel-tests
-silent-rules gnu])
+AM_INIT_AUTOMAKE([1.11.6 dist-bzip2 dist-xz color-tests parallel-tests
+silent-rules subdir-objects gnu])
 
 m4_pattern_forbid([^M4_[A-Z]])
 
@@ -50,29 +50,65 @@ AC_ARG_ENABLE([gcc-warnings],
      *)      AC_MSG_ERROR([bad value $enableval for gcc-warnings option]) ;;
    esac
    gl_gcc_warnings=$enableval],
-  [gl_gcc_warnings=no]
+  [if test -d "$srcdir"/.git; then
+     gl_gcc_warnings=yes
+   else
+     gl_gcc_warnings=no
+   fi]
 )
 
 if test "$gl_gcc_warnings" = yes; then
   gl_WARN_ADD([-Werror], [WERROR_CFLAGS])
   AC_SUBST([WERROR_CFLAGS])
 
+  # We use '#pragma GCC diagnostic push' to silence some
+  # warnings, but older gcc doesn't support this.
+  AC_CACHE_CHECK([whether pragma GCC diagnostic push works],
+    [M4_cv_gcc_pragma_push_works], [
+    save_CFLAGS=$CFLAGS
+    CFLAGS='-Wunknown-pragmas -Werror'
+    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+      #pragma GCC diagnostic push
+      #pragma GCC diagnostic pop
+    ]])],
+    [M4_cv_gcc_pragma_push_works=yes],
+    [M4_cv_gcc_pragma_push_works=no])
+    CFLAGS=$save_CFLAGS])
+
+  # This, $nw, is the list of warnings we disable.
   nw=
-  nw="$nw -Waggregate-return"       # C90 is anachronistic
+  nw="$nw -Waggregate-return"       # K&R is anachronistic
+  nw="$nw -Wtraditional-conversion" # K&R is anachronistic
+  nw="$nw -Wundef"                  # K&R is anachronistic
+  nw="$nw -Wtraditional"            # K&R is anachronistic
   nw="$nw -Wlong-long"              # C90 is anachronistic
-  nw="$nw -Wundef"                  # Warns on '#if GNULIB_FOO' etc in gnulib
-  nw="$nw -Wtraditional"            # Warns on #elif which we use often
   nw="$nw -Wsystem-headers"         # Don't let system headers trigger warnings
   nw="$nw -Wpadded"                 # Our structs are not packed
-  nw="$nw -Wredundant-decls"        # Gnulib has multiple decls
-  nw="$nw -Wformat-nonliteral"      # Needed in builtin.c
-  nw="$nw -Wunreachable-code"       # Needed in output.c
   nw="$nw -Wconversion"             # Too many warnings for now
   nw="$nw -Wsign-conversion"        # Too many warnings for now
-  nw="$nw -Wtraditional-conversion" # Too many warnings for now
   nw="$nw -Wcast-qual"              # Too many warnings for now
   nw="$nw -Wswitch-enum"            # Too many warnings for now
-  # This, $nw, is the list of warnings we disable.
+  # gcc 4.4.6 complains enum-compare is C++ only; gcc 4.7.0 implies it in -Wall
+  nw="$nw -Wenum-compare"
+
+  # Gnulib uses '#pragma GCC diagnostic push' to silence some
+  # warnings, but older gcc doesn't support this.
+  AC_CACHE_CHECK([whether pragma GCC diagnostic push works],
+    [M4_cv_gcc_pragma_push_works], [
+    save_CFLAGS=$CFLAGS
+    CFLAGS='-Wunknown-pragmas -Werror'
+    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+      #pragma GCC diagnostic push
+      #pragma GCC diagnostic pop
+    ]])],
+    [M4_cv_gcc_pragma_push_works=yes],
+    [M4_cv_gcc_pragma_push_works=no])
+    CFLAGS=$save_CFLAGS])
+  if test $M4_cv_gcc_pragma_push_works = no; then
+    nw="$nw -Wmissing-prototypes"
+    nw="$nw -Wmissing-declarations"
+    nw="$nw -Wunreachable-code"
+  fi
 
   gl_MANYWARN_ALL_GCC([ws])
   gl_MANYWARN_COMPLEMENT([ws], [$ws], [$nw])
@@ -80,13 +116,24 @@ if test "$gl_gcc_warnings" = yes; then
     gl_WARN_ADD([$w])
   done
 
+  # Gnulib turns on -Wformat=2, which implies -Wformat-nonliteral, but
+  # we temporarily override it in format.c if possible.
+  if test $M4_cv_gcc_pragma_push_works = no; then
+    gl_WARN_ADD([-Wno-format-nonliteral])
+  fi
+
   gl_WARN_ADD([-fdiagnostics-show-option])
   gl_WARN_ADD([-funit-at-a-time])
 
   AC_SUBST([WARN_CFLAGS])
 
-  AC_DEFINE([_FORTIFY_SOURCE], [2],
-    [enable compile-time and run-time bounds-checking, and some warnings])
+  AH_VERBATIM([FORTIFY_SOURCE],
+  [/* Enable compile-time and run-time bounds-checking, and some warnings,
+      without upsetting newer glibc. */
+   #if defined __OPTIMIZE__ && __OPTIMIZE__
+   # define _FORTIFY_SOURCE 2
+   #endif
+  ])
 fi
 
 # Tandem/NSK is broken - it has 'long long int' but not

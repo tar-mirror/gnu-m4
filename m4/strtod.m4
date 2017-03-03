@@ -1,5 +1,5 @@
-# strtod.m4 serial 19
-dnl Copyright (C) 2002-2003, 2006-2011 Free Software Foundation, Inc.
+# strtod.m4 serial 22
+dnl Copyright (C) 2002-2003, 2006-2013 Free Software Foundation, Inc.
 dnl This file is free software; the Free Software Foundation
 dnl gives unlimited permission to copy and/or distribute it,
 dnl with or without modifications, as long as this notice is preserved.
@@ -7,15 +7,18 @@ dnl with or without modifications, as long as this notice is preserved.
 AC_DEFUN([gl_FUNC_STRTOD],
 [
   AC_REQUIRE([gl_STDLIB_H_DEFAULTS])
-  dnl Test whether strtod is declared.
-  dnl Don't call AC_FUNC_STRTOD, because it does not have the right guess
-  dnl when cross-compiling.
-  dnl Don't call AC_CHECK_FUNCS([strtod]) because it would collide with the
-  dnl ac_cv_func_strtod variable set by the AC_FUNC_STRTOD macro.
-  AC_CHECK_DECLS_ONCE([strtod])
-  if test $ac_cv_have_decl_strtod != yes; then
-    HAVE_STRTOD=0
-  else
+  m4_ifdef([gl_FUNC_STRTOD_OBSOLETE], [
+    dnl Test whether strtod is declared.
+    dnl Don't call AC_FUNC_STRTOD, because it does not have the right guess
+    dnl when cross-compiling.
+    dnl Don't call AC_CHECK_FUNCS([strtod]) because it would collide with the
+    dnl ac_cv_func_strtod variable set by the AC_FUNC_STRTOD macro.
+    AC_CHECK_DECLS_ONCE([strtod])
+    if test $ac_cv_have_decl_strtod != yes; then
+      HAVE_STRTOD=0
+    fi
+  ])
+  if test $HAVE_STRTOD = 1; then
     AC_CACHE_CHECK([whether strtod obeys C99], [gl_cv_func_strtod_works],
       [AC_RUN_IFELSE([AC_LANG_PROGRAM([[
 #include <stdlib.h>
@@ -98,7 +101,7 @@ numeric_equal (double x, double y)
         [gl_cv_func_strtod_works=yes],
         [gl_cv_func_strtod_works=no],
         [dnl The last known bugs in glibc strtod(), as of this writing,
-	 dnl were fixed in version 2.8
+         dnl were fixed in version 2.8
          AC_EGREP_CPP([Lucky user],
            [
 #include <features.h>
@@ -109,15 +112,14 @@ numeric_equal (double x, double y)
  #endif
 #endif
            ],
-           [gl_cv_func_strtod_works=yes],
+           [gl_cv_func_strtod_works="guessing yes"],
            [gl_cv_func_strtod_works="guessing no"])])])
-    if test "$gl_cv_func_strtod_works" != yes; then
-      REPLACE_STRTOD=1
-    fi
-  fi
-  if test $HAVE_STRTOD = 0 || test $REPLACE_STRTOD = 1; then
-    AC_LIBOBJ([strtod])
-    gl_PREREQ_STRTOD
+    case "$gl_cv_func_strtod_works" in
+      *yes) ;;
+      *)
+        REPLACE_STRTOD=1
+        ;;
+    esac
   fi
 ])
 

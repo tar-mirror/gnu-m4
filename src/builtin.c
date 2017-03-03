@@ -1,6 +1,6 @@
 /* GNU m4 -- A simple macro processor
 
-   Copyright (C) 1989-1994, 2000, 2004, 2006-2011 Free Software
+   Copyright (C) 1989-1994, 2000, 2004, 2006-2013 Free Software
    Foundation, Inc.
 
    This file is part of GNU M4.
@@ -26,6 +26,7 @@
 
 #include "execute.h"
 #include "memchr2.h"
+#include "progname.h"
 #include "regex.h"
 #include "spawn-pipe.h"
 #include "wait-process.h"
@@ -173,7 +174,7 @@ static predefined const predefined_tab[] =
 | Find the builtin, which lives on ADDR.  |
 `----------------------------------------*/
 
-const builtin *
+const builtin * M4_GNUC_PURE
 find_builtin_by_addr (builtin_func *func)
 {
   const builtin *bp;
@@ -191,7 +192,7 @@ find_builtin_by_addr (builtin_func *func)
 | placeholder builtin.                                      |
 `----------------------------------------------------------*/
 
-const builtin *
+const builtin * M4_GNUC_PURE
 find_builtin_by_name (const char *name)
 {
   const builtin *bp;
@@ -894,7 +895,7 @@ m4_defn (struct obstack *obs, int argc, token_data **argv)
   if (bad_argc (argv[0], argc, 2, -1))
     return;
 
-  assert (0 < argc && argc <= INT_MAX);
+  assert (0 < argc);
   for (i = 1; i < (unsigned) argc; i++)
     {
       const char *arg = ARG((int) i);

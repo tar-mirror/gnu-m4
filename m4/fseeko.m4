@@ -1,5 +1,5 @@
-# fseeko.m4 serial 11
-dnl Copyright (C) 2007-2011 Free Software Foundation, Inc.
+# fseeko.m4 serial 17
+dnl Copyright (C) 2007-2013 Free Software Foundation, Inc.
 dnl This file is free software; the Free Software Foundation
 dnl gives unlimited permission to copy and/or distribute it,
 dnl with or without modifications, as long as this notice is preserved.
@@ -7,28 +7,8 @@ dnl with or without modifications, as long as this notice is preserved.
 AC_DEFUN([gl_FUNC_FSEEKO],
 [
   AC_REQUIRE([gl_STDIO_H_DEFAULTS])
-  AC_REQUIRE([gl_HAVE_FSEEKO])
   AC_REQUIRE([gl_STDIN_LARGE_OFFSET])
-
-  AC_CHECK_DECLS_ONCE([fseeko])
-  if test $ac_cv_have_decl_fseeko = no; then
-    HAVE_DECL_FSEEKO=0
-  fi
-
-  if test $gl_cv_func_fseeko = no; then
-    HAVE_FSEEKO=0
-    gl_REPLACE_FSEEKO
-  else
-    if test $gl_cv_var_stdin_large_offset = no; then
-      gl_REPLACE_FSEEKO
-    fi
-  fi
-])
-
-dnl Tests whether fseeko is available.
-dnl Result is gl_cv_func_fseeko.
-AC_DEFUN([gl_HAVE_FSEEKO],
-[
+  AC_REQUIRE([gl_SYS_TYPES_H])
   AC_REQUIRE([AC_PROG_CC])
 
   dnl Persuade glibc <stdio.h> to declare fseeko().
@@ -40,18 +20,28 @@ AC_DEFUN([gl_HAVE_FSEEKO],
 ]], [fseeko (stdin, 0, 0);])],
         [gl_cv_func_fseeko=yes], [gl_cv_func_fseeko=no])
     ])
-])
 
-AC_DEFUN([gl_REPLACE_FSEEKO],
-[
-  AC_REQUIRE([gl_STDIO_H_DEFAULTS])
-  AC_REQUIRE([gl_HAVE_FSEEKO])
-  if test $gl_cv_func_fseeko = yes; then
-    REPLACE_FSEEKO=1
+  AC_CHECK_DECLS_ONCE([fseeko])
+  if test $ac_cv_have_decl_fseeko = no; then
+    HAVE_DECL_FSEEKO=0
   fi
-  AC_LIBOBJ([fseeko])
-  dnl If we are also using the fseek module, then fseek needs replacing, too.
-  m4_ifdef([gl_REPLACE_FSEEK], [gl_REPLACE_FSEEK])
+
+  if test $gl_cv_func_fseeko = no; then
+    HAVE_FSEEKO=0
+  else
+    if test $WINDOWS_64_BIT_OFF_T = 1; then
+      REPLACE_FSEEKO=1
+    fi
+    if test $gl_cv_var_stdin_large_offset = no; then
+      REPLACE_FSEEKO=1
+    fi
+    m4_ifdef([gl_FUNC_FFLUSH_STDIN], [
+      gl_FUNC_FFLUSH_STDIN
+      if test $gl_cv_func_fflush_stdin != yes; then
+        REPLACE_FSEEKO=1
+      fi
+    ])
+  fi
 ])
 
 dnl Code shared by fseeko and ftello.  Determine if large files are supported,
@@ -72,4 +62,12 @@ AC_DEFUN([gl_STDIN_LARGE_OFFSET],
 #endif]])],
         [gl_cv_var_stdin_large_offset=yes],
         [gl_cv_var_stdin_large_offset=no])])
+])
+
+# Prerequisites of lib/fseeko.c.
+AC_DEFUN([gl_PREREQ_FSEEKO],
+[
+  dnl Native Windows has the function _fseeki64. mingw hides it, but mingw64
+  dnl makes it usable again.
+  AC_CHECK_FUNCS([_fseeki64])
 ])

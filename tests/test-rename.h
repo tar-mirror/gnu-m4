@@ -1,5 +1,5 @@
 /* Test of rename() function.
-   Copyright (C) 2009-2011 Free Software Foundation, Inc.
+   Copyright (C) 2009-2013 Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -339,7 +339,7 @@ test_rename (int (*func) (char const *, char const *), bool print)
         errno = 0;
         ASSERT (func (BASE "dir2", BASE "dir/.") == -1);
         ASSERT (errno == EINVAL || errno == EBUSY || errno == EISDIR
-                || errno == ENOTEMPTY);
+                || errno == ENOTEMPTY || errno == EEXIST);
       }
       {
         errno = 0;
@@ -366,7 +366,7 @@ test_rename (int (*func) (char const *, char const *), bool print)
         errno = 0;
         ASSERT (func (BASE "dir2", BASE "dir/.//") == -1);
         ASSERT (errno == EINVAL || errno == EBUSY || errno == EISDIR
-                || errno == ENOTEMPTY);
+                || errno == ENOTEMPTY || errno == EEXIST);
       }
       {
         errno = 0;

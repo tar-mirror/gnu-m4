@@ -1,4 +1,4 @@
-/* Copyright (C) 1998-1999, 2001, 2005-2007, 2009-2011 Free Software
+/* Copyright (C) 1998-1999, 2001, 2005-2007, 2009-2013 Free Software
    Foundation, Inc.
    This file is derived from the one in the GNU C Library.
 
@@ -38,7 +38,11 @@
 /* Generate a unique temporary file name from XTEMPLATE.
    The last six characters of XTEMPLATE must be "XXXXXX";
    they are replaced with a string that makes the file name unique.
-   Then open the file and return a fd. */
+   Then open the file and return a fd.
+
+   If you are creating temporary files which will later be removed,
+   consider using the clean-temp module, which avoids several pitfalls
+   of using mkstemp directly. */
 int
 mkstemp (char *xtemplate)
 {

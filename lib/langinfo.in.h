@@ -1,5 +1,5 @@
 /* Substitute for and wrapper around <langinfo.h>.
-   Copyright (C) 2009-2011 Free Software Foundation, Inc.
+   Copyright (C) 2009-2013 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -12,15 +12,14 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software Foundation,
-   Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.  */
+   along with this program; if not, see <http://www.gnu.org/licenses/>.  */
 
 /*
  * POSIX <langinfo.h> for platforms that lack it or have an incomplete one.
  * <http://www.opengroup.org/onlinepubs/9699919799/basedefs/langinfo.h.html>
  */
 
-#ifndef _GL_LANGINFO_H
+#ifndef _@GUARD_PREFIX@_LANGINFO_H
 
 #if __GNUC__ >= 3
 @PRAGMA_SYSTEM_HEADER@
@@ -32,8 +31,8 @@
 # @INCLUDE_NEXT@ @NEXT_LANGINFO_H@
 #endif
 
-#ifndef _GL_LANGINFO_H
-#define _GL_LANGINFO_H
+#ifndef _@GUARD_PREFIX@_LANGINFO_H
+#define _@GUARD_PREFIX@_LANGINFO_H
 
 
 #if !@HAVE_LANGINFO_H@
@@ -173,5 +172,5 @@ _GL_WARN_ON_USE (nl_langinfo, "nl_langinfo is not portable - "
 #endif
 
 
-#endif /* _GL_LANGINFO_H */
-#endif /* _GL_LANGINFO_H */
+#endif /* _@GUARD_PREFIX@_LANGINFO_H */
+#endif /* _@GUARD_PREFIX@_LANGINFO_H */

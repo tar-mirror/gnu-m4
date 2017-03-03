@@ -1,6 +1,6 @@
-# fflush.m4 serial 8
+# fflush.m4 serial 15
 
-# Copyright (C) 2007-2011 Free Software Foundation, Inc.
+# Copyright (C) 2007-2013 Free Software Foundation, Inc.
 # This file is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
 # with or without modifications, as long as this notice is preserved.
@@ -12,13 +12,30 @@ dnl unread input on seekable streams, rather than C99 undefined semantics.
 
 AC_DEFUN([gl_FUNC_FFLUSH],
 [
+  AC_REQUIRE([gl_STDIO_H_DEFAULTS])
+  gl_FUNC_FFLUSH_STDIN
+  if test $gl_cv_func_fflush_stdin != yes; then
+    REPLACE_FFLUSH=1
+  fi
+])
+
+dnl Determine whether fflush works on input streams.
+dnl Sets gl_cv_func_fflush_stdin.
+
+AC_DEFUN([gl_FUNC_FFLUSH_STDIN],
+[
+  AC_CHECK_HEADERS_ONCE([unistd.h])
   AC_CACHE_CHECK([whether fflush works on input streams],
     [gl_cv_func_fflush_stdin],
     [echo hello world > conftest.txt
      AC_RUN_IFELSE([AC_LANG_PROGRAM(
        [[
 #include <stdio.h>
-#include <unistd.h>
+#if HAVE_UNISTD_H
+# include <unistd.h>
+#else /* on Windows with MSVC */
+# include <io.h>
+#endif
        ]], [[FILE *f = fopen ("conftest.txt", "r");
          char buffer[10];
          int fd;
@@ -55,27 +72,18 @@ AC_DEFUN([gl_FUNC_FFLUSH],
            return 7;
          return 0;
        ]])], [gl_cv_func_fflush_stdin=yes], [gl_cv_func_fflush_stdin=no],
-     [dnl Pessimistically assume fflush is broken.
-      gl_cv_func_fflush_stdin=no])
+     [gl_cv_func_fflush_stdin=cross])
      rm conftest.txt
     ])
-  if test $gl_cv_func_fflush_stdin = no; then
-    gl_REPLACE_FFLUSH
-  fi
-])
-
-AC_DEFUN([gl_REPLACE_FFLUSH],
-[
-  AC_LIBOBJ([fflush])
-  AC_REQUIRE([gl_STDIO_H_DEFAULTS])
-  REPLACE_FFLUSH=1
-  gl_PREREQ_FFLUSH
-  gl_REPLACE_FSEEKO
+  case $gl_cv_func_fflush_stdin in
+    yes) gl_func_fflush_stdin=1 ;;
+    no)  gl_func_fflush_stdin=0 ;;
+    *)   gl_func_fflush_stdin='(-1)' ;;
+  esac
+  AC_DEFINE_UNQUOTED([FUNC_FFLUSH_STDIN], [$gl_func_fflush_stdin],
+    [Define to 1 if fflush is known to work on stdin as per POSIX.1-2008,
+     0 if fflush is known to not work, -1 if unknown.])
 ])
 
 # Prerequisites of lib/fflush.c.
-AC_DEFUN([gl_PREREQ_FFLUSH],
-[
-  AC_REQUIRE([AC_C_INLINE])
-  :
-])
+AC_DEFUN([gl_PREREQ_FFLUSH], [:])

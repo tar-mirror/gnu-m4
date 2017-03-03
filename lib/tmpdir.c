@@ -1,4 +1,4 @@
-/* Copyright (C) 1999, 2001-2002, 2006, 2009-2011 Free Software Foundation,
+/* Copyright (C) 1999, 2001-2002, 2006, 2009-2013 Free Software Foundation,
    Inc.
    This file is part of the GNU C Library.
 
@@ -33,27 +33,35 @@
 
 #include <stdio.h>
 #ifndef P_tmpdir
-# define P_tmpdir "/tmp"
+# ifdef _P_tmpdir /* native Windows */
+#  define P_tmpdir _P_tmpdir
+# else
+#  define P_tmpdir "/tmp"
+# endif
 #endif
 
 #include <sys/stat.h>
+
+#if (defined _WIN32 || defined __WIN32__) && ! defined __CYGWIN__
+# define WIN32_LEAN_AND_MEAN  /* avoid including junk */
+# include <windows.h>
+#endif
+
+#include "pathmax.h"
 
 #if _LIBC
 # define struct_stat64 struct stat64
 #else
 # define struct_stat64 struct stat
+# define __libc_secure_getenv secure_getenv
 # define __xstat64(version, path, buf) stat (path, buf)
-#endif
-
-#if ! (HAVE___SECURE_GETENV || _LIBC)
-# define __secure_getenv getenv
 #endif
 
 /* Pathname support.
    ISSLASH(C)           tests whether C is a directory separator character.
  */
 #if defined _WIN32 || defined __WIN32__ || defined __CYGWIN__ || defined __EMX__ || defined __DJGPP__
-  /* Win32, Cygwin, OS/2, DOS */
+  /* Native Windows, Cygwin, OS/2, DOS */
 # define ISSLASH(C) ((C) == '/' || (C) == '\\')
 #else
   /* Unix */
@@ -81,6 +89,7 @@ path_search (char *tmpl, size_t tmpl_len, const char *dir, const char *pfx,
 {
   const char *d;
   size_t dlen, plen;
+  bool add_slash;
 
   if (!pfx || !pfx[0])
     {
@@ -96,7 +105,7 @@ path_search (char *tmpl, size_t tmpl_len, const char *dir, const char *pfx,
 
   if (try_tmpdir)
     {
-      d = __secure_getenv ("TMPDIR");
+      d = __libc_secure_getenv ("TMPDIR");
       if (d != NULL && direxists (d))
         dir = d;
       else if (dir != NULL && direxists (dir))
@@ -106,6 +115,19 @@ path_search (char *tmpl, size_t tmpl_len, const char *dir, const char *pfx,
     }
   if (dir == NULL)
     {
+#if (defined _WIN32 || defined __WIN32__) && ! defined __CYGWIN__
+      char dirbuf[PATH_MAX];
+      DWORD retval;
+
+      /* Find Windows temporary file directory.
+         We try this before P_tmpdir because Windows defines P_tmpdir to "\\"
+         and will therefore try to put all temporary files in the root
+         directory (unless $TMPDIR is set).  */
+      retval = GetTempPath (PATH_MAX, dirbuf);
+      if (retval > 0 && retval < PATH_MAX && direxists (dirbuf))
+        dir = dirbuf;
+      else
+#endif
       if (direxists (P_tmpdir))
         dir = P_tmpdir;
       else if (strcmp (P_tmpdir, "/tmp") != 0 && direxists ("/tmp"))
@@ -118,16 +140,20 @@ path_search (char *tmpl, size_t tmpl_len, const char *dir, const char *pfx,
     }
 
   dlen = strlen (dir);
-  while (dlen >= 1 && ISSLASH (dir[dlen - 1]))
-    dlen--;                     /* remove trailing slashes */
+#ifdef __VMS
+  add_slash = 0;
+#else
+  add_slash = dlen != 0 && !ISSLASH (dir[dlen - 1]);
+#endif
 
   /* check we have room for "${dir}/${pfx}XXXXXX\0" */
-  if (tmpl_len < dlen + 1 + plen + 6 + 1)
+  if (tmpl_len < dlen + add_slash + plen + 6 + 1)
     {
       __set_errno (EINVAL);
       return -1;
     }
 
-  sprintf (tmpl, "%.*s/%.*sXXXXXX", (int) dlen, dir, (int) plen, pfx);
+  memcpy (tmpl, dir, dlen);
+  sprintf (tmpl + dlen, &"/%.*sXXXXXX"[!add_slash], (int) plen, pfx);
   return 0;
 }

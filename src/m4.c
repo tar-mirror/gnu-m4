@@ -1,6 +1,6 @@
 /* GNU m4 -- A simple macro processor
 
-   Copyright (C) 1989-1994, 2004-2011 Free Software Foundation, Inc.
+   Copyright (C) 1989-1994, 2004-2013 Free Software Foundation, Inc.
 
    This file is part of GNU M4.
 
@@ -99,6 +99,7 @@ m4_error (int status, int errnum, const char *format, ...)
                   current_line, format, args);
   if (fatal_warnings && ! retcode)
     retcode = EXIT_FAILURE;
+  va_end (args);
 }
 
 /*-------------------------------.
@@ -114,6 +115,7 @@ m4_error_at_line (int status, int errnum, const char *file, int line,
   verror_at_line (status, errnum, line ? file : NULL, line, format, args);
   if (fatal_warnings && ! retcode)
     retcode = EXIT_FAILURE;
+  va_end (args);
 }
 
 #ifndef SIGBUS
@@ -138,7 +140,7 @@ static const char * volatile signal_message[NSIG];
    must be aysnc-signal safe, since it is executed as a signal
    handler.  If SIGNO is zero, this represents a stack overflow; in
    that case, we return to allow c_stack_action to handle things.  */
-static void
+static void M4_GNUC_PURE
 fault_handler (int signo)
 {
   if (signo)

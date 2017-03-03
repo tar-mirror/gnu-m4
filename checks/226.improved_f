@@ -1,4 +1,4 @@
-dnl @ ../doc/m4.texinfo:8269: Origin of test
+dnl @ ../doc/m4.texi:8298: Origin of test
 dnl @ expected status: 0
 dnl @ extra options:  -Dlimit=10 -Dverbose -Dalt=4
 dnl @ Copyright (C) 2006, 2007, 2008, 2009 Free Software

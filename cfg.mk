@@ -1,5 +1,5 @@
 # Customize maint.mk.                           -*- makefile -*-
-# Copyright (C) 2003-2011 Free Software Foundation, Inc.
+# Copyright (C) 2003-2013 Free Software Foundation, Inc.
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -28,17 +28,20 @@ local-checks-to-skip =
 local-checks-to-skip += sc_bindtextdomain
 # M4 intentionally uses a coding style that compiles under C++.
 local-checks-to-skip += sc_cast_of_x_alloc_return_value
-# sc_copyright_check is currently broken for multi-line copyrights.
-local-checks-to-skip += sc_copyright_check
 
 # Our files include "m4.h", which in turn includes <config.h> first.
 config_h_header = "m4\.h"
 
 # Hash of NEWS contents, to ensure we don't add entries to wrong section.
-old_NEWS_hash = cd89f6716f741756751054c484b7044b
+old_NEWS_hash = 345b93b3900db54f6bab85e3da153b38
 
 # Indent only with spaces.
 sc_prohibit_tab_based_indentation:
  @re='^ *    '                                               \
  msg='TAB in indentation; use only spaces'                   \
    $(_prohibit_regexp)
+
+# List all syntax-check exemptions:
+exclude_file_name_regexp--sc_prohibit_tab_based_indentation = \
+  (^(GNU)?Makefile(\.am)?|\.mk|^HACKING|^ChangeLog.*)$$
+exclude_file_name_regexp--update-copyright = ^m4/gnulib-cache.m4$$

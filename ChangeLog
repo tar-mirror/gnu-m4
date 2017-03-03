@@ -1,3 +1,250 @@
+2013-09-15  Gary V. Vaughan  <gary@gnu.org>
+
+	configury: specify subdir-objects for future automake releases.
+	Latest automake warns about future incompatibility if
+	subdir-objects is not specified by AM_INIT_AUTOMAKE.
+	* configure.ac (AM_INIT_AUTOMAKE): Add subdir-objects.
+
+	bootstrap: require newer texinfo release.
+	* bootstrap.conf (buildreq): Bump required makeinfo binary
+	release number to 4.13 to support --bulid-dir option.
+
+	bootstrap: don't double-specify --no-changelog to gnulib-tool.
+	* bootstrap.conf (gnulib_tool_option_extras): Rename from
+	this...
+	(gnulib_tool_options): ...this, and append options rather than
+	overwrite.
+
+	bootstrap: sync with upstream.
+	* gl/build-aux/bootstrap.in, gl/build-aux/extract-trace,
+	gl/build-aux/funclib.sh, gl/build-aux/options-parser: Update
+	from upstream to pick up recent improvements.
+	* bootstrap: Regenerate.
+
+2013-08-17  Michael Witten  <mfwitten@gmail.com>  (tiny change)
+
+	Clean up documentation
+	* doc/m4.texinfo: Note that m4 is mostly compatible with SVR4.
+
+2013-08-17  Eric Blake  <eblake@redhat.com>
+
+	maint: update to latest gnulib
+	* gnulib: Update to latest, for various fixes.
+
+2013-04-18  Eric Blake  <eblake@redhat.com>
+
+	maint: update to latest gnulib
+	* gnulib: Update to latest, for regex fixes.
+
+2013-03-15  Eric Blake  <eblake@redhat.com>
+
+	build: avoid test failure on HPUX
+	* doc/m4.texi (Command line files): Skip tests on systems where it
+	is impossible to start with stdin/out closed.
+	Reported by Gary V. Vaughan.
+
+2013-03-12  Eric Blake  <eblake@redhat.com>
+
+	maint: update to latest gnulib
+	* gnulib: Update to latest, for mingw compile fixes.
+
+2013-03-11  Eric Blake  <eblake@redhat.com>
+
+	build: fix large diversions on mingw
+	* gl/lib/clean-temp.c.diff: New file.
+	* NEWS: Mention the fix.
+
+2013-03-08  Gary V. Vaughan  <gary@gnu.org>
+
+	bootstrap: remove reintroduced CVS cruft.
+	* bootstrap.conf (m4_ignore_gnulib_ignore): Remove.
+	The code this was factored from was removed between making the
+	bootstrap branch, and merging, so this function is actually
+	obsolete.
+
+	maint: automake 1.11.5 and earlier generate insecure dist
+	rules.
+	* configure.ac (AM_INIT_AUTOMAKE): Require 1.11.5 or newer.
+
+2010-09-17  Gary V. Vaughan  <gary@gnu.org>
+
+	bootstrap: upgrade to canonical upstream version.
+	* bootstrap.conf: New file to configure gnulib bootstrap.
+	* gl: New gnulib overrides directory.
+	* gl/modules/bootstrap, gl/modules/extract-trace,
+	gl/modules/funclib.sh, gl/modules/inline-source,
+	gl/modules/options-parser: Import canonical bootstrap modules.
+	* gl/build-aux/bootstrap.in, gl/build-aux/extract-trace,
+	gl/build-aux/funclib.sh, gl/build-aix/inline-source,
+	gl/build-aux/options-parser: Import module implementations.
+	* bootstrap: Regenerate.
+	* m4/gnulib-cache.m4: Regenerate.
+
+2013-01-02  Eric Blake  <eblake@redhat.com>
+
+	maint: automake recommends *.texi now
+	* doc/m4.texinfo: Move...
+	* doc/m4.texi: ...here, for the eventual automake 1.14.
+	* HACKING: Reflect the rename.
+	* doc/Makefile.am (info_TEXINFOS): Likewise.
+	* checks/Makefile.am ($(srcdir)/stamp-checks): Likewise.
+
+2013-01-01  Eric Blake  <eblake@redhat.com>
+
+	maint: bump copyright year
+	* all files: Version control now has a commit in 2013.
+
+	maint: update to latest gnulib
+	* gnulib: Update to latest, for rational range regex, build fixes,
+	copyright update.
+	* NEWS: Document this.
+
+2012-12-22  Eric Blake  <eblake@redhat.com>
+
+	maint: enable tight_scope syntax check
+	* src/Makefile.am (m4_SOURCES): Move m4.h...
+	(noinst_HEADERS): ...into separate listing for syntax check.
+	* src/m4.h: Add 'extern' to function declarations.
+	(expansion_level): Declare extern variable here...
+	* src/debug.c: ...not here.
+
+	maint: move syntax check exemptions into cfg.mk
+	* .x-sc_prohibit_tab_based_indentation: Delete file.
+	* .x-update-copyright: Likewise.
+	* Makefile.am (syntax_check_exceptions): Delete rule.
+	* cfg.mk (exclude_file_name_regexp): Move exemptions here.
+	(local-checks-to-skip): Re-enable copyright check.
+
+	build: update to latest gnulib
+	* gnulib: Update to latest.
+
+2012-11-19  Eric Blake  <eblake@redhat.com>
+
+	build: avoid problematic gcc 4.4 warnings
+	* configure.ac (nw): Disable gcc warnings that cause build
+	failures under RHEL 6.3.
+	* gnulib: Update to latest.
+
+2012-11-14  Paul Eggert  <eggert@cs.ucla.edu>
+
+	doc: improve prehistory discussion
+	* doc/m4.texinfo (History): Describe M6 and related processors.
+	From a suggestion by Doug McIlroy in
+	<http://lists.gnu.org/archive/html/m4-discuss/2012-05/msg00004.html>.
+	Also, improve citation quality by giving URLs and so forth.
+
+2012-09-21  Eric Blake  <eblake@redhat.com>
+
+	maint: drop more CVS cruft
+	* bootstrap (Version control): Don't generate .cvsignore or
+	prepopulate m4/.gitignore.
+	* .gitignore: Allow m4/gnulib-cache.m4 manually.
+
+2012-09-06  Eric Blake  <eblake@redhat.com>
+
+	maint: enable gcc warnings during git development
+	* configure.ac (gl_gcc_warnings): Alter default based on environment.
+
+2012-09-05  Stefanno Lattarini  <stefano.lattarini@gmail.com>  (tiny change)
+
+	maint: convert the last hand-written Makefile to automake
+	* checks/Makefile.in: Rename ...
+	* checks/Makefile.am: ... like this, and simplify and adjust to
+	make it proper as Automake input.
+
+2012-09-04  Eric Blake  <eblake@redhat.com>
+
+	maint: merge gitignore files
+	* build-aux/.gitignore: Delete.
+	* checks/.gitignore: Likewise.
+	* doc/.gitignore: Likewise.
+	* examples/.gitignore: Likewise.
+	* src/.gitignore: Likewise.
+	* .gitignore: Cover rules from deleted files.
+
+	maint: drop CVS cruft
+	* .cvsignore: Remove.
+	* build-aux/.cvsignore: Likewise.
+	* checks/.cvsignore: Likewise.
+	* doc/.cvsignore: Likewise.
+	* examples/.cvsignore: Likewise.
+	* src/.cvsignore: Likewise.
+
+	build: add more compiler checking
+	* configure.ac (nw): Turn on some warnings that no longer trigger
+	a gcc warning, or where we reduce the scope of unwarned code.
+	* src/m4.h (progname): Drop redundant declaration.
+	* src/builtin.c (includes): Use header for program_name.
+
+	build: pick up latest gnulib fixes
+	* gnulib: Update to latest.
+	* m4/gnulib-cache.m4: Regenerate.
+	* missing: Break symlink in order to work around automake version
+	mismatch issue.
+	* .gitignore: Update.
+	* .cvsignore: Likewise.
+
+	build: mark several pure functions
+	* src/m4.h (M4_GNUC_PURE): New macro.
+	* src/m4.c (fault_handler): Mark pure.
+	* src/builtin.c (find_builtin_by_addr, find_builtin_by_name):
+	Likewise.
+	* src/symtab.c (hash): Likewise.
+
+2012-09-01  Eric Blake  <eblake@redhat.com>
+
+	build: silence gcc warning
+	* configure.ac (M4_cv_gcc_pragma_push_works): New test.
+	(-Wformat-nonliteral): Disable for older gcc.
+	* src/format.c (expand_format): Mark our only uses of nonliteral
+	format as being safe.
+
+	doc: fix misuse of @xref
+	* doc/m4.texinfo (Inhibiting Invocation): Reword.
+
+2012-07-21  Eric Blake  <eblake@redhat.com>
+
+	bootstrap: avoid undefined variables
+	* bootstrap (func_fatal_error, func_usage, func_help)
+	(func_version): Use constants, not undefined variables; propagate
+	any write failures.
+	(func_missing_arg): Drop duplicate declaration.  Preinitialize
+	exit_cmd.
+	Reported by Stefano Lattarini.
+
+2012-06-26  Eric Blake  <eblake@redhat.com>
+
+	build: get missing from automake, not gnulib
+	* build-aux/missing: Break link to gnulib.
+	* .gitignore: Reflect this.
+
+2012-06-25  Eric Blake  <eblake@redhat.com>
+
+	maint: update copyright year
+	* all files: Run 'make update-copyright'.
+
+	build: deal with newer glibc vs. FORTIFY_SOURCE
+	* configure.ac (FORTIFY_SOURCE): Make conditional on optimization.
+
+2011-05-02  Eric Blake  <eblake@redhat.com>
+
+	build: pick up latest gnulib fixes
+	* gnulib: Update to latest, for fclose improvements.
+
+2011-04-30  Eric Blake  <eblake@redhat.com>
+
+	build: improve SIGPIPE emulation on mingw
+	* gnulib: Update to latest.
+	* m4/gnulib-cache.m4: Import sigpipe module, drop strtol.
+
+2011-04-29  Eric Blake  <eblake@redhat.com>
+
+	m4_defn: avoid compiler warning
+	* src/builtin.c (m4_defn): Nuke redundant condition.
+
+	m4_error: fix missing va_end
+	* src/m4.c (m4_error, m4_error_at_line): Add missing va_end.
+
 2011-03-01  Eric Blake  <eblake@redhat.com>
 
 	Release Version 1.4.16.
@@ -5297,8 +5544,8 @@ Mon Jan 22 21:08:52 1990  Rene' Seindal (seindal at diku.dk)
 	coding: utf-8
 	End:
 
-	Copyright (C) 1990-1994, 2000-2001, 2003, 2005-2011 Free Software
-	Foundation, Inc.
+	Copyright (C) 1990-1994, 2000-2001, 2003, 2005-2013 Free
+	Software Foundation, Inc.
 
 	Copying and distribution of this file, with or without
 	modification, are permitted provided the copyright notice

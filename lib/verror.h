@@ -1,5 +1,5 @@
 /* Declaration for va_list error-reporting function
-   Copyright (C) 2006-2007, 2009-2011 Free Software Foundation, Inc.
+   Copyright (C) 2006-2007, 2009-2013 Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -17,34 +17,35 @@
 #ifndef _VERROR_H
 #define _VERROR_H 1
 
-#include "error.h"
 #include <stdarg.h>
+
+#include "error.h" /* for _GL_ATTRIBUTE_FORMAT */
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/* Print a message with `vfprintf (stderr, FORMAT, ARGS)';
+/* Print a message with 'vfprintf (stderr, FORMAT, ARGS)';
    if ERRNUM is nonzero, follow it with ": " and strerror (ERRNUM).
-   If STATUS is nonzero, terminate the program with `exit (STATUS)'.
+   If STATUS is nonzero, terminate the program with 'exit (STATUS)'.
    Use the globals error_print_progname and error_message_count similarly
    to error().  */
 
 extern void verror (int __status, int __errnum, const char *__format,
                     va_list __args)
-     __attribute__ ((__format__ (__printf__, 3, 0)));
+     _GL_ATTRIBUTE_FORMAT ((__printf__, 3, 0));
 
-/* Print a message with `vfprintf (stderr, FORMAT, ARGS)';
+/* Print a message with 'vfprintf (stderr, FORMAT, ARGS)';
    if ERRNUM is nonzero, follow it with ": " and strerror (ERRNUM).
-   If STATUS is nonzero, terminate the program with `exit (STATUS)'.
-   If FNAME is not NULL, prepend the message with `FNAME:LINENO:'.
+   If STATUS is nonzero, terminate the program with 'exit (STATUS)'.
+   If FNAME is not NULL, prepend the message with "FNAME:LINENO:".
    Use the globals error_print_progname, error_message_count, and
    error_one_per_line similarly to error_at_line().  */
 
 extern void verror_at_line (int __status, int __errnum, const char *__fname,
                             unsigned int __lineno, const char *__format,
                             va_list __args)
-     __attribute__ ((__format__ (__printf__, 5, 0)));
+     _GL_ATTRIBUTE_FORMAT ((__printf__, 5, 0));
 
 #ifdef __cplusplus
 }

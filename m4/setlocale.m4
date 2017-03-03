@@ -1,5 +1,5 @@
-# setlocale.m4 serial 1
-dnl Copyright (C) 2011 Free Software Foundation, Inc.
+# setlocale.m4 serial 4
+dnl Copyright (C) 2011-2013 Free Software Foundation, Inc.
 dnl This file is free software; the Free Software Foundation
 dnl gives unlimited permission to copy and/or distribute it,
 dnl with or without modifications, as long as this notice is preserved.
@@ -12,12 +12,14 @@ AC_DEFUN([gl_FUNC_SETLOCALE],
     dnl On native Windows systems, setlocale(category,NULL) does not look at
     dnl the environment variables LC_ALL, category, and LANG.
     mingw*) REPLACE_SETLOCALE=1 ;;
+    dnl On Cygwin 1.5.x, setlocale always succeeds but setlocale(LC_CTYPE,NULL)
+    dnl is then still "C".
+    cygwin*)
+      case `uname -r` in
+        1.5.*) REPLACE_SETLOCALE=1 ;;
+      esac
+      ;;
   esac
-  if test $REPLACE_SETLOCALE = 1; then
-    gl_REPLACE_LOCALE_H
-    AC_LIBOBJ([setlocale])
-    gl_PREREQ_SETLOCALE
-  fi
 ])
 
 # Prerequisites of lib/setlocale.c.
