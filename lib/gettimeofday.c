@@ -1,7 +1,6 @@
 /* Provide gettimeofday for systems that don't have it or for which it's broken.
 
-   Copyright (C) 2001, 2002, 2003, 2005, 2006, 2007 Free Software
-   Foundation, Inc.
+   Copyright (C) 2001-2003, 2005-2007, 2009-2010 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -101,7 +100,7 @@ rpl_tzset (void)
    causes problems.  */
 
 int
-rpl_gettimeofday (struct timeval *restrict tv, void *restrict tz)
+gettimeofday (struct timeval *restrict tv, void *restrict tz)
 {
 #undef gettimeofday
 #if HAVE_GETTIMEOFDAY
@@ -111,7 +110,7 @@ rpl_gettimeofday (struct timeval *restrict tv, void *restrict tz)
   struct tm save = *localtime_buffer_addr;
 # endif
 
-  int result = gettimeofday (tv, tz);
+  int result = gettimeofday (tv, (struct timezone *) tz);
 
 # if GETTIMEOFDAY_CLOBBERS_LOCALTIME
   *localtime_buffer_addr = save;

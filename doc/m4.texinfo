@@ -44,12 +44,12 @@ This manual (@value{UPDATED}) is for @acronym{GNU} M4 (version
 language.
 
 Copyright @copyright{} 1989, 1990, 1991, 1992, 1993, 1994, 2004, 2005,
-2006, 2007, 2008, 2009 Free Software Foundation, Inc.
+2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
 
 @quotation
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the @acronym{GNU} Free Documentation License,
-Version 1.2 or any later version published by the Free Software
+Version 1.3 or any later version published by the Free Software
 Foundation; with no Invariant Sections, no Front-Cover Texts, and no
 Back-Cover Texts.  A copy of the license is included in the section
 entitled ``@acronym{GNU} Free Documentation License.''
@@ -399,7 +399,7 @@ released 1.4.3 and 1.4.4.  And in 2006, Eric Blake joined the team and
 prepared patches for the release of 1.4.5, 1.4.6, 1.4.7, and 1.4.8.
 More bug fixes were incorporated in 2007, with releases 1.4.9 and
 1.4.10.  Eric continued with some portability fixes for 1.4.11 and
-1.4.12 in 2008, and 1.4.13 in 2009.
+1.4.12 in 2008, 1.4.13 in 2009, and 1.4.14 in 2010.
 
 Meanwhile, development has continued on new features for @code{m4}, such
 as dynamic module loading and additional builtins.  When complete,
@@ -960,6 +960,51 @@ options.
 @example
 @error{}m4: cannot open `Makefile/': Not a directory
 @end example
+
+@comment Test that closed stderr does not cause a crash.  Not all
+@comment systems have the same message for EBADF.
+
+@comment xerr: ignore
+@example
+ifdef(`__unix__', ,
+      `errprint(` skipping: syscmd does not have unix semantics
+')m4exit(`77')')dnl
+changequote(`[', `]')dnl
+syscmd([echo | ']__program__[' >&-])dnl
+@error{}m4: write error: Bad file descriptor
+sysval
+@result{}1
+@end example
+
+@example
+ifdef(`__unix__', ,
+      `errprint(` skipping: syscmd does not have unix semantics
+')m4exit(`77')')dnl
+changequote(`[', `]')dnl
+syscmd([echo 'esyscmd(echo hi >&2 && echo err"print(bye
+)d"nl)dnl' > tmp.m4 \
+  && ']__program__[' tmp.m4 <&- >&- \
+  && rm tmp.m4])sysval
+@error{}hi
+@error{}bye
+@result{}0
+@end example
+
+@comment Test that we obey POSIX semantics with -D interspersed with
+@comment files, even with POSIXLY_CORRECT (BSD getopt gets it wrong).
+
+$ @kbd{m4 }
+@example
+ifdef(`__unix__', ,
+      `errprint(` skipping: syscmd does not have unix semantics
+')m4exit(`77')')dnl
+changequote(`[', `]')dnl
+syscmd([POSIXLY_CORRECT=1 ']__program__[' -Dbar=hello foo -Dbar=world foo])dnl
+@result{}hello
+@result{}world
+sysval
+@result{}0
+@end example
 @end ignore
 
 @node Syntax
@@ -1223,13 +1268,15 @@ whitespace so that less whitespace is output (which, although harmless
 to shell scripts, can be visually unappealing), and fixes the quoting
 issues so that the capitalization occurs when the macro
 @samp{gl_STRING_MODULE_INDICATOR} is invoked, rather then when it is
-defined.
+defined.  It also adds another layer of quoting to the first argument of
+@code{translit}, to ensure that the output will be rescanned as a string
+rather than a potential uppercase macro name needing further expansion.
 
 @example
 changequote([,])dnl
 define([gl_STRING_MODULE_INDICATOR],
   [dnl comment
-  GNULIB_[]translit([$1], [a-z], [A-Z])=1dnl
+  GNULIB_[]translit([[$1]], [a-z], [A-Z])=1dnl
 ])dnl
   gl_STRING_MODULE_INDICATOR([strcase])
 @result{}    GNULIB_STRCASE=1
@@ -1238,7 +1285,7 @@ define([gl_STRING_MODULE_INDICATOR],
 The parsing of the first line is unchanged.  The second line sees the
 name of the macro to define, then sees the discarded @samp{@key{NL}}
 and two spaces, as before.  But this time, the next token is
-@samp{[dnl comment@key{NL}@ @ GNULIB_[]translit([$1], [a-z],
+@samp{[dnl comment@key{NL}@ @ GNULIB_[]translit([[$1]], [a-z],
 [A-Z])=1dnl@key{NL}]}, which includes nested quotes, followed by
 @samp{)} to end the macro definition and @samp{dnl} to skip the
 newline.  No early expansion of @code{translit} occurs, so the entire
@@ -1255,10 +1302,11 @@ output literally.  The token @samp{[]} is an empty string, so it does
 not affect output.  Then the token @samp{translit} is encountered.
 
 This time, the arguments to @code{translit} are parsed as @samp{(},
-@samp{[strcase]}, @samp{,}, @samp{ }, @samp{[a-z]}, @samp{,}, @samp{ },
+@samp{[[strcase]]}, @samp{,}, @samp{ }, @samp{[a-z]}, @samp{,}, @samp{ },
 @samp{[A-Z]}, and @samp{)}.  The two spaces are discarded, and the
-translit results in the desired result @samp{STRCASE}.  This is
-rescanned, but since it is not a macro name, it is output literally.
+translit results in the desired result @samp{[STRCASE]}.  This is
+rescanned, but since it is a string, the quotes are stripped and the
+only output is a literal @samp{STRCASE}.
 Then the scanner sees @samp{=} and @samp{1}, which are output
 literally, followed by @samp{dnl} which discards the rest of the
 definition of @code{gl_STRING_MODULE_INDICATOR}.  The newline at the
@@ -5090,17 +5138,16 @@ time.
 
 @cindex @env{TMPDIR}
 Numbered diversions are counted from 0 upwards, diversion number 0
-being the normal output stream.  The number of simultaneous diversions
-is limited mainly by the memory used to describe them, because @acronym{GNU}
+being the normal output stream.  @acronym{GNU}
 @code{m4} tries to keep diversions in memory.  However, there is a
-limit to the overall memory usable by all diversions taken altogether
+limit to the overall memory usable by all diversions taken together
 (512K, currently).  When this maximum is about to be exceeded,
 a temporary file is opened to receive the contents of the biggest
 diversion still in memory, freeing this memory for other diversions.
 When creating the temporary file, @code{m4} honors the value of the
 environment variable @env{TMPDIR}, and falls back to @file{/tmp}.
-So, it is theoretically possible that the number and aggregate size of
-diversions is limited only by available disk space.
+Thus, the amount of available disk space provides the only real limit on
+the number and aggregate size of diversions.
 
 @ignore
 @comment We need to test spilled diversions, but don't need to expose
@@ -6616,10 +6663,10 @@ esyscmd(`false')
 @result{}
 ifelse(sysval, `0', `zero', `non-zero')
 @result{}non-zero
-esyscmd(`exit 2')
+esyscmd(`echo dnl && exit 127')
 @result{}
 sysval
-@result{}2
+@result{}127
 esyscmd(`true')
 @result{}
 sysval
@@ -6630,7 +6677,7 @@ sysval
 command, for example, if the system-imposed argument length is exceeded,
 or if there were not enough resources to fork.  It is not possible to
 distinguish between failed execution and successful execution that had
-an exit status of 127.
+an exit status of 127, unless there was output from the child process.
 
 On UNIX platforms, where it is possible to detect when command execution
 is terminated by a signal, rather than a normal exit, the result is the
@@ -8501,7 +8548,7 @@ string.  In turn, that means the replacement text has unbalanced quotes,
 necessitating another round of @code{changequote}.
 
 In the fixed version below, (also shipped as
-@file{m4-@value{VERSION}/@/examples/@/capitalize.m4}), @code{capitalize}
+@file{m4-@value{VERSION}/@/examples/@/capitalize2.m4}), @code{capitalize}
 uses the alternate quotes of @samp{<<[} and @samp{]>>} (the longer
 strings are chosen so as to be less likely to appear in the text being
 converted).  The helpers @code{_to_alt} and @code{_from_alt} merely

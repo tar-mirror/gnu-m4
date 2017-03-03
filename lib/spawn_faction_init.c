@@ -1,4 +1,4 @@
-/* Copyright (C) 2000 Free Software Foundation, Inc.
+/* Copyright (C) 2000, 2009, 2010 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    This program is free software: you can redistribute it and/or modify
@@ -33,7 +33,7 @@ __posix_spawn_file_actions_realloc (posix_spawn_file_actions_t *file_actions)
 {
   int newalloc = file_actions->_allocated + 8;
   void *newmem = realloc (file_actions->_actions,
-			  newalloc * sizeof (struct __spawn_action));
+                          newalloc * sizeof (struct __spawn_action));
 
   if (newmem == NULL)
     /* Not enough memory.  */

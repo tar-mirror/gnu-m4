@@ -1,5 +1,5 @@
 /* Test of strsignal() function.
-   Copyright (C) 2008 Free Software Foundation, Inc.
+   Copyright (C) 2008, 2009, 2010 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -19,22 +19,14 @@
 
 #include <config.h>
 
-#include <signal.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 
-#define ASSERT(expr) \
-  do									     \
-    {									     \
-      if (!(expr))							     \
-        {								     \
-          fprintf (stderr, "%s:%d: assertion failed\n", __FILE__, __LINE__); \
-          fflush (stderr);						     \
-          abort ();							     \
-        }								     \
-    }									     \
-  while (0)
+#include "signature.h"
+SIGNATURE_CHECK (strsignal, char *, (int));
+
+#include <signal.h>
+
+#include "macros.h"
 
 #if HAVE_DECL_SYS_SIGLIST
 # define ASSERT_DESCRIPTION(got, expect)
@@ -44,7 +36,7 @@
 #endif
 
 int
-main (int argc, char **argv)
+main (void)
 {
   /* Work around bug in cygwin 1.5.25 <string.h> by declaring str as
      const char *, even though strsignal is supposed to return char *.

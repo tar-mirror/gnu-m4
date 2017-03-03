@@ -1,7 +1,7 @@
 /* GNU m4 -- A simple macro processor
 
-   Copyright (C) 1991, 1992, 1993, 1994, 2004, 2006, 2007 Free Software
-   Foundation, Inc.
+   Copyright (C) 1991, 1992, 1993, 1994, 2004, 2006, 2007, 2009, 2010
+   Free Software Foundation, Inc.
 
    This file is part of GNU M4.
 
@@ -47,7 +47,7 @@ debug_init (void)
 
 /*-----------------------------------------------------------------.
 | Function to decode the debugging flags OPTS.  Used by main while |
-| processing option -d, and by the builtin debugmode ().	   |
+| processing option -d, and by the builtin debugmode ().           |
 `-----------------------------------------------------------------*/
 
 int
@@ -60,57 +60,57 @@ debug_decode (const char *opts)
   else
     {
       for (level = 0; *opts; opts++)
-	{
-	  switch (*opts)
-	    {
-	    case 'a':
-	      level |= DEBUG_TRACE_ARGS;
-	      break;
+        {
+          switch (*opts)
+            {
+            case 'a':
+              level |= DEBUG_TRACE_ARGS;
+              break;
 
-	    case 'e':
-	      level |= DEBUG_TRACE_EXPANSION;
-	      break;
+            case 'e':
+              level |= DEBUG_TRACE_EXPANSION;
+              break;
 
-	    case 'q':
-	      level |= DEBUG_TRACE_QUOTE;
-	      break;
+            case 'q':
+              level |= DEBUG_TRACE_QUOTE;
+              break;
 
-	    case 't':
-	      level |= DEBUG_TRACE_ALL;
-	      break;
+            case 't':
+              level |= DEBUG_TRACE_ALL;
+              break;
 
-	    case 'l':
-	      level |= DEBUG_TRACE_LINE;
-	      break;
+            case 'l':
+              level |= DEBUG_TRACE_LINE;
+              break;
 
-	    case 'f':
-	      level |= DEBUG_TRACE_FILE;
-	      break;
+            case 'f':
+              level |= DEBUG_TRACE_FILE;
+              break;
 
-	    case 'p':
-	      level |= DEBUG_TRACE_PATH;
-	      break;
+            case 'p':
+              level |= DEBUG_TRACE_PATH;
+              break;
 
-	    case 'c':
-	      level |= DEBUG_TRACE_CALL;
-	      break;
+            case 'c':
+              level |= DEBUG_TRACE_CALL;
+              break;
 
-	    case 'i':
-	      level |= DEBUG_TRACE_INPUT;
-	      break;
+            case 'i':
+              level |= DEBUG_TRACE_INPUT;
+              break;
 
-	    case 'x':
-	      level |= DEBUG_TRACE_CALLID;
-	      break;
+            case 'x':
+              level |= DEBUG_TRACE_CALLID;
+              break;
 
-	    case 'V':
-	      level |= DEBUG_TRACE_VERBOSE;
-	      break;
+            case 'V':
+              level |= DEBUG_TRACE_VERBOSE;
+              break;
 
-	    default:
-	      return -1;
-	    }
-	}
+            default:
+              return -1;
+            }
+        }
     }
 
   /* This is to avoid screwing up the trace output due to changes in the
@@ -121,11 +121,11 @@ debug_decode (const char *opts)
   return level;
 }
 
-/*------------------------------------------------------------------------.
-| Change the debug output stream to FP.  If the underlying file is the	  |
-| same as stdout, use stdout instead so that debug messages appear in the |
-| correct relative position.						  |
-`------------------------------------------------------------------------*/
+/*-----------------------------------------------------------------.
+| Change the debug output stream to FP.  If the underlying file is |
+| the same as stdout, use stdout instead so that debug messages    |
+| appear in the correct relative position.                         |
+`-----------------------------------------------------------------*/
 
 static void
 debug_set_file (FILE *fp)
@@ -143,24 +143,24 @@ debug_set_file (FILE *fp)
   if (debug != NULL && debug != stdout)
     {
       if (fstat (STDOUT_FILENO, &stdout_stat) < 0)
-	return;
+        return;
       if (fstat (fileno (debug), &debug_stat) < 0)
-	return;
+        return;
 
       /* mingw has a bug where fstat on a regular file reports st_ino
-	 of 0.  On normal system, st_ino should never be 0.  */
+         of 0.  On normal system, st_ino should never be 0.  */
       if (stdout_stat.st_ino == debug_stat.st_ino
-	  && stdout_stat.st_dev == debug_stat.st_dev
-	  && stdout_stat.st_ino != 0)
-	{
-	  if (debug != stderr && close_stream (debug) != 0)
-	    {
-	      M4ERROR ((warning_status, errno,
-			"error writing to debug stream"));
-	      retcode = EXIT_FAILURE;
-	    }
-	  debug = stdout;
-	}
+          && stdout_stat.st_dev == debug_stat.st_dev
+          && stdout_stat.st_ino != 0)
+        {
+          if (debug != stderr && close_stream (debug) != 0)
+            {
+              M4ERROR ((warning_status, errno,
+                        "error writing to debug stream"));
+              retcode = EXIT_FAILURE;
+            }
+          debug = stdout;
+        }
     }
 }
 
@@ -195,11 +195,11 @@ debug_flush_files (void)
     }
 }
 
-/*-------------------------------------------------------------------------.
-| Change the debug output to file NAME.  If NAME is NULL, debug output is  |
-| reverted to stderr, and if empty debug output is discarded.  Return true |
-| iff the output stream was changed.					   |
-`-------------------------------------------------------------------------*/
+/*--------------------------------------------------------------.
+| Change the debug output to file NAME.  If NAME is NULL, debug |
+| output is reverted to stderr, and if empty, debug output is   |
+| discarded.  Return true iff the output stream was changed.    |
+`--------------------------------------------------------------*/
 
 bool
 debug_set_output (const char *name)
@@ -214,19 +214,20 @@ debug_set_output (const char *name)
     {
       fp = fopen (name, "a");
       if (fp == NULL)
-	return false;
+        return false;
 
       if (set_cloexec_flag (fileno (fp), true) != 0)
-	M4ERROR ((warning_status, errno,
-		  "Warning: cannot protect debug file across forks"));
+        M4ERROR ((warning_status, errno,
+                  "Warning: cannot protect debug file across forks"));
       debug_set_file (fp);
     }
   return true;
 }
 
-/*-----------------------------------------------------------------------.
-| Print the header of a one-line debug message, starting by "m4 debug".	 |
-`-----------------------------------------------------------------------*/
+/*--------------------------------------------------------------.
+| Print the header of a one-line debug message, starting by "m4 |
+| debug".                                                       |
+`--------------------------------------------------------------*/
 
 void
 debug_message_prefix (void)
@@ -248,11 +249,11 @@ debug_message_prefix (void)
    output from interfering with other debug messages generated by the
    various builtins.  */
 
-/*---------------------------------------------------------------------.
-| Tracing output is formatted here, by a simplified printf-to-obstack  |
-| function trace_format ().  Understands only %S, %s, %d, %l (optional |
-| left quote) and %r (optional right quote).			       |
-`---------------------------------------------------------------------*/
+/*------------------------------------------------------------------.
+| Tracing output is formatted here, by a simplified                 |
+| printf-to-obstack function trace_format ().  Understands only %S, |
+| %s, %d, %l (optional left quote) and %r (optional right quote).   |
+`------------------------------------------------------------------*/
 
 static void
 trace_format (const char *fmt, ...)
@@ -270,48 +271,48 @@ trace_format (const char *fmt, ...)
   while (true)
     {
       while ((ch = *fmt++) != '\0' && ch != '%')
-	obstack_1grow (&trace, ch);
+        obstack_1grow (&trace, ch);
 
       if (ch == '\0')
-	break;
+        break;
 
       maxlen = 0;
       switch (*fmt++)
-	{
-	case 'S':
-	  maxlen = max_debug_argument_length;
-	  /* fall through */
+        {
+        case 'S':
+          maxlen = max_debug_argument_length;
+          /* fall through */
 
-	case 's':
-	  s = va_arg (args, const char *);
-	  break;
+        case 's':
+          s = va_arg (args, const char *);
+          break;
 
-	case 'l':
-	  s = (debug_level & DEBUG_TRACE_QUOTE) ? lquote.string : "";
-	  break;
+        case 'l':
+          s = (debug_level & DEBUG_TRACE_QUOTE) ? lquote.string : "";
+          break;
 
-	case 'r':
-	  s = (debug_level & DEBUG_TRACE_QUOTE) ? rquote.string : "";
-	  break;
+        case 'r':
+          s = (debug_level & DEBUG_TRACE_QUOTE) ? rquote.string : "";
+          break;
 
-	case 'd':
-	  d = va_arg (args, int);
-	  s = ntoa (d, 10);
-	  break;
+        case 'd':
+          d = va_arg (args, int);
+          s = ntoa (d, 10);
+          break;
 
-	default:
-	  s = "";
-	  break;
-	}
+        default:
+          s = "";
+          break;
+        }
 
       slen = strlen (s);
       if (maxlen == 0 || maxlen > slen)
-	obstack_grow (&trace, s, slen);
+        obstack_grow (&trace, s, slen);
       else
-	{
-	  obstack_grow (&trace, s, maxlen);
-	  obstack_grow (&trace, "...", 3);
-	}
+        {
+          obstack_grow (&trace, s, maxlen);
+          obstack_grow (&trace, "...", 3);
+        }
     }
 
   va_end (args);
@@ -328,9 +329,9 @@ trace_header (int id)
   if (current_line)
     {
       if (debug_level & DEBUG_TRACE_FILE)
-	trace_format ("%s:", current_file);
+        trace_format ("%s:", current_file);
       if (debug_level & DEBUG_TRACE_LINE)
-	trace_format ("%d:", current_line);
+        trace_format ("%d:", current_line);
     }
   trace_format (" -%d- ", expansion_level);
   if (debug_level & DEBUG_TRACE_CALLID)
@@ -354,7 +355,7 @@ trace_flush (void)
 
 /*-------------------------------------------------------------.
 | Do pre-argument-collction tracing for macro NAME.  Used from |
-| expand_macro ().					       |
+| expand_macro ().                                             |
 `-------------------------------------------------------------*/
 
 void
@@ -365,10 +366,10 @@ trace_prepre (const char *name, int id)
   trace_flush ();
 }
 
-/*-----------------------------------------------------------------------.
-| Format the parts of a trace line, that can be made before the macro is |
-| actually expanded.  Used from expand_macro ().			 |
-`-----------------------------------------------------------------------*/
+/*--------------------------------------------------------------.
+| Format the parts of a trace line, that can be made before the |
+| macro is actually expanded.  Used from expand_macro ().       |
+`--------------------------------------------------------------*/
 
 void
 trace_pre (const char *name, int id, int argc, token_data **argv)
@@ -384,34 +385,35 @@ trace_pre (const char *name, int id, int argc, token_data **argv)
       trace_format ("(");
 
       for (i = 1; i < argc; i++)
-	{
-	  if (i != 1)
-	    trace_format (", ");
+        {
+          if (i != 1)
+            trace_format (", ");
 
-	  switch (TOKEN_DATA_TYPE (argv[i]))
-	    {
-	    case TOKEN_TEXT:
-	      trace_format ("%l%S%r", TOKEN_DATA_TEXT (argv[i]));
-	      break;
+          switch (TOKEN_DATA_TYPE (argv[i]))
+            {
+            case TOKEN_TEXT:
+              trace_format ("%l%S%r", TOKEN_DATA_TEXT (argv[i]));
+              break;
 
-	    case TOKEN_FUNC:
-	      bp = find_builtin_by_addr (TOKEN_DATA_FUNC (argv[i]));
-	      if (bp == NULL)
-		{
-		  M4ERROR ((warning_status, 0, "\
+            case TOKEN_FUNC:
+              bp = find_builtin_by_addr (TOKEN_DATA_FUNC (argv[i]));
+              if (bp == NULL)
+                {
+                  M4ERROR ((warning_status, 0, "\
 INTERNAL ERROR: builtin not found in builtin table! (trace_pre ())"));
-		  abort ();
-		}
-	      trace_format ("<%s>", bp->name);
-	      break;
+                  abort ();
+                }
+              trace_format ("<%s>", bp->name);
+              break;
 
-	    default:
-	      M4ERROR ((warning_status, 0,
-			"INTERNAL ERROR: bad token data type (trace_pre ())"));
-	      abort ();
-	    }
+            case TOKEN_VOID:
+            default:
+              M4ERROR ((warning_status, 0,
+                        "INTERNAL ERROR: bad token data type (trace_pre ())"));
+              abort ();
+            }
 
-	}
+        }
       trace_format (")");
     }
 
@@ -424,12 +426,11 @@ INTERNAL ERROR: builtin not found in builtin table! (trace_pre ())"));
 
 /*-------------------------------------------------------------------.
 | Format the final part of a trace line and print it all.  Used from |
-| expand_macro ().						     |
+| expand_macro ().                                                   |
 `-------------------------------------------------------------------*/
 
 void
-trace_post (const char *name, int id, int argc, token_data **argv,
-	    const char *expanded)
+trace_post (const char *name, int id, int argc, const char *expanded)
 {
   if (debug_level & DEBUG_TRACE_CALL)
     {

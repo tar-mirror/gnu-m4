@@ -1,5 +1,5 @@
-# spawn_h.m4 serial 1
-dnl Copyright (C) 2008 Free Software Foundation, Inc.
+# spawn_h.m4 serial 6
+dnl Copyright (C) 2008-2010 Free Software Foundation, Inc.
 dnl This file is free software; the Free Software Foundation
 dnl gives unlimited permission to copy and/or distribute it,
 dnl with or without modifications, as long as this notice is preserved.
@@ -12,24 +12,49 @@ AC_DEFUN([gl_SPAWN_H],
   dnl once only, before all statements that occur in other macros.
   AC_REQUIRE([gl_SPAWN_H_DEFAULTS])
 
+  dnl <spawn.h> is always overridden, because of GNULIB_POSIXCHECK.
   gl_CHECK_NEXT_HEADERS([spawn.h])
 
   AC_CHECK_HEADERS_ONCE([spawn.h])
   if test $ac_cv_header_spawn_h = yes; then
     HAVE_SPAWN_H=1
+    AC_CHECK_TYPES([posix_spawnattr_t], [], [HAVE_POSIX_SPAWNATTR_T=0], [[
+#include <spawn.h>
+      ]])
+    AC_CHECK_TYPES([posix_spawn_file_actions_t], [],
+      [HAVE_POSIX_SPAWN_FILE_ACTIONS_T=0], [[
+#include <spawn.h>
+      ]])
   else
     HAVE_SPAWN_H=0
+    HAVE_POSIX_SPAWNATTR_T=0
+    HAVE_POSIX_SPAWN_FILE_ACTIONS_T=0
+    gl_REPLACE_SPAWN_H
   fi
   AC_SUBST([HAVE_SPAWN_H])
 
   AC_REQUIRE([AC_C_RESTRICT])
+
+  dnl Check for declarations of anything we want to poison if the
+  dnl corresponding gnulib module is not in use.
+  gl_WARN_ON_USE_PREPARE([[#include <spawn.h>
+    ]], [posix_spawn posix_spawnp posix_spawnattr_init posix_spawnattr_destroy
+    posix_spawnattr_getsigdefault posix_spawnattr_setsigdefault
+    posix_spawnattr_getsigmask posix_spawnattr_setsigmask
+    posix_spawnattr_getflags posix_spawnattr_setflags
+    posix_spawnattr_getpgroup posix_spawnattr_setpgroup
+    posix_spawnattr_getschedpolicy posix_spawnattr_setschedpolicy
+    posix_spawnattr_getschedparam posix_spawnattr_setschedparam
+    posix_spawn_file_actions_init posix_spawn_file_actions_destroy
+    posix_spawn_file_actions_addopen posix_spawn_file_actions_addclose
+    posix_spawwn_file_actions_adddup2])
 ])
 
 dnl Unconditionally enables the replacement of <spawn.h>.
 AC_DEFUN([gl_REPLACE_SPAWN_H],
 [
-  AC_REQUIRE([gl_SPAWN_H_DEFAULTS])
-  SPAWN_H='spawn.h'
+  dnl This is a no-op, because <spawn.h> is always overridden.
+  :
 ])
 
 AC_DEFUN([gl_SPAWN_MODULE_INDICATOR],
@@ -63,7 +88,9 @@ AC_DEFUN([gl_SPAWN_H_DEFAULTS],
   GNULIB_POSIX_SPAWNATTR_SETSIGMASK=0;        AC_SUBST([GNULIB_POSIX_SPAWNATTR_SETSIGMASK])
   GNULIB_POSIX_SPAWNATTR_DESTROY=0;           AC_SUBST([GNULIB_POSIX_SPAWNATTR_DESTROY])
   dnl Assume proper GNU behavior unless another module says otherwise.
-  HAVE_POSIX_SPAWN=1;     AC_SUBST([HAVE_POSIX_SPAWN])
-  REPLACE_POSIX_SPAWN=0;  AC_SUBST([REPLACE_POSIX_SPAWN])
-  SPAWN_H='';             AC_SUBST([SPAWN_H])
+  HAVE_POSIX_SPAWN=1;        AC_SUBST([HAVE_POSIX_SPAWN])
+  HAVE_POSIX_SPAWNATTR_T=1;  AC_SUBST([HAVE_POSIX_SPAWNATTR_T])
+  HAVE_POSIX_SPAWN_FILE_ACTIONS_T=1;
+                             AC_SUBST([HAVE_POSIX_SPAWN_FILE_ACTIONS_T])
+  REPLACE_POSIX_SPAWN=0;     AC_SUBST([REPLACE_POSIX_SPAWN])
 ])

@@ -1,4 +1,4 @@
-/* Copyright (C) 2000, 2008 Free Software Foundation, Inc.
+/* Copyright (C) 2000, 2008, 2009, 2010 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    This program is free software: you can redistribute it and/or modify
@@ -51,12 +51,12 @@ struct __spawn_action
 # define __posix_spawn_file_actions_realloc gl_posix_spawn_file_actions_realloc
 #endif
 extern int __posix_spawn_file_actions_realloc (posix_spawn_file_actions_t *
-					       file_actions);
+                                               file_actions);
 
 #if !_LIBC
 # define __spawni gl_posix_spawn_internal
 #endif
 extern int __spawni (pid_t *pid, const char *path,
-		     const posix_spawn_file_actions_t *file_actions,
-		     const posix_spawnattr_t *attrp, char *const argv[],
-		     char *const envp[], int use_path);
+                     const posix_spawn_file_actions_t *file_actions,
+                     const posix_spawnattr_t *attrp, char *const argv[],
+                     char *const envp[], int use_path);

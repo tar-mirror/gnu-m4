@@ -1,5 +1,5 @@
 /* Test of closein module.
-   Copyright (C) 2007, 2008 Free Software Foundation, Inc.
+   Copyright (C) 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -26,6 +26,7 @@
 #include <unistd.h>
 
 #include "binary-io.h"
+#include "ignore-value.h"
 
 char *program_name;
 
@@ -47,6 +48,6 @@ main (int argc, char **argv)
     close (0);
 
   if (argc > 1)
-    fread (buf, 1, 6, stdin);
+    ignore_value (fread (buf, 1, 6, stdin));
   return 0;
 }

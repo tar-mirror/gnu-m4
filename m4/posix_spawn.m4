@@ -1,5 +1,5 @@
 # posix_spawn.m4 serial 4
-dnl Copyright (C) 2008 Free Software Foundation, Inc.
+dnl Copyright (C) 2008, 2009, 2010 Free Software Foundation, Inc.
 dnl This file is free software; the Free Software Foundation
 dnl gives unlimited permission to copy and/or distribute it,
 dnl with or without modifications, as long as this notice is preserved.
@@ -158,18 +158,18 @@ main ()
           || (err = posix_spawnp (&child, CHILD_PROGRAM_FILENAME, &actions, &attrs, argv, environ)) != 0))
     {
       if (actions_allocated)
-	posix_spawn_file_actions_destroy (&actions);
+        posix_spawn_file_actions_destroy (&actions);
       if (attrs_allocated)
-	posix_spawnattr_destroy (&attrs);
+        posix_spawnattr_destroy (&attrs);
       sigprocmask (SIG_UNBLOCK, &fatal_signal_set, NULL);
       if (err == ENOENT)
-	return 0;
+        return 0;
       else
-	{
-	  errno = err;
-	  perror ("subprocess failed");
-	  exit (1);
-	}
+        {
+          errno = err;
+          perror ("subprocess failed");
+          exit (1);
+        }
     }
   posix_spawn_file_actions_destroy (&actions);
   posix_spawnattr_destroy (&attrs);

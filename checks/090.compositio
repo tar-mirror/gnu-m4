@@ -1,4 +1,4 @@
-dnl @ ../doc/m4.texinfo:3629: Origin of test
+dnl @ ../doc/m4.texinfo:3566: Origin of test
 dnl @ expected status: 0
 dnl @ extra options: 
 dnl @ Copyright (C) 2006, 2007, 2008, 2009 Free Software
@@ -7,21 +7,25 @@ dnl @ This file is free software; the Free Software Foundation
 dnl @ gives unlimited permission to copy and/or distribute it
 dnl @ with or without modifications, as long as this notice
 dnl @ is preserved.
-include(`curry.m4')include(`stack.m4')
+define(`define_blind', `ifelse(`$#', `0', ``$0'',
+`_$0(`$1', `$2', `$'`#', `$'`0')')')
 dnl @result{}
-define(`rename', `copy($@)undefine(`$1')')dnl
-define(`copy', `ifdef(`$2', `errprint(`$2 already defined
-')m4exit(`1')',
-   `stack_foreach(`$1', `curry(`pushdef', `$2')')')')dnl
-pushdef(`a', `1')pushdef(`a', defn(`divnum'))pushdef(`a', `2')
+define(`_define_blind', `define(`$1',
+`ifelse(`$3', `0', ``$4'', `$2')')')
 dnl @result{}
-copy(`a', `b')
+define_blind
+dnl @result{}define_blind
+define_blind(`foo', `arguments were $*')
 dnl @result{}
-rename(`b', `c')
+foo
+dnl @result{}foo
+foo(`bar')
+dnl @result{}arguments were bar
+define(`blah', defn(`foo'))
 dnl @result{}
-a b c
-dnl @result{}2 b 2
-popdef(`a', `c')c a
-dnl @result{} 0
-popdef(`a', `c')a c
-dnl @result{}1 1
+blah
+dnl @result{}blah
+blah(`a', `b')
+dnl @result{}arguments were a,b
+defn(`blah')
+dnl @result{}ifelse(`$#', `0', ``$0'', `arguments were $*')

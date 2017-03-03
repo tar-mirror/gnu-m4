@@ -1,5 +1,5 @@
 /* Creation of subprocesses, communicating via pipes.
-   Copyright (C) 2001-2004, 2006-2009 Free Software Foundation, Inc.
+   Copyright (C) 2001-2004, 2006-2010 Free Software Foundation, Inc.
    Written by Bruno Haible <haible@clisp.cons.org>, 2001.
 
    This program is free software: you can redistribute it and/or modify
@@ -35,7 +35,7 @@
 
 #define _(str) gettext (str)
 
-#if defined _MSC_VER || defined __MINGW32__
+#if (defined _WIN32 || defined __WIN32__) && ! defined __CYGWIN__
 
 /* Native Woe32 API.  */
 # include <process.h>
@@ -105,14 +105,14 @@ nonintr_open (const char *pathname, int oflag, mode_t mode)
  */
 static pid_t
 create_pipe (const char *progname,
-	     const char *prog_path, char **prog_argv,
-	     bool pipe_stdin, bool pipe_stdout,
-	     const char *prog_stdin, const char *prog_stdout,
-	     bool null_stderr,
-	     bool slave_process, bool exit_on_error,
-	     int fd[2])
+             const char *prog_path, char **prog_argv,
+             bool pipe_stdin, bool pipe_stdout,
+             const char *prog_stdin, const char *prog_stdout,
+             bool null_stderr,
+             bool slave_process, bool exit_on_error,
+             int fd[2])
 {
-#if defined _MSC_VER || defined __MINGW32__
+#if (defined _WIN32 || defined __WIN32__) && ! defined __CYGWIN__
 
   /* Native Woe32 API.
      This uses _pipe(), dup2(), and spawnv().  It could also be implemented
@@ -133,12 +133,10 @@ create_pipe (const char *progname,
   prog_argv = prepare_spawn (prog_argv);
 
   if (pipe_stdout)
-    if (_pipe (ifd, 4096, O_BINARY | O_NOINHERIT) < 0
-	|| (ifd[0] = fd_safer (ifd[0])) < 0)
+    if (pipe2_safer (ifd, O_BINARY | O_CLOEXEC) < 0)
       error (EXIT_FAILURE, errno, _("cannot create pipe"));
   if (pipe_stdin)
-    if (_pipe (ofd, 4096, O_BINARY | O_NOINHERIT) < 0
-	|| (ofd[1] = fd_safer (ofd[1])) < 0)
+    if (pipe2_safer (ofd, O_BINARY | O_CLOEXEC) < 0)
       error (EXIT_FAILURE, errno, _("cannot create pipe"));
 /* Data flow diagram:
  *
@@ -151,11 +149,11 @@ create_pipe (const char *progname,
 
   /* Save standard file handles of parent process.  */
   if (pipe_stdin || prog_stdin != NULL)
-    orig_stdin = dup_noinherit (STDIN_FILENO);
+    orig_stdin = dup_safer_noinherit (STDIN_FILENO);
   if (pipe_stdout || prog_stdout != NULL)
-    orig_stdout = dup_noinherit (STDOUT_FILENO);
+    orig_stdout = dup_safer_noinherit (STDOUT_FILENO);
   if (null_stderr)
-    orig_stderr = dup_noinherit (STDERR_FILENO);
+    orig_stderr = dup_safer_noinherit (STDERR_FILENO);
   child = -1;
 
   /* Create standard file handles of child process.  */
@@ -165,27 +163,25 @@ create_pipe (const char *progname,
   if ((!pipe_stdin || dup2 (ofd[0], STDIN_FILENO) >= 0)
       && (!pipe_stdout || dup2 (ifd[1], STDOUT_FILENO) >= 0)
       && (!null_stderr
-	  || ((nulloutfd = open ("NUL", O_RDWR, 0)) >= 0
-	      && (nulloutfd == STDERR_FILENO
-		  || (dup2 (nulloutfd, STDERR_FILENO) >= 0
-		      && close (nulloutfd) >= 0))))
+          || ((nulloutfd = open ("NUL", O_RDWR, 0)) >= 0
+              && (nulloutfd == STDERR_FILENO
+                  || (dup2 (nulloutfd, STDERR_FILENO) >= 0
+                      && close (nulloutfd) >= 0))))
       && (pipe_stdin
-	  || prog_stdin == NULL
-	  || ((stdinfd = open (prog_stdin, O_RDONLY, 0)) >= 0
-	      && (stdinfd == STDIN_FILENO
-		  || (dup2 (stdinfd, STDIN_FILENO) >= 0
-		      && close (stdinfd) >= 0))))
+          || prog_stdin == NULL
+          || ((stdinfd = open (prog_stdin, O_RDONLY, 0)) >= 0
+              && (stdinfd == STDIN_FILENO
+                  || (dup2 (stdinfd, STDIN_FILENO) >= 0
+                      && close (stdinfd) >= 0))))
       && (pipe_stdout
-	  || prog_stdout == NULL
-	  || ((stdoutfd = open (prog_stdout, O_WRONLY, 0)) >= 0
-	      && (stdoutfd == STDOUT_FILENO
-		  || (dup2 (stdoutfd, STDOUT_FILENO) >= 0
-		      && close (stdoutfd) >= 0)))))
+          || prog_stdout == NULL
+          || ((stdoutfd = open (prog_stdout, O_WRONLY, 0)) >= 0
+              && (stdoutfd == STDOUT_FILENO
+                  || (dup2 (stdoutfd, STDOUT_FILENO) >= 0
+                      && close (stdoutfd) >= 0)))))
     /* The child process doesn't inherit ifd[0], ifd[1], ofd[0], ofd[1],
        but it inherits all open()ed or dup2()ed file handles (which is what
-       we want in the case of STD*_FILENO) and also orig_stdin,
-       orig_stdout, orig_stderr (which is not explicitly wanted but
-       harmless).  */
+       we want in the case of STD*_FILENO).  */
     /* Use spawnvpe and pass the environment explicitly.  This is needed if
        the program has modified the environment using putenv() or [un]setenv().
        On Windows, programs have two environments, one in the "environment
@@ -196,16 +192,16 @@ create_pipe (const char *progname,
        [un]setenv().  */
     {
       child = spawnvpe (P_NOWAIT, prog_path, (const char **) prog_argv,
-			(const char **) environ);
+                        (const char **) environ);
       if (child < 0 && errno == ENOEXEC)
-	{
-	  /* prog is not an native executable.  Try to execute it as a
-	     shell script.  Note that prepare_spawn() has already prepended
-	     a hidden element "sh.exe" to prog_argv.  */
-	  --prog_argv;
-	  child = spawnvpe (P_NOWAIT, prog_argv[0], (const char **) prog_argv,
-			    (const char **) environ);
-	}
+        {
+          /* prog is not an native executable.  Try to execute it as a
+             shell script.  Note that prepare_spawn() has already prepended
+             a hidden element "sh.exe" to prog_argv.  */
+          --prog_argv;
+          child = spawnvpe (P_NOWAIT, prog_argv[0], (const char **) prog_argv,
+                            (const char **) environ);
+        }
     }
   if (stdinfd >= 0)
     close (stdinfd);
@@ -216,11 +212,11 @@ create_pipe (const char *progname,
 
   /* Restore standard file handles of parent process.  */
   if (null_stderr)
-    dup2 (orig_stderr, STDERR_FILENO), close (orig_stderr);
+    undup_safer_noinherit (orig_stderr, STDERR_FILENO);
   if (pipe_stdout || prog_stdout != NULL)
-    dup2 (orig_stdout, STDOUT_FILENO), close (orig_stdout);
+    undup_safer_noinherit (orig_stdout, STDOUT_FILENO);
   if (pipe_stdin || prog_stdin != NULL)
-    dup2 (orig_stdin, STDIN_FILENO), close (orig_stdin);
+    undup_safer_noinherit (orig_stdin, STDIN_FILENO);
 
   if (pipe_stdin)
     close (ofd[0]);
@@ -229,12 +225,12 @@ create_pipe (const char *progname,
   if (child == -1)
     {
       if (exit_on_error || !null_stderr)
-	error (exit_on_error ? EXIT_FAILURE : 0, errno,
-	       _("%s subprocess failed"), progname);
+        error (exit_on_error ? EXIT_FAILURE : 0, errno,
+               _("%s subprocess failed"), progname);
       if (pipe_stdout)
-	close (ifd[0]);
+        close (ifd[0]);
       if (pipe_stdin)
-	close (ofd[1]);
+        close (ofd[1]);
       return -1;
     }
 
@@ -258,12 +254,10 @@ create_pipe (const char *progname,
   pid_t child;
 
   if (pipe_stdout)
-    if (pipe (ifd) < 0
-	|| (ifd[0] = fd_safer (ifd[0])) < 0)
+    if (pipe_safer (ifd) < 0)
       error (EXIT_FAILURE, errno, _("cannot create pipe"));
   if (pipe_stdin)
-    if (pipe (ofd) < 0
-	|| (ofd[1] = fd_safer (ofd[1])) < 0)
+    if (pipe_safer (ofd) < 0)
       error (EXIT_FAILURE, errno, _("cannot create pipe"));
 /* Data flow diagram:
  *
@@ -283,79 +277,79 @@ create_pipe (const char *progname,
   attrs_allocated = false;
   if ((err = posix_spawn_file_actions_init (&actions)) != 0
       || (actions_allocated = true,
-	  (pipe_stdin
-	   && (err = posix_spawn_file_actions_adddup2 (&actions,
-						       ofd[0], STDIN_FILENO))
-	      != 0)
-	  || (pipe_stdout
-	      && (err = posix_spawn_file_actions_adddup2 (&actions,
-							  ifd[1], STDOUT_FILENO))
-		 != 0)
-	  || (pipe_stdin
-	      && (err = posix_spawn_file_actions_addclose (&actions, ofd[0]))
-		 != 0)
-	  || (pipe_stdout
-	      && (err = posix_spawn_file_actions_addclose (&actions, ifd[1]))
-		 != 0)
-	  || (pipe_stdin
-	      && (err = posix_spawn_file_actions_addclose (&actions, ofd[1]))
-		 != 0)
-	  || (pipe_stdout
-	      && (err = posix_spawn_file_actions_addclose (&actions, ifd[0]))
-		 != 0)
-	  || (null_stderr
-	      && (err = posix_spawn_file_actions_addopen (&actions,
-							  STDERR_FILENO,
-							  "/dev/null", O_RDWR,
-							  0))
-		 != 0)
-	  || (!pipe_stdin
-	      && prog_stdin != NULL
-	      && (err = posix_spawn_file_actions_addopen (&actions,
-							  STDIN_FILENO,
-							  prog_stdin, O_RDONLY,
-							  0))
-		 != 0)
-	  || (!pipe_stdout
-	      && prog_stdout != NULL
-	      && (err = posix_spawn_file_actions_addopen (&actions,
-							  STDOUT_FILENO,
-							  prog_stdout, O_WRONLY,
-							  0))
-		 != 0)
-	  || (slave_process
-	      && ((err = posix_spawnattr_init (&attrs)) != 0
-		  || (attrs_allocated = true,
-		      (err = posix_spawnattr_setsigmask (&attrs,
-							 &blocked_signals))
-		      != 0
-		      || (err = posix_spawnattr_setflags (&attrs,
-							POSIX_SPAWN_SETSIGMASK))
-			 != 0)))
-	  || (err = posix_spawnp (&child, prog_path, &actions,
-				  attrs_allocated ? &attrs : NULL, prog_argv,
-				  environ))
-	     != 0))
+          (pipe_stdin
+           && (err = posix_spawn_file_actions_adddup2 (&actions,
+                                                       ofd[0], STDIN_FILENO))
+              != 0)
+          || (pipe_stdout
+              && (err = posix_spawn_file_actions_adddup2 (&actions,
+                                                          ifd[1], STDOUT_FILENO))
+                 != 0)
+          || (pipe_stdin
+              && (err = posix_spawn_file_actions_addclose (&actions, ofd[0]))
+                 != 0)
+          || (pipe_stdout
+              && (err = posix_spawn_file_actions_addclose (&actions, ifd[1]))
+                 != 0)
+          || (pipe_stdin
+              && (err = posix_spawn_file_actions_addclose (&actions, ofd[1]))
+                 != 0)
+          || (pipe_stdout
+              && (err = posix_spawn_file_actions_addclose (&actions, ifd[0]))
+                 != 0)
+          || (null_stderr
+              && (err = posix_spawn_file_actions_addopen (&actions,
+                                                          STDERR_FILENO,
+                                                          "/dev/null", O_RDWR,
+                                                          0))
+                 != 0)
+          || (!pipe_stdin
+              && prog_stdin != NULL
+              && (err = posix_spawn_file_actions_addopen (&actions,
+                                                          STDIN_FILENO,
+                                                          prog_stdin, O_RDONLY,
+                                                          0))
+                 != 0)
+          || (!pipe_stdout
+              && prog_stdout != NULL
+              && (err = posix_spawn_file_actions_addopen (&actions,
+                                                          STDOUT_FILENO,
+                                                          prog_stdout, O_WRONLY,
+                                                          0))
+                 != 0)
+          || (slave_process
+              && ((err = posix_spawnattr_init (&attrs)) != 0
+                  || (attrs_allocated = true,
+                      (err = posix_spawnattr_setsigmask (&attrs,
+                                                         &blocked_signals))
+                      != 0
+                      || (err = posix_spawnattr_setflags (&attrs,
+                                                        POSIX_SPAWN_SETSIGMASK))
+                         != 0)))
+          || (err = posix_spawnp (&child, prog_path, &actions,
+                                  attrs_allocated ? &attrs : NULL, prog_argv,
+                                  environ))
+             != 0))
     {
       if (actions_allocated)
-	posix_spawn_file_actions_destroy (&actions);
+        posix_spawn_file_actions_destroy (&actions);
       if (attrs_allocated)
-	posix_spawnattr_destroy (&attrs);
+        posix_spawnattr_destroy (&attrs);
       if (slave_process)
-	unblock_fatal_signals ();
+        unblock_fatal_signals ();
       if (exit_on_error || !null_stderr)
-	error (exit_on_error ? EXIT_FAILURE : 0, err,
-	       _("%s subprocess failed"), progname);
+        error (exit_on_error ? EXIT_FAILURE : 0, err,
+               _("%s subprocess failed"), progname);
       if (pipe_stdout)
-	{
-	  close (ifd[0]);
-	  close (ifd[1]);
-	}
+        {
+          close (ifd[0]);
+          close (ifd[1]);
+        }
       if (pipe_stdin)
-	{
-	  close (ofd[0]);
-	  close (ofd[1]);
-	}
+        {
+          close (ofd[0]);
+          close (ofd[1]);
+        }
       return -1;
     }
   posix_spawn_file_actions_destroy (&actions);
@@ -390,15 +384,15 @@ create_pipe (const char *progname,
  */
 pid_t
 create_pipe_bidi (const char *progname,
-		  const char *prog_path, char **prog_argv,
-		  bool null_stderr,
-		  bool slave_process, bool exit_on_error,
-		  int fd[2])
+                  const char *prog_path, char **prog_argv,
+                  bool null_stderr,
+                  bool slave_process, bool exit_on_error,
+                  int fd[2])
 {
   pid_t result = create_pipe (progname, prog_path, prog_argv,
-			      true, true, NULL, NULL,
-			      null_stderr, slave_process, exit_on_error,
-			      fd);
+                              true, true, NULL, NULL,
+                              null_stderr, slave_process, exit_on_error,
+                              fd);
   return result;
 }
 
@@ -411,16 +405,16 @@ create_pipe_bidi (const char *progname,
  */
 pid_t
 create_pipe_in (const char *progname,
-		const char *prog_path, char **prog_argv,
-		const char *prog_stdin, bool null_stderr,
-		bool slave_process, bool exit_on_error,
-		int fd[1])
+                const char *prog_path, char **prog_argv,
+                const char *prog_stdin, bool null_stderr,
+                bool slave_process, bool exit_on_error,
+                int fd[1])
 {
   int iofd[2];
   pid_t result = create_pipe (progname, prog_path, prog_argv,
-			      false, true, prog_stdin, NULL,
-			      null_stderr, slave_process, exit_on_error,
-			      iofd);
+                              false, true, prog_stdin, NULL,
+                              null_stderr, slave_process, exit_on_error,
+                              iofd);
   if (result != -1)
     fd[0] = iofd[0];
   return result;
@@ -435,16 +429,16 @@ create_pipe_in (const char *progname,
  */
 pid_t
 create_pipe_out (const char *progname,
-		 const char *prog_path, char **prog_argv,
-		 const char *prog_stdout, bool null_stderr,
-		 bool slave_process, bool exit_on_error,
-		 int fd[1])
+                 const char *prog_path, char **prog_argv,
+                 const char *prog_stdout, bool null_stderr,
+                 bool slave_process, bool exit_on_error,
+                 int fd[1])
 {
   int iofd[2];
   pid_t result = create_pipe (progname, prog_path, prog_argv,
-			      true, false, NULL, prog_stdout,
-			      null_stderr, slave_process, exit_on_error,
-			      iofd);
+                              true, false, NULL, prog_stdout,
+                              null_stderr, slave_process, exit_on_error,
+                              iofd);
   if (result != -1)
     fd[0] = iofd[1];
   return result;

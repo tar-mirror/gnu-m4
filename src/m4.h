@@ -1,7 +1,7 @@
 /* GNU m4 -- A simple macro processor
 
    Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2004, 2005, 2006,
-   2007, 2008 Free Software Foundation, Inc.
+   2007, 2008, 2009, 2010 Free Software Foundation, Inc.
 
    This file is part of GNU M4.
 
@@ -84,14 +84,14 @@
 
 struct string
   {
-    char *string;		/* characters of the string */
-    size_t length;		/* length of the string */
+    char *string;               /* characters of the string */
+    size_t length;              /* length of the string */
   };
 typedef struct string STRING;
 
 /* Memory allocation.  */
-#define obstack_chunk_alloc	xmalloc
-#define obstack_chunk_free	free
+#define obstack_chunk_alloc     xmalloc
+#define obstack_chunk_free      free
 
 /* Those must come first.  */
 typedef struct token_data token_data;
@@ -109,29 +109,30 @@ typedef unsigned int bool_bitfield;
 /* Take advantage of GNU C compiler source level optimization hints,
    using portable macros.  */
 #if __GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ > 6)
-#  define M4_GNUC_ATTRIBUTE(args)	__attribute__(args)
+# define M4_GNUC_ATTRIBUTE(args)        __attribute__ (args)
 #else
-#  define M4_GNUC_ATTRIBUTE(args)
+# define M4_GNUC_ATTRIBUTE(args)
 #endif  /* __GNUC__ */
 
-#define M4_GNUC_UNUSED		M4_GNUC_ATTRIBUTE((__unused__))
-#define M4_GNUC_PRINTF(fmt, arg)			\
-  M4_GNUC_ATTRIBUTE((__format__ (__printf__, fmt, arg)))
+#define M4_GNUC_UNUSED          M4_GNUC_ATTRIBUTE ((__unused__))
+#define M4_GNUC_PRINTF(fmt, arg)                        \
+  M4_GNUC_ATTRIBUTE ((__format__ (__printf__, fmt, arg)))
+#define M4_GNUC_NORETURN        M4_GNUC_ATTRIBUTE ((__noreturn__))
 
 /* File: m4.c  --- global definitions.  */
 
 /* Option flags.  */
-extern int sync_output;			/* -s */
-extern int debug_level;			/* -d */
-extern size_t hash_table_size;		/* -H */
-extern int no_gnu_extensions;		/* -G */
-extern int prefix_all_builtins;		/* -P */
-extern int max_debug_argument_length;	/* -l */
-extern int suppress_warnings;		/* -Q */
-extern int warning_status;		/* -E */
-extern int nesting_limit;		/* -L */
+extern int sync_output;                 /* -s */
+extern int debug_level;                 /* -d */
+extern size_t hash_table_size;          /* -H */
+extern int no_gnu_extensions;           /* -G */
+extern int prefix_all_builtins;         /* -P */
+extern int max_debug_argument_length;   /* -l */
+extern int suppress_warnings;           /* -Q */
+extern int warning_status;              /* -E */
+extern int nesting_limit;               /* -L */
 #ifdef ENABLE_CHANGEWORD
-extern const char *user_word_regexp;	/* -W */
+extern const char *user_word_regexp;    /* -W */
 #endif
 
 /* Error handling.  */
@@ -140,7 +141,7 @@ extern const char *program_name;
 
 void m4_error (int, int, const char *, ...) M4_GNUC_PRINTF(3, 4);
 void m4_error_at_line (int, int, const char *, int,
-		       const char *, ...) M4_GNUC_PRINTF(5, 6);
+                       const char *, ...) M4_GNUC_PRINTF(5, 6);
 
 #define M4ERROR(Arglist) (m4_error Arglist)
 #define M4ERROR_AT_LINE(Arglist) (m4_error_at_line Arglist)
@@ -179,55 +180,55 @@ extern FILE *debug;
 #define DEBUG_TRACE_DEFAULT 7
 
 #define DEBUG_PRINT1(Fmt, Arg1) \
-  do								\
-    {								\
-      if (debug != NULL)					\
-	xfprintf (debug, Fmt, Arg1);				\
-    }								\
+  do                                                            \
+    {                                                           \
+      if (debug != NULL)                                        \
+        xfprintf (debug, Fmt, Arg1);                            \
+    }                                                           \
   while (0)
 
 #define DEBUG_PRINT3(Fmt, Arg1, Arg2, Arg3) \
-  do								\
-    {								\
-      if (debug != NULL)					\
-	xfprintf (debug, Fmt, Arg1, Arg2, Arg3);                \
-    }								\
+  do                                                            \
+    {                                                           \
+      if (debug != NULL)                                        \
+        xfprintf (debug, Fmt, Arg1, Arg2, Arg3);                \
+    }                                                           \
   while (0)
 
 #define DEBUG_MESSAGE(Fmt) \
-  do								\
-    {								\
-      if (debug != NULL)					\
-	{							\
-	  debug_message_prefix ();				\
-	  xfprintf (debug, Fmt);                                \
-	  putc ('\n', debug);					\
-	}							\
-    }								\
+  do                                                            \
+    {                                                           \
+      if (debug != NULL)                                        \
+        {                                                       \
+          debug_message_prefix ();                              \
+          xfprintf (debug, Fmt);                                \
+          putc ('\n', debug);                                   \
+        }                                                       \
+    }                                                           \
   while (0)
 
 #define DEBUG_MESSAGE1(Fmt, Arg1) \
-  do								\
-    {								\
-      if (debug != NULL)					\
-	{							\
-	  debug_message_prefix ();				\
-	  xfprintf (debug, Fmt, Arg1);				\
-	  putc ('\n', debug);					\
-	}							\
-    }								\
+  do                                                            \
+    {                                                           \
+      if (debug != NULL)                                        \
+        {                                                       \
+          debug_message_prefix ();                              \
+          xfprintf (debug, Fmt, Arg1);                          \
+          putc ('\n', debug);                                   \
+        }                                                       \
+    }                                                           \
   while (0)
 
 #define DEBUG_MESSAGE2(Fmt, Arg1, Arg2) \
-  do								\
-    {								\
-      if (debug != NULL)					\
-	{							\
-	  debug_message_prefix ();				\
-	  xfprintf (debug, Fmt, Arg1, Arg2);			\
-	  putc ('\n', debug);					\
-	}							\
-    }								\
+  do                                                            \
+    {                                                           \
+      if (debug != NULL)                                        \
+        {                                                       \
+          debug_message_prefix ();                              \
+          xfprintf (debug, Fmt, Arg1, Arg2);                    \
+          putc ('\n', debug);                                   \
+        }                                                       \
+    }                                                           \
   while (0)
 
 void debug_init (void);
@@ -238,21 +239,21 @@ void debug_message_prefix (void);
 
 void trace_prepre (const char *, int);
 void trace_pre (const char *, int, int, token_data **);
-void trace_post (const char *, int, int, token_data **, const char *);
+void trace_post (const char *, int, int, const char *);
 
 /* File: input.c  --- lexical definitions.  */
 
 /* Various different token types.  */
 enum token_type
 {
-  TOKEN_EOF,			/* end of file */
-  TOKEN_STRING,			/* a quoted string or comment */
-  TOKEN_WORD,			/* an identifier */
-  TOKEN_OPEN,			/* ( */
-  TOKEN_COMMA,			/* , */
-  TOKEN_CLOSE,			/* ) */
-  TOKEN_SIMPLE,			/* any other single character */
-  TOKEN_MACDEF			/* a macro's definition (see "defn") */
+  TOKEN_EOF,                    /* end of file */
+  TOKEN_STRING,                 /* a quoted string or comment */
+  TOKEN_WORD,                   /* an identifier */
+  TOKEN_OPEN,                   /* ( */
+  TOKEN_COMMA,                  /* , */
+  TOKEN_CLOSE,                  /* ) */
+  TOKEN_SIMPLE,                 /* any other single character */
+  TOKEN_MACDEF                  /* a macro's definition (see "defn") */
 };
 
 /* The data for a token, a macro argument, and a macro definition.  */
@@ -269,24 +270,24 @@ struct token_data
   union
     {
       struct
-	{
-	  char *text;
+        {
+          char *text;
 #ifdef ENABLE_CHANGEWORD
-	  char *original_text;
+          char *original_text;
 #endif
-	}
+        }
       u_t;
       builtin_func *func;
     }
   u;
 };
 
-#define TOKEN_DATA_TYPE(Td)		((Td)->type)
-#define TOKEN_DATA_TEXT(Td)		((Td)->u.u_t.text)
+#define TOKEN_DATA_TYPE(Td)             ((Td)->type)
+#define TOKEN_DATA_TEXT(Td)             ((Td)->u.u_t.text)
 #ifdef ENABLE_CHANGEWORD
-# define TOKEN_DATA_ORIG_TEXT(Td)	((Td)->u.u_t.original_text)
+# define TOKEN_DATA_ORIG_TEXT(Td)       ((Td)->u.u_t.original_text)
 #endif
-#define TOKEN_DATA_FUNC(Td)		((Td)->u.func)
+#define TOKEN_DATA_FUNC(Td)             ((Td)->u.func)
 
 typedef enum token_type token_type;
 typedef enum token_data_type token_data_type;
@@ -363,23 +364,23 @@ struct symbol
   token_data data;
 };
 
-#define SYMBOL_NEXT(S)		((S)->next)
-#define SYMBOL_TRACED(S)	((S)->traced)
-#define SYMBOL_SHADOWED(S)	((S)->shadowed)
-#define SYMBOL_MACRO_ARGS(S)	((S)->macro_args)
-#define SYMBOL_BLIND_NO_ARGS(S)	((S)->blind_no_args)
-#define SYMBOL_DELETED(S)	((S)->deleted)
+#define SYMBOL_NEXT(S)          ((S)->next)
+#define SYMBOL_TRACED(S)        ((S)->traced)
+#define SYMBOL_SHADOWED(S)      ((S)->shadowed)
+#define SYMBOL_MACRO_ARGS(S)    ((S)->macro_args)
+#define SYMBOL_BLIND_NO_ARGS(S) ((S)->blind_no_args)
+#define SYMBOL_DELETED(S)       ((S)->deleted)
 #define SYMBOL_PENDING_EXPANSIONS(S) ((S)->pending_expansions)
-#define SYMBOL_NAME(S)		((S)->name)
-#define SYMBOL_TYPE(S)		(TOKEN_DATA_TYPE (&(S)->data))
-#define SYMBOL_TEXT(S)		(TOKEN_DATA_TEXT (&(S)->data))
-#define SYMBOL_FUNC(S)		(TOKEN_DATA_FUNC (&(S)->data))
+#define SYMBOL_NAME(S)          ((S)->name)
+#define SYMBOL_TYPE(S)          (TOKEN_DATA_TYPE (&(S)->data))
+#define SYMBOL_TEXT(S)          (TOKEN_DATA_TEXT (&(S)->data))
+#define SYMBOL_FUNC(S)          (TOKEN_DATA_FUNC (&(S)->data))
 
 typedef enum symbol_lookup symbol_lookup;
 typedef struct symbol symbol;
 typedef void hack_symbol (symbol *, void *);
 
-#define HASHMAX 509		/* default, overridden by -Hsize */
+#define HASHMAX 509             /* default, overridden by -Hsize */
 
 extern symbol **symtab;
 
@@ -481,3 +482,6 @@ static inline unsigned char to_uchar (char ch) { return ch; }
 #else
 # define to_uchar(C) ((unsigned char) (C))
 #endif
+
+/* Avoid negative logic when comparing two strings.  */
+#define STREQ(a, b) (strcmp (a, b) == 0)

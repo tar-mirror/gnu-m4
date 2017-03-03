@@ -1,5 +1,5 @@
 /* Test of fpurge() function.
-   Copyright (C) 2007-2008 Free Software Foundation, Inc.
+   Copyright (C) 2007-2010 Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -18,71 +18,115 @@
 
 #include <config.h>
 
-#include "fpurge.h"
-
+/* None of the files accessed by this test are large, so disable the
+   fseek link warning if we are not using the gnulib fseek module.  */
+#define _GL_NO_LARGE_FILES
 #include <stdio.h>
-#include <stdlib.h>
+
 #include <string.h>
 
-#define ASSERT(expr) \
-  do									     \
-    {									     \
-      if (!(expr))							     \
-        {								     \
-          fprintf (stderr, "%s:%d: assertion failed\n", __FILE__, __LINE__); \
-          fflush (stderr);						     \
-          abort ();							     \
-        }								     \
-    }									     \
-  while (0)
+#include "macros.h"
 
 #define TESTFILE "t-fpurge.tmp"
 
 int
-main ()
+main (void)
 {
-  FILE *fp;
+  int check_filepos;
 
-  /* Create a file with some contents.  */
-  fp = fopen (TESTFILE, "w");
-  if (fp == NULL)
-    goto skip;
-  if (fwrite ("foobarsh", 1, 8, fp) < 8)
-    goto skip;
-  if (fclose (fp))
-    goto skip;
+  for (check_filepos = 0; check_filepos <= 1; check_filepos++)
+    {
+      FILE *fp;
 
-  /* Open it in read-write mode.  */
-  fp = fopen (TESTFILE, "r+");
-  if (fp == NULL)
-    goto skip;
-  if (fseek (fp, 3, SEEK_CUR))
-    goto skip;
-  if (fwrite ("g", 1, 1, fp) < 1)
-    goto skip;
-  if (fflush (fp))
-    goto skip;
-  if (fwrite ("az", 1, 2, fp) < 2)
-    goto skip;
-  ASSERT (fpurge (fp) == 0);
-  ASSERT (fclose (fp) == 0);
+      /* Create a file with some contents.  */
+      fp = fopen (TESTFILE, "w");
+      if (fp == NULL)
+        goto skip;
+      if (fwrite ("foobarsh", 1, 8, fp) < 8)
+        goto skip;
+      if (fclose (fp))
+        goto skip;
 
-  /* Open it in read-only mode.  */
-  fp = fopen (TESTFILE, "r");
-  if (fp == NULL)
-    goto skip;
-  {
-    char buf[8];
-    if (fread (buf, 1, 8, fp) < 8)
-      goto skip;
-    ASSERT (memcmp (buf, "foogarsh", 8) == 0);
-  }
-  ASSERT (fpurge (fp) == 0);
-  ASSERT (fclose (fp) == 0);
+      /* The file's contents is now "foobarsh".  */
 
+      /* Open it in read-write mode.  */
+      fp = fopen (TESTFILE, "r+");
+      if (fp == NULL)
+        goto skip;
+      if (fseek (fp, 3, SEEK_CUR))
+        goto skip;
+      if (fwrite ("g", 1, 1, fp) < 1)
+        goto skip;
+      if (fflush (fp))
+        goto skip;
+      if (fwrite ("bz", 1, 2, fp) < 2)
+        goto skip;
+      /* Discard pending write.  */
+      ASSERT (fpurge (fp) == 0);
+      /* Verify that when discarding pending output, the file position is set
+         back to where it was before the write calls.  */
+      if (check_filepos)
+        ASSERT (ftell (fp) == 4);
+      ASSERT (fclose (fp) == 0);
+
+      /* Open it in read-only mode.  */
+      fp = fopen (TESTFILE, "r");
+      if (fp == NULL)
+        goto skip;
+      /* Verify that the pending writes before the fpurge were really
+         discarded.  */
+      {
+        char buf[8];
+        if (fread (buf, 1, 7, fp) < 7)
+          goto skip;
+        ASSERT (memcmp (buf, "foogars", 7) == 0);
+      }
+      /* Discard the buffered 'h'.  */
+      if (check_filepos)
+        ASSERT (ftell (fp) == 7);
+      ASSERT (fpurge (fp) == 0);
+      /* Verify that when discarding pending input, the file position is
+         advanced to match the end of the previously read input.  */
+      if (check_filepos)
+        ASSERT (ftell (fp) == 8);
+      ASSERT (getc (fp) == EOF);
+      ASSERT (fclose (fp) == 0);
+
+      /* The file's contents is now "foogarsh".  */
+
+      /* Ensure that purging a read does not corrupt subsequent writes.  */
+      fp = fopen (TESTFILE, "r+");
+      if (fp == NULL)
+        goto skip;
+      if (fseek (fp, -1, SEEK_END))
+        goto skip;
+      ASSERT (getc (fp) == 'h');
+      ASSERT (getc (fp) == EOF);
+      if (check_filepos)
+        ASSERT (ftell (fp) == 8);
+      ASSERT (fpurge (fp) == 0);
+      if (check_filepos)
+        ASSERT (ftell (fp) == 8);
+      ASSERT (putc ('!', fp) == '!');
+      ASSERT (fclose (fp) == 0);
+      fp = fopen (TESTFILE, "r");
+      if (fp == NULL)
+        goto skip;
+      {
+        char buf[10];
+        ASSERT (fread (buf, 1, 10, fp) == 9);
+        ASSERT (memcmp (buf, "foogarsh!", 9) == 0);
+      }
+      ASSERT (fclose (fp) == 0);
+
+      /* The file's contents is now "foogarsh!".  */
+    }
+
+  remove (TESTFILE);
   return 0;
 
  skip:
-  fprintf (stderr, "Skipping test: file operations failed.\n");
+  fprintf (stderr, "Skipping test: prerequisite file operations failed.\n");
+  remove (TESTFILE);
   return 77;
 }

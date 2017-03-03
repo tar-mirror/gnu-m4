@@ -1,4 +1,4 @@
-/* Copyright (C) 2000 Free Software Foundation, Inc.
+/* Copyright (C) 2000, 2009, 2010 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    This program is free software: you can redistribute it and/or modify
@@ -25,9 +25,9 @@
    Before running the process perform the actions described in FILE-ACTIONS. */
 int
 posix_spawnp (pid_t *pid, const char *file,
-	      const posix_spawn_file_actions_t *file_actions,
-	      const posix_spawnattr_t *attrp, char *const argv[],
-	      char *const envp[])
+              const posix_spawn_file_actions_t *file_actions,
+              const posix_spawnattr_t *attrp, char *const argv[],
+              char *const envp[])
 {
   return __spawni (pid, file, file_actions, attrp, argv, envp, 1);
 }

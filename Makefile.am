@@ -1,7 +1,7 @@
 ## Makefile.am - template for generating Makefile via Automake
 ##
-## Copyright (C) 2000, 2001, 2003, 2004, 2005, 2006, 2007, 2008 Free
-## Software Foundation, Inc.
+## Copyright (C) 2000, 2001, 2003, 2004, 2005, 2006, 2007, 2008, 2009,
+## 2010 Free Software Foundation, Inc.
 ##
 ## This file is part of GNU M4.
 ##
@@ -21,8 +21,13 @@
 ## Written by Gary V. Vaughan <gary@gnu.org>
 
 SUBDIRS = . examples lib src doc checks tests
+
+syntax_check_exceptions =		\
+  .x-sc_prohibit_tab_based_indentation	\
+  .x-update-copyright
+
 EXTRA_DIST = bootstrap c-boxes.el cfg.mk maint.mk \
-	.version m4/gnulib-cache.m4
+	.prev-version .version m4/gnulib-cache.m4 $(syntax_check_exceptions)
 DISTCLEANFILES = stamp-h
 ## maintainer-clean should remove as much as possible that ./bootstrap can
 ## recreate.  In the m4 directory, keep only gnulib-cache.m4.
@@ -34,7 +39,8 @@ MAINTAINERCLEANFILES = INSTALL Makefile.in aclocal.m4 \
 ACLOCAL_AMFLAGS = -I m4
 ## Enough users install GNU M4 as gm4 that we make sure 'make installcheck'
 ## will handle that, prior to making a release.
-DISTCHECK_CONFIGURE_FLAGS = --enable-changeword --program-prefix=g
+DISTCHECK_CONFIGURE_FLAGS = --enable-changeword --program-prefix=g \
+	--enable-gcc-warnings
 
 BUILT_SOURCES = $(top_srcdir)/.version
 $(top_srcdir)/.version:

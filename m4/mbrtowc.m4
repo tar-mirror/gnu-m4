@@ -1,5 +1,6 @@
-# mbrtowc.m4 serial 14
-dnl Copyright (C) 2001-2002, 2004-2005, 2008, 2009 Free Software Foundation, Inc.
+# mbrtowc.m4 serial 16
+dnl Copyright (C) 2001-2002, 2004-2005, 2008-2010 Free Software Foundation,
+dnl Inc.
 dnl This file is free software; the Free Software Foundation
 dnl gives unlimited permission to copy and/or distribute it,
 dnl with or without modifications, as long as this notice is preserved.
@@ -127,7 +128,7 @@ int main ()
 }],
           [gl_cv_func_mbrtowc_incomplete_state=yes],
           [gl_cv_func_mbrtowc_incomplete_state=no],
-          [])
+          [:])
       fi
     ])
 ])
@@ -156,6 +157,7 @@ changequote([,])dnl
       if test $LOCALE_ZH_CN != none; then
         AC_TRY_RUN([
 #include <locale.h>
+#include <stdlib.h>
 #include <string.h>
 #include <wchar.h>
 int main ()
@@ -178,7 +180,7 @@ int main ()
 }],
           [gl_cv_func_mbrtowc_sanitycheck=yes],
           [gl_cv_func_mbrtowc_sanitycheck=no],
-          [])
+          [:])
       fi
     ])
 ])
@@ -225,7 +227,7 @@ int main ()
         return 1;
     }
   return 0;
-}], [gl_cv_func_mbrtowc_null_arg=yes], [gl_cv_func_mbrtowc_null_arg=no], [])
+}], [gl_cv_func_mbrtowc_null_arg=yes], [gl_cv_func_mbrtowc_null_arg=no], [:])
       fi
     ])
 ])
@@ -295,7 +297,7 @@ int main ()
 }],
           [gl_cv_func_mbrtowc_retval=yes],
           [gl_cv_func_mbrtowc_retval=no],
-          [])
+          [:])
       fi
     ])
 ])
@@ -342,7 +344,7 @@ int main ()
 }],
           [gl_cv_func_mbrtowc_nul_retval=yes],
           [gl_cv_func_mbrtowc_nul_retval=no],
-          [])
+          [:])
       fi
     ])
 ])

@@ -1,5 +1,5 @@
 /* Creation of subprocesses, communicating via pipes.
-   Copyright (C) 2001-2003, 2006, 2008 Free Software Foundation, Inc.
+   Copyright (C) 2001-2003, 2006, 2008-2010 Free Software Foundation, Inc.
    Written by Bruno Haible <haible@clisp.cons.org>, 2001.
 
    This program is free software: you can redistribute it and/or modify
@@ -82,10 +82,10 @@ extern "C" {
  * signal and the EPIPE error code.
  */
 extern pid_t create_pipe_out (const char *progname,
-			      const char *prog_path, char **prog_argv,
-			      const char *prog_stdout, bool null_stderr,
-			      bool slave_process, bool exit_on_error,
-			      int fd[1]);
+                              const char *prog_path, char **prog_argv,
+                              const char *prog_stdout, bool null_stderr,
+                              bool slave_process, bool exit_on_error,
+                              int fd[1]);
 
 /* Open a pipe for input from a child process.
  * The child's stdin comes from a file.
@@ -95,10 +95,10 @@ extern pid_t create_pipe_out (const char *progname,
  *
  */
 extern pid_t create_pipe_in (const char *progname,
-			     const char *prog_path, char **prog_argv,
-			     const char *prog_stdin, bool null_stderr,
-			     bool slave_process, bool exit_on_error,
-			     int fd[1]);
+                             const char *prog_path, char **prog_argv,
+                             const char *prog_stdin, bool null_stderr,
+                             bool slave_process, bool exit_on_error,
+                             int fd[1]);
 
 /* Open a bidirectional pipe.
  *
@@ -109,15 +109,27 @@ extern pid_t create_pipe_in (const char *progname,
  *
  * Note: When writing to a child process, it is useful to ignore the SIGPIPE
  * signal and the EPIPE error code.
+ *
+ * Note: The parent process must be careful to avoid deadlock.
+ * 1) If you write more than PIPE_MAX bytes or, more generally, if you write
+ *    more bytes than the subprocess can handle at once, the subprocess
+ *    may write its data and wait on you to read it, but you are currently
+ *    busy writing.
+ * 2) When you don't know ahead of time how many bytes the subprocess
+ *    will produce, the usual technique of calling read (fd, buf, BUFSIZ)
+ *    with a fixed BUFSIZ will, on Linux 2.2.17 and on BSD systems, cause
+ *    the read() call to block until *all* of the buffer has been filled.
+ *    But the subprocess cannot produce more data until you gave it more
+ *    input.  But you are currently busy reading from it.
  */
 extern pid_t create_pipe_bidi (const char *progname,
-			       const char *prog_path, char **prog_argv,
-			       bool null_stderr,
-			       bool slave_process, bool exit_on_error,
-			       int fd[2]);
+                               const char *prog_path, char **prog_argv,
+                               bool null_stderr,
+                               bool slave_process, bool exit_on_error,
+                               int fd[2]);
 
 /* The name of the "always silent" device.  */
-#if defined _MSC_VER || defined __MINGW32__
+#if (defined _WIN32 || defined __WIN32__) && ! defined __CYGWIN__
 /* Native Woe32 API.  */
 # define DEV_NULL "NUL"
 #else

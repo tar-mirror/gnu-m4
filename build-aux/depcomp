@@ -1,14 +1,14 @@
 #! /bin/sh
 # depcomp - compile a program generating dependencies as side-effects
 
-scriptversion=2009-03-04.20
+scriptversion=2009-04-28.21; # UTC
 
 # Copyright (C) 1999, 2000, 2003, 2004, 2005, 2006, 2007, 2009 Free
 # Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 3, or (at your option)
+# the Free Software Foundation; either version 2, or (at your option)
 # any later version.
 
 # This program is distributed in the hope that it will be useful,
@@ -474,7 +474,7 @@ makedepend)
   fi
   # X makedepend
   shift
-  cleared=no
+  cleared=no eat=no
   for arg
   do
     case $cleared in
@@ -482,11 +482,17 @@ makedepend)
       set ""; shift
       cleared=yes ;;
     esac
+    if test $eat = yes; then
+      eat=no
+      continue
+    fi
     case "$arg" in
     -D*|-I*)
       set fnord "$@" "$arg"; shift ;;
     # Strip any option that makedepend may not understand.  Remove
     # the object too, otherwise makedepend will parse it as a source file.
+    -arch)
+      eat=yes ;;
     -*|$object)
       ;;
     *)
@@ -619,5 +625,6 @@ exit 0
 # eval: (add-hook 'write-file-hooks 'time-stamp)
 # time-stamp-start: "scriptversion="
 # time-stamp-format: "%:y-%02m-%02d.%02H"
-# time-stamp-end: "$"
+# time-stamp-time-zone: "UTC"
+# time-stamp-end: "; # UTC"
 # End:

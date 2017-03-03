@@ -1,7 +1,7 @@
 /* GNU m4 -- A simple macro processor
 
    Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2004, 2005, 2006,
-   2007, 2008, 2009 Free Software Foundation, Inc.
+   2007, 2008, 2009, 2010 Free Software Foundation, Inc.
 
    This file is part of GNU M4.
 
@@ -26,6 +26,7 @@
 #include <signal.h>
 
 #include "c-stack.h"
+#include "ignore-value.h"
 #include "progname.h"
 #include "version-etc.h"
 
@@ -35,7 +36,7 @@
 
 #define AUTHORS "Rene' Seindal"
 
-static void usage (int);
+static void usage (int) M4_GNUC_NORETURN;
 
 /* Enable sync output for /lib/cpp (-s).  */
 int sync_output = 0;
@@ -79,7 +80,7 @@ int retcode;
 struct macro_definition
 {
   struct macro_definition *next;
-  int code;			/* D, U, s, t, '\1', or DEBUGFILE_OPTION.  */
+  int code; /* D, U, s, t, '\1', or DEBUGFILE_OPTION.  */
   const char *arg;
 };
 typedef struct macro_definition macro_definition;
@@ -96,7 +97,7 @@ m4_error (int status, int errnum, const char *format, ...)
   va_list args;
   va_start (args, format);
   verror_at_line (status, errnum, current_line ? current_file : NULL,
-		  current_line, format, args);
+                  current_line, format, args);
   if (fatal_warnings && ! retcode)
     retcode = EXIT_FAILURE;
 }
@@ -107,7 +108,7 @@ m4_error (int status, int errnum, const char *format, ...)
 
 void
 m4_error_at_line (int status, int errnum, const char *file, int line,
-		  const char *format, ...)
+                  const char *format, ...)
 {
   va_list args;
   va_start (args, format);
@@ -125,7 +126,7 @@ m4_error_at_line (int status, int errnum, const char *file, int line,
 #  define MAX(a,b) ((a) < (b) ? (b) : (a))
 # endif
 # define NSIG (MAX (SIGABRT, MAX (SIGILL, MAX (SIGFPE,  \
-					       MAX (SIGSEGV, SIGBUS)))) + 1)
+                                               MAX (SIGSEGV, SIGBUS)))) + 1)
 #endif
 
 /* Pre-translated messages for program errors.  Do not translate in
@@ -144,21 +145,24 @@ fault_handler (int signo)
   if (signo)
     {
       /* POSIX states that reading static memory is, in general, not
-	 async-safe.  However, the static variables that we read are
-	 never modified once this handler is installed, so this
-	 particular usage is safe.  And it seems an oversight that
-	 POSIX claims strlen is not async-safe.	 */
-      write (STDERR_FILENO, program_name, strlen (program_name));
-      write (STDERR_FILENO, ": ", 2);
-      write (STDERR_FILENO, program_error_message,
-	     strlen (program_error_message));
+         async-safe.  However, the static variables that we read are
+         never modified once this handler is installed, so this
+         particular usage is safe.  And it seems an oversight that
+         POSIX claims strlen is not async-safe.  Ignore write
+         failures, since we will exit with non-zero status anyway.  */
+#define WRITE(f, b, l) ignore_value (write (f, b, l))
+      WRITE (STDERR_FILENO, program_name, strlen (program_name));
+      WRITE (STDERR_FILENO, ": ", 2);
+      WRITE (STDERR_FILENO, program_error_message,
+             strlen (program_error_message));
       if (signal_message[signo])
-	{
-	  write (STDERR_FILENO, ": ", 2);
-	  write (STDERR_FILENO, signal_message[signo],
-		 strlen (signal_message[signo]));
-	}
-      write (STDERR_FILENO, "\n", 1);
+        {
+          WRITE (STDERR_FILENO, ": ", 2);
+          WRITE (STDERR_FILENO, signal_message[signo],
+                 strlen (signal_message[signo]));
+        }
+      WRITE (STDERR_FILENO, "\n", 1);
+#undef WRITE
       _exit (EXIT_INTERNAL_ERROR);
     }
 }
@@ -273,12 +277,12 @@ mismatch, or whatever value was passed to the m4exit macro.\n\
    non-character as a pseudo short option, starting with CHAR_MAX + 1.  */
 enum
 {
-  DEBUGFILE_OPTION = CHAR_MAX + 1,	/* no short opt */
-  DIVERSIONS_OPTION,			/* not quite -N, because of message */
-  WARN_MACRO_SEQUENCE_OPTION,		/* no short opt */
+  DEBUGFILE_OPTION = CHAR_MAX + 1,      /* no short opt */
+  DIVERSIONS_OPTION,                    /* not quite -N, because of message */
+  WARN_MACRO_SEQUENCE_OPTION,           /* no short opt */
 
-  HELP_OPTION,				/* no short opt */
-  VERSION_OPTION			/* no short opt */
+  HELP_OPTION,                          /* no short opt */
+  VERSION_OPTION                        /* no short opt */
 };
 
 static const struct option long_options[] =
@@ -319,12 +323,12 @@ static const struct option long_options[] =
 static void
 process_file (const char *name)
 {
-  if (strcmp (name, "-") == 0)
+  if (STREQ (name, "-"))
     {
       /* If stdin is a terminal, we want to allow 'm4 - file -'
-	 to read input from stdin twice, like GNU cat.  Besides,
-	 there is no point closing stdin before wrapped text, to
-	 minimize bugs in syscmd called from wrapped text.  */
+         to read input from stdin twice, like GNU cat.  Besides,
+         there is no point closing stdin before wrapped text, to
+         minimize bugs in syscmd called from wrapped text.  */
       push_file (stdin, "stdin", false);
     }
   else
@@ -332,13 +336,13 @@ process_file (const char *name)
       char *full_name;
       FILE *fp = m4_path_search (name, &full_name);
       if (fp == NULL)
-	{
-	  error (0, errno, "cannot open `%s'", name);
-	  /* Set the status to EXIT_FAILURE, even though we
-	     continue to process files after a missing file.  */
-	  retcode = EXIT_FAILURE;
-	  return;
-	}
+        {
+          error (0, errno, _("cannot open `%s'"), name);
+          /* Set the status to EXIT_FAILURE, even though we
+             continue to process files after a missing file.  */
+          retcode = EXIT_FAILURE;
+          return;
+        }
       push_file (fp, full_name, true);
       free (full_name);
     }
@@ -357,13 +361,13 @@ process_file (const char *name)
 #endif
 
 int
-main (int argc, char *const *argv, char *const *envp)
+main (int argc, char *const *argv)
 {
   struct sigaction act;
-  macro_definition *head;	/* head of deferred argument list */
+  macro_definition *head;       /* head of deferred argument list */
   macro_definition *tail;
   macro_definition *defn;
-  int optchar;			/* option character */
+  int optchar;                  /* option character */
 
   macro_definition *defines;
   bool interactive = false;
@@ -388,7 +392,7 @@ main (int argc, char *const *argv, char *const *envp)
      handlers.  */
   program_error_message
     = xasprintf (_("internal error detected; please report this bug to <%s>"),
-		 PACKAGE_BUGREPORT);
+                 PACKAGE_BUGREPORT);
   signal_message[SIGSEGV] = xstrdup (strsignal (SIGSEGV));
   signal_message[SIGABRT] = xstrdup (strsignal (SIGABRT));
   signal_message[SIGILL] = xstrdup (strsignal (SIGILL));
@@ -416,10 +420,10 @@ main (int argc, char *const *argv, char *const *envp)
     char *crash = getenv ("M4_CRASH");
     if (crash)
       {
-	if (!atoi (crash))
-	  ++*(int *) 8;
-	assert (false);
-	abort ();
+        if (!strtol (crash, NULL, 10))
+          ++*(int *) 8;
+        assert (false);
+        abort ();
       }
   }
 #endif /* DEBUG_STKOVF */
@@ -428,28 +432,28 @@ main (int argc, char *const *argv, char *const *envp)
   head = tail = NULL;
 
   while ((optchar = getopt_long (argc, (char **) argv, OPTSTRING,
-				 long_options, NULL)) != -1)
+                                 long_options, NULL)) != -1)
     switch (optchar)
       {
       default:
-	usage (EXIT_FAILURE);
+        usage (EXIT_FAILURE);
 
       case 'B':
       case 'S':
       case 'T':
-	/* Compatibility junk: options that other implementations
-	   support, but which we ignore as no-ops and don't list in
-	   --help.  */
-	error (0, 0, "Warning: `m4 -%c' may be removed in a future release",
-	       optchar);
-	break;
+        /* Compatibility junk: options that other implementations
+           support, but which we ignore as no-ops and don't list in
+           --help.  */
+        error (0, 0, _("warning: `m4 -%c' may be removed in a future release"),
+               optchar);
+        break;
 
       case 'N':
       case DIVERSIONS_OPTION:
-	/* -N became an obsolete no-op in 1.4.x.  */
-	error (0, 0, "Warning: `m4 %s' is deprecated",
-	       optchar == 'N' ? "-N" : "--diversions");
-	break;
+        /* -N became an obsolete no-op in 1.4.x.  */
+        error (0, 0, _("warning: `m4 %s' is deprecated"),
+               optchar == 'N' ? "-N" : "--diversions");
+        break;
 
       case 'D':
       case 'U':
@@ -457,119 +461,119 @@ main (int argc, char *const *argv, char *const *envp)
       case 't':
       case '\1':
       case DEBUGFILE_OPTION:
-	/* Arguments that cannot be handled until later are accumulated.  */
+        /* Arguments that cannot be handled until later are accumulated.  */
 
-	defn = (macro_definition *) xmalloc (sizeof (macro_definition));
-	defn->code = optchar;
-	defn->arg = optarg;
-	defn->next = NULL;
+        defn = (macro_definition *) xmalloc (sizeof (macro_definition));
+        defn->code = optchar;
+        defn->arg = optarg;
+        defn->next = NULL;
 
-	if (head == NULL)
-	  head = defn;
-	else
-	  tail->next = defn;
-	tail = defn;
+        if (head == NULL)
+          head = defn;
+        else
+          tail->next = defn;
+        tail = defn;
 
-	break;
+        break;
 
       case 'E':
-	if (! fatal_warnings)
-	  fatal_warnings = true;
-	else
-	  warning_status = EXIT_FAILURE;
-	break;
+        if (! fatal_warnings)
+          fatal_warnings = true;
+        else
+          warning_status = EXIT_FAILURE;
+        break;
 
       case 'F':
-	frozen_file_to_write = optarg;
-	break;
+        frozen_file_to_write = optarg;
+        break;
 
       case 'G':
-	no_gnu_extensions = 1;
-	break;
+        no_gnu_extensions = 1;
+        break;
 
       case 'H':
-	hash_table_size = atol (optarg);
-	if (hash_table_size == 0)
-	  hash_table_size = HASHMAX;
-	break;
+        hash_table_size = strtol (optarg, NULL, 10);
+        if (hash_table_size == 0)
+          hash_table_size = HASHMAX;
+        break;
 
       case 'I':
-	add_include_directory (optarg);
-	break;
+        add_include_directory (optarg);
+        break;
 
       case 'L':
-	nesting_limit = atoi (optarg);
-	break;
+        nesting_limit = strtol (optarg, NULL, 10);
+        break;
 
       case 'P':
-	prefix_all_builtins = 1;
-	break;
+        prefix_all_builtins = 1;
+        break;
 
       case 'Q':
-	suppress_warnings = 1;
-	break;
+        suppress_warnings = 1;
+        break;
 
       case 'R':
-	frozen_file_to_read = optarg;
-	break;
+        frozen_file_to_read = optarg;
+        break;
 
 #ifdef ENABLE_CHANGEWORD
       case 'W':
-	user_word_regexp = optarg;
-	break;
+        user_word_regexp = optarg;
+        break;
 #endif
 
       case 'd':
-	debug_level = debug_decode (optarg);
-	if (debug_level < 0)
-	  {
-	    error (0, 0, "bad debug flags: `%s'", optarg);
-	    debug_level = 0;
-	  }
-	break;
+        debug_level = debug_decode (optarg);
+        if (debug_level < 0)
+          {
+            error (0, 0, _("bad debug flags: `%s'"), optarg);
+            debug_level = 0;
+          }
+        break;
 
       case 'e':
-	error (0, 0, "Warning: `m4 -e' is deprecated, use `-i' instead");
-	/* fall through */
+        error (0, 0, _("warning: `m4 -e' is deprecated, use `-i' instead"));
+        /* fall through */
       case 'i':
-	interactive = true;
-	break;
+        interactive = true;
+        break;
 
       case 'g':
-	no_gnu_extensions = 0;
-	break;
+        no_gnu_extensions = 0;
+        break;
 
       case 'l':
-	max_debug_argument_length = atoi (optarg);
-	if (max_debug_argument_length <= 0)
-	  max_debug_argument_length = 0;
-	break;
+        max_debug_argument_length = strtol (optarg, NULL, 10);
+        if (max_debug_argument_length <= 0)
+          max_debug_argument_length = 0;
+        break;
 
       case 'o':
-	/* -o/--error-output are deprecated synonyms of --debugfile,
-	   but don't issue a deprecation warning until autoconf 2.61
-	   or later is more widely established, as such a warning
-	   would interfere with all earlier versions of autoconf.  */
-	/* Don't call debug_set_output here, as it has side effects.  */
-	debugfile = optarg;
-	break;
+        /* -o/--error-output are deprecated synonyms of --debugfile,
+           but don't issue a deprecation warning until autoconf 2.61
+           or later is more widely established, as such a warning
+           would interfere with all earlier versions of autoconf.  */
+        /* Don't call debug_set_output here, as it has side effects.  */
+        debugfile = optarg;
+        break;
 
       case WARN_MACRO_SEQUENCE_OPTION:
-	 /* Don't call set_macro_sequence here, as it can exit.
-	    --warn-macro-sequence sets optarg to NULL (which uses the
-	    default regexp); --warn-macro-sequence= sets optarg to ""
-	    (which disables these warnings).  */
-	macro_sequence = optarg;
-	break;
+         /* Don't call set_macro_sequence here, as it can exit.
+            --warn-macro-sequence sets optarg to NULL (which uses the
+            default regexp); --warn-macro-sequence= sets optarg to ""
+            (which disables these warnings).  */
+        macro_sequence = optarg;
+        break;
 
       case VERSION_OPTION:
-	version_etc (stdout, PACKAGE, PACKAGE_NAME, VERSION, AUTHORS, NULL);
-	exit (EXIT_SUCCESS);
-	break;
+        version_etc (stdout, PACKAGE, PACKAGE_NAME, VERSION, AUTHORS, NULL);
+        exit (EXIT_SUCCESS);
+        break;
 
       case HELP_OPTION:
-	usage (EXIT_SUCCESS);
-	break;
+        usage (EXIT_SUCCESS);
+        break;
       }
 
   defines = head;
@@ -606,47 +610,47 @@ main (int argc, char *const *argv, char *const *envp)
       symbol *sym;
 
       switch (defines->code)
-	{
-	case 'D':
-	  {
-	    /* defines->arg is read-only, so we need a copy.  */
-	    char *macro_name = xstrdup (defines->arg);
-	    char *macro_value = strchr (macro_name, '=');
-	    if (macro_value)
-	      *macro_value++ = '\0';
-	    define_user_macro (macro_name, macro_value, SYMBOL_INSERT);
-	    free (macro_name);
-	  }
-	  break;
+        {
+        case 'D':
+          {
+            /* defines->arg is read-only, so we need a copy.  */
+            char *macro_name = xstrdup (defines->arg);
+            char *macro_value = strchr (macro_name, '=');
+            if (macro_value)
+              *macro_value++ = '\0';
+            define_user_macro (macro_name, macro_value, SYMBOL_INSERT);
+            free (macro_name);
+          }
+          break;
 
-	case 'U':
-	  lookup_symbol (defines->arg, SYMBOL_DELETE);
-	  break;
+        case 'U':
+          lookup_symbol (defines->arg, SYMBOL_DELETE);
+          break;
 
-	case 't':
-	  sym = lookup_symbol (defines->arg, SYMBOL_INSERT);
-	  SYMBOL_TRACED (sym) = true;
-	  break;
+        case 't':
+          sym = lookup_symbol (defines->arg, SYMBOL_INSERT);
+          SYMBOL_TRACED (sym) = true;
+          break;
 
-	case 's':
-	  sync_output = 1;
-	  break;
+        case 's':
+          sync_output = 1;
+          break;
 
-	case '\1':
-	  seen_file = true;
-	  process_file (defines->arg);
-	  break;
+        case '\1':
+          seen_file = true;
+          process_file (defines->arg);
+          break;
 
-	case DEBUGFILE_OPTION:
-	  if (!debug_set_output (defines->arg))
-	    M4ERROR ((warning_status, errno, "cannot set debug file `%s'",
-		      debugfile ? debugfile : _("stderr")));
-	  break;
+        case DEBUGFILE_OPTION:
+          if (!debug_set_output (defines->arg))
+            M4ERROR ((warning_status, errno, "cannot set debug file `%s'",
+                      debugfile ? debugfile : _("stderr")));
+          break;
 
-	default:
-	  M4ERROR ((0, 0, "INTERNAL ERROR: bad code in deferred arguments"));
-	  abort ();
-	}
+        default:
+          M4ERROR ((0, 0, "INTERNAL ERROR: bad code in deferred arguments"));
+          abort ();
+        }
 
       next = defines->next;
       free (defines);

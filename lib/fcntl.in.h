@@ -1,6 +1,6 @@
 /* Like <fcntl.h>, but with non-working flags defined to 0.
 
-   Copyright (C) 2006-2008 Free Software Foundation, Inc.
+   Copyright (C) 2006-2010 Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -25,8 +25,9 @@
 /* Special invocation convention.  */
 
 #include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
+#ifndef __GLIBC__ /* Avoid namespace pollution on glibc systems.  */
+# include <sys/stat.h>
+#endif
 #@INCLUDE_NEXT@ @NEXT_FCNTL_H@
 
 #else
@@ -35,13 +36,23 @@
 #ifndef _GL_FCNTL_H
 
 #include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
+#ifndef __GLIBC__ /* Avoid namespace pollution on glibc systems.  */
+# include <sys/stat.h>
+#endif
 /* The include_next requires a split double-inclusion guard.  */
 #@INCLUDE_NEXT@ @NEXT_FCNTL_H@
 
 #ifndef _GL_FCNTL_H
 #define _GL_FCNTL_H
+
+#ifndef __GLIBC__ /* Avoid namespace pollution on glibc systems.  */
+# include <unistd.h>
+#endif
+
+
+/* The definition of _GL_ARG_NONNULL is copied here.  */
+
+/* The definition of _GL_WARN_ON_USE is copied here.  */
 
 
 /* Declare overridden functions.  */
@@ -50,29 +61,92 @@
 extern "C" {
 #endif
 
+#if @GNULIB_FCNTL@
+# if @REPLACE_FCNTL@
+#  undef fcntl
+#  define fcntl rpl_fcntl
+# endif
+# if !@HAVE_FCNTL@ || @REPLACE_FCNTL@
+extern int fcntl (int fd, int action, ...);
+# endif
+#elif defined GNULIB_POSIXCHECK
+# undef fcntl
+# if HAVE_RAW_DECL_FCNTL
+_GL_WARN_ON_USE (fcntl, "fcntl is not always POSIX compliant - "
+                 "use gnulib module fcntl for portability");
+# endif
+#endif
+
 #if @GNULIB_OPEN@
 # if @REPLACE_OPEN@
 #  undef open
 #  define open rpl_open
-extern int open (const char *filename, int flags, ...);
+extern int open (const char *filename, int flags, ...) _GL_ARG_NONNULL ((1));
 # endif
+#elif defined GNULIB_POSIXCHECK
+# undef open
+/* Assume open is always declared.  */
+_GL_WARN_ON_USE (open, "open is not always POSIX compliant - "
+                 "use gnulib module open for portability");
 #endif
 
-#ifdef FCHDIR_REPLACEMENT
-/* gnulib internal function.  */
-extern void _gl_register_fd (int fd, const char *filename);
+#if @GNULIB_OPENAT@
+# if @REPLACE_OPENAT@
+#  undef openat
+#  define openat rpl_openat
+# endif
+# if !@HAVE_OPENAT@ || @REPLACE_OPENAT@
+extern int openat (int fd, char const *file, int flags, /* mode_t mode */ ...)
+     _GL_ARG_NONNULL ((2));
+# endif
+#elif defined GNULIB_POSIXCHECK
+# undef openat
+# if HAVE_RAW_DECL_OPENAT
+_GL_WARN_ON_USE (openat, "openat is not portable - "
+                 "use gnulib module openat for portability");
+# endif
 #endif
 
 #ifdef __cplusplus
 }
 #endif
 
+/* Fix up the FD_* macros, only known to be missing on mingw.  */
+
+#ifndef FD_CLOEXEC
+# define FD_CLOEXEC 1
+#endif
+
+/* Fix up the supported F_* macros.  Intentionally leave other F_*
+   macros undefined.  Only known to be missing on mingw.  */
+
+#ifndef F_DUPFD_CLOEXEC
+# define F_DUPFD_CLOEXEC 0x40000000
+/* Witness variable: 1 if gnulib defined F_DUPFD_CLOEXEC, 0 otherwise.  */
+# define GNULIB_defined_F_DUPFD_CLOEXEC 1
+#else
+# define GNULIB_defined_F_DUPFD_CLOEXEC 0
+#endif
+
+#ifndef F_DUPFD
+# define F_DUPFD 1
+#endif
+
+#ifndef F_GETFD
+# define F_GETFD 2
+#endif
 
 /* Fix up the O_* macros.  */
 
 #if !defined O_DIRECT && defined O_DIRECTIO
 /* Tru64 spells it `O_DIRECTIO'.  */
 # define O_DIRECT O_DIRECTIO
+#endif
+
+#if !defined O_CLOEXEC && defined O_NOINHERIT
+/* Mingw spells it `O_NOINHERIT'.  Intentionally leave it
+   undefined if not available.  */
+# define O_CLOEXEC O_NOINHERIT
 #endif
 
 #ifndef O_DIRECT
@@ -119,6 +193,10 @@ extern void _gl_register_fd (int fd, const char *filename);
 # define O_SYNC 0
 #endif
 
+#ifndef O_TTY_INIT
+# define O_TTY_INIT 0
+#endif
+
 /* For systems that distinguish between text and binary I/O.
    O_BINARY is usually declared in fcntl.h  */
 #if !defined O_BINARY && defined _O_BINARY
@@ -136,6 +214,42 @@ extern void _gl_register_fd (int fd, const char *filename);
 #ifndef O_BINARY
 # define O_BINARY 0
 # define O_TEXT 0
+#endif
+
+/* Fix up the AT_* macros.  */
+
+/* Work around a bug in Solaris 9 and 10: AT_FDCWD is positive.  Its
+   value exceeds INT_MAX, so its use as an int doesn't conform to the
+   C standard, and GCC and Sun C complain in some cases.  If the bug
+   is present, undef AT_FDCWD here, so it can be redefined below.  */
+#if 0 < AT_FDCWD && AT_FDCWD == 0xffd19553
+# undef AT_FDCWD
+#endif
+
+/* Use the same bit pattern as Solaris 9, but with the proper
+   signedness.  The bit pattern is important, in case this actually is
+   Solaris with the above workaround.  */
+#ifndef AT_FDCWD
+# define AT_FDCWD (-3041965)
+#endif
+
+/* Use the same values as Solaris 9.  This shouldn't matter, but
+   there's no real reason to differ.  */
+#ifndef AT_SYMLINK_NOFOLLOW
+# define AT_SYMLINK_NOFOLLOW 4096
+#endif
+
+#ifndef AT_REMOVEDIR
+# define AT_REMOVEDIR 1
+#endif
+
+/* Solaris 9 lacks these two, so just pick unique values.  */
+#ifndef AT_SYMLINK_FOLLOW
+# define AT_SYMLINK_FOLLOW 2
+#endif
+
+#ifndef AT_EACCESS
+# define AT_EACCESS 4
 #endif
 
 

@@ -1,5 +1,5 @@
 /* Test of signbit() substitute.
-   Copyright (C) 2007, 2008, 2009 Free Software Foundation, Inc.
+   Copyright (C) 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -20,22 +20,15 @@
 
 #include <math.h>
 
+/* signbit must be a macro.  */
+#ifndef signbit
+# error missing declaration
+#endif
+
 #include <float.h>
 #include <limits.h>
-#include <stdio.h>
-#include <stdlib.h>
 
-#define ASSERT(expr) \
-  do									     \
-    {									     \
-      if (!(expr))							     \
-        {								     \
-          fprintf (stderr, "%s:%d: assertion failed\n", __FILE__, __LINE__); \
-          fflush (stderr);						     \
-          abort ();							     \
-        }								     \
-    }									     \
-  while (0)
+#include "macros.h"
 
 float zerof = 0.0f;
 double zerod = 0.0;

@@ -1,5 +1,5 @@
 /* Test of c-stack module.
-   Copyright (C) 2002, 2004, 2006, 2008 Free Software Foundation, Inc.
+   Copyright (C) 2002, 2004, 2006, 2008-2010 Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -20,7 +20,6 @@
 
 #include "exitfail.h"
 #include <stdio.h>
-#include <stdlib.h>
 #if HAVE_SETRLIMIT
 /* At least FreeBSD 5.0 needs extra headers before <sys/resource.h>
    will compile.  */
@@ -29,17 +28,7 @@
 # include <sys/resource.h>
 #endif
 
-#define ASSERT(expr) \
-  do									     \
-    {									     \
-      if (!(expr))							     \
-	{								     \
-	  fprintf (stderr, "%s:%d: assertion failed\n", __FILE__, __LINE__); \
-	  fflush (stderr);						     \
-	  abort ();							     \
-	}								     \
-    }									     \
-  while (0)
+#include "macros.h"
 
 char *program_name;
 
@@ -75,10 +64,10 @@ main (int argc, char **argv)
   if (c_stack_action (0) == 0)
     {
       if (1 < argc)
-	{
-	  exit_failure = 77;
-	  ++*argv[argc]; /* Intentionally dereference NULL.  */
-	}
+        {
+          exit_failure = 77;
+          ++*argv[argc]; /* Intentionally dereference NULL.  */
+        }
       return recurse (0);
     }
   fputs ("skipping test: ", stderr);

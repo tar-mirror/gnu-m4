@@ -1,16 +1,28 @@
-# strstr.m4 serial 5
-dnl Copyright (C) 2008 Free Software Foundation, Inc.
+# strstr.m4 serial 7
+dnl Copyright (C) 2008, 2009, 2010 Free Software Foundation, Inc.
 dnl This file is free software; the Free Software Foundation
 dnl gives unlimited permission to copy and/or distribute it,
 dnl with or without modifications, as long as this notice is preserved.
 
-dnl Check that strstr is efficient.
-AC_DEFUN([gl_FUNC_STRSTR],
+dnl Check that strstr works.
+AC_DEFUN([gl_FUNC_STRSTR_SIMPLE],
 [
   AC_REQUIRE([gl_HEADER_STRING_H_DEFAULTS])
-  AC_CACHE_CHECK([whether strstr works in linear time],
-    [gl_cv_func_strstr_linear],
-    [AC_RUN_IFELSE([AC_LANG_PROGRAM([[
+  AC_REQUIRE([gl_FUNC_MEMCHR])
+  if test "$gl_cv_func_memchr_works" != yes; then
+    REPLACE_STRSTR=1
+    AC_LIBOBJ([strstr])
+  fi
+]) # gl_FUNC_STRSTR_SIMPLE
+
+dnl Additionally, check that strstr is efficient.
+AC_DEFUN([gl_FUNC_STRSTR],
+[
+  AC_REQUIRE([gl_FUNC_STRSTR_SIMPLE])
+  if test $REPLACE_STRSTR = 0; then
+    AC_CACHE_CHECK([whether strstr works in linear time],
+      [gl_cv_func_strstr_linear],
+      [AC_RUN_IFELSE([AC_LANG_PROGRAM([[
 #include <signal.h> /* for signal */
 #include <string.h> /* for memmem */
 #include <stdlib.h> /* for malloc */
@@ -26,20 +38,20 @@ AC_DEFUN([gl_FUNC_STRSTR],
     /* Check for quadratic performance.  */
     if (haystack && needle)
       {
-	memset (haystack, 'A', 2 * m);
-	haystack[2 * m] = 'B';
-	haystack[2 * m + 1] = 0;
-	memset (needle, 'A', m);
-	needle[m] = 'B';
-	needle[m + 1] = 0;
-	result = strstr (haystack, needle);
+        memset (haystack, 'A', 2 * m);
+        haystack[2 * m] = 'B';
+        haystack[2 * m + 1] = 0;
+        memset (needle, 'A', m);
+        needle[m] = 'B';
+        needle[m + 1] = 0;
+        result = strstr (haystack, needle);
       }
     return !result;]])],
-      [gl_cv_func_strstr_linear=yes], [gl_cv_func_strstr_linear=no],
-      [dnl Only glibc >= 2.9 and cygwin >= 1.7.0 are known to have a
-       dnl strstr that works in linear time.
-       AC_EGREP_CPP([Lucky user],
-	 [
+        [gl_cv_func_strstr_linear=yes], [gl_cv_func_strstr_linear=no],
+        [dnl Only glibc >= 2.9 and cygwin >= 1.7.0 are known to have a
+         dnl strstr that works in linear time.
+         AC_EGREP_CPP([Lucky user],
+           [
 #include <features.h>
 #ifdef __GNU_LIBRARY__
  #if (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 9) || (__GLIBC__ > 2)
@@ -52,13 +64,16 @@ AC_DEFUN([gl_FUNC_STRSTR],
   Lucky user
  #endif
 #endif
-	 ],
-	 [gl_cv_func_strstr_linear=yes],
-	 [gl_cv_func_strstr_linear="guessing no"])
+           ],
+           [gl_cv_func_strstr_linear=yes],
+           [gl_cv_func_strstr_linear="guessing no"])
+        ])
       ])
-    ])
-  if test "$gl_cv_func_strstr_linear" != yes; then
-    REPLACE_STRSTR=1
+    if test "$gl_cv_func_strstr_linear" != yes; then
+      REPLACE_STRSTR=1
+    fi
+  fi
+  if test $REPLACE_STRSTR = 1; then
     AC_LIBOBJ([strstr])
   fi
 ]) # gl_FUNC_STRSTR

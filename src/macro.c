@@ -1,7 +1,7 @@
 /* GNU m4 -- A simple macro processor
 
-   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2006, 2007 Free
-   Software Foundation, Inc.
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2006, 2007, 2009,
+   2010 Free Software Foundation, Inc.
 
    This file is part of GNU M4.
 
@@ -72,12 +72,12 @@ expand_input (void)
 }
 
 
-/*------------------------------------------------------------------------.
-| Expand one token, according to its type.  Potential macro names	  |
-| (TOKEN_WORD) are looked up in the symbol table, to see if they have a	  |
-| macro definition.  If they have, they are expanded as macros, otherwise |
-| the text are just copied to the output.				  |
-`------------------------------------------------------------------------*/
+/*----------------------------------------------------------------.
+| Expand one token, according to its type.  Potential macro names |
+| (TOKEN_WORD) are looked up in the symbol table, to see if they  |
+| have a macro definition.  If they have, they are expanded as    |
+| macros, otherwise the text is just copied to the output.        |
+`----------------------------------------------------------------*/
 
 static void
 expand_token (struct obstack *obs, token_type t, token_data *td, int line)
@@ -85,7 +85,7 @@ expand_token (struct obstack *obs, token_type t, token_data *td, int line)
   symbol *sym;
 
   switch (t)
-    {				/* TOKSW */
+    { /* TOKSW */
     case TOKEN_EOF:
     case TOKEN_MACDEF:
       break;
@@ -96,45 +96,45 @@ expand_token (struct obstack *obs, token_type t, token_data *td, int line)
     case TOKEN_SIMPLE:
     case TOKEN_STRING:
       shipout_text (obs, TOKEN_DATA_TEXT (td), strlen (TOKEN_DATA_TEXT (td)),
-		    line);
+                    line);
       break;
 
     case TOKEN_WORD:
       sym = lookup_symbol (TOKEN_DATA_TEXT (td), SYMBOL_LOOKUP);
       if (sym == NULL || SYMBOL_TYPE (sym) == TOKEN_VOID
-	  || (SYMBOL_TYPE (sym) == TOKEN_FUNC
-	      && SYMBOL_BLIND_NO_ARGS (sym)
-	      && peek_token () != TOKEN_OPEN))
-	{
+          || (SYMBOL_TYPE (sym) == TOKEN_FUNC
+              && SYMBOL_BLIND_NO_ARGS (sym)
+              && peek_token () != TOKEN_OPEN))
+        {
 #ifdef ENABLE_CHANGEWORD
-	  shipout_text (obs, TOKEN_DATA_ORIG_TEXT (td),
-			strlen (TOKEN_DATA_ORIG_TEXT (td)), line);
+          shipout_text (obs, TOKEN_DATA_ORIG_TEXT (td),
+                        strlen (TOKEN_DATA_ORIG_TEXT (td)), line);
 #else
-	  shipout_text (obs, TOKEN_DATA_TEXT (td),
-			strlen (TOKEN_DATA_TEXT (td)), line);
+          shipout_text (obs, TOKEN_DATA_TEXT (td),
+                        strlen (TOKEN_DATA_TEXT (td)), line);
 #endif
-	}
+        }
       else
-	expand_macro (sym);
+        expand_macro (sym);
       break;
 
     default:
       M4ERROR ((warning_status, 0,
-		"INTERNAL ERROR: bad token type in expand_token ()"));
+                "INTERNAL ERROR: bad token type in expand_token ()"));
       abort ();
     }
 }
 
 
-/*-------------------------------------------------------------------------.
-| This function parses one argument to a macro call.  It expects the first |
-| left parenthesis, or the separating comma to have been read by the	   |
-| caller.  It skips leading whitespace, and reads and expands tokens,	   |
-| until it finds a comma or an right parenthesis at the same level of	   |
-| parentheses.  It returns a flag indicating whether the argument read are |
-| the last for the active macro call.  The argument are build on the	   |
-| obstack OBS, indirectly through expand_token ().			   |
-`-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------.
+| This function parses one argument to a macro call.  It expects the |
+| first left parenthesis, or the separating comma, to have been read |
+| by the caller.  It skips leading whitespace, and reads and expands |
+| tokens, until it finds a comma or an right parenthesis at the same |
+| level of parentheses.  It returns a flag indicating whether the    |
+| argument read is the last for the active macro call.  The argument |
+| is built on the obstack OBS, indirectly through expand_token ().   |
+`-------------------------------------------------------------------*/
 
 static bool
 expand_argument (struct obstack *obs, token_data *argp)
@@ -161,73 +161,73 @@ expand_argument (struct obstack *obs, token_data *argp)
     {
 
       switch (t)
-	{			/* TOKSW */
-	case TOKEN_COMMA:
-	case TOKEN_CLOSE:
-	  if (paren_level == 0)
-	    {
-	      /* The argument MUST be finished, whether we want it or not.  */
-	      obstack_1grow (obs, '\0');
-	      text = (char *) obstack_finish (obs);
+        { /* TOKSW */
+        case TOKEN_COMMA:
+        case TOKEN_CLOSE:
+          if (paren_level == 0)
+            {
+              /* The argument MUST be finished, whether we want it or not.  */
+              obstack_1grow (obs, '\0');
+              text = (char *) obstack_finish (obs);
 
-	      if (TOKEN_DATA_TYPE (argp) == TOKEN_VOID)
-		{
-		  TOKEN_DATA_TYPE (argp) = TOKEN_TEXT;
-		  TOKEN_DATA_TEXT (argp) = text;
-		}
-	      return t == TOKEN_COMMA;
-	    }
-	  /* fallthru */
-	case TOKEN_OPEN:
-	case TOKEN_SIMPLE:
-	  text = TOKEN_DATA_TEXT (&td);
+              if (TOKEN_DATA_TYPE (argp) == TOKEN_VOID)
+                {
+                  TOKEN_DATA_TYPE (argp) = TOKEN_TEXT;
+                  TOKEN_DATA_TEXT (argp) = text;
+                }
+              return t == TOKEN_COMMA;
+            }
+          /* fallthru */
+        case TOKEN_OPEN:
+        case TOKEN_SIMPLE:
+          text = TOKEN_DATA_TEXT (&td);
 
-	  if (*text == '(')
-	    paren_level++;
-	  else if (*text == ')')
-	    paren_level--;
-	  expand_token (obs, t, &td, line);
-	  break;
+          if (*text == '(')
+            paren_level++;
+          else if (*text == ')')
+            paren_level--;
+          expand_token (obs, t, &td, line);
+          break;
 
-	case TOKEN_EOF:
-	  /* current_file changed to "" if we see TOKEN_EOF, use the
-	     previous value we stored earlier.  */
-	  M4ERROR_AT_LINE ((EXIT_FAILURE, 0, file, line,
-			    "ERROR: end of file in argument list"));
-	  break;
+        case TOKEN_EOF:
+          /* current_file changed to "" if we see TOKEN_EOF, use the
+             previous value we stored earlier.  */
+          M4ERROR_AT_LINE ((EXIT_FAILURE, 0, file, line,
+                            "ERROR: end of file in argument list"));
+          break;
 
-	case TOKEN_WORD:
-	case TOKEN_STRING:
-	  expand_token (obs, t, &td, line);
-	  break;
+        case TOKEN_WORD:
+        case TOKEN_STRING:
+          expand_token (obs, t, &td, line);
+          break;
 
-	case TOKEN_MACDEF:
-	  if (obstack_object_size (obs) == 0)
-	    {
-	      TOKEN_DATA_TYPE (argp) = TOKEN_FUNC;
-	      TOKEN_DATA_FUNC (argp) = TOKEN_DATA_FUNC (&td);
-	    }
-	  break;
+        case TOKEN_MACDEF:
+          if (obstack_object_size (obs) == 0)
+            {
+              TOKEN_DATA_TYPE (argp) = TOKEN_FUNC;
+              TOKEN_DATA_FUNC (argp) = TOKEN_DATA_FUNC (&td);
+            }
+          break;
 
-	default:
-	  M4ERROR ((warning_status, 0,
-		    "INTERNAL ERROR: bad token type in expand_argument ()"));
-	  abort ();
-	}
+        default:
+          M4ERROR ((warning_status, 0,
+                    "INTERNAL ERROR: bad token type in expand_argument ()"));
+          abort ();
+        }
 
       t = next_token (&td, NULL);
     }
 }
 
-/*-------------------------------------------------------------------------.
-| Collect all the arguments to a call of the macro SYM.  The arguments are |
-| stored on the obstack ARGUMENTS and a table of pointers to the arguments |
-| on the obstack ARGPTR.						   |
-`-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------.
+| Collect all the arguments to a call of the macro SYM.  The   |
+| arguments are stored on the obstack ARGUMENTS and a table of |
+| pointers to the arguments on the obstack ARGPTR.             |
+`-------------------------------------------------------------*/
 
 static void
 collect_arguments (symbol *sym, struct obstack *argptr,
-		   struct obstack *arguments)
+                   struct obstack *arguments)
 {
   token_data td;
   token_data *tdp;
@@ -243,34 +243,35 @@ collect_arguments (symbol *sym, struct obstack *argptr,
     {
       next_token (&td, NULL); /* gobble parenthesis */
       do
-	{
-	  more_args = expand_argument (arguments, &td);
+        {
+          more_args = expand_argument (arguments, &td);
 
-	  if (!groks_macro_args && TOKEN_DATA_TYPE (&td) == TOKEN_FUNC)
-	    {
-	      TOKEN_DATA_TYPE (&td) = TOKEN_TEXT;
-	      TOKEN_DATA_TEXT (&td) = (char *) "";
-	    }
-	  tdp = (token_data *) obstack_copy (arguments, &td, sizeof td);
-	  obstack_ptr_grow (argptr, tdp);
-	}
+          if (!groks_macro_args && TOKEN_DATA_TYPE (&td) == TOKEN_FUNC)
+            {
+              TOKEN_DATA_TYPE (&td) = TOKEN_TEXT;
+              TOKEN_DATA_TEXT (&td) = (char *) "";
+            }
+          tdp = (token_data *) obstack_copy (arguments, &td, sizeof td);
+          obstack_ptr_grow (argptr, tdp);
+        }
       while (more_args);
     }
 }
 
 
-/*------------------------------------------------------------------------.
-| The actual call of a macro is handled by call_macro ().  call_macro ()  |
-| is passed a symbol SYM, whose type is used to call either a builtin	  |
-| function, or the user macro expansion function expand_user_macro ()	  |
-| (lives in builtin.c).  There are ARGC arguments to the call, stored in  |
-| the ARGV table.  The expansion is left on the obstack EXPANSION.  Macro |
-| tracing is also handled here.						  |
-`------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------.
+| The actual call of a macro is handled by call_macro ().            |
+| call_macro () is passed a symbol SYM, whose type is used to call   |
+| either a builtin function, or the user macro expansion function    |
+| expand_user_macro () (lives in builtin.c).  There are ARGC         |
+| arguments to the call, stored in the ARGV table.  The expansion is |
+| left on the obstack EXPANSION.  Macro tracing is also handled      |
+| here.                                                              |
+`-------------------------------------------------------------------*/
 
 void
 call_macro (symbol *sym, int argc, token_data **argv,
-		 struct obstack *expansion)
+                 struct obstack *expansion)
 {
   switch (SYMBOL_TYPE (sym))
     {
@@ -282,29 +283,32 @@ call_macro (symbol *sym, int argc, token_data **argv,
       expand_user_macro (expansion, sym, argc, argv);
       break;
 
+    case TOKEN_VOID:
     default:
       M4ERROR ((warning_status, 0,
-		"INTERNAL ERROR: bad symbol type in call_macro ()"));
+                "INTERNAL ERROR: bad symbol type in call_macro ()"));
       abort ();
     }
 }
 
-/*-------------------------------------------------------------------------.
-| The macro expansion is handled by expand_macro ().  It parses the	   |
-| arguments, using collect_arguments (), and builds a table of pointers to |
-| the arguments.  The arguments themselves are stored on a local obstack.  |
-| Expand_macro () uses call_macro () to do the call of the macro.	   |
-|									   |
-| Expand_macro () is potentially recursive, since it calls expand_argument |
-| (), which might call expand_token (), which might call expand_macro ().  |
-`-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------.
+| The macro expansion is handled by expand_macro ().  It parses the  |
+| arguments, using collect_arguments (), and builds a table of       |
+| pointers to the arguments.  The arguments themselves are stored on |
+| a local obstack.  Expand_macro () uses call_macro () to do the     |
+| call of the macro.                                                 |
+|                                                                    |
+| Expand_macro () is potentially recursive, since it calls           |
+| expand_argument (), which might call expand_token (), which might  |
+| call expand_macro ().                                              |
+`-------------------------------------------------------------------*/
 
 static void
 expand_macro (symbol *sym)
 {
-  struct obstack arguments;	/* Alternate obstack if argc_stack is busy.  */
-  unsigned argv_base;		/* Size of argv_stack on entry.  */
-  bool use_argc_stack = true;	/* Whether argc_stack is safe.  */
+  struct obstack arguments;     /* Alternate obstack if argc_stack is busy.  */
+  unsigned argv_base;           /* Size of argv_stack on entry.  */
+  bool use_argc_stack = true;   /* Whether argc_stack is safe.  */
   token_data **argv;
   int argc;
   struct obstack *expansion;
@@ -327,8 +331,8 @@ expand_macro (symbol *sym)
   expansion_level++;
   if (nesting_limit > 0 && expansion_level > nesting_limit)
     M4ERROR ((EXIT_FAILURE, 0,
-	      "recursion limit of %d exceeded, use -L<N> to change it",
-	      nesting_limit));
+              "recursion limit of %d exceeded, use -L<N> to change it",
+              nesting_limit));
 
   macro_call_id++;
   my_call_id = macro_call_id;
@@ -339,8 +343,8 @@ expand_macro (symbol *sym)
   if (obstack_object_size (&argc_stack) > 0)
     {
       /* We cannot use argc_stack if this is a nested invocation, and an
-	 outer invocation has an unfinished argument being
-	 collected.  */
+         outer invocation has an unfinished argument being
+         collected.  */
       obstack_init (&arguments);
       use_argc_stack = false;
     }
@@ -349,10 +353,10 @@ expand_macro (symbol *sym)
     trace_prepre (SYMBOL_NAME (sym), my_call_id);
 
   collect_arguments (sym, &argv_stack,
-		     use_argc_stack ? &argc_stack : &arguments);
+                     use_argc_stack ? &argc_stack : &arguments);
 
   argc = ((obstack_object_size (&argv_stack) - argv_base)
-	  / sizeof (token_data *));
+          / sizeof (token_data *));
   argv = (token_data **) ((char *) obstack_base (&argv_stack) + argv_base);
 
   loc_close_file = current_file;
@@ -368,7 +372,7 @@ expand_macro (symbol *sym)
   expanded = push_string_finish ();
 
   if (traced)
-    trace_post (SYMBOL_NAME (sym), my_call_id, argc, argv, expanded);
+    trace_post (SYMBOL_NAME (sym), my_call_id, argc, expanded);
 
   current_file = loc_close_file;
   current_line = loc_close_line;

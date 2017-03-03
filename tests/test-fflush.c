@@ -1,5 +1,5 @@
 /* Test of POSIX compatible fflush() function.
-   Copyright (C) 2007 Free Software Foundation, Inc.
+   Copyright (C) 2007, 2009, 2010 Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -18,11 +18,18 @@
 
 #include <config.h>
 
+/* None of the files accessed by this test are large, so disable the
+   ftell link warning if we are not using the gnulib ftell module.  */
+#define _GL_NO_LARGE_FILES
 #include <stdio.h>
+
+#include "signature.h"
+SIGNATURE_CHECK (fflush, int, (FILE *));
+
 #include <unistd.h>
 
 int
-main (int argc, char *argv[])
+main (void)
 {
   FILE *f;
   char buffer[10];
@@ -59,7 +66,7 @@ main (int argc, char *argv[])
     }
 #endif
   /* POSIX requires fflush-fseek to set file offset of fd.  */
-  if (fflush (f) != 0 || fseek (f, 0, SEEK_CUR) != 0)
+  if (fflush (f) != 0 || fseeko (f, 0, SEEK_CUR) != 0)
     {
       fputs ("Failed to flush-fseek sample file.\n", stderr);
       fclose (f);
@@ -70,7 +77,7 @@ main (int argc, char *argv[])
   if (lseek (fd, 0, SEEK_CUR) != 5)
     {
       fprintf (stderr, "File offset is wrong after fseek: %ld.\n",
-	       (long) lseek (fd, 0, SEEK_CUR));
+               (long) lseek (fd, 0, SEEK_CUR));
       fclose (f);
       unlink ("test-fflush.txt");
       return 1;
@@ -78,7 +85,7 @@ main (int argc, char *argv[])
   if (ftell (f) != 5)
     {
       fprintf (stderr, "ftell result is wrong after fseek: %ld.\n",
-	       (long) ftell (f));
+               (long) ftell (f));
       fclose (f);
       unlink ("test-fflush.txt");
       return 1;
@@ -111,7 +118,7 @@ main (int argc, char *argv[])
   if (lseek (fd, 0, SEEK_CUR) != 6)
     {
       fprintf (stderr, "File offset is wrong after fseeko: %ld.\n",
-	       (long) lseek (fd, 0, SEEK_CUR));
+               (long) lseek (fd, 0, SEEK_CUR));
       fclose (f);
       unlink ("test-fflush.txt");
       return 1;
@@ -119,7 +126,7 @@ main (int argc, char *argv[])
   if (ftell (f) != 6)
     {
       fprintf (stderr, "ftell result is wrong after fseeko: %ld.\n",
-	       (long) ftell (f));
+               (long) ftell (f));
       fclose (f);
       unlink ("test-fflush.txt");
       return 1;

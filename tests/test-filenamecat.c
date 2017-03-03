@@ -1,6 +1,6 @@
 /* Test of concatenation of two arbitrary file names.
 
-   Copyright (C) 1996-2007, 2009 Free Software Foundation, Inc.
+   Copyright (C) 1996-2007, 2009-2010 Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@
 #include "progname.h"
 
 int
-main (int argc, char *argv[])
+main (int argc _GL_UNUSED, char *argv[])
 {
   static char const *const tests[][3] =
     {
@@ -57,10 +57,10 @@ main (int argc, char *argv[])
       char const *const *t = tests[i];
       char *res = file_name_concat (t[0], t[1], &base_in_result);
       if (strcmp (res, t[2]) != 0)
-	{
-	  fprintf (stderr, "test #%u: got %s, expected %s\n", i, res, t[2]);
-	  fail = true;
-	}
+        {
+          fprintf (stderr, "test #%u: got %s, expected %s\n", i, res, t[2]);
+          fail = true;
+        }
     }
   exit (fail ? EXIT_FAILURE : EXIT_SUCCESS);
 }

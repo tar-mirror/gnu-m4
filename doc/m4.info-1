@@ -1,14 +1,14 @@
 This is m4.info, produced by makeinfo version 4.13 from m4.texinfo.
 
-This manual (5 March 2009) is for GNU M4 (version 1.4.13), a package
-containing an implementation of the m4 macro language.
+This manual (24 February 2010) is for GNU M4 (version 1.4.14), a
+package containing an implementation of the m4 macro language.
 
    Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2004, 2005, 2006,
-2007, 2008, 2009 Free Software Foundation, Inc.
+2007, 2008, 2009, 2010 Free Software Foundation, Inc.
 
      Permission is granted to copy, distribute and/or modify this
      document under the terms of the GNU Free Documentation License,
-     Version 1.2 or any later version published by the Free Software
+     Version 1.3 or any later version published by the Free Software
      Foundation; with no Invariant Sections, no Front-Cover Texts, and
      no Back-Cover Texts.  A copy of the license is included in the
      section entitled "GNU Free Documentation License."
@@ -24,15 +24,15 @@ File: m4.info,  Node: Top,  Next: Preliminaries,  Up: (dir)
 GNU M4
 ******
 
-This manual (5 March 2009) is for GNU M4 (version 1.4.13), a package
-containing an implementation of the m4 macro language.
+This manual (24 February 2010) is for GNU M4 (version 1.4.14), a
+package containing an implementation of the m4 macro language.
 
    Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 2004, 2005, 2006,
-2007, 2008, 2009 Free Software Foundation, Inc.
+2007, 2008, 2009, 2010 Free Software Foundation, Inc.
 
      Permission is granted to copy, distribute and/or modify this
      document under the terms of the GNU Free Documentation License,
-     Version 1.2 or any later version published by the Free Software
+     Version 1.3 or any later version published by the Free Software
      Foundation; with no Invariant Sections, no Front-Cover Texts, and
      no Back-Cover Texts.  A copy of the license is included in the
      section entitled "GNU Free Documentation License."
@@ -46,10 +46,10 @@ generating `configure' scripts, but not for running them.
 
    GNU `m4' was originally written by Rene' Seindal, with subsequent
 changes by Franc,ois Pinard and other volunteers on the Internet.  All
-names and email addresses can be found in the files `m4-1.4.13/AUTHORS'
-and `m4-1.4.13/THANKS' from the GNU M4 distribution.
+names and email addresses can be found in the files `m4-1.4.14/AUTHORS'
+and `m4-1.4.14/THANKS' from the GNU M4 distribution.
 
-   This is release 1.4.13.  It is now considered stable:  future
+   This is release 1.4.14.  It is now considered stable:  future
 releases in the 1.4.x series are only meant to fix bugs, increase speed,
 or improve documentation.  However...
 
@@ -344,8 +344,8 @@ addressed some long standing bugs in the venerable 1.4 release.  Then in
 And in 2006, Eric Blake joined the team and prepared patches for the
 release of 1.4.5, 1.4.6, 1.4.7, and 1.4.8.  More bug fixes were
 incorporated in 2007, with releases 1.4.9 and 1.4.10.  Eric continued
-with some portability fixes for 1.4.11 and 1.4.12 in 2008, and 1.4.13
-in 2009.
+with some portability fixes for 1.4.11 and 1.4.12 in 2008, 1.4.13 in
+2009, and 1.4.14 in 2010.
 
    Meanwhile, development has continued on new features for `m4', such
 as dynamic module loading and additional builtins.  When complete, GNU
@@ -412,7 +412,7 @@ the examples assume that your current directory is located where you
 unpacked the installation, so if you plan on following along, you may
 find it helpful to do this now:
 
-     $ cd m4-1.4.13
+     $ cd m4-1.4.14
 
    As each of the predefined macros in `m4' is described, a prototype
 call of the macro will be shown, giving descriptive names to the
@@ -1055,12 +1055,15 @@ after the macro invocation is scanned and output literally.
 and whitespace so that less whitespace is output (which, although
 harmless to shell scripts, can be visually unappealing), and fixes the
 quoting issues so that the capitalization occurs when the macro
-`gl_STRING_MODULE_INDICATOR' is invoked, rather then when it is defined.
+`gl_STRING_MODULE_INDICATOR' is invoked, rather then when it is
+defined.  It also adds another layer of quoting to the first argument of
+`translit', to ensure that the output will be rescanned as a string
+rather than a potential uppercase macro name needing further expansion.
 
      changequote([,])dnl
      define([gl_STRING_MODULE_INDICATOR],
        [dnl comment
-       GNULIB_[]translit([$1], [a-z], [A-Z])=1dnl
+       GNULIB_[]translit([[$1]], [a-z], [A-Z])=1dnl
      ])dnl
        gl_STRING_MODULE_INDICATOR([strcase])
      =>    GNULIB_STRCASE=1
@@ -1068,10 +1071,10 @@ quoting issues so that the capitalization occurs when the macro
    The parsing of the first line is unchanged.  The second line sees the
 name of the macro to define, then sees the discarded `<NL>' and two
 spaces, as before.  But this time, the next token is `[dnl comment<NL>
-GNULIB_[]translit([$1], [a-z], [A-Z])=1dnl<NL>]', which includes nested
-quotes, followed by `)' to end the macro definition and `dnl' to skip
-the newline.  No early expansion of `translit' occurs, so the entire
-string becomes the definition of the macro.
+GNULIB_[]translit([[$1]], [a-z], [A-Z])=1dnl<NL>]', which includes
+nested quotes, followed by `)' to end the macro definition and `dnl' to
+skip the newline.  No early expansion of `translit' occurs, so the
+entire string becomes the definition of the macro.
 
    The final line is then parsed, beginning with two spaces that are
 output literally, and an invocation of `gl_STRING_MODULE_INDICATOR'
@@ -1083,13 +1086,14 @@ output literally.  The token `[]' is an empty string, so it does not
 affect output.  Then the token `translit' is encountered.
 
    This time, the arguments to `translit' are parsed as `(',
-`[strcase]', `,', ` ', `[a-z]', `,', ` ', `[A-Z]', and `)'.  The two
+`[[strcase]]', `,', ` ', `[a-z]', `,', ` ', `[A-Z]', and `)'.  The two
 spaces are discarded, and the translit results in the desired result
-`STRCASE'.  This is rescanned, but since it is not a macro name, it is
-output literally.  Then the scanner sees `=' and `1', which are output
-literally, followed by `dnl' which discards the rest of the definition
-of `gl_STRING_MODULE_INDICATOR'.  The newline at the end of output is
-the literal `<NL>' that appeared after the invocation of the macro.
+`[STRCASE]'.  This is rescanned, but since it is a string, the quotes
+are stripped and the only output is a literal `STRCASE'.  Then the
+scanner sees `=' and `1', which are output literally, followed by `dnl'
+which discards the rest of the definition of
+`gl_STRING_MODULE_INDICATOR'.  The newline at the end of output is the
+literal `<NL>' that appeared after the invocation of the macro.
 
    The order in which `m4' expands the macros can be further explored
 using the trace facilities of GNU `m4' (*note Trace::).
@@ -2436,7 +2440,7 @@ arguments into a single string.
      arguments, `join' avoids the SEPARATOR for an empty ARG.
 
    Here are some examples of its usage, based on the implementation
-`m4-1.4.13/examples/join.m4' distributed in this package:
+`m4-1.4.14/examples/join.m4' distributed in this package:
 
      $ m4 -I examples
      include(`join.m4')
@@ -2531,7 +2535,7 @@ element, or treating multiple arguments as a single element:
      levels of quoting are added around each element.
 
    An actual implementation of these three macros is distributed as
-`m4-1.4.13/examples/quote.m4' in this package.  First, let's examine
+`m4-1.4.14/examples/quote.m4' in this package.  First, let's examine
 their usage:
 
      $ m4 -I examples
@@ -2647,7 +2651,7 @@ finished, it increments the iterator (using the predefined macro
 `incr', *note Incr::), and recurses.
 
    Here is an actual implementation of `forloop', distributed as
-`m4-1.4.13/examples/forloop.m4' in this package:
+`m4-1.4.14/examples/forloop.m4' in this package:
 
      $ m4 -I examples
      undivert(`forloop.m4')dnl
@@ -2688,8 +2692,8 @@ Here is an example of a loop macro that implements list iteration.
 
    As an example, this displays each word in a list inside of a
 sentence, using an implementation of `foreach' distributed as
-`m4-1.4.13/examples/foreach.m4', and `foreachq' in
-`m4-1.4.13/examples/foreachq.m4'.
+`m4-1.4.14/examples/foreach.m4', and `foreachq' in
+`m4-1.4.14/examples/foreachq.m4'.
 
      $ m4 -I examples
      include(`foreach.m4')
@@ -2839,7 +2843,7 @@ definition stack.
      parameter.
 
    A sample implementation of these macros is distributed in the file
-`m4-1.4.13/examples/stack.m4'.
+`m4-1.4.14/examples/stack.m4'.
 
      $ m4 -I examples
      include(`stack.m4')
@@ -2969,7 +2973,7 @@ more obvious.  The macro `stack_foreach' mentioned earlier is an example
 of a context that provides exactly one argument to a macro name.  But
 coupled with currying, we can invoke `reverse' with two arguments for
 each definition of a macro stack.  This example uses the file
-`m4-1.4.13/examples/curry.m4' included in the distribution.
+`m4-1.4.14/examples/curry.m4' included in the distribution.
 
      $ m4 -I examples
      include(`curry.m4')include(`stack.m4')
@@ -3997,7 +4001,7 @@ behavior is likely to change in a future release, to match POSIX, so
 you should not depend on this order.
 
    It is possible to emulate POSIX behavior even with older versions of
-GNU M4 by including the file `m4-1.4.13/examples/wrapfifo.m4' from the
+GNU M4 by including the file `m4-1.4.14/examples/wrapfifo.m4' from the
 distribution:
 
      $ m4 -I examples
@@ -4022,7 +4026,7 @@ distribution:
 
    It is likewise possible to emulate LIFO behavior without resorting to
 the GNU M4 extension of `builtin', by including the file
-`m4-1.4.13/examples/wraplifo.m4' from the distribution.
+`m4-1.4.14/examples/wraplifo.m4' from the distribution.
 (Unfortunately, both examples shown here share some subtle bugs.  See
 if you can find and correct them; or *note Answers: Improved m4wrap.).
 
@@ -4128,8 +4132,8 @@ There are two builtin macros in `m4' for including files:
 
    The rest of this section assumes that `m4' is invoked with the `-I'
 option (*note Invoking m4: Preprocessor features.)  pointing to the
-`m4-1.4.13/examples' directory shipped as part of the GNU `m4' package.
-The file `m4-1.4.13/examples/incl.m4' in the distribution contains the
+`m4-1.4.14/examples' directory shipped as part of the GNU `m4' package.
+The file `m4-1.4.14/examples/incl.m4' in the distribution contains the
 lines:
 
      $ cat examples/incl.m4
@@ -4206,17 +4210,15 @@ can at any time be diverted to a temporary file, and be reinserted into
 the output stream, "undiverted", again at a later time.
 
    Numbered diversions are counted from 0 upwards, diversion number 0
-being the normal output stream.  The number of simultaneous diversions
-is limited mainly by the memory used to describe them, because GNU `m4'
-tries to keep diversions in memory.  However, there is a limit to the
-overall memory usable by all diversions taken altogether (512K,
-currently).  When this maximum is about to be exceeded, a temporary
-file is opened to receive the contents of the biggest diversion still
-in memory, freeing this memory for other diversions.  When creating the
-temporary file, `m4' honors the value of the environment variable
-`TMPDIR', and falls back to `/tmp'.  So, it is theoretically possible
-that the number and aggregate size of diversions is limited only by
-available disk space.
+being the normal output stream.  GNU `m4' tries to keep diversions in
+memory.  However, there is a limit to the overall memory usable by all
+diversions taken together (512K, currently).  When this maximum is
+about to be exceeded, a temporary file is opened to receive the
+contents of the biggest diversion still in memory, freeing this memory
+for other diversions.  When creating the temporary file, `m4' honors
+the value of the environment variable `TMPDIR', and falls back to
+`/tmp'.  Thus, the amount of available disk space provides the only
+real limit on the number and aggregate size of diversions.
 
    Diversions make it possible to generate output in a different order
 than the input was read.  It is possible to implement topological
@@ -4787,7 +4789,7 @@ individual words or whole sentences, by substituting calls of the macros
      upper case and the remaining characters to lower case.
 
    First, an example of their usage, using implementations distributed
-in `m4-1.4.13/examples/capitalize.m4'.
+in `m4-1.4.14/examples/capitalize.m4'.
 
      $ m4 -I examples
      include(`capitalize.m4')
@@ -5443,10 +5445,10 @@ To see whether a shell command succeeded, use `sysval':
      =>
      ifelse(sysval, `0', `zero', `non-zero')
      =>non-zero
-     esyscmd(`exit 2')
+     esyscmd(`echo dnl && exit 127')
      =>
      sysval
-     =>2
+     =>127
      esyscmd(`true')
      =>
      sysval
@@ -5456,7 +5458,7 @@ To see whether a shell command succeeded, use `sysval':
 command, for example, if the system-imposed argument length is exceeded,
 or if there were not enough resources to fork.  It is not possible to
 distinguish between failed execution and successful execution that had
-an exit status of 127.
+an exit status of 127, unless there was output from the child process.
 
    On UNIX platforms, where it is possible to detect when command
 execution is terminated by a signal, rather than a normal exit, the
@@ -5926,7 +5928,7 @@ characters.  The directives are:
      the same name, and its order, along with `F', is important.
 
 `V NUMBER <NL>'
-     Confirms the format of the file.  `m4' 1.4.13 only creates and
+     Confirms the format of the file.  `m4' 1.4.14 only creates and
      understands frozen files where NUMBER is 1.  This directive must
      be the first non-comment in the file, and may not appear more than
      once.
@@ -6325,7 +6327,7 @@ The `forloop' macro (*note Forloop::) as presented earlier can go into
 an infinite loop if given an iterator that is not parsed as a macro
 name.  It does not do any sanity checking on its numeric bounds, and
 only permits decimal numbers for bounds.  Here is an improved version,
-shipped as `m4-1.4.13/examples/forloop2.m4'; this version also
+shipped as `m4-1.4.14/examples/forloop2.m4'; this version also
 optimizes overhead by calling four macros instead of six per iteration
 (excluding those in TEXT), by not dereferencing the ITERATOR in the
 helper `_forloop'.
@@ -6400,7 +6402,7 @@ to pass the current iterator value as a single argument.  Coupled with
 helper macros if the argument is needed in more than one place in the
 expansion, the output can be generated with three, rather than four,
 macros of overhead per iteration.  Notice how the file
-`m4-1.4.13/examples/forloop3.m4' rearranges the arguments of the helper
+`m4-1.4.14/examples/forloop3.m4' rearranges the arguments of the helper
 `_forloop' to take two arguments that are placed around the current
 value.  By splitting a balanced set of parantheses across multiple
 arguments, the helper macro can now be shared by `forloop' and the new
@@ -6492,7 +6494,7 @@ recursion use fewer arguments, rather than adding additional quoted
 uses of `shift'.  By doing so, `m4' uses less memory, invokes fewer
 macros, is less likely to run into machine limits, and most
 importantly, performs faster.  The fixed version of `foreachq' can be
-found in `m4-1.4.13/examples/foreachq2.m4':
+found in `m4-1.4.14/examples/foreachq2.m4':
 
      $ m4 -I examples
      include(`foreachq2.m4')
@@ -6541,7 +6543,7 @@ operate on an unboxed list in the first place, and by using the
 fixed-length `$#' instead of an arbitrary length list as the key to end
 recursion.  The result is an overhead of six macro invocations per loop
 (excluding any macros in TEXT), instead of eight.  This alternative
-approach is available as `m4-1.4.13/examples/foreach3.m4':
+approach is available as `m4-1.4.14/examples/foreach3.m4':
 
      $ m4 -I examples
      include(`foreachq3.m4')
@@ -6650,7 +6652,7 @@ supported.
      =>4
 
    For yet another approach, the improved version of `foreach',
-available in `m4-1.4.13/examples/foreach2.m4', simply overquotes the
+available in `m4-1.4.14/examples/foreach2.m4', simply overquotes the
 arguments to `_foreach' to begin with, using `dquote_elt'.  Then
 `_foreach' can just use `_arg1' to remove the extra layer of quoting
 that was added up front:
@@ -6819,7 +6821,7 @@ argument in the recursive call; while the other approach would give the
 same output, it does so at the expense of increasing the argument size
 on each iteration of `_stack_reverse_sep', which results in quadratic
 instead of linear execution time.  The improved stack walking macros
-are available in `m4-1.4.13/examples/stack_sep.m4':
+are available in `m4-1.4.14/examples/stack_sep.m4':
 
      $ m4 -I examples
      include(`stack_sep.m4')
@@ -6899,7 +6901,7 @@ in an undefined state.
 arguments to `m4wrap', separated by a space, rather than saving just
 the first argument.  This is done with the `join' macro documented
 previously (*note Shift::).  The improved LIFO example is shipped as
-`m4-1.4.13/examples/wraplifo2.m4', and can easily be converted to a
+`m4-1.4.14/examples/wraplifo2.m4', and can easily be converted to a
 FIFO solution by swapping the adjacent invocations of `joinall' and
 `defn'.
 
@@ -7035,7 +7037,7 @@ string.  In turn, that means the replacement text has unbalanced quotes,
 necessitating another round of `changequote'.
 
    In the fixed version below, (also shipped as
-`m4-1.4.13/examples/capitalize.m4'), `capitalize' uses the alternate
+`m4-1.4.14/examples/capitalize2.m4'), `capitalize' uses the alternate
 quotes of `<<[' and `]>>' (the longer strings are chosen so as to be
 less likely to appear in the text being converted).  The helpers
 `_to_alt' and `_from_alt' merely reduce the number of characters
@@ -7849,7 +7851,7 @@ Appendix B How to make copies of this manual
 
 This appendix covers the license for copying this manual.  Note that
 some of the longer examples in this manual are also distributed in the
-directory `m4-1.4.13/examples/', where a more permissive license is in
+directory `m4-1.4.14/examples/', where a more permissive license is in
 effect when copying just the examples.
 
 * Menu:

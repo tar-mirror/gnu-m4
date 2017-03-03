@@ -1,5 +1,5 @@
 /* Auxiliary functions for the creation of subprocesses.  Native Woe32 API.
-   Copyright (C) 2003, 2006-2009 Free Software Foundation, Inc.
+   Copyright (C) 2001, 2003-2010 Free Software Foundation, Inc.
    Written by Bruno Haible <bruno@clisp.org>, 2003.
 
    This program is free software: you can redistribute it and/or modify
@@ -24,34 +24,70 @@
 
 #include <stdbool.h>
 #include <string.h>
+#include <unistd.h>
 #include <errno.h>
 
+#include "cloexec.h"
 #include "xalloc.h"
 
-/* Duplicates a file handle, making the copy uninheritable.  */
+/* Duplicates a file handle, making the copy uninheritable.
+   Returns -1 for a file handle that is equivalent to closed.  */
 static int
 dup_noinherit (int fd)
 {
-  HANDLE curr_process = GetCurrentProcess ();
-  HANDLE old_handle = (HANDLE) _get_osfhandle (fd);
-  HANDLE new_handle;
-  int nfd;
-
-  if (!DuplicateHandle (curr_process,		    /* SourceProcessHandle */
-			old_handle,		    /* SourceHandle */
-			curr_process,		    /* TargetProcessHandle */
-			(PHANDLE) &new_handle,	    /* TargetHandle */
-			(DWORD) 0,		    /* DesiredAccess */
-			FALSE,			    /* InheritHandle */
-			DUPLICATE_SAME_ACCESS))	    /* Options */
-    error (EXIT_FAILURE, 0, _("DuplicateHandle failed with error code 0x%08x"),
-	   (unsigned int) GetLastError ());
-
-  nfd = _open_osfhandle ((long) new_handle, O_BINARY);
-  if (nfd < 0)
+  fd = dup_cloexec (fd);
+  if (fd < 0 && errno == EMFILE)
     error (EXIT_FAILURE, errno, _("_open_osfhandle failed"));
 
-  return nfd;
+  return fd;
+}
+
+/* Returns a file descriptor equivalent to FD, except that the resulting file
+   descriptor is none of STDIN_FILENO, STDOUT_FILENO, STDERR_FILENO.
+   FD must be open and non-inheritable.  The result will be non-inheritable as
+   well.
+   If FD < 0, FD itself is returned.  */
+static int
+fd_safer_noinherit (int fd)
+{
+  if (STDIN_FILENO <= fd && fd <= STDERR_FILENO)
+    {
+      /* The recursion depth is at most 3.  */
+      int nfd = fd_safer_noinherit (dup_noinherit (fd));
+      int saved_errno = errno;
+      close (fd);
+      errno = saved_errno;
+      return nfd;
+    }
+  return fd;
+}
+
+/* Duplicates a file handle, making the copy uninheritable and ensuring the
+   result is none of STDIN_FILENO, STDOUT_FILENO, STDERR_FILENO.
+   Returns -1 for a file handle that is equivalent to closed.  */
+static int
+dup_safer_noinherit (int fd)
+{
+  return fd_safer_noinherit (dup_noinherit (fd));
+}
+
+/* Undoes the effect of TEMPFD = dup_safer_noinherit (ORIGFD);  */
+static void
+undup_safer_noinherit (int tempfd, int origfd)
+{
+  if (tempfd >= 0)
+    {
+      if (dup2 (tempfd, origfd) < 0)
+        error (EXIT_FAILURE, errno, _("cannot restore fd %d: dup2 failed"),
+               origfd);
+      close (tempfd);
+    }
+  else
+    {
+      /* origfd was closed or open to no handle at all.  Set it to a closed
+         state.  This is (nearly) equivalent to the original state.  */
+      close (origfd);
+    }
 }
 
 /* Prepares an argument vector before calling spawn().
@@ -107,68 +143,68 @@ prepare_spawn (char **argv)
       const char *string = argv[i];
 
       if (string[0] == '\0')
-	new_argv[i] = xstrdup ("\"\"");
+        new_argv[i] = xstrdup ("\"\"");
       else if (strpbrk (string, SHELL_SPECIAL_CHARS) != NULL)
-	{
-	  bool quote_around = (strpbrk (string, SHELL_SPACE_CHARS) != NULL);
-	  size_t length;
-	  unsigned int backslashes;
-	  const char *s;
-	  char *quoted_string;
-	  char *p;
+        {
+          bool quote_around = (strpbrk (string, SHELL_SPACE_CHARS) != NULL);
+          size_t length;
+          unsigned int backslashes;
+          const char *s;
+          char *quoted_string;
+          char *p;
 
-	  length = 0;
-	  backslashes = 0;
-	  if (quote_around)
-	    length++;
-	  for (s = string; *s != '\0'; s++)
-	    {
-	      char c = *s;
-	      if (c == '"')
-		length += backslashes + 1;
-	      length++;
-	      if (c == '\\')
-		backslashes++;
-	      else
-		backslashes = 0;
-	    }
-	  if (quote_around)
-	    length += backslashes + 1;
+          length = 0;
+          backslashes = 0;
+          if (quote_around)
+            length++;
+          for (s = string; *s != '\0'; s++)
+            {
+              char c = *s;
+              if (c == '"')
+                length += backslashes + 1;
+              length++;
+              if (c == '\\')
+                backslashes++;
+              else
+                backslashes = 0;
+            }
+          if (quote_around)
+            length += backslashes + 1;
 
-	  quoted_string = (char *) xmalloc (length + 1);
+          quoted_string = (char *) xmalloc (length + 1);
 
-	  p = quoted_string;
-	  backslashes = 0;
-	  if (quote_around)
-	    *p++ = '"';
-	  for (s = string; *s != '\0'; s++)
-	    {
-	      char c = *s;
-	      if (c == '"')
-		{
-		  unsigned int j;
-		  for (j = backslashes + 1; j > 0; j--)
-		    *p++ = '\\';
-		}
-	      *p++ = c;
-	      if (c == '\\')
-		backslashes++;
-	      else
-		backslashes = 0;
-	    }
-	  if (quote_around)
-	    {
-	      unsigned int j;
-	      for (j = backslashes; j > 0; j--)
-		*p++ = '\\';
-	      *p++ = '"';
-	    }
-	  *p = '\0';
+          p = quoted_string;
+          backslashes = 0;
+          if (quote_around)
+            *p++ = '"';
+          for (s = string; *s != '\0'; s++)
+            {
+              char c = *s;
+              if (c == '"')
+                {
+                  unsigned int j;
+                  for (j = backslashes + 1; j > 0; j--)
+                    *p++ = '\\';
+                }
+              *p++ = c;
+              if (c == '\\')
+                backslashes++;
+              else
+                backslashes = 0;
+            }
+          if (quote_around)
+            {
+              unsigned int j;
+              for (j = backslashes; j > 0; j--)
+                *p++ = '\\';
+              *p++ = '"';
+            }
+          *p = '\0';
 
-	  new_argv[i] = quoted_string;
-	}
+          new_argv[i] = quoted_string;
+        }
       else
-	new_argv[i] = (char *) string;
+        new_argv[i] = (char *) string;
     }
   new_argv[argc] = NULL;
 

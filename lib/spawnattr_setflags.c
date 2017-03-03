@@ -1,4 +1,4 @@
-/* Copyright (C) 2000, 2004 Free Software Foundation, Inc.
+/* Copyright (C) 2000, 2004, 2009, 2010 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    This program is free software: you can redistribute it and/or modify
@@ -22,13 +22,13 @@
 #include <errno.h>
 #include <string.h>
 
-#define ALL_FLAGS (POSIX_SPAWN_RESETIDS					      \
-		   | POSIX_SPAWN_SETPGROUP				      \
-		   | POSIX_SPAWN_SETSIGDEF				      \
-		   | POSIX_SPAWN_SETSIGMASK				      \
-		   | POSIX_SPAWN_SETSCHEDPARAM				      \
-		   | POSIX_SPAWN_SETSCHEDULER				      \
-		   | POSIX_SPAWN_USEVFORK)
+#define ALL_FLAGS (POSIX_SPAWN_RESETIDS                                       \
+                   | POSIX_SPAWN_SETPGROUP                                    \
+                   | POSIX_SPAWN_SETSIGDEF                                    \
+                   | POSIX_SPAWN_SETSIGMASK                                   \
+                   | POSIX_SPAWN_SETSCHEDPARAM                                \
+                   | POSIX_SPAWN_SETSCHEDULER                                 \
+                   | POSIX_SPAWN_USEVFORK)
 
 /* Store flags in the attribute structure.  */
 int

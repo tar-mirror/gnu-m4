@@ -1,6 +1,6 @@
-# Configure template for GNU M4.			-*-Autoconf-*-
-# Copyright (C) 1991, 1993, 1994, 2004, 2005, 2006, 2007, 2008, 2009
-# Free Software Foundation, Inc.
+# Configure template for GNU M4.           -*-Autoconf-*-
+# Copyright (C) 1991, 1993, 1994, 2004, 2005, 2006, 2007, 2008, 2009,
+# 2010 Free Software Foundation, Inc.
 #
 # This file is part of GNU M4.
 #
@@ -17,12 +17,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_PREREQ([2.60])
+AC_PREREQ([2.62])
 AC_INIT([GNU M4], m4_esyscmd([build-aux/git-version-gen .tarball-version]),
   [bug-m4@gnu.org])
 AC_CONFIG_AUX_DIR([build-aux])
 
-AM_INIT_AUTOMAKE([1.10.1 dist-bzip2 gnu])
+AM_INIT_AUTOMAKE([1.11.1 dist-bzip2 dist-xz color-tests parallel-tests
+silent-rules gnu])
 
 m4_pattern_forbid([^M4_[A-Z]])
 
@@ -34,6 +35,53 @@ M4_EARLY
 
 # M4 is single-threaded; so we can optimize gnulib code by using this:
 gl_DISABLE_THREADS
+
+AC_ARG_ENABLE([gcc-warnings],
+  [AS_HELP_STRING([--enable-gcc-warnings],
+                  [turn on lots of GCC warnings (for developers)])],
+  [case $enableval in
+     yes|no) ;;
+     *)      AC_MSG_ERROR([bad value $enableval for gcc-warnings option]) ;;
+   esac
+   gl_gcc_warnings=$enableval],
+  [gl_gcc_warnings=no]
+)
+
+if test "$gl_gcc_warnings" = yes; then
+  gl_WARN_ADD([-Werror], [WERROR_CFLAGS])
+  AC_SUBST([WERROR_CFLAGS])
+
+  nw=
+  nw="$nw -Waggregate-return"       # C90 is anachronistic
+  nw="$nw -Wlong-long"              # C90 is anachronistic
+  nw="$nw -Wundef"                  # Warns on '#if GNULIB_FOO' etc in gnulib
+  nw="$nw -Wtraditional"            # Warns on #elif which we use often
+  nw="$nw -Wsystem-headers"         # Don't let system headers trigger warnings
+  nw="$nw -Wpadded"                 # Our structs are not packed
+  nw="$nw -Wredundant-decls"        # Gnulib has multiple decls
+  nw="$nw -Wformat-nonliteral"      # Needed in builtin.c
+  nw="$nw -Wunreachable-code"       # Needed in output.c
+  nw="$nw -Wconversion"             # Too many warnings for now
+  nw="$nw -Wsign-conversion"        # Too many warnings for now
+  nw="$nw -Wtraditional-conversion" # Too many warnings for now
+  nw="$nw -Wcast-qual"              # Too many warnings for now
+  nw="$nw -Wswitch-enum"            # Too many warnings for now
+  # This, $nw, is the list of warnings we disable.
+
+  gl_MANYWARN_ALL_GCC([ws])
+  gl_MANYWARN_COMPLEMENT([ws], [$ws], [$nw])
+  for w in $ws; do
+    gl_WARN_ADD([$w])
+  done
+
+  gl_WARN_ADD([-fdiagnostics-show-option])
+  gl_WARN_ADD([-funit-at-a-time])
+
+  AC_SUBST([WARN_CFLAGS])
+
+  AC_DEFINE([_FORTIFY_SOURCE], [2],
+    [enable compile-time and run-time bounds-checking, and some warnings])
+fi
 
 # Tandem/NSK is broken - it has 'long long int' but not
 # 'unsigned long long int', which confuses assumptions made by gnulib.
@@ -98,15 +146,15 @@ dnl Give mingw a default that is more likely to be available.
 dnl Too bad _AS_PATH_WALK is not public.
     M4_save_IFS=$IFS; IFS=$PATH_SEPARATOR
     for M4_dir in `if (command -p getconf PATH) 2>/dev/null ; then
-	command -p getconf PATH
+        command -p getconf PATH
       else
-	echo "/bin$PATH_SEPARATOR$PATH"
+        echo "/bin$PATH_SEPARATOR$PATH"
       fi`
     do
       IFS=$M4_save_IFS
       test -z "$M4_dir" && continue
       AS_EXECUTABLE_P(["$M4_dir/sh"]) \
-	&& { with_syscmd_shell=$M4_dir/sh; break; }
+        && { with_syscmd_shell=$M4_dir/sh; break; }
     done
     IFS=$M4_save_IFS
   fi
@@ -120,12 +168,12 @@ M4_WITH_DMALLOC
 AC_CONFIG_COMMANDS([stamp-h], [[test -z "$CONFIG_HEADERS" || date > stamp-h]])
 
 AC_CONFIG_FILES([Makefile
-		 doc/Makefile
-		 lib/Makefile
-		 src/Makefile
-		 tests/Makefile
-		 checks/Makefile
-		 examples/Makefile
+                 doc/Makefile
+                 lib/Makefile
+                 src/Makefile
+                 tests/Makefile
+                 checks/Makefile
+                 examples/Makefile
 ])
 
 AC_OUTPUT

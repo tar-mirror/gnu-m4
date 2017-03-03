@@ -1,5 +1,5 @@
 /* Ordered set data type implemented by a binary tree.
-   Copyright (C) 2006-2007 Free Software Foundation, Inc.
+   Copyright (C) 2006-2007, 2009-2010 Free Software Foundation, Inc.
    Written by Bruno Haible <bruno@clisp.org>, 2006.
 
    This program is free software: you can redistribute it and/or modify
@@ -28,11 +28,15 @@ typedef struct
 typedef iterstack_item_t iterstack_t[MAXHEIGHT];
 
 static gl_oset_t
-gl_tree_create_empty (gl_oset_implementation_t implementation,
-		      gl_setelement_compar_fn compar_fn,
-		      gl_setelement_dispose_fn dispose_fn)
+gl_tree_nx_create_empty (gl_oset_implementation_t implementation,
+                         gl_setelement_compar_fn compar_fn,
+                         gl_setelement_dispose_fn dispose_fn)
 {
-  struct gl_oset_impl *set = XMALLOC (struct gl_oset_impl);
+  struct gl_oset_impl *set =
+    (struct gl_oset_impl *) malloc (sizeof (struct gl_oset_impl));
+
+  if (set == NULL)
+    return NULL;
 
   set->base.vtable = implementation;
   set->base.compar_fn = compar_fn;
@@ -58,52 +62,52 @@ gl_tree_search (gl_oset_t set, const void *elt)
   for (node = set->root; node != NULL; )
     {
       int cmp = (compar != NULL
-		 ? compar (node->value, elt)
-		 : (node->value > elt ? 1 :
-		    node->value < elt ? -1 : 0));
+                 ? compar (node->value, elt)
+                 : (node->value > elt ? 1 :
+                    node->value < elt ? -1 : 0));
 
       if (cmp < 0)
-	node = node->right;
+        node = node->right;
       else if (cmp > 0)
-	node = node->left;
+        node = node->left;
       else /* cmp == 0 */
-	/* We have an element equal to ELT.  */
-	return true;
+        /* We have an element equal to ELT.  */
+        return true;
     }
   return false;
 }
 
 static bool
 gl_tree_search_atleast (gl_oset_t set,
-			gl_setelement_threshold_fn threshold_fn,
-			const void *threshold,
-			const void **eltp)
+                        gl_setelement_threshold_fn threshold_fn,
+                        const void *threshold,
+                        const void **eltp)
 {
   gl_oset_node_t node;
 
   for (node = set->root; node != NULL; )
     {
       if (! threshold_fn (node->value, threshold))
-	node = node->right;
+        node = node->right;
       else
-	{
-	  /* We have an element >= VALUE.  But we need the leftmost such
-	     element.  */
-	  gl_oset_node_t found = node;
-	  node = node->left;
-	  for (; node != NULL; )
-	    {
-	      if (! threshold_fn (node->value, threshold))
-		node = node->right;
-	      else
-		{
-		  found = node;
-		  node = node->left;
-		}
-	    }
-	  *eltp = found->value;
-	  return true;
-	}
+        {
+          /* We have an element >= VALUE.  But we need the leftmost such
+             element.  */
+          gl_oset_node_t found = node;
+          node = node->left;
+          for (; node != NULL; )
+            {
+              if (! threshold_fn (node->value, threshold))
+                node = node->right;
+              else
+                {
+                  found = node;
+                  node = node->left;
+                }
+            }
+          *eltp = found->value;
+          return true;
+        }
     }
   return false;
 }
@@ -117,30 +121,31 @@ gl_tree_search_node (gl_oset_t set, const void *elt)
   for (node = set->root; node != NULL; )
     {
       int cmp = (compar != NULL
-		 ? compar (node->value, elt)
-		 : (node->value > elt ? 1 :
-		    node->value < elt ? -1 : 0));
+                 ? compar (node->value, elt)
+                 : (node->value > elt ? 1 :
+                    node->value < elt ? -1 : 0));
 
       if (cmp < 0)
-	node = node->right;
+        node = node->right;
       else if (cmp > 0)
-	node = node->left;
+        node = node->left;
       else /* cmp == 0 */
-	/* We have an element equal to ELT.  */
-	return node;
+        /* We have an element equal to ELT.  */
+        return node;
     }
   return NULL;
 }
 
-static bool
-gl_tree_add (gl_oset_t set, const void *elt)
+static int
+gl_tree_nx_add (gl_oset_t set, const void *elt)
 {
   gl_setelement_compar_fn compar;
   gl_oset_node_t node = set->root;
 
   if (node == NULL)
     {
-      gl_tree_add_first (set, elt);
+      if (gl_tree_nx_add_first (set, elt) == NULL)
+        return -1;
       return true;
     }
 
@@ -149,30 +154,32 @@ gl_tree_add (gl_oset_t set, const void *elt)
   for (;;)
     {
       int cmp = (compar != NULL
-		 ? compar (node->value, elt)
-		 : (node->value > elt ? 1 :
-		    node->value < elt ? -1 : 0));
+                 ? compar (node->value, elt)
+                 : (node->value > elt ? 1 :
+                    node->value < elt ? -1 : 0));
 
       if (cmp < 0)
-	{
-	  if (node->right == NULL)
-	    {
-	      gl_tree_add_after (set, node, elt);
-	      return true;
-	    }
-	  node = node->right;
-	}
+        {
+          if (node->right == NULL)
+            {
+              if (gl_tree_nx_add_after (set, node, elt) == NULL)
+                return -1;
+              return true;
+            }
+          node = node->right;
+        }
       else if (cmp > 0)
-	{
-	  if (node->left == NULL)
-	    {
-	      gl_tree_add_before (set, node, elt);
-	      return true;
-	    }
-	  node = node->left;
-	}
+        {
+          if (node->left == NULL)
+            {
+              if (gl_tree_nx_add_before (set, node, elt) == NULL)
+                return -1;
+              return true;
+            }
+          node = node->left;
+        }
       else /* cmp == 0 */
-	return false;
+        return false;
     }
 }
 
@@ -199,28 +206,28 @@ gl_tree_oset_free (gl_oset_t set)
     {
       /* Descend on left branch.  */
       for (;;)
-	{
-	  if (node == NULL)
-	    break;
-	  stack_ptr->node = node;
-	  stack_ptr->rightp = false;
-	  node = node->left;
-	  stack_ptr++;
-	}
+        {
+          if (node == NULL)
+            break;
+          stack_ptr->node = node;
+          stack_ptr->rightp = false;
+          node = node->left;
+          stack_ptr++;
+        }
       /* Climb up again.  */
       for (;;)
-	{
-	  if (stack_ptr == &stack[0])
-	    goto done_iterate;
-	  stack_ptr--;
-	  node = stack_ptr->node;
-	  if (!stack_ptr->rightp)
-	    break;
-	  /* Free the current node.  */
-	  if (set->base.dispose_fn != NULL)
-	    set->base.dispose_fn (node->value);
-	  free (node);
-	}
+        {
+          if (stack_ptr == &stack[0])
+            goto done_iterate;
+          stack_ptr--;
+          node = stack_ptr->node;
+          if (!stack_ptr->rightp)
+            break;
+          /* Free the current node.  */
+          if (set->base.dispose_fn != NULL)
+            set->base.dispose_fn (node->value);
+          free (node);
+        }
       /* Descend on right branch.  */
       stack_ptr->rightp = true;
       node = node->right;
@@ -266,17 +273,17 @@ gl_tree_iterator_next (gl_oset_iterator_t *iterator, const void **eltp)
       *eltp = node->value;
       /* Advance to the next node.  */
       if (node->right != NULL)
-	{
-	  node = node->right;
-	  while (node->left != NULL)
-	    node = node->left;
-	}
+        {
+          node = node->right;
+          while (node->left != NULL)
+            node = node->left;
+        }
       else
-	{
-	  while (node->parent != NULL && node->parent->right == node)
-	    node = node->parent;
-	  node = node->parent;
-	}
+        {
+          while (node->parent != NULL && node->parent->right == node)
+            node = node->parent;
+          node = node->parent;
+        }
       iterator->p = node;
       return true;
     }

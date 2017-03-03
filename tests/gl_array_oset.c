@@ -1,5 +1,5 @@
 /* Ordered set data type implemented by an array.
-   Copyright (C) 2006-2007 Free Software Foundation, Inc.
+   Copyright (C) 2006-2007, 2009-2010 Free Software Foundation, Inc.
    Written by Bruno Haible <bruno@clisp.org>, 2006.
 
    This program is free software: you can redistribute it and/or modify
@@ -22,8 +22,6 @@
 
 #include <stdlib.h>
 
-#include "xalloc.h"
-
 /* Checked size_t computations.  */
 #include "xsize.h"
 
@@ -41,11 +39,15 @@ struct gl_oset_impl
 };
 
 static gl_oset_t
-gl_array_create_empty (gl_oset_implementation_t implementation,
-		       gl_setelement_compar_fn compar_fn,
-		       gl_setelement_dispose_fn dispose_fn)
+gl_array_nx_create_empty (gl_oset_implementation_t implementation,
+                          gl_setelement_compar_fn compar_fn,
+                          gl_setelement_dispose_fn dispose_fn)
 {
-  struct gl_oset_impl *set = XMALLOC (struct gl_oset_impl);
+  struct gl_oset_impl *set =
+    (struct gl_oset_impl *) malloc (sizeof (struct gl_oset_impl));
+
+  if (set == NULL)
+    return NULL;
 
   set->base.vtable = implementation;
   set->base.compar_fn = compar_fn;
@@ -75,25 +77,25 @@ gl_array_indexof (gl_oset_t set, const void *elt)
       size_t high = count;
 
       /* At each loop iteration, low < high; for indices < low the values
-	 are smaller than ELT; for indices >= high the values are greater
-	 than ELT.  So, if the element occurs in the list, it is at
-	 low <= position < high.  */
+         are smaller than ELT; for indices >= high the values are greater
+         than ELT.  So, if the element occurs in the list, it is at
+         low <= position < high.  */
       do
-	{
-	  size_t mid = low + (high - low) / 2; /* low <= mid < high */
-	  int cmp = (compar != NULL
-		     ? compar (set->elements[mid], elt)
-		     : (set->elements[mid] > elt ? 1 :
-			set->elements[mid] < elt ? -1 : 0));
+        {
+          size_t mid = low + (high - low) / 2; /* low <= mid < high */
+          int cmp = (compar != NULL
+                     ? compar (set->elements[mid], elt)
+                     : (set->elements[mid] > elt ? 1 :
+                        set->elements[mid] < elt ? -1 : 0));
 
-	  if (cmp < 0)
-	    low = mid + 1;
-	  else if (cmp > 0)
-	    high = mid;
-	  else /* cmp == 0 */
-	    /* We have an element equal to ELT at index MID.  */
-	    return mid;
-	}
+          if (cmp < 0)
+            low = mid + 1;
+          else if (cmp > 0)
+            high = mid;
+          else /* cmp == 0 */
+            /* We have an element equal to ELT at index MID.  */
+            return mid;
+        }
       while (low < high);
     }
   return (size_t)(-1);
@@ -107,9 +109,9 @@ gl_array_search (gl_oset_t set, const void *elt)
 
 static bool
 gl_array_search_atleast (gl_oset_t set,
-			 gl_setelement_threshold_fn threshold_fn,
-			 const void *threshold,
-			 const void **eltp)
+                         gl_setelement_threshold_fn threshold_fn,
+                         const void *threshold,
+                         const void **eltp)
 {
   size_t count = set->count;
 
@@ -119,44 +121,45 @@ gl_array_search_atleast (gl_oset_t set,
       size_t high = count;
 
       /* At each loop iteration, low < high; for indices < low the values are
-	 smaller than THRESHOLD; for indices >= high the values are nonexistent.
-	 So, if an element >= THRESHOLD occurs in the list, it is at
-	 low <= position < high.  */
+         smaller than THRESHOLD; for indices >= high the values are nonexistent.
+         So, if an element >= THRESHOLD occurs in the list, it is at
+         low <= position < high.  */
       do
-	{
-	  size_t mid = low + (high - low) / 2; /* low <= mid < high */
+        {
+          size_t mid = low + (high - low) / 2; /* low <= mid < high */
 
-	  if (! threshold_fn (set->elements[mid], threshold))
-	    low = mid + 1;
-	  else
-	    {
-	      /* We have an element >= THRESHOLD at index MID.  But we need the
-		 minimal such index.  */
-	      high = mid;
-	      /* At each loop iteration, low <= high and
-		   compar (list->elements[high], value) >= 0,
-		 and we know that the first occurrence of the element is at
-		 low <= position <= high.  */
-	      while (low < high)
-		{
-		  size_t mid2 = low + (high - low) / 2; /* low <= mid2 < high */
+          if (! threshold_fn (set->elements[mid], threshold))
+            low = mid + 1;
+          else
+            {
+              /* We have an element >= THRESHOLD at index MID.  But we need the
+                 minimal such index.  */
+              high = mid;
+              /* At each loop iteration, low <= high and
+                   compar (list->elements[high], value) >= 0,
+                 and we know that the first occurrence of the element is at
+                 low <= position <= high.  */
+              while (low < high)
+                {
+                  size_t mid2 = low + (high - low) / 2; /* low <= mid2 < high */
 
-		  if (! threshold_fn (set->elements[mid2], threshold))
-		    low = mid2 + 1;
-		  else
-		    high = mid2;
-		}
-	      *eltp = set->elements[low];
-	      return true;
-	    }
-	}
+                  if (! threshold_fn (set->elements[mid2], threshold))
+                    low = mid2 + 1;
+                  else
+                    high = mid2;
+                }
+              *eltp = set->elements[low];
+              return true;
+            }
+        }
       while (low < high);
     }
   return false;
 }
 
-/* Ensure that set->allocated > set->count.  */
-static void
+/* Ensure that set->allocated > set->count.
+   Return 0 upon success, -1 upon out-of-memory.  */
+static int
 grow (gl_oset_t set)
 {
   size_t new_allocated;
@@ -168,31 +171,35 @@ grow (gl_oset_t set)
   memory_size = xtimes (new_allocated, sizeof (const void *));
   if (size_overflow_p (memory_size))
     /* Overflow, would lead to out of memory.  */
-    xalloc_die ();
-  memory = (const void **) xrealloc (set->elements, memory_size);
+    return -1;
+  memory = (const void **) realloc (set->elements, memory_size);
   if (memory == NULL)
     /* Out of memory.  */
-    xalloc_die ();
+    return -1;
   set->elements = memory;
   set->allocated = new_allocated;
+  return 0;
 }
 
 /* Add the given element ELT at the given position,
-   0 <= position <= gl_oset_size (set).  */
-static inline void
-gl_array_add_at (gl_oset_t set, size_t position, const void *elt)
+   0 <= position <= gl_oset_size (set).
+   Return 1 upon success, -1 upon out-of-memory.  */
+static inline int
+gl_array_nx_add_at (gl_oset_t set, size_t position, const void *elt)
 {
   size_t count = set->count;
   const void **elements;
   size_t i;
 
   if (count == set->allocated)
-    grow (set);
+    if (grow (set) < 0)
+      return -1;
   elements = set->elements;
   for (i = count; i > position; i--)
     elements[i] = elements[i - 1];
   elements[position] = elt;
   set->count = count + 1;
+  return 1;
 }
 
 /* Remove the element at the given position,
@@ -212,8 +219,8 @@ gl_array_remove_at (gl_oset_t set, size_t position)
   set->count = count - 1;
 }
 
-static bool
-gl_array_add (gl_oset_t set, const void *elt)
+static int
+gl_array_nx_add (gl_oset_t set, const void *elt)
 {
   size_t count = set->count;
   size_t low = 0;
@@ -224,28 +231,27 @@ gl_array_add (gl_oset_t set, const void *elt)
       size_t high = count;
 
       /* At each loop iteration, low < high; for indices < low the values
-	 are smaller than ELT; for indices >= high the values are greater
-	 than ELT.  So, if the element occurs in the list, it is at
-	 low <= position < high.  */
+         are smaller than ELT; for indices >= high the values are greater
+         than ELT.  So, if the element occurs in the list, it is at
+         low <= position < high.  */
       do
-	{
-	  size_t mid = low + (high - low) / 2; /* low <= mid < high */
-	  int cmp = (compar != NULL
-		     ? compar (set->elements[mid], elt)
-		     : (set->elements[mid] > elt ? 1 :
-			set->elements[mid] < elt ? -1 : 0));
+        {
+          size_t mid = low + (high - low) / 2; /* low <= mid < high */
+          int cmp = (compar != NULL
+                     ? compar (set->elements[mid], elt)
+                     : (set->elements[mid] > elt ? 1 :
+                        set->elements[mid] < elt ? -1 : 0));
 
-	  if (cmp < 0)
-	    low = mid + 1;
-	  else if (cmp > 0)
-	    high = mid;
-	  else /* cmp == 0 */
-	    return false;
-	}
+          if (cmp < 0)
+            low = mid + 1;
+          else if (cmp > 0)
+            high = mid;
+          else /* cmp == 0 */
+            return false;
+        }
       while (low < high);
     }
-  gl_array_add_at (set, low, elt);
-  return true;
+  return gl_array_nx_add_at (set, low, elt);
 }
 
 static bool
@@ -267,19 +273,19 @@ gl_array_free (gl_oset_t set)
   if (set->elements != NULL)
     {
       if (set->base.dispose_fn != NULL)
-	{
-	  size_t count = set->count;
+        {
+          size_t count = set->count;
 
-	  if (count > 0)
-	    {
-	      gl_setelement_dispose_fn dispose = set->base.dispose_fn;
-	      const void **elements = set->elements;
+          if (count > 0)
+            {
+              gl_setelement_dispose_fn dispose = set->base.dispose_fn;
+              const void **elements = set->elements;
 
-	      do
-		dispose (*elements++);
-	      while (--count > 0);
-	    }
-	}
+              do
+                dispose (*elements++);
+              while (--count > 0);
+            }
+        }
       free (set->elements);
     }
   free (set);
@@ -312,8 +318,8 @@ gl_array_iterator_next (gl_oset_iterator_t *iterator, const void **eltp)
   if (iterator->count != set->count)
     {
       if (iterator->count != set->count + 1)
-	/* Concurrent modifications were done on the set.  */
-	abort ();
+        /* Concurrent modifications were done on the set.  */
+        abort ();
       /* The last returned element was removed.  */
       iterator->count--;
       iterator->p = (const void **) iterator->p - 1;
@@ -338,11 +344,11 @@ gl_array_iterator_free (gl_oset_iterator_t *iterator)
 
 const struct gl_oset_implementation gl_array_oset_implementation =
   {
-    gl_array_create_empty,
+    gl_array_nx_create_empty,
     gl_array_size,
     gl_array_search,
     gl_array_search_atleast,
-    gl_array_add,
+    gl_array_nx_add,
     gl_array_remove,
     gl_array_free,
     gl_array_iterator,

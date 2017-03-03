@@ -1,5 +1,5 @@
 /* Test of sigaction() function.
-   Copyright (C) 2008 Free Software Foundation, Inc.
+   Copyright (C) 2008, 2009, 2010 Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -20,21 +20,13 @@
 
 #include <signal.h>
 
-#include <stdio.h>
-#include <stdlib.h>
+#include "signature.h"
+SIGNATURE_CHECK (sigaction, int, (int, struct sigaction const *,
+                                  struct sigaction *));
 
-#define ASSERT(expr) \
-  do									     \
-    {									     \
-      if (!(expr))							     \
-        {								     \
-          fprintf (stderr, "%s:%d: assertion failed\n", __FILE__, __LINE__); \
-          fflush (stderr);						     \
-          signal (SIGABRT, SIG_DFL);					     \
-          abort ();							     \
-        }								     \
-    }									     \
-  while (0)
+#include <stddef.h>
+
+#include "macros.h"
 
 #ifndef SA_NOCLDSTOP
 # define SA_NOCLDSTOP 0
@@ -53,7 +45,7 @@
    provide other flags as extensions, such as SA_RESTORER, that we
    must ignore in this test.  */
 #define MASK_SA_FLAGS (SA_NOCLDSTOP | SA_ONSTACK | SA_RESETHAND | SA_RESTART \
-		       | SA_SIGINFO | SA_NOCLDWAIT | SA_NODEFER)
+                       | SA_SIGINFO | SA_NOCLDWAIT | SA_NODEFER)
 
 /* This test is unsafe in the presence of an asynchronous SIGABRT,
    because we install a signal-handler that is intentionally not
@@ -77,8 +69,8 @@ handler (int sig)
       break;
     case 1:
       /* This assertion fails on glibc-2.3.6 systems with LinuxThreads,
-	 when this program is linked with -lpthread, due to the sigaction()
-	 override in libpthread.so.  */
+         when this program is linked with -lpthread, due to the sigaction()
+         override in libpthread.so.  */
 #if !defined __GLIBC__
       ASSERT (sa.sa_handler == SIG_DFL);
 #endif
@@ -89,7 +81,7 @@ handler (int sig)
 }
 
 int
-main (int argc, char *argv[])
+main (void)
 {
   struct sigaction sa;
   struct sigaction old_sa;

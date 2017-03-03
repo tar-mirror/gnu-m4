@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008 Free Software Foundation
+ * Copyright (C) 2008, 2009, 2010 Free Software Foundation, Inc.
  * Written by Eric Blake
  *
  * This program is free software: you can redistribute it and/or modify
@@ -19,25 +19,16 @@
 
 #include <stdlib.h>
 
+#include "signature.h"
+SIGNATURE_CHECK (strtod, double, (char const *, char **));
+
 #include <errno.h>
 #include <float.h>
 #include <math.h>
-#include <stdio.h>
 #include <string.h>
 
 #include "isnand-nolibm.h"
-
-#define ASSERT(expr) \
-  do									     \
-    {									     \
-      if (!(expr))							     \
-	{								     \
-	  fprintf (stderr, "%s:%d: assertion failed\n", __FILE__, __LINE__); \
-	  fflush (stderr);						     \
-	  /* FIXME abort ();*/status = 1;                               \
-	}								     \
-    }									     \
-  while (0)
+#include "macros.h"
 
 /* Avoid requiring -lm just for fabs.  */
 #define FABS(d) ((d) < 0.0 ? -(d) : (d))
@@ -47,7 +38,7 @@
 double zero = 0.0;
 
 int
-main ()
+main (void)
 {
   int status = 0;
   /* Subject sequence empty or invalid.  */
@@ -806,16 +797,16 @@ main ()
     char *input = malloc (m + 1);
     if (input)
       {
-	char *ptr;
-	double result;
-	memset (input, '\t', m - 1);
-	input[m - 1] = '1';
-	input[m] = '\0';
-	errno = 0;
-	result = strtod (input, &ptr);
-	ASSERT (result == 1.0);
-	ASSERT (ptr == input + m);
-	ASSERT (errno == 0);
+        char *ptr;
+        double result;
+        memset (input, '\t', m - 1);
+        input[m - 1] = '1';
+        input[m] = '\0';
+        errno = 0;
+        result = strtod (input, &ptr);
+        ASSERT (result == 1.0);
+        ASSERT (ptr == input + m);
+        ASSERT (errno == 0);
       }
     free (input);
   }
@@ -824,16 +815,16 @@ main ()
     char *input = malloc (m + 1);
     if (input)
       {
-	char *ptr;
-	double result;
-	memset (input, '0', m - 1);
-	input[m - 1] = '1';
-	input[m] = '\0';
-	errno = 0;
-	result = strtod (input, &ptr);
-	ASSERT (result == 1.0);
-	ASSERT (ptr == input + m);
-	ASSERT (errno == 0);
+        char *ptr;
+        double result;
+        memset (input, '0', m - 1);
+        input[m - 1] = '1';
+        input[m] = '\0';
+        errno = 0;
+        result = strtod (input, &ptr);
+        ASSERT (result == 1.0);
+        ASSERT (ptr == input + m);
+        ASSERT (errno == 0);
       }
     free (input);
   }
@@ -845,25 +836,25 @@ main ()
     char *input = malloc (m + 1);
     if (input)
       {
-	char *ptr;
-	double result;
-	input[0] = '.';
-	memset (input + 1, '0', m - 10);
-	input[m - 9] = '1';
-	input[m - 8] = 'e';
-	input[m - 7] = '+';
-	input[m - 6] = '9';
-	input[m - 5] = '9';
-	input[m - 4] = '9';
-	input[m - 3] = '9';
-	input[m - 2] = '9';
-	input[m - 1] = '1';
-	input[m] = '\0';
-	errno = 0;
-	result = strtod (input, &ptr);
-	ASSERT (result == 1.0);         /* MacOS X 10.3, FreeBSD 6.2, NetBSD 3.0, OpenBSD 4.0, IRIX 6.5, OSF/1 5.1, mingw */
-	ASSERT (ptr == input + m);      /* OSF/1 5.1 */
-	ASSERT (errno == 0);            /* MacOS X 10.3, FreeBSD 6.2, NetBSD 3.0, OpenBSD 4.0, IRIX 6.5, OSF/1 5.1, mingw */
+        char *ptr;
+        double result;
+        input[0] = '.';
+        memset (input + 1, '0', m - 10);
+        input[m - 9] = '1';
+        input[m - 8] = 'e';
+        input[m - 7] = '+';
+        input[m - 6] = '9';
+        input[m - 5] = '9';
+        input[m - 4] = '9';
+        input[m - 3] = '9';
+        input[m - 2] = '9';
+        input[m - 1] = '1';
+        input[m] = '\0';
+        errno = 0;
+        result = strtod (input, &ptr);
+        ASSERT (result == 1.0);         /* MacOS X 10.3, FreeBSD 6.2, NetBSD 3.0, OpenBSD 4.0, IRIX 6.5, OSF/1 5.1, mingw */
+        ASSERT (ptr == input + m);      /* OSF/1 5.1 */
+        ASSERT (errno == 0);            /* MacOS X 10.3, FreeBSD 6.2, NetBSD 3.0, OpenBSD 4.0, IRIX 6.5, OSF/1 5.1, mingw */
       }
     free (input);
   }
@@ -872,24 +863,24 @@ main ()
     char *input = malloc (m + 1);
     if (input)
       {
-	char *ptr;
-	double result;
-	input[0] = '1';
-	memset (input + 1, '0', m - 9);
-	input[m - 8] = 'e';
-	input[m - 7] = '-';
-	input[m - 6] = '9';
-	input[m - 5] = '9';
-	input[m - 4] = '9';
-	input[m - 3] = '9';
-	input[m - 2] = '9';
-	input[m - 1] = '1';
-	input[m] = '\0';
-	errno = 0;
-	result = strtod (input, &ptr);
-	ASSERT (result == 1.0);         /* MacOS X 10.3, FreeBSD 6.2, NetBSD 3.0, OpenBSD 4.0, IRIX 6.5, OSF/1 5.1, mingw */
-	ASSERT (ptr == input + m);
-	ASSERT (errno == 0);            /* MacOS X 10.3, FreeBSD 6.2, NetBSD 3.0, OpenBSD 4.0, IRIX 6.5, OSF/1 5.1, mingw */
+        char *ptr;
+        double result;
+        input[0] = '1';
+        memset (input + 1, '0', m - 9);
+        input[m - 8] = 'e';
+        input[m - 7] = '-';
+        input[m - 6] = '9';
+        input[m - 5] = '9';
+        input[m - 4] = '9';
+        input[m - 3] = '9';
+        input[m - 2] = '9';
+        input[m - 1] = '1';
+        input[m] = '\0';
+        errno = 0;
+        result = strtod (input, &ptr);
+        ASSERT (result == 1.0);         /* MacOS X 10.3, FreeBSD 6.2, NetBSD 3.0, OpenBSD 4.0, IRIX 6.5, OSF/1 5.1, mingw */
+        ASSERT (ptr == input + m);
+        ASSERT (errno == 0);            /* MacOS X 10.3, FreeBSD 6.2, NetBSD 3.0, OpenBSD 4.0, IRIX 6.5, OSF/1 5.1, mingw */
       }
     free (input);
   }
@@ -899,20 +890,20 @@ main ()
     char *input = malloc (m + 1);
     if (input)
       {
-	char *ptr;
-	double result;
-	input[0] = '-';
-	input[1] = '0';
-	input[2] = 'e';
-	input[3] = '1';
-	memset (input + 4, '0', m - 3);
-	input[m] = '\0';
-	errno = 0;
-	result = strtod (input, &ptr);
-	ASSERT (result == 0.0);
-	ASSERT (!!signbit (result) == !!signbit (-zero)); /* IRIX 6.5, OSF/1 4.0 */
-	ASSERT (ptr == input + m);
-	ASSERT (errno == 0);
+        char *ptr;
+        double result;
+        input[0] = '-';
+        input[1] = '0';
+        input[2] = 'e';
+        input[3] = '1';
+        memset (input + 4, '0', m - 3);
+        input[m] = '\0';
+        errno = 0;
+        result = strtod (input, &ptr);
+        ASSERT (result == 0.0);
+        ASSERT (!!signbit (result) == !!signbit (-zero)); /* IRIX 6.5, OSF/1 4.0 */
+        ASSERT (ptr == input + m);
+        ASSERT (errno == 0);
       }
     free (input);
   }

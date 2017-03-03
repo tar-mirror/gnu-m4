@@ -1,5 +1,5 @@
-# strtod.m4 serial 12
-dnl Copyright (C) 2002-2003, 2006-2009 Free Software Foundation, Inc.
+# strtod.m4 serial 13
+dnl Copyright (C) 2002-2003, 2006-2010 Free Software Foundation, Inc.
 dnl This file is free software; the Free Software Foundation
 dnl gives unlimited permission to copy and/or distribute it,
 dnl with or without modifications, as long as this notice is preserved.
@@ -64,10 +64,18 @@ numeric_equal (double x, double y)
     if (numeric_equal (value, value) || term != (string + 5))
       return 1;
   }
+  {
+    /* darwin 10.6.1 misparses "nan(".  */
+    const char *string = "nan(";
+    char *term;
+    double value = strtod (string, &term);
+    if (numeric_equal (value, value) || term != (string + 3))
+      return 1;
+  }
 ]])],
-	[gl_cv_func_strtod_works=yes],
-	[gl_cv_func_strtod_works=no],
-	[gl_cv_func_strtod_works="guessing no"])])
+        [gl_cv_func_strtod_works=yes],
+        [gl_cv_func_strtod_works=no],
+        [gl_cv_func_strtod_works="guessing no"])])
     if test "$gl_cv_func_strtod_works" != yes; then
       REPLACE_STRTOD=1
       gl_PREREQ_STRTOD

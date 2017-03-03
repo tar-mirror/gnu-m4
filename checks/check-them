@@ -1,6 +1,7 @@
 #!/bin/sh
 # Check GNU m4 against examples from the manual source.
-# Copyright (C) 1992, 2006, 2007, 2008 Free Software Foundation, Inc.
+# Copyright (C) 1992, 2006, 2007, 2008, 2009, 2010 Free Software
+# Foundation, Inc.
 #
 # This file is part of GNU M4.
 #
@@ -93,9 +94,9 @@ do
     *stackovf.test)
       "$file" "$m4"
       case $? in
-	77) skipped="$skipped $file";;
-	0) ;;
-	*) failed="$failed $file"
+        77) skipped="$skipped $file";;
+        0) ;;
+        *) failed="$failed $file"
       esac
       continue ;;
   esac
@@ -134,11 +135,11 @@ do
       cp $err $xerr ;;
     '')
       ${SED} '/^dnl @error{}/!d
-	   s///; '"s|^m4:|$m4name:|; s|examples/|$examples/|" \
-	"$file" > $xerr ;;
+           s///; '"s|^m4:|$m4name:|; s|examples/|$examples/|" \
+        "$file" > $xerr ;;
     *)
       ${SED} "s|^m4:|$m4name:|; s|examples/|$examples/|" \
-	"$examples/$xerrfile" > $xerr ;;
+        "$examples/$xerrfile" > $xerr ;;
   esac
 
   # For the benefit of mingw, normalize \r\n line endings

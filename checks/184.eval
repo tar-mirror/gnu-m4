@@ -1,4 +1,4 @@
-dnl @ ../doc/m4.texinfo:6336: Origin of test
+dnl @ ../doc/m4.texinfo:6275: Origin of test
 dnl @ expected status: 0
 dnl @ extra options: 
 dnl @ Copyright (C) 2006, 2007, 2008, 2009 Free Software
@@ -7,28 +7,17 @@ dnl @ This file is free software; the Free Software Foundation
 dnl @ gives unlimited permission to copy and/or distribute it
 dnl @ with or without modifications, as long as this notice
 dnl @ is preserved.
-eval(`666', `10')
-dnl @result{}666
-eval(`666', `11')
-dnl @result{}556
-eval(`666', `6')
-dnl @result{}3030
-eval(`666', `6', `10')
-dnl @result{}0000003030
-eval(`-666', `6', `10')
-dnl @result{}-0000003030
-eval(`10', `', `0')
-dnl @result{}10
-`0r1:'eval(`10', `1', `11')
-dnl @result{}0r1:01111111111
-eval(`10', `16')
-dnl @result{}a
-eval(`1', `37')
-dnl @error{}m4:stdin:9: radix 37 in builtin `eval' out of range
-dnl @result{}
-eval(`1', , `-1')
-dnl @error{}m4:stdin:10: negative width to builtin `eval'
-dnl @result{}
-eval()
-dnl @error{}m4:stdin:11: empty string treated as 0 in builtin `eval'
+eval(`2 ** 3 ** 2')
+dnl @result{}512
+eval(`(2 ** 3) ** 2')
+dnl @result{}64
+eval(`0 ** 1')
 dnl @result{}0
+eval(`2 ** 0')
+dnl @result{}1
+eval(`0 ** 0')
+dnl @result{}
+dnl @error{}m4:stdin:5: divide by zero in eval: 0 ** 0
+eval(`4 ** -2')
+dnl @error{}m4:stdin:6: negative exponent in eval: 4 ** -2
+dnl @result{}

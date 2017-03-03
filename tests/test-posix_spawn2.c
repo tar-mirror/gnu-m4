@@ -1,5 +1,5 @@
 /* Test of posix_spawn() function.
-   Copyright (C) 2008, 2009 Free Software Foundation, Inc.
+   Copyright (C) 2008, 2009, 2010 Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -95,9 +95,9 @@ main ()
           || (err = posix_spawnp (&child, "/bin/sh", &actions, &attrs, argv, environ)) != 0))
     {
       if (actions_allocated)
-	posix_spawn_file_actions_destroy (&actions);
+        posix_spawn_file_actions_destroy (&actions);
       if (attrs_allocated)
-	posix_spawnattr_destroy (&attrs);
+        posix_spawnattr_destroy (&attrs);
       sigprocmask (SIG_UNBLOCK, &fatal_signal_set, NULL);
       errno = err;
       perror ("subprocess failed");

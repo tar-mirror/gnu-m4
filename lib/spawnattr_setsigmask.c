@@ -1,4 +1,4 @@
-/* Copyright (C) 2000 Free Software Foundation, Inc.
+/* Copyright (C) 2000, 2009, 2010 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    This program is free software: you can redistribute it and/or modify
@@ -24,7 +24,7 @@
 /* Set signal mask for the new process in ATTR to SIGMASK.  */
 int
 posix_spawnattr_setsigmask (posix_spawnattr_t *attr,
-			    const sigset_t *sigmask)
+                            const sigset_t *sigmask)
 {
   /* Copy the sigset_t data to the user buffer.  */
   memcpy (&attr->_ss, sigmask, sizeof (sigset_t));

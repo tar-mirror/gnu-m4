@@ -1,5 +1,5 @@
 /* Flushing buffers of a FILE stream.
-   Copyright (C) 2007-2009 Free Software Foundation, Inc.
+   Copyright (C) 2007-2010 Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@
 #include <config.h>
 
 /* Specification.  */
-#include "fpurge.h"
+#include <stdio.h>
 
 #if HAVE___FPURGE                   /* glibc >= 2.2, Haiku, Solaris >= 7 */
 # include <stdio_ext.h>
@@ -35,7 +35,7 @@ fpurge (FILE *fp)
   /* The __fpurge function does not have a return value.  */
   return 0;
 
-#elif HAVE_FPURGE                   /* FreeBSD, NetBSD, OpenBSD, DragonFly, MacOS X */
+#elif HAVE_FPURGE                   /* FreeBSD, NetBSD, OpenBSD, DragonFly, MacOS X, Cygwin 1.7 */
 
   /* Call the system's fpurge function.  */
 # undef fpurge
@@ -49,7 +49,7 @@ fpurge (FILE *fp)
        <stdio.h> on BSD systems says:
          "The following always hold: if _flags & __SRD, _w is 0."
        If this invariant is not fulfilled and the stream is read-write but
-       currently writing, subsequent putc or fputc calls will write directly
+       currently reading, subsequent putc or fputc calls will write directly
        into the buffer, although they shouldn't be allowed to.  */
     if ((fp_->_flags & __SRD) != 0)
       fp_->_w = 0;
@@ -75,13 +75,13 @@ fpurge (FILE *fp)
   fp_->_p = fp_->_bf._base;
   fp_->_r = 0;
   fp_->_w = ((fp_->_flags & (__SLBF | __SNBF | __SRD)) == 0 /* fully buffered and not currently reading? */
-	     ? fp_->_bf._size
-	     : 0);
+             ? fp_->_bf._size
+             : 0);
   /* Avoid memory leak when there is an active ungetc buffer.  */
   if (fp_ub._base != NULL)
     {
       if (fp_ub._base != fp_->_ubuf)
-	free (fp_ub._base);
+        free (fp_ub._base);
       fp_ub._base = NULL;
     }
   return 0;

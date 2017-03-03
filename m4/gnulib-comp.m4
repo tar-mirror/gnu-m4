@@ -1,5 +1,5 @@
 # DO NOT EDIT! GENERATED AUTOMATICALLY!
-# Copyright (C) 2002-2009 Free Software Foundation, Inc.
+# Copyright (C) 2002-2010 Free Software Foundation, Inc.
 #
 # This file is free software, distributed under the terms of the GNU
 # General Public License.  As a special exception to the GNU General
@@ -62,27 +62,37 @@ AC_DEFUN([M4_INIT],
   gl_C_STACK
   AC_DEFINE([SIGNAL_SAFE_LIST], [1], [Define if lists must be signal-safe.])
   gl_CLOEXEC
+  gl_MODULE_INDICATOR([cloexec])
   gl_CLOSE_STREAM
   gl_MODULE_INDICATOR([close-stream])
   gl_CLOSEIN
   gl_CLOSEOUT
   gl_CONFIG_H
   gl_DIRNAME
+  gl_MODULE_INDICATOR([dirname])
+  gl_DIRNAME_LGPL
   gl_DOUBLE_SLASH_ROOT
+  gl_FUNC_DUP2
+  gl_UNISTD_MODULE_INDICATOR([dup2])
   gl_ENVIRON
   gl_UNISTD_MODULE_INDICATOR([environ])
-  AC_REQUIRE([gl_HEADER_ERRNO_H])
+  gl_HEADER_ERRNO_H
   gl_ERROR
   m4_ifdef([AM_XGETTEXT_OPTION],
-    [AM_XGETTEXT_OPTION([--flag=error:3:c-format])
-     AM_XGETTEXT_OPTION([--flag=error_at_line:5:c-format])])
+    [AM_][XGETTEXT_OPTION([--flag=error:3:c-format])
+     AM_][XGETTEXT_OPTION([--flag=error_at_line:5:c-format])])
   gl_EXECUTE
   gl_EXITFAIL
   gl_FATAL_SIGNAL
+  gl_FUNC_FCNTL
+  gl_FCNTL_MODULE_INDICATOR([fcntl])
   gl_FCNTL_H
+  gl_MODULE_INDICATOR([fd-safer-flag])
   gl_FUNC_FFLUSH
   gl_STDIO_MODULE_INDICATOR([fflush])
   gl_FILE_NAME_CONCAT
+  gl_MODULE_INDICATOR([filenamecat])
+  gl_FILE_NAME_CONCAT_LGPL
   gl_FLOAT_H
   gl_FUNC_FOPEN
   gl_STDIO_MODULE_INDICATOR([fopen])
@@ -90,6 +100,7 @@ AC_DEFUN([M4_INIT],
   gl_MODULE_INDICATOR([fopen-safer])
   gl_FUNC_FPENDING
   gl_FUNC_FPURGE
+  gl_STDIO_MODULE_INDICATOR([fpurge])
   gl_FUNC_FREADING
   gl_FUNC_FREXP_NO_LIBM
   gl_MATH_MODULE_INDICATOR([frexp])
@@ -101,10 +112,13 @@ AC_DEFUN([M4_INIT],
   gl_STDIO_MODULE_INDICATOR([ftello])
   gl_FUNC_GETDTABLESIZE
   gl_UNISTD_MODULE_INDICATOR([getdtablesize])
-  gl_GETOPT
+  gl_FUNC_GETOPT_GNU
+  gl_MODULE_INDICATOR([getopt-gnu])
+  gl_FUNC_GETOPT_POSIX
   AC_SUBST([LIBINTL])
   AC_SUBST([LTLIBINTL])
   gl_FUNC_GETTIMEOFDAY
+  gl_SYS_TIME_MODULE_INDICATOR([gettimeofday])
   # Autoconf 2.61a.99 and earlier don't support linking a file only
   # in VPATH builds.  But since GNUmakefile is for maintainer use
   # only, it does not matter if we skip the link with older autoconf.
@@ -115,10 +129,12 @@ AC_DEFUN([M4_INIT],
   	m4_defn([m4_PACKAGE_VERSION])), [1], [],
         [AC_CONFIG_LINKS([$GNUmakefile:$GNUmakefile], [],
   	[GNUmakefile=$GNUmakefile])])
+  AC_REQUIRE([AC_C_INLINE])
   gl_INLINE
   gl_FUNC_ISNAND_NO_LIBM
   gl_FUNC_ISNANF_NO_LIBM
   gl_FUNC_ISNANL_NO_LIBM
+  gl_LANGINFO_H
   gl_LIBSIGSEGV
   gl_LIST
   gl_LOCALCHARSET
@@ -129,6 +145,8 @@ AC_DEFUN([M4_INIT],
   gl_UNISTD_MODULE_INDICATOR([lseek])
   gl_FUNC_LSTAT
   gl_SYS_STAT_MODULE_INDICATOR([lstat])
+  AC_CONFIG_COMMANDS_PRE([m4_ifdef([AH_HEADER],
+    [AC_SUBST([CONFIG_INCLUDE], m4_defn([AH_HEADER]))])])
   AC_FUNC_MALLOC
   AC_DEFINE([GNULIB_MALLOC_GNU], 1, [Define to indicate the 'malloc' module.])
   gl_FUNC_MALLOC_POSIX
@@ -139,11 +157,15 @@ AC_DEFUN([M4_INIT],
   gl_WCHAR_MODULE_INDICATOR([mbrtowc])
   gl_FUNC_MBSINIT
   gl_WCHAR_MODULE_INDICATOR([mbsinit])
+  gl_FUNC_MEMCHR
+  gl_STRING_MODULE_INDICATOR([memchr])
   gt_FUNC_MKDTEMP
   gl_STDLIB_MODULE_INDICATOR([mkdtemp])
   gl_FUNC_MKSTEMP
   gl_STDLIB_MODULE_INDICATOR([mkstemp])
-  AC_REQUIRE([gl_MULTIARCH])
+  gl_MULTIARCH
+  gl_FUNC_NL_LANGINFO
+  gl_LANGINFO_MODULE_INDICATOR([nl_langinfo])
   AC_FUNC_OBSTACK
   dnl Note: AC_FUNC_OBSTACK does AC_LIBSOURCES([obstack.h, obstack.c]).
   gl_FUNC_OPEN
@@ -152,6 +174,9 @@ AC_DEFUN([M4_INIT],
   gl_LIST
   gl_PATHMAX
   gl_PIPE
+  gl_FUNC_PIPE2
+  gl_UNISTD_MODULE_INDICATOR([pipe2])
+  gl_MODULE_INDICATOR([pipe2-safer])
   gl_POSIX_SPAWN
   if test $HAVE_POSIX_SPAWN = 0 || test $REPLACE_POSIX_SPAWN = 1; then
     gl_REPLACE_SPAWN_H
@@ -216,10 +241,14 @@ AC_DEFUN([M4_INIT],
   gl_FUNC_PRINTF_FREXP
   gl_FUNC_PRINTF_FREXPL
   m4_divert_text([INIT_PREPARE], [gl_printf_safe=yes])
+  AC_CHECK_DECLS([program_invocation_name], [], [], [#include <errno.h>])
+  AC_CHECK_DECLS([program_invocation_short_name], [], [], [#include <errno.h>])
   gl_QUOTEARG
   gl_FUNC_RAWMEMCHR
   gl_STRING_MODULE_INDICATOR([rawmemchr])
   gl_REGEX
+  gl_FUNC_RMDIR
+  gl_UNISTD_MODULE_INDICATOR([rmdir])
   gl_SCHED_H
   gl_SIGACTION
   gl_SIGNAL_MODULE_INDICATOR([sigaction])
@@ -233,12 +262,16 @@ AC_DEFUN([M4_INIT],
   gl_STDIO_MODULE_INDICATOR([snprintf])
   gl_SPAWN_H
   gt_TYPE_SSIZE_T
+  gl_FUNC_STAT
+  gl_SYS_STAT_MODULE_INDICATOR([stat])
   gl_STDARG_H
   AM_STDBOOL_H
+  gl_STDDEF_H
   gl_STDINT_H
   gl_STDIO_H
   gl_STDLIB_H
   gl_STDLIB_SAFER
+  gl_MODULE_INDICATOR([stdlib-safer])
   gl_FUNC_STRCHRNUL
   gl_STRING_MODULE_INDICATOR([strchrnul])
   gl_FUNC_STRERROR
@@ -251,6 +284,7 @@ AC_DEFUN([M4_INIT],
   gl_FUNC_STRSIGNAL
   gl_STRING_MODULE_INDICATOR([strsignal])
   gl_FUNC_STRSTR
+  gl_FUNC_STRSTR_SIMPLE
   gl_STRING_MODULE_INDICATOR([strstr])
   gl_FUNC_STRTOD
   gl_STDLIB_MODULE_INDICATOR([strtod])
@@ -263,6 +297,7 @@ AC_DEFUN([M4_INIT],
   AC_PROG_MKDIR_P
   gl_FUNC_GEN_TEMPNAME
   gl_THREADLIB
+  gl_HEADER_TIME_H
   gl_TLS
   gt_TMPDIR
   gl_UNISTD_H
@@ -272,28 +307,32 @@ AC_DEFUN([M4_INIT],
   gl_FUNC_VASPRINTF
   gl_STDIO_MODULE_INDICATOR([vasprintf])
   m4_ifdef([AM_XGETTEXT_OPTION],
-    [AM_XGETTEXT_OPTION([--flag=asprintf:2:c-format])
-     AM_XGETTEXT_OPTION([--flag=vasprintf:2:c-format])])
+    [AM_][XGETTEXT_OPTION([--flag=asprintf:2:c-format])
+     AM_][XGETTEXT_OPTION([--flag=vasprintf:2:c-format])])
   gl_FUNC_VASPRINTF_POSIX
   m4_ifdef([AM_XGETTEXT_OPTION],
-    [AM_XGETTEXT_OPTION([--flag=verror:3:c-format])
-     AM_XGETTEXT_OPTION([--flag=verror_at_line:5:c-format])])
+    [AM_][XGETTEXT_OPTION([--flag=verror:3:c-format])
+     AM_][XGETTEXT_OPTION([--flag=verror_at_line:5:c-format])])
+  gl_VERSION_ETC
   gl_WAIT_PROCESS
+  AC_SUBST([WARN_CFLAGS])
   gl_WCHAR_H
   gl_FUNC_WCRTOMB
   gl_WCHAR_MODULE_INDICATOR([wcrtomb])
   gl_WCTYPE_H
   gl_XALLOC
+  gl_LIST
+  gl_LIST
   m4_ifdef([AM_XGETTEXT_OPTION],
-    [AM_XGETTEXT_OPTION([--flag=xprintf:1:c-format])
-     AM_XGETTEXT_OPTION([--flag=xvprintf:1:c-format])
-     AM_XGETTEXT_OPTION([--flag=xfprintf:2:c-format])
-     AM_XGETTEXT_OPTION([--flag=xvfprintf:2:c-format])])
+    [AM_][XGETTEXT_OPTION([--flag=xprintf:1:c-format])
+     AM_][XGETTEXT_OPTION([--flag=xvprintf:1:c-format])
+     AM_][XGETTEXT_OPTION([--flag=xfprintf:2:c-format])
+     AM_][XGETTEXT_OPTION([--flag=xvfprintf:2:c-format])])
   gl_XSIZE
   gl_XSTRNDUP
   gl_XVASPRINTF
   m4_ifdef([AM_XGETTEXT_OPTION],
-    [AM_XGETTEXT_OPTION([--flag=xasprintf:1:c-format])])
+    [AM_][XGETTEXT_OPTION([--flag=xasprintf:1:c-format])])
   m4_ifval(M4_LIBSOURCES_LIST, [
     m4_syscmd([test ! -d ]m4_defn([M4_LIBSOURCES_DIR])[ ||
       for gl_file in ]M4_LIBSOURCES_LIST[ ; do
@@ -316,7 +355,7 @@ AC_DEFUN([M4_INIT],
     if test -n "$M4_LIBOBJS"; then
       # Remove the extension.
       sed_drop_objext='s/\.o$//;s/\.obj$//'
-      for i in `for i in $M4_LIBOBJS; do echo "$i"; done | sed "$sed_drop_objext" | sort | uniq`; do
+      for i in `for i in $M4_LIBOBJS; do echo "$i"; done | sed -e "$sed_drop_objext" | sort | uniq`; do
         M4_libobjs="$M4_libobjs $i.$ac_objext"
         M4_ltlibobjs="$M4_ltlibobjs $i.lo"
       done
@@ -335,8 +374,12 @@ AC_DEFUN([M4_INIT],
   gl_source_base='tests'
   gt_LOCALE_FR
   gt_LOCALE_FR_UTF8
+  gt_LOCALE_FR
+  gt_LOCALE_TR_UTF8
   gl_FUNC_UNGETC_WORKS
   gl_FUNC_UNGETC_WORKS
+  gl_FUNC_GETPAGESIZE
+  gl_UNISTD_MODULE_INDICATOR([getpagesize])
   dnl you must add AM_GNU_GETTEXT([external]) or similar to configure.ac.
   AM_GNU_GETTEXT_VERSION([0.17])
   gl_DOUBLE_EXPONENT_LOCATION
@@ -347,6 +390,11 @@ AC_DEFUN([M4_INIT],
   gt_LOCALE_JA
   gt_LOCALE_ZH_CN
   gt_LOCALE_FR_UTF8
+  gl_FUNC_MMAP_ANON
+  AC_CHECK_HEADERS_ONCE([sys/mman.h])
+  AC_CHECK_FUNCS_ONCE([mprotect])
+  gt_LOCALE_FR
+  gt_LOCALE_FR_UTF8
   AC_EGREP_CPP([notposix], [[
   #if defined _MSC_VER || defined __MINGW32__
     notposix
@@ -355,6 +403,8 @@ AC_DEFUN([M4_INIT],
     [posix_spawn_ported=no],
     [posix_spawn_ported=yes])
   AM_CONDITIONAL([POSIX_SPAWN_PORTED], [test $posix_spawn_ported = yes])
+  gl_FUNC_PUTENV
+  gl_STDLIB_MODULE_INDICATOR([putenv])
   gt_LOCALE_FR
   gt_LOCALE_FR_UTF8
   gl_FUNC_SETENV
@@ -365,8 +415,17 @@ AC_DEFUN([M4_INIT],
   gt_TYPE_WCHAR_T
   gt_TYPE_WINT_T
   AC_CHECK_DECLS_ONCE([alarm])
+  gl_FUNC_MMAP_ANON
+  AC_CHECK_HEADERS_ONCE([sys/mman.h])
+  AC_CHECK_FUNCS_ONCE([mprotect])
+  gl_FUNC_SYMLINK
+  gl_UNISTD_MODULE_INDICATOR([symlink])
   gl_FUNC_UNSETENV
   gl_STDLIB_MODULE_INDICATOR([unsetenv])
+  abs_aux_dir=`cd "$ac_aux_dir"; pwd`
+  AC_SUBST([abs_aux_dir])
+  abs_aux_dir=`cd "$ac_aux_dir"; pwd`
+  AC_SUBST([abs_aux_dir])
   gt_LOCALE_FR
   gt_LOCALE_FR_UTF8
   gt_LOCALE_JA
@@ -395,7 +454,7 @@ AC_DEFUN([M4_INIT],
     if test -n "$M4tests_LIBOBJS"; then
       # Remove the extension.
       sed_drop_objext='s/\.o$//;s/\.obj$//'
-      for i in `for i in $M4tests_LIBOBJS; do echo "$i"; done | sed "$sed_drop_objext" | sort | uniq`; do
+      for i in `for i in $M4tests_LIBOBJS; do echo "$i"; done | sed -e "$sed_drop_objext" | sort | uniq`; do
         M4tests_libobjs="$M4tests_libobjs $i.$ac_objext"
         M4tests_ltlibobjs="$M4tests_ltlibobjs $i.lo"
       done
@@ -469,11 +528,16 @@ AC_DEFUN([M4tests_LIBSOURCES], [
 # gnulib-tool and may be removed by future gnulib-tool invocations.
 AC_DEFUN([M4_FILE_LIST], [
   build-aux/announce-gen
+  build-aux/arg-nonnull.h
   build-aux/config.rpath
   build-aux/gendocs.sh
   build-aux/git-version-gen
+  build-aux/gnu-web-doc-update
   build-aux/gnupload
-  build-aux/link-warning.h
+  build-aux/update-copyright
+  build-aux/useless-if-before-free
+  build-aux/vc-list-files
+  build-aux/warn-on-use.h
   doc/fdl-1.3.texi
   doc/gendocs_template
   doc/gpl-3.0.texi
@@ -481,6 +545,7 @@ AC_DEFUN([M4_FILE_LIST], [
   lib/alloca.in.h
   lib/asnprintf.c
   lib/asprintf.c
+  lib/basename-lgpl.c
   lib/basename.c
   lib/binary-io.h
   lib/btowc.c
@@ -499,9 +564,12 @@ AC_DEFUN([M4_FILE_LIST], [
   lib/closeout.c
   lib/closeout.h
   lib/config.charset
+  lib/dirname-lgpl.c
   lib/dirname.c
   lib/dirname.h
+  lib/dup-safer-flag.c
   lib/dup-safer.c
+  lib/dup2.c
   lib/errno.in.h
   lib/error.c
   lib/error.h
@@ -511,9 +579,12 @@ AC_DEFUN([M4_FILE_LIST], [
   lib/exitfail.h
   lib/fatal-signal.c
   lib/fatal-signal.h
+  lib/fcntl.c
   lib/fcntl.in.h
+  lib/fd-safer-flag.c
   lib/fd-safer.c
   lib/fflush.c
+  lib/filenamecat-lgpl.c
   lib/filenamecat.c
   lib/filenamecat.h
   lib/float+.h
@@ -524,7 +595,6 @@ AC_DEFUN([M4_FILE_LIST], [
   lib/fpending.h
   lib/fpucw.h
   lib/fpurge.c
-  lib/fpurge.h
   lib/freadahead.c
   lib/freadahead.h
   lib/freading.c
@@ -553,11 +623,16 @@ AC_DEFUN([M4_FILE_LIST], [
   lib/gl_list.h
   lib/gl_oset.c
   lib/gl_oset.h
+  lib/gl_xlist.c
+  lib/gl_xlist.h
+  lib/gl_xoset.c
+  lib/gl_xoset.h
   lib/glthread/lock.c
   lib/glthread/lock.h
   lib/glthread/threadlib.c
   lib/glthread/tls.c
   lib/glthread/tls.h
+  lib/ignore-value.h
   lib/intprops.h
   lib/isnan.c
   lib/isnand-nolibm.h
@@ -566,6 +641,7 @@ AC_DEFUN([M4_FILE_LIST], [
   lib/isnanf.c
   lib/isnanl-nolibm.h
   lib/isnanl.c
+  lib/langinfo.in.h
   lib/localcharset.c
   lib/localcharset.h
   lib/lseek.c
@@ -577,11 +653,15 @@ AC_DEFUN([M4_FILE_LIST], [
   lib/math.in.h
   lib/mbrtowc.c
   lib/mbsinit.c
+  lib/memchr.c
+  lib/memchr.valgrind
   lib/memchr2.c
   lib/memchr2.h
+  lib/memchr2.valgrind
   lib/mkdtemp.c
   lib/mkstemp-safer.c
   lib/mkstemp.c
+  lib/nl_langinfo.c
   lib/obstack.c
   lib/obstack.h
   lib/open.c
@@ -589,6 +669,8 @@ AC_DEFUN([M4_FILE_LIST], [
   lib/pipe-safer.c
   lib/pipe.c
   lib/pipe.h
+  lib/pipe2-safer.c
+  lib/pipe2.c
   lib/printf-args.c
   lib/printf-args.h
   lib/printf-frexp.c
@@ -611,6 +693,7 @@ AC_DEFUN([M4_FILE_LIST], [
   lib/regex_internal.c
   lib/regex_internal.h
   lib/regexec.c
+  lib/rmdir.c
   lib/sched.in.h
   lib/sig-handler.h
   lib/sigaction.c
@@ -635,8 +718,10 @@ AC_DEFUN([M4_FILE_LIST], [
   lib/spawnattr_setsigmask.c
   lib/spawni.c
   lib/spawnp.c
+  lib/stat.c
   lib/stdarg.in.h
   lib/stdbool.in.h
+  lib/stddef.in.h
   lib/stdint.in.h
   lib/stdio--.h
   lib/stdio-impl.h
@@ -664,6 +749,7 @@ AC_DEFUN([M4_FILE_LIST], [
   lib/sys_wait.in.h
   lib/tempname.c
   lib/tempname.h
+  lib/time.in.h
   lib/tmpdir.c
   lib/tmpdir.h
   lib/unistd--.h
@@ -713,6 +799,7 @@ AC_DEFUN([M4_FILE_LIST], [
   m4/dirname.m4
   m4/dos.m4
   m4/double-slash-root.m4
+  m4/dup2.m4
   m4/eealloc.m4
   m4/environ.m4
   m4/errno_h.m4
@@ -724,6 +811,8 @@ AC_DEFUN([M4_FILE_LIST], [
   m4/exponentl.m4
   m4/extensions.m4
   m4/fatal-signal.m4
+  m4/fcntl-o.m4
+  m4/fcntl.m4
   m4/fcntl_h.m4
   m4/fflush.m4
   m4/filenamecat.m4
@@ -739,6 +828,7 @@ AC_DEFUN([M4_FILE_LIST], [
   m4/ftello.m4
   m4/getdtablesize.m4
   m4/getopt.m4
+  m4/getpagesize.m4
   m4/gettext.m4
   m4/gettimeofday.m4
   m4/gl_list.m4
@@ -759,6 +849,7 @@ AC_DEFUN([M4_FILE_LIST], [
   m4/isnand.m4
   m4/isnanf.m4
   m4/isnanl.m4
+  m4/langinfo_h.m4
   m4/lcmessage.m4
   m4/ldexpl.m4
   m4/lib-ld.m4
@@ -768,6 +859,7 @@ AC_DEFUN([M4_FILE_LIST], [
   m4/localcharset.m4
   m4/locale-fr.m4
   m4/locale-ja.m4
+  m4/locale-tr.m4
   m4/locale-zh.m4
   m4/lock.m4
   m4/longlong.m4
@@ -775,18 +867,24 @@ AC_DEFUN([M4_FILE_LIST], [
   m4/lstat.m4
   m4/malloc.m4
   m4/malloca.m4
+  m4/manywarnings.m4
   m4/math_h.m4
   m4/mbrtowc.m4
   m4/mbsinit.m4
   m4/mbstate_t.m4
+  m4/memchr.m4
   m4/mkdtemp.m4
   m4/mkstemp.m4
+  m4/mmap-anon.m4
+  m4/mode_t.m4
   m4/multiarch.m4
+  m4/nl_langinfo.m4
   m4/nls.m4
   m4/nocrash.m4
   m4/open.m4
   m4/pathmax.m4
   m4/pipe.m4
+  m4/pipe2.m4
   m4/po.m4
   m4/posix_spawn.m4
   m4/printf-frexp.m4
@@ -794,9 +892,11 @@ AC_DEFUN([M4_FILE_LIST], [
   m4/printf-posix.m4
   m4/printf.m4
   m4/progtest.m4
+  m4/putenv.m4
   m4/quotearg.m4
   m4/rawmemchr.m4
   m4/regex.m4
+  m4/rmdir.m4
   m4/sched_h.m4
   m4/setenv.m4
   m4/sig_atomic_t.m4
@@ -808,8 +908,10 @@ AC_DEFUN([M4_FILE_LIST], [
   m4/snprintf.m4
   m4/spawn_h.m4
   m4/ssize_t.m4
+  m4/stat.m4
   m4/stdarg.m4
   m4/stdbool.m4
+  m4/stddef_h.m4
   m4/stdint.m4
   m4/stdint_h.m4
   m4/stdio-safer.m4
@@ -825,11 +927,13 @@ AC_DEFUN([M4_FILE_LIST], [
   m4/strstr.m4
   m4/strtod.m4
   m4/strtol.m4
+  m4/symlink.m4
   m4/sys_stat_h.m4
   m4/sys_time_h.m4
   m4/sys_wait_h.m4
   m4/tempname.m4
   m4/threadlib.m4
+  m4/time_h.m4
   m4/tls.m4
   m4/tmpdir.m4
   m4/uintmax_t.m4
@@ -840,8 +944,11 @@ AC_DEFUN([M4_FILE_LIST], [
   m4/vasnprintf.m4
   m4/vasprintf-posix.m4
   m4/vasprintf.m4
+  m4/version-etc.m4
   m4/visibility.m4
   m4/wait-process.m4
+  m4/warn-on-use.m4
+  m4/warnings.m4
   m4/wchar.m4
   m4/wchar_t.m4
   m4/wcrtomb.m4
@@ -852,9 +959,12 @@ AC_DEFUN([M4_FILE_LIST], [
   m4/xsize.m4
   m4/xstrndup.m4
   m4/xvasprintf.m4
+  tests/init.sh
   tests/locale/fr/LC_MESSAGES/test-quotearg.mo
   tests/locale/fr/LC_MESSAGES/test-quotearg.po
+  tests/macros.h
   tests/nan.h
+  tests/signature.h
   tests/test-alloca-opt.c
   tests/test-array_list.c
   tests/test-array_oset.c
@@ -868,17 +978,26 @@ AC_DEFUN([M4_FILE_LIST], [
   tests/test-c-stack.c
   tests/test-c-stack.sh
   tests/test-c-stack2.sh
+  tests/test-c-strcase.sh
+  tests/test-c-strcasecmp.c
+  tests/test-c-strncasecmp.c
+  tests/test-cloexec.c
   tests/test-closein.c
   tests/test-closein.sh
   tests/test-dirname.c
+  tests/test-dup-safer.c
+  tests/test-dup2.c
   tests/test-environ.c
   tests/test-errno.c
+  tests/test-fcntl-h.c
   tests/test-fcntl.c
   tests/test-fflush.c
   tests/test-fflush2.c
   tests/test-fflush2.sh
   tests/test-filenamecat.c
+  tests/test-fopen-safer.c
   tests/test-fopen.c
+  tests/test-fopen.h
   tests/test-fpending.c
   tests/test-fpending.sh
   tests/test-fpurge.c
@@ -894,6 +1013,9 @@ AC_DEFUN([M4_FILE_LIST], [
   tests/test-ftello.sh
   tests/test-ftello2.sh
   tests/test-getdtablesize.c
+  tests/test-getopt.c
+  tests/test-getopt.h
+  tests/test-getopt_long.h
   tests/test-gettimeofday.c
   tests/test-isnand-nolibm.c
   tests/test-isnand.h
@@ -901,10 +1023,12 @@ AC_DEFUN([M4_FILE_LIST], [
   tests/test-isnanf.h
   tests/test-isnanl-nolibm.c
   tests/test-isnanl.h
+  tests/test-langinfo.c
   tests/test-linkedhash_list.c
   tests/test-lseek.c
   tests/test-lseek.sh
   tests/test-lstat.c
+  tests/test-lstat.h
   tests/test-malloca.c
   tests/test-math.c
   tests/test-mbrtowc.c
@@ -914,8 +1038,15 @@ AC_DEFUN([M4_FILE_LIST], [
   tests/test-mbrtowc4.sh
   tests/test-mbsinit.c
   tests/test-mbsinit.sh
+  tests/test-memchr.c
   tests/test-memchr2.c
+  tests/test-nl_langinfo.c
+  tests/test-nl_langinfo.sh
   tests/test-open.c
+  tests/test-open.h
+  tests/test-pipe.c
+  tests/test-pipe.sh
+  tests/test-pipe2.c
   tests/test-posix_spawn1.c
   tests/test-posix_spawn1.in.sh
   tests/test-posix_spawn2.c
@@ -925,12 +1056,19 @@ AC_DEFUN([M4_FILE_LIST], [
   tests/test-quotearg.c
   tests/test-quotearg.sh
   tests/test-rawmemchr.c
+  tests/test-rmdir.c
+  tests/test-rmdir.h
   tests/test-sched.c
+  tests/test-setenv.c
   tests/test-sigaction.c
   tests/test-signal.c
   tests/test-signbit.c
   tests/test-snprintf.c
+  tests/test-spawn.c
+  tests/test-stat.c
+  tests/test-stat.h
   tests/test-stdbool.c
+  tests/test-stddef.c
   tests/test-stdint.c
   tests/test-stdio.c
   tests/test-stdlib.c
@@ -940,23 +1078,44 @@ AC_DEFUN([M4_FILE_LIST], [
   tests/test-strsignal.c
   tests/test-strstr.c
   tests/test-strtod.c
+  tests/test-symlink.c
+  tests/test-symlink.h
   tests/test-sys_stat.c
   tests/test-sys_time.c
+  tests/test-sys_wait.c
+  tests/test-time.c
   tests/test-unistd.c
+  tests/test-unsetenv.c
+  tests/test-update-copyright.sh
   tests/test-vasnprintf.c
   tests/test-vasprintf-posix.c
   tests/test-vasprintf.c
+  tests/test-vc-list-files-cvs.sh
+  tests/test-vc-list-files-git.sh
+  tests/test-version-etc.c
+  tests/test-version-etc.sh
   tests/test-wchar.c
   tests/test-wcrtomb.c
   tests/test-wcrtomb.sh
   tests/test-wctype.c
+  tests/test-xalloc-die.c
+  tests/test-xalloc-die.sh
   tests/test-xvasprintf.c
+  tests/zerosize-ptr.h
+  tests=lib/c-strcase.h
+  tests=lib/c-strcasecmp.c
+  tests=lib/c-strncasecmp.c
+  tests=lib/getpagesize.c
   tests=lib/gl_array_list.c
   tests=lib/gl_array_list.h
   tests=lib/gl_array_oset.c
   tests=lib/gl_array_oset.h
+  tests=lib/putenv.c
+  tests=lib/same-inode.h
   tests=lib/setenv.c
+  tests=lib/symlink.c
   tests=lib/unsetenv.c
   tests=lib/wctob.c
   top/GNUmakefile
+  top/maint.mk
 ])

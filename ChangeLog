@@ -1,3 +1,330 @@
+2010-02-24  Eric Blake  <eblake@redhat.com>
+
+	Release Version 1.4.14.
+	* gnulib: Update to latest.
+	* README: Increase libsigsegv recommendation.
+	* HACKING: Likewise.  Tweak release instructions.
+	* NEWS: Mention the release.
+
+	Improve parsing example.
+	* doc/m4.texinfo (Input processing): Double-quote argument to
+	translit, for robustness.
+	* THANKS: Update.
+	Reported by Chris Penev.
+
+2010-01-29  Eric Blake  <ebb9@byu.net>
+
+	Document upcoming release.
+	* gnulib: Update to latest.
+	* doc/m4.texinfo (History): Mention 1.4.14.
+
+2010-01-06  Eric Blake  <ebb9@byu.net>
+
+	Use correct license on auxiliary documentation.
+	* gnulib: Update to latest.
+	* AUTHORS: Use GFDL 1.3, not 1.2.
+	* BACKLOG: Likewise.
+	* README: Likewise.
+	* THANKS: Likewise.
+	* TODO: Likewise.
+	* NEWS: Place under GFDL.
+	* cfg.mk (old_NEWS_hash): Update.
+
+2010-01-05  Eric Blake  <ebb9@byu.net>
+
+	Remove more TAB characters.
+	* THANKS: Use space for alignment.
+	* bootstrap: Likewise.
+	* checks/stackovf.test: Likewise.
+	* configure.ac: Likewise.
+	* src/builtin.c: Likewise.  Also update some stale comments.
+	* src/debug.c: Likewise.
+	* src/eval.c: Likewise.
+	* src/format.c: Likewise.
+	* src/freeze.c: Likewise.
+	* src/input.c: Likewise.
+	* src/m4.c: Likewise.
+	* src/m4.h: Likewise.
+	* src/macro.c: Likewise.
+	* src/output.c: Likewise.
+	* src/path.c: Likewise.
+	* src/symtab.c: Likewise.
+
+	Clarify minimum bootstrap requirements.
+	* bootstrap: Avoid out-of-date duplicated data.
+
+	Security fix by requiring newer automake features.
+	* configure.ac (AM_INIT_AUTOMAKE): Add dist-xz, color-tests,
+	parallel-tests, and silent-rules.
+	(AC_PREREQ): Bump autoconf requirement to 2.62, per automake.
+	* HACKING: Update minimum requirements.
+	* NEWS: Document the fix.
+
+	Drop hard-coding of GPG id.
+	* gnulib: Update to latest.
+	* m4/gnulib-cache.m4: Regenerate.
+	* cfg.mk (gpg_key_ID): Delete, now that maint.mk provides a
+	sensible default.
+	(update-copyright-env): Don't let environment interfere with wrap
+	column.
+
+2010-01-01  Eric Blake  <ebb9@byu.net>
+
+	Update copyright year.
+	All files impacted, via 'make update-copyright'.  Additionally:
+	* .gitignore: Ignore backup files.
+
+2009-12-29  Eric Blake  <ebb9@byu.net>
+
+	Document new indentation policy.
+	* HACKING: Document indentation policy.
+	* .x-sc_prohibit_tab_based_indentation: New file.
+	* cfg.mk (sc_prohibit_tab_based_indentation): New rule.
+	* Makefile.am (syntax_check_exceptions): New macro.
+	(EXTRA_DIST): Distribute exception files, and .prev-version.
+
+	Switch to indentation by space, not tab.
+	* .gitmodules: Convert leading tabs to spaces.
+	* TODO: Likewise.
+	* bootstrap: Likewise.
+	* c-boxes.el: Likewise.
+	* checks/check-them: Likewise.
+	* checks/get-them: Likewise.
+	* checks/stackovf.test: Likewise.
+	* configure.ac: Likewise.
+	* src/builtin.c: Likewise.
+	* src/debug.c: Likewise.
+	* src/eval.c: Likewise.
+	* src/format.c: Likewise.
+	* src/freeze.c: Likewise.
+	* src/input.c: Likewise.
+	* src/m4.c: Likewise.
+	* src/m4.h: Likewise.
+	* src/macro.c: Likewise.
+	* src/output.c: Likewise.
+	* src/path.c: Likewise.
+	* src/symtab.c: Likewise.
+
+	Update to latest gnulib.
+	* gnulib: Update.
+	* m4/gnulib-cache.m4: Import xoset.
+	* src/output.c (includes): Ensure that gnulib oset usage will
+	call xalloc_die on memory failure.
+	* build-aux/.cvsignore: Regenerate.
+	* build-aux/.gitignore: Likewise.
+
+2009-11-28  Eric Blake  <ebb9@byu.net>
+
+	Work around BSD getopt bug.
+	* gnulib: Update.
+	* doc/m4.texinfo (Command line files): Add test.
+
+	Use fastmap for better regex performance.
+	* src/input.c (word_start): Delete.
+	(pop_wrapup): Free memory on exit.
+	(set_word_regexp): Compile a fastmap instead.
+	(peek_token, next_token): Use the fastmap.
+
+2009-11-26  Eric Blake  <ebb9@byu.net>
+
+	Ignore write failures before stack overflow exit.
+	* m4/gnulib-cache.m4: Import ignore-value module.
+	* src/m4.c (fault_handler): Use it to avoid compiler warning.
+
+2009-11-25  Eric Blake  <ebb9@byu.net>
+
+	Allow use of compiler warnings.
+	* m4/gnulib-cache.m4: Import manywarnings module.
+	* configure.ac (WERROR_CFLAGS, WARN_CFLAGS): New variables.
+	* src/Makefile.am (AM_CFLAGS): Use them.
+	* Makefile.am (DISTCHECK_CONFIGURE_FLAGS): Turn on warnings during
+	distcheck.
+	* src/m4.h (M4_GNUC_NORETURN): New macro.
+	(trace_post): Delete unused parameter.
+	* src/m4.c (usage): Mark as noreturn.
+	(main): Remove unused parameter.
+	* src/debug.c (trace_post): Likewise.
+	(trace_pre): Cover all enum values.
+	* src/symtab.c (lookup_symbol): Likewise.
+	* src/builtin.c (define_macro, m4_dumpdef): Likewise.
+	(m4_define, m4_undefine, m4_pushdef, m4_popdef, m4_sysval)
+	(m4_divert, m4_undivert, m4_dnl, m4_changequote, m4_changecom)
+	(m4_changeword, m4_syscmd, m4_include, m4_sinclude, m4_m4exit)
+	(m4_debugmode, m4_debugfile, m4_placeholder): Mark unused
+	parameters.
+	(mkstemp_helper): Use parameter.
+	(substitute): Avoid signed vs. unsigned comparison.
+	* src/format.c (arg_int, arg_long, arg_double): Likewise.
+	* src/input.c (next_token): Likewise.
+	* src/output.c (freeze_diversions): Likewise.
+	(m4_tmpname): Allow C++ compilation.
+	* src/freeze.c (produce_frozen_state, GET_NUMBER): Use correct
+	type.
+	* src/macro.c (call_macro): Cover all enum values.
+	(expand_macro): Update caller.
+	* src/path.c (m4_fopen): Remove unused parameter.
+	(m4_path_search): Update caller.
+
+	Silence syntax-check warnings.
+	* src/m4.h (STREQ): New macro.
+	* src/builtin.c (find_builtin_by_name): Use it.
+	* src/input.c (set_word_regexp): Likewise.
+	* src/m4.c (process_file): Likewise.
+	(main): Consistently spell warning, and mark output strings.
+	Avoid unsafe parsing functions.
+	(process_file): Mark output strings.
+	* src/output.c (make_diversion): Likewise.
+	* src/format.c (arg_int, arg_long, arg_double): New helpers.
+	(ARG_INT, ARG_LONG, ARG_DOUBLE): Use them to detect parse errors.
+	* BACKLOG: Avoid whitespace problems.
+	* TODO: Likewise.
+	* HACKING: Likewise.
+	* examples/esyscmd.m4: Likewise.
+	* examples/file.m4: Likewise.
+	* examples/fstab.m4: Likewise.
+	* examples/patsubst.m4: Likewise.
+
+	Use gnulib maintainer-makefile module.
+	* m4/gnulib-cache.m4: Import maintainer-makefile module.
+	* cfg.mk (local-checks-to-skip): Drop changelog-check; add
+	sc_cast_of_x_alloc_return_value.
+	(gnulib_dir, gnu_rel_host, url_dir_list): Delete; provided by
+	maint.mk.
+	(config_h_header, old_NEWS_hash): New macros.
+	* .prev-version: New file.
+	* maint.mk: Remove from version control; use gnulib instead.
+	* .gitignore: Update.
+	* HACKING: Update.
+
+	Update from gnulib.
+	* gnulib: Update.
+	* m4/gnulib-cache.m4: Use --makefile-name.
+	* lib/Makefile.am: Wrap the gnulib-generated file.
+	* tests/Makefile.am: Likewise.
+	* .gitignore: Track our wrappers.
+	* doc/m4.texinfo (Improved capitalize): Fix typo.
+
+2009-10-05  Eric Blake  <ebb9@byu.net>
+
+	Update from gnulib.
+	* gnulib: Update.
+	* m4/gnulib-cache.m4: Import gnu-web-doc-update module.
+	* build-aux/.gitignore: Ignore new file.
+	* build-aux/.cvsignore: Likewise.
+
+2009-08-20  Eric Blake  <ebb9@byu.net>
+
+	Update from gnulib.
+	* gnulib: Update.
+	* AUTHORS: Mention recent copyright assignment.
+
+2009-08-17  Eric Blake  <ebb9@byu.net>
+
+	Enhance test with closed descriptors.
+	* doc/m4.texinfo (Command line files): Enhance test from
+	2009-07-20 to actually test the bug being fixed.
+
+	Update copyright year.
+	* AUTHORS: Run UPDATE_COPYRIGHT_FORCE=1 make update-copyright.
+	* BACKLOG: Likewise.
+	* Makefile.am: Likewise.
+	* TODO: Likewise.
+	* acinclude.m4: Likewise.
+	* c-boxes.el: Likewise.
+	* cfg.mk: Likewise.
+	* checks/Makefile.in: Likewise.
+	* checks/check-them: Likewise.
+	* checks/stackovf.test: Likewise.
+	* doc/Makefile.am: Likewise.
+	* examples/Makefile.am: Likewise.
+	* src/Makefile.am: Likewise.
+	* src/debug.c: Likewise.
+	* src/eval.c: Likewise.
+	* src/freeze.c: Likewise.
+	* src/m4.h: Likewise.
+	* src/macro.c: Likewise.
+	* src/path.c: Likewise.
+	* src/symtab.c: Likewise.
+
+	Prepare to bulk update copyright year.
+	* gnulib: Update.
+	* m4/gnulib-cache.m4: Import update-copyright and vc-list-files
+	modules.
+	* maint.mk: Fix copyright.
+	(build_aux, VC_LIST, VC_LIST_EXCEPT, update-copyright): New macros
+	and rules borrowed from gnulib.
+	* cfg.mk (update-copyright-env): Enforce longhand behavior.
+	* .cvsignore: Reflect these changes.
+	* .gitignore: Likewise.
+	* .x-update-copyright: New file.
+
+2009-08-14  Eric Blake  <ebb9@byu.net>
+
+	Explicitly request GNU getopt extensions.
+	* gnulib: Update.
+	* m4/gnulib-cache.m4: Use getopt-gnu, not obsolete getopt module.
+
+2009-07-22  Eric Blake  <ebb9@byu.net>
+
+	Fix testsuite on Solaris.
+	* doc/m4.texinfo (Command line files): Tolerate different spelling
+	of EBADF.
+	* src/builtin.c (m4_esyscmd): Clear errno before reaping.
+
+2009-07-21  Eric Blake  <ebb9@byu.net>
+
+	Fix testsuite on mingw.
+	* gnulib: Update.
+
+2009-07-20  Eric Blake  <ebb9@byu.net>
+
+	Pick up gnulib fixes for sub-process execution.
+	* gnulib: Update.
+	* doc/m4.texinfo (Command line files): Add test; regression
+	introduced 2009-03-05.
+	* NEWS: Document the change.
+
+	Avoid cygwin 1.7 crash with closed stdout.
+	* gnulib: Update.
+	* doc/m4.texinfo (Command line files): Add test; regression
+	introduced 2008-07-17.
+	* NEWS: Document the change.
+
+	A status of 127 does not always imply esyscmd failure.
+	* src/builtin.c (m4_esyscmd): Silence gnulib message; regression
+	introduced 2009-03-05.
+	* doc/m4.texinfo (Sysval): Test this.
+	* NEWS: Document the change.
+
+2009-06-25  Eric Blake  <ebb9@byu.net>
+
+	Fix description of limits on diversions.
+	* doc/m4.texinfo (Diversions): Fix grammar.  Be less pessimistic
+	about limitations.
+	* THANKS: Update.
+	Reported by Elias Benali.
+
+2009-06-17  Eric Blake  <ebb9@byu.net>
+
+	Update to latest gnulib.
+	* gnulib: Import fixes for Interix compilation.
+	* THANKS: Update.
+	Reported by Jay Krell.
+
+2009-05-22  Eric Blake  <ebb9@byu.net>
+
+	Update to latest gnulib.
+	* gnulib: Import fixes for AIX compilation.
+	* THANKS: Update.
+	Reported by Jens Rehsack.
+
+2009-04-13  Eric Blake  <ebb9@byu.net>
+
+	Fix GFDL usage.
+	* doc/m4.texinfo (copying): Complete transition to GFDL 1.3,
+	started 2008-12-12.
+	Reported by Santiago Vila.
+
 2009-04-01  Eric Blake  <ebb9@byu.net>
 
 	Release Version 1.4.13.
@@ -416,14 +743,6 @@
 	Increase ulimit stack value to be larger than SIGSTKSZ.
 	* checks/stackovf.test (tmpfile): Use 300K rather than 50K, since
 	at least OpenBSD's sh died early from an undersized stack limit.
-
-2008-07-17  Eric Blake  <ebb9@byu.net>
-
-	Fix missing copyright notices.
-	* acinclude.m4: Add copyright license details.
-	* c-boxes.el: Likewise.
-	* checks/get-them: Likewise.
-	* checks/check-them: Likewise.
 
 2008-07-17  Eric Blake  <ebb9@byu.net>
 
@@ -4815,7 +5134,8 @@ Mon Jan 22 21:08:52 1990  Rene' Seindal (seindal at diku.dk)
 	End:
 
 	Copyright (C) 1990, 1991, 1992, 1993, 1994, 2000, 2001, 2003,
-	2005, 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
+	2005, 2006, 2007, 2008, 2009, 2010 Free Software Foundation,
+	Inc.
 
 	Copying and distribution of this file, with or without
 	modification, are permitted provided the copyright notice
